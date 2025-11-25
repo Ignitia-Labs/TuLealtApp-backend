@@ -1,0 +1,25 @@
+# Dockerfile para desarrollo con hot-reload
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Instalar dependencias del sistema necesarias para compilación
+RUN apk add --no-cache python3 make g++
+
+# Copiar archivos de configuración
+COPY package.json package-lock.json* ./
+COPY tsconfig.json tsconfig.base.json nest-cli.json ./
+
+# Instalar todas las dependencias (incluyendo devDependencies)
+RUN npm install
+
+# Copiar código fuente
+COPY apps ./apps
+COPY libs ./libs
+
+# Exponer puertos (se sobrescribirán en docker-compose)
+EXPOSE 3000 3001 3002
+
+# Comando por defecto (se sobrescribirá en docker-compose)
+CMD ["npm", "run", "start:admin"]
+

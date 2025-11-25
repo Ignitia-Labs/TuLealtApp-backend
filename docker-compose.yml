@@ -1,0 +1,126 @@
+version: '3.8'
+
+services:
+  # MariaDB Database
+  mariadb:
+    image: mariadb:11.2
+    container_name: tulealtapp-mariadb-dev
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-rootpassword}
+      - MYSQL_DATABASE=${DB_NAME:-tulealtapp}
+      - MYSQL_USER=${DB_USER:-tulealtapp}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-tulealtapp}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./docker/mariadb/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - tulealtapp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Admin API
+  admin-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: tulealtapp-admin-api-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps:/app/apps
+      - ./libs:/app/libs
+      - ./package.json:/app/package.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./nest-cli.json:/app/nest-cli.json
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DB_HOST=mariadb
+      - DB_PORT=3306
+      - DB_USER=${DB_USER:-tulealtapp}
+      - DB_PASSWORD=${DB_PASSWORD:-tulealtapp}
+      - DB_NAME=${DB_NAME:-tulealtapp}
+    command: npm run start:admin
+    networks:
+      - tulealtapp-network
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Partner API
+  partner-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: tulealtapp-partner-api-dev
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./apps:/app/apps
+      - ./libs:/app/libs
+      - ./package.json:/app/package.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./nest-cli.json:/app/nest-cli.json
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - DB_HOST=mariadb
+      - DB_PORT=3306
+      - DB_USER=${DB_USER:-tulealtapp}
+      - DB_PASSWORD=${DB_PASSWORD:-tulealtapp}
+      - DB_NAME=${DB_NAME:-tulealtapp}
+    command: npm run start:partner
+    networks:
+      - tulealtapp-network
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Customer API
+  customer-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: tulealtapp-customer-api-dev
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./apps:/app/apps
+      - ./libs:/app/libs
+      - ./package.json:/app/package.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./nest-cli.json:/app/nest-cli.json
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - DB_HOST=mariadb
+      - DB_PORT=3306
+      - DB_USER=${DB_USER:-tulealtapp}
+      - DB_PASSWORD=${DB_PASSWORD:-tulealtapp}
+      - DB_NAME=${DB_NAME:-tulealtapp}
+    command: npm run start:customer
+    networks:
+      - tulealtapp-network
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    restart: unless-stopped
+
+networks:
+  tulealtapp-network:
+    driver: bridge
+
+volumes:
+  mariadb_data:
+

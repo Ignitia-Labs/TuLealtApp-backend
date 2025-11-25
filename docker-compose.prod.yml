@@ -1,0 +1,125 @@
+version: '3.8'
+
+services:
+  # MariaDB Database - Producción
+  mariadb:
+    image: mariadb:11.2
+    container_name: tulealtapp-mariadb-prod
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - mariadb_data_prod:/var/lib/mysql
+    networks:
+      - tulealtapp-network
+    restart: always
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Admin API - Producción
+  admin-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: tulealtapp-admin-api-prod
+    ports:
+      - "${ADMIN_API_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB_HOST=mariadb
+      - DB_PORT=3306
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+    command: ["node", "dist/apps/admin-api/main.js"]
+    networks:
+      - tulealtapp-network
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/admin/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Partner API - Producción
+  partner-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: tulealtapp-partner-api-prod
+    ports:
+      - "${PARTNER_API_PORT:-3001}:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DB_HOST=mariadb
+      - DB_PORT=3306
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+    command: ["node", "dist/apps/partner-api/main.js"]
+    networks:
+      - tulealtapp-network
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/partner/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Customer API - Producción
+  customer-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: tulealtapp-customer-api-prod
+    ports:
+      - "${CUSTOMER_API_PORT:-3002}:3002"
+    environment:
+      - NODE_ENV=production
+      - PORT=3002
+      - DB_HOST=mariadb
+      - DB_PORT=3306
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+    command: ["node", "dist/apps/customer-api/main.js"]
+    networks:
+      - tulealtapp-network
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3002/customer/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  tulealtapp-network:
+    driver: bridge
+
+volumes:
+  mariadb_data_prod:
+

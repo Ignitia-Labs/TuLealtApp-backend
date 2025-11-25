@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2021",
+    "sourceMap": true,
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "types": ["node"],
+    "paths": {
+      "@libs/domain": ["libs/domain/src/index"],
+      "@libs/domain/*": ["libs/domain/src/*"],
+      "@libs/application": ["libs/application/src/index"],
+      "@libs/application/*": ["libs/application/src/*"],
+      "@libs/infrastructure": ["libs/infrastructure/src/index"],
+      "@libs/infrastructure/*": ["libs/infrastructure/src/*"],
+      "@libs/shared": ["libs/shared/src/index"],
+      "@libs/shared/*": ["libs/shared/src/*"]
+    }
+  }
+}
+
