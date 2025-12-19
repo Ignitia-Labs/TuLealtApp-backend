@@ -17,6 +17,9 @@ export class RegisterUserHandler {
     const createUserRequest = new CreateUserRequest();
     createUserRequest.email = request.email;
     createUserRequest.name = request.name;
+    createUserRequest.firstName = request.firstName;
+    createUserRequest.lastName = request.lastName;
+    createUserRequest.phone = request.phone;
     createUserRequest.password = request.password;
     createUserRequest.roles = ['customer']; // Rol por defecto para registro público
 

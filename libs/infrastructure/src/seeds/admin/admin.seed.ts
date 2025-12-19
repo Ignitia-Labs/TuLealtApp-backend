@@ -28,4 +28,3 @@ export class AdminSeed extends BaseSeed {
     this.log('Seeds de Admin API completadas');
   }
 }
-

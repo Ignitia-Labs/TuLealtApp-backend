@@ -8,6 +8,10 @@ export class User {
     public readonly id: number,
     public readonly email: string,
     public readonly name: string,
+    public readonly firstName: string,
+    public readonly lastName: string,
+    public readonly phone: string,
+    public readonly profile: Record<string, any> | null,
     public readonly passwordHash: string,
     public readonly roles: string[],
     public readonly isActive: boolean,
@@ -22,12 +26,29 @@ export class User {
   static create(
     email: string,
     name: string,
+    firstName: string,
+    lastName: string,
+    phone: string,
     passwordHash: string,
     roles: string[] = ['customer'],
+    profile: Record<string, any> | null = null,
     id?: number,
   ): User {
     const now = new Date();
-    return new User(id || 0, email, name, passwordHash, roles, true, now, now);
+    return new User(
+      id || 0,
+      email,
+      name,
+      firstName,
+      lastName,
+      phone,
+      profile,
+      passwordHash,
+      roles,
+      true,
+      now,
+      now,
+    );
   }
 
   /**
@@ -52,6 +73,10 @@ export class User {
       this.id,
       this.email,
       this.name,
+      this.firstName,
+      this.lastName,
+      this.phone,
+      this.profile,
       this.passwordHash,
       this.roles,
       false,
@@ -68,9 +93,39 @@ export class User {
       this.id,
       this.email,
       this.name,
+      this.firstName,
+      this.lastName,
+      this.phone,
+      this.profile,
       this.passwordHash,
       this.roles,
       true,
+      this.createdAt,
+      new Date(),
+    );
+  }
+
+  /**
+   * Método de dominio para actualizar el perfil del usuario
+   */
+  updateProfile(
+    firstName?: string,
+    lastName?: string,
+    email?: string,
+    phone?: string,
+    profile?: Record<string, any> | null,
+  ): User {
+    return new User(
+      this.id,
+      email ?? this.email,
+      this.name,
+      firstName ?? this.firstName,
+      lastName ?? this.lastName,
+      phone ?? this.phone,
+      profile !== undefined ? profile : this.profile,
+      this.passwordHash,
+      this.roles,
+      this.isActive,
       this.createdAt,
       new Date(),
     );

@@ -55,8 +55,12 @@ export class AdminUserSeed extends BaseSeed {
       const adminUser = User.create(
         this.ADMIN_EMAIL,
         this.ADMIN_NAME,
+        'Admin', // firstName
+        'User', // lastName
+        '+1234567890', // phone
         passwordHash,
         this.ADMIN_ROLES,
+        null, // profile
       );
 
       // Guardar usando el repositorio (la BD asignará el ID automáticamente)

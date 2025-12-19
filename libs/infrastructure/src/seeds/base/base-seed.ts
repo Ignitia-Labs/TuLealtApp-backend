@@ -30,4 +30,3 @@ export abstract class BaseSeed implements ISeed {
     console.error(`[SEED: ${this.getName()}] ERROR: ${message}`, error);
   }
 }
-

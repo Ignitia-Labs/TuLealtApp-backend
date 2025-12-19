@@ -22,6 +22,18 @@ export class UserEntity {
   name: string;
 
   @Column('varchar', { length: 255 })
+  firstName: string;
+
+  @Column('varchar', { length: 255 })
+  lastName: string;
+
+  @Column('varchar', { length: 50 })
+  phone: string;
+
+  @Column('json', { nullable: true })
+  profile: Record<string, any> | null;
+
+  @Column('varchar', { length: 255 })
   passwordHash: string;
 
   @Column('json')

@@ -13,6 +13,10 @@ export class UserMapper {
       persistenceEntity.id,
       persistenceEntity.email,
       persistenceEntity.name,
+      persistenceEntity.firstName,
+      persistenceEntity.lastName,
+      persistenceEntity.phone,
+      persistenceEntity.profile,
       persistenceEntity.passwordHash,
       persistenceEntity.roles,
       persistenceEntity.isActive,
@@ -34,6 +38,10 @@ export class UserMapper {
     }
     entity.email = domainEntity.email;
     entity.name = domainEntity.name;
+    entity.firstName = domainEntity.firstName;
+    entity.lastName = domainEntity.lastName;
+    entity.phone = domainEntity.phone;
+    entity.profile = domainEntity.profile;
     entity.passwordHash = domainEntity.passwordHash;
     entity.roles = domainEntity.roles;
     entity.isActive = domainEntity.isActive;

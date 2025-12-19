@@ -16,6 +16,10 @@ export * from './users/lock-user/lock-user.handler';
 export * from './users/lock-user/lock-user.request';
 export * from './users/lock-user/lock-user.response';
 
+export * from './users/update-user-profile/update-user-profile.handler';
+export * from './users/update-user-profile/update-user-profile.request';
+export * from './users/update-user-profile/update-user-profile.response';
+
 // Auth Handlers
 export * from './auth/authenticate-user/authenticate-user.handler';
 export * from './auth/authenticate-user/authenticate-user.request';

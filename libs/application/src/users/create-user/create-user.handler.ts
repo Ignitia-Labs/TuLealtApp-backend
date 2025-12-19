@@ -29,8 +29,12 @@ export class CreateUserHandler {
     const user = User.create(
       request.email,
       request.name,
+      request.firstName,
+      request.lastName,
+      request.phone,
       passwordHash,
       request.roles || ['customer'],
+      request.profile || null,
     );
 
     // Guardar usando el repositorio (la BD asignará el ID automáticamente)
@@ -41,6 +45,10 @@ export class CreateUserHandler {
       savedUser.id,
       savedUser.email,
       savedUser.name,
+      savedUser.firstName,
+      savedUser.lastName,
+      savedUser.phone,
+      savedUser.profile,
       savedUser.roles,
       savedUser.isActive,
       savedUser.createdAt,

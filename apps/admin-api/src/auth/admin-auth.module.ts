@@ -3,11 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AdminAuthController } from './admin-auth.controller';
 import { AdminJwtStrategy } from './strategies/admin-jwt.strategy';
-import {
-  AuthenticateUserHandler,
-  GetUserProfileHandler,
-  JwtAuthService,
-} from '@libs/application';
+import { AuthenticateUserHandler, GetUserProfileHandler, JwtAuthService } from '@libs/application';
 import { InfrastructureModule } from '@libs/infrastructure';
 
 /**
@@ -46,4 +42,3 @@ import { InfrastructureModule } from '@libs/infrastructure';
   exports: [JwtAuthService],
 })
 export class AdminAuthModule {}
-

@@ -1,6 +1,11 @@
 import { Module } from '@nestjs/common';
 import { UsersController } from './controllers/users.controller';
-import { CreateUserHandler, GetUserProfileHandler, LockUserHandler } from '@libs/application';
+import {
+  CreateUserHandler,
+  GetUserProfileHandler,
+  LockUserHandler,
+  UpdateUserProfileHandler,
+} from '@libs/application';
 import { InfrastructureModule } from '@libs/infrastructure';
 import { HealthController } from '@libs/shared';
 import { AdminAuthModule } from './auth/admin-auth.module';
@@ -17,6 +22,7 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     CreateUserHandler,
     GetUserProfileHandler,
     LockUserHandler,
+    UpdateUserProfileHandler,
   ],
 })
 export class AdminApiModule {}
