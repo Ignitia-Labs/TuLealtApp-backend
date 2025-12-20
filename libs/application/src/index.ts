@@ -20,6 +20,14 @@ export * from './users/update-user-profile/update-user-profile.handler';
 export * from './users/update-user-profile/update-user-profile.request';
 export * from './users/update-user-profile/update-user-profile.response';
 
+export * from './users/update-my-profile/update-my-profile.handler';
+export * from './users/update-my-profile/update-my-profile.request';
+export * from './users/update-my-profile/update-my-profile.response';
+
+export * from './users/update-password/update-password.handler';
+export * from './users/update-password/update-password.request';
+export * from './users/update-password/update-password.response';
+
 // Auth Handlers
 export * from './auth/authenticate-user/authenticate-user.handler';
 export * from './auth/authenticate-user/authenticate-user.request';
@@ -34,3 +42,51 @@ export * from './auth/services/jwt.service';
 
 // Auth Types
 export * from './auth/types/jwt-payload.interface';
+
+// Pricing Handlers
+export * from './pricing/get-pricing-plans/get-pricing-plans.handler';
+export * from './pricing/get-pricing-plans/get-pricing-plans.request';
+export * from './pricing/get-pricing-plans/get-pricing-plans.response';
+
+export * from './pricing/get-pricing-plan-by-id/get-pricing-plan-by-id.handler';
+export * from './pricing/get-pricing-plan-by-id/get-pricing-plan-by-id.request';
+export * from './pricing/get-pricing-plan-by-id/get-pricing-plan-by-id.response';
+
+export * from './pricing/get-pricing-plan-by-slug/get-pricing-plan-by-slug.handler';
+export * from './pricing/get-pricing-plan-by-slug/get-pricing-plan-by-slug.request';
+export * from './pricing/get-pricing-plan-by-slug/get-pricing-plan-by-slug.response';
+
+export * from './pricing/calculate-price/calculate-price.handler';
+export * from './pricing/calculate-price/calculate-price.request';
+export * from './pricing/calculate-price/calculate-price.response';
+
+export * from './pricing/create-pricing-plan/create-pricing-plan.handler';
+export * from './pricing/create-pricing-plan/create-pricing-plan.request';
+export * from './pricing/create-pricing-plan/create-pricing-plan.response';
+
+export * from './pricing/update-pricing-plan/update-pricing-plan.handler';
+export * from './pricing/update-pricing-plan/update-pricing-plan.request';
+export * from './pricing/update-pricing-plan/update-pricing-plan.response';
+
+export * from './pricing/toggle-status-pricing-plan/toggle-status-pricing-plan.handler';
+export * from './pricing/toggle-status-pricing-plan/toggle-status-pricing-plan.request';
+export * from './pricing/toggle-status-pricing-plan/toggle-status-pricing-plan.response';
+
+export * from './pricing/delete-pricing-plan/delete-pricing-plan.handler';
+export * from './pricing/delete-pricing-plan/delete-pricing-plan.request';
+export * from './pricing/delete-pricing-plan/delete-pricing-plan.response';
+
+export * from './pricing/get-rate-exchange/get-rate-exchange.handler';
+export * from './pricing/get-rate-exchange/get-rate-exchange.request';
+export * from './pricing/get-rate-exchange/get-rate-exchange.response';
+
+export * from './pricing/set-rate-exchange/set-rate-exchange.handler';
+export * from './pricing/set-rate-exchange/set-rate-exchange.request';
+export * from './pricing/set-rate-exchange/set-rate-exchange.response';
+
+// Pricing DTOs for Swagger
+export * from './pricing/dto/pricing-plan-swagger.dto';
+export * from './pricing/dto/pricing-promotion-swagger.dto';
+export * from './pricing/dto/pricing-promotions-swagger.dto';
+export * from './pricing/dto/pricing-period-swagger.dto';
+export * from './pricing/dto/pricing-feature-swagger.dto';

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from '../persistence/database.module';
 import { AdminUserSeed } from './shared/admin-user.seed';
+import { PricingPlanSeed } from './shared/pricing-plan.seed';
 import { AdminSeed } from './admin/admin.seed';
 import { PartnerSeed } from './partner/partner.seed';
 import { CustomerSeed } from './customer/customer.seed';
@@ -18,6 +19,7 @@ import { CustomerSeed } from './customer/customer.seed';
   providers: [
     // Seeds compartidas
     AdminUserSeed,
+    PricingPlanSeed,
     // Seeds por contexto
     AdminSeed,
     PartnerSeed,
@@ -25,6 +27,7 @@ import { CustomerSeed } from './customer/customer.seed';
   ],
   exports: [
     AdminUserSeed,
+    PricingPlanSeed,
     AdminSeed,
     PartnerSeed,
     CustomerSeed,

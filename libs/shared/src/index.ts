@@ -14,6 +14,7 @@ export * from './controllers/health.controller';
 
 // Types
 export * from './types/common.types';
+export * from './types/error-response.dto';
 
 // Guards
 export * from './guards/jwt-auth.guard';
@@ -22,3 +23,6 @@ export * from './guards/roles.guard';
 // Decorators
 export * from './decorators/roles.decorator';
 export * from './decorators/current-user.decorator';
+
+// Pricing
+export * from './pricing';

@@ -36,6 +36,7 @@ export class UpdateUserProfileHandler {
       request.email,
       request.phone,
       request.profile,
+      undefined, // name no está en UpdateUserProfileRequest, se mantiene el existente
     );
 
     // Guardar los cambios

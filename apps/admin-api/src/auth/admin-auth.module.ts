@@ -3,7 +3,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AdminAuthController } from './admin-auth.controller';
 import { AdminJwtStrategy } from './strategies/admin-jwt.strategy';
-import { AuthenticateUserHandler, GetUserProfileHandler, JwtAuthService } from '@libs/application';
+import {
+  AuthenticateUserHandler,
+  GetUserProfileHandler,
+  UpdateMyProfileHandler,
+  UpdatePasswordHandler,
+  JwtAuthService,
+} from '@libs/application';
 import { InfrastructureModule } from '@libs/infrastructure';
 
 /**
@@ -34,6 +40,8 @@ import { InfrastructureModule } from '@libs/infrastructure';
     // Handlers de aplicación reutilizados
     AuthenticateUserHandler,
     GetUserProfileHandler,
+    UpdateMyProfileHandler,
+    UpdatePasswordHandler,
     // Servicio JWT
     JwtAuthService,
     // Estrategia Passport JWT

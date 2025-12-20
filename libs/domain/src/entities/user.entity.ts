@@ -114,16 +114,37 @@ export class User {
     email?: string,
     phone?: string,
     profile?: Record<string, any> | null,
+    name?: string,
   ): User {
     return new User(
       this.id,
       email ?? this.email,
-      this.name,
+      name ?? this.name,
       firstName ?? this.firstName,
       lastName ?? this.lastName,
       phone ?? this.phone,
       profile !== undefined ? profile : this.profile,
       this.passwordHash,
+      this.roles,
+      this.isActive,
+      this.createdAt,
+      new Date(),
+    );
+  }
+
+  /**
+   * Método de dominio para actualizar la contraseña del usuario
+   */
+  updatePassword(newPasswordHash: string): User {
+    return new User(
+      this.id,
+      this.email,
+      this.name,
+      this.firstName,
+      this.lastName,
+      this.phone,
+      this.profile,
+      newPasswordHash,
       this.roles,
       this.isActive,
       this.createdAt,

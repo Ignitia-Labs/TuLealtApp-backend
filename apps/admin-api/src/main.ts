@@ -10,6 +10,20 @@ import { HttpExceptionFilter, AllExceptionsFilter } from '@libs/shared';
 async function bootstrap() {
   const app = await NestFactory.create(AdminApiModule);
 
+  // Configuración de CORS
+  app.enableCors({
+    origin: [
+      'http://localhost:4000', // Angular default
+      'http://localhost:8080',
+      'http://127.0.0.1:4000',
+      'http://127.0.0.1:8080',
+      ...(process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : []),
+    ],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    credentials: true,
+  });
+
   // Prefijo global para todas las rutas
   app.setGlobalPrefix('admin');
 

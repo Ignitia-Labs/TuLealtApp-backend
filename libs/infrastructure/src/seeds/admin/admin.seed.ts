@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BaseSeed } from '../base/base-seed';
 import { AdminUserSeed } from '../shared/admin-user.seed';
+import { PricingPlanSeed } from '../shared/pricing-plan.seed';
 
 /**
  * Seed específica para el contexto de Admin API
@@ -8,7 +9,10 @@ import { AdminUserSeed } from '../shared/admin-user.seed';
  */
 @Injectable()
 export class AdminSeed extends BaseSeed {
-  constructor(private readonly adminUserSeed: AdminUserSeed) {
+  constructor(
+    private readonly adminUserSeed: AdminUserSeed,
+    private readonly pricingPlanSeed: PricingPlanSeed,
+  ) {
     super();
   }
 
@@ -21,6 +25,9 @@ export class AdminSeed extends BaseSeed {
 
     // Ejecutar seed de usuario admin
     await this.adminUserSeed.run();
+
+    // Ejecutar seed de planes de precios
+    await this.pricingPlanSeed.run();
 
     // Aquí se pueden agregar más seeds específicas de admin en el futuro
     // Ejemplo: permisos, roles, configuraciones, etc.
