@@ -37,4 +37,3 @@ export class CustomerJwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     return payload;
   }
 }
-

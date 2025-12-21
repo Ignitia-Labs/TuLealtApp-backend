@@ -97,4 +97,3 @@ export class PricingPlanSwaggerDto {
   })
   updatedAt: Date;
 }
-

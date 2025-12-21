@@ -121,4 +121,3 @@ export class CustomerAuthController {
     return this.getUserProfileHandler.execute(request);
   }
 }
-

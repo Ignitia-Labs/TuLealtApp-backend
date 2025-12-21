@@ -14,4 +14,3 @@ export interface ISeed {
    */
   run(): Promise<void>;
 }
-

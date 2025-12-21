@@ -149,7 +149,11 @@ export class UpdatePricingPlanRequest {
   @IsOptional()
   icon?: string;
 
-  @ApiProperty({ example: 'esencia', description: 'Slug único del plan (debe ser único en la base de datos)', required: false })
+  @ApiProperty({
+    example: 'esencia',
+    description: 'Slug único del plan (debe ser único en la base de datos)',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   slug?: string;
@@ -217,4 +221,3 @@ export class UpdatePricingPlanRequest {
   @IsOptional()
   order?: number;
 }
-

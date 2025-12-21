@@ -9,10 +9,7 @@ export class TenantMapper {
   /**
    * Convierte una entidad de persistencia a entidad de dominio
    */
-  static toDomain(
-    persistenceEntity: TenantEntity,
-    features?: TenantFeaturesEntity | null,
-  ): Tenant {
+  static toDomain(persistenceEntity: TenantEntity, features?: TenantFeaturesEntity | null): Tenant {
     return Tenant.create(
       persistenceEntity.partnerId,
       persistenceEntity.name,
@@ -58,9 +55,7 @@ export class TenantMapper {
   /**
    * Convierte una entidad de persistencia de características a entidad de dominio
    */
-  static featuresToDomain(
-    persistenceEntity: TenantFeaturesEntity,
-  ): TenantFeatures {
+  static featuresToDomain(persistenceEntity: TenantFeaturesEntity): TenantFeatures {
     return TenantFeatures.create(
       persistenceEntity.tenantId,
       persistenceEntity.qrScanning,
@@ -74,9 +69,7 @@ export class TenantMapper {
   /**
    * Convierte una entidad de dominio de características a entidad de persistencia
    */
-  static featuresToPersistence(
-    domainEntity: TenantFeatures,
-  ): TenantFeaturesEntity {
+  static featuresToPersistence(domainEntity: TenantFeatures): TenantFeaturesEntity {
     const entity = new TenantFeaturesEntity();
     if (domainEntity.id > 0) {
       entity.id = domainEntity.id;

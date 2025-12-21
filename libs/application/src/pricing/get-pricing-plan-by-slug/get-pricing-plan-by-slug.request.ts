@@ -13,4 +13,3 @@ export class GetPricingPlanBySlugRequest {
   @IsNotEmpty()
   slug: string;
 }
-

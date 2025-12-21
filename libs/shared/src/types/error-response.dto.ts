@@ -116,4 +116,3 @@ export class BadRequestErrorResponseDto extends ErrorResponseDto {
   })
   error: 'Bad Request';
 }
-

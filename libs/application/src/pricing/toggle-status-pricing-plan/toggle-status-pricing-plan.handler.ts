@@ -22,7 +22,9 @@ export class ToggleStatusPricingPlanHandler {
     }
 
     // Toggle del estado: si está activo, desactivarlo; si está inactivo, activarlo
-    const updatedPlan = existingPlan.isActive() ? existingPlan.deactivate() : existingPlan.activate();
+    const updatedPlan = existingPlan.isActive()
+      ? existingPlan.deactivate()
+      : existingPlan.activate();
 
     // Guardar los cambios
     const savedPlan = await this.pricingPlanRepository.update(updatedPlan);
@@ -30,4 +32,3 @@ export class ToggleStatusPricingPlanHandler {
     return new ToggleStatusPricingPlanResponse(savedPlan);
   }
 }
-

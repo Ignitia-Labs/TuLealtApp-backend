@@ -8,13 +8,7 @@ import {
   HttpStatus,
   ParseIntPipe,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-  ApiBody,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import {
   CreateBranchHandler,
   CreateBranchRequest,
@@ -101,9 +95,7 @@ export class BranchesController {
       error: 'Not Found',
     },
   })
-  async createBranch(
-    @Body() request: CreateBranchRequest,
-  ): Promise<CreateBranchResponse> {
+  async createBranch(@Body() request: CreateBranchRequest): Promise<CreateBranchResponse> {
     return this.createBranchHandler.execute(request);
   }
 
@@ -146,9 +138,7 @@ export class BranchesController {
       error: 'Not Found',
     },
   })
-  async getBranch(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<GetBranchResponse> {
+  async getBranch(@Param('id', ParseIntPipe) id: number): Promise<GetBranchResponse> {
     const request = new GetBranchRequest();
     request.branchId = id;
     return this.getBranchHandler.execute(request);

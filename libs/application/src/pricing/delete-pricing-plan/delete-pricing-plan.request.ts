@@ -15,4 +15,3 @@ export class DeletePricingPlanRequest {
   @IsNotEmpty()
   planId: number;
 }
-

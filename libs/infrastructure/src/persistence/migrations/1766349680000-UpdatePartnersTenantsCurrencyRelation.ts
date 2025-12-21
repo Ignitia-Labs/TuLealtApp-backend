@@ -62,10 +62,9 @@ export class UpdatePartnersTenantsCurrencyRelation1766349680000 implements Migra
     for (const partner of partners) {
       const currencyCode = currencyIdMapping[partner.currencyId];
       if (currencyCode) {
-        const currency = await queryRunner.query(
-          'SELECT id FROM currencies WHERE code = ?',
-          [currencyCode],
-        );
+        const currency = await queryRunner.query('SELECT id FROM currencies WHERE code = ?', [
+          currencyCode,
+        ]);
         if (currency && currency.length > 0) {
           await queryRunner.query('UPDATE partners SET currencyId_temp = ? WHERE id = ?', [
             currency[0].id,
@@ -80,10 +79,9 @@ export class UpdatePartnersTenantsCurrencyRelation1766349680000 implements Migra
     for (const tenant of tenants) {
       const currencyCode = currencyIdMapping[tenant.currencyId];
       if (currencyCode) {
-        const currency = await queryRunner.query(
-          'SELECT id FROM currencies WHERE code = ?',
-          [currencyCode],
-        );
+        const currency = await queryRunner.query('SELECT id FROM currencies WHERE code = ?', [
+          currencyCode,
+        ]);
         if (currency && currency.length > 0) {
           await queryRunner.query('UPDATE tenants SET currencyId_temp = ? WHERE id = ?', [
             currency[0].id,
@@ -134,36 +132,36 @@ export class UpdatePartnersTenantsCurrencyRelation1766349680000 implements Migra
 
     // Mapeo inverso: códigos ISO a currencyId antiguos
     const currencyCodeMapping: Record<string, string> = {
-      'USD': 'currency-1',
-      'MXN': 'currency-2',
-      'EUR': 'currency-3',
-      'COP': 'currency-4',
-      'ARS': 'currency-5',
-      'CLP': 'currency-6',
-      'PEN': 'currency-7',
-      'GTQ': 'currency-8',
-      'CAD': 'currency-9',
-      'HNL': 'currency-10',
-      'NIO': 'currency-11',
-      'CRC': 'currency-12',
-      'PAB': 'currency-13',
-      'SVC': 'currency-14',
-      'BZD': 'currency-15',
-      'BRL': 'currency-16',
-      'UYU': 'currency-17',
-      'PYG': 'currency-18',
-      'BOB': 'currency-19',
-      'VES': 'currency-20',
-      'GYD': 'currency-21',
-      'SRD': 'currency-22',
-      'DOP': 'currency-23',
-      'CUP': 'currency-24',
-      'HTG': 'currency-25',
-      'JMD': 'currency-26',
-      'TTD': 'currency-27',
-      'BBD': 'currency-28',
-      'BSD': 'currency-29',
-      'XCD': 'currency-30',
+      USD: 'currency-1',
+      MXN: 'currency-2',
+      EUR: 'currency-3',
+      COP: 'currency-4',
+      ARS: 'currency-5',
+      CLP: 'currency-6',
+      PEN: 'currency-7',
+      GTQ: 'currency-8',
+      CAD: 'currency-9',
+      HNL: 'currency-10',
+      NIO: 'currency-11',
+      CRC: 'currency-12',
+      PAB: 'currency-13',
+      SVC: 'currency-14',
+      BZD: 'currency-15',
+      BRL: 'currency-16',
+      UYU: 'currency-17',
+      PYG: 'currency-18',
+      BOB: 'currency-19',
+      VES: 'currency-20',
+      GYD: 'currency-21',
+      SRD: 'currency-22',
+      DOP: 'currency-23',
+      CUP: 'currency-24',
+      HTG: 'currency-25',
+      JMD: 'currency-26',
+      TTD: 'currency-27',
+      BBD: 'currency-28',
+      BSD: 'currency-29',
+      XCD: 'currency-30',
     };
 
     // Crear columna temporal para almacenar el currencyId string
@@ -222,8 +220,11 @@ export class UpdatePartnersTenantsCurrencyRelation1766349680000 implements Migra
     await queryRunner.dropColumn('tenants', 'currencyId');
 
     // Renombrar currencyId_temp a currencyId
-    await queryRunner.query('ALTER TABLE partners CHANGE currencyId_temp currencyId VARCHAR(50) NOT NULL');
-    await queryRunner.query('ALTER TABLE tenants CHANGE currencyId_temp currencyId VARCHAR(50) NOT NULL');
+    await queryRunner.query(
+      'ALTER TABLE partners CHANGE currencyId_temp currencyId VARCHAR(50) NOT NULL',
+    );
+    await queryRunner.query(
+      'ALTER TABLE tenants CHANGE currencyId_temp currencyId VARCHAR(50) NOT NULL',
+    );
   }
 }
-

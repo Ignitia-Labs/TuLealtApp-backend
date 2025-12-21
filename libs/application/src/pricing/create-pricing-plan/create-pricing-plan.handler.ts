@@ -70,4 +70,3 @@ export class CreatePricingPlanHandler {
     return new CreatePricingPlanResponse(savedPlan);
   }
 }
-

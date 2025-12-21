@@ -42,4 +42,3 @@ export class PricingFeatureEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

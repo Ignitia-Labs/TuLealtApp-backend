@@ -16,4 +16,3 @@ export class GetPricingPlanBySlugResponse {
     this.plan = plan;
   }
 }
-

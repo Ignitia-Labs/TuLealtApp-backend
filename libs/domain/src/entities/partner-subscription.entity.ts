@@ -61,9 +61,7 @@ export class PartnerSubscription {
   /**
    * Método de dominio para actualizar el estado de la suscripción
    */
-  updateStatus(
-    status: 'active' | 'expired' | 'suspended' | 'cancelled',
-  ): PartnerSubscription {
+  updateStatus(status: 'active' | 'expired' | 'suspended' | 'cancelled'): PartnerSubscription {
     return new PartnerSubscription(
       this.id,
       this.partnerId,
@@ -83,10 +81,7 @@ export class PartnerSubscription {
   /**
    * Método de dominio para registrar un pago
    */
-  recordPayment(
-    amount: number,
-    paymentStatus: 'paid' | 'pending' | 'failed',
-  ): PartnerSubscription {
+  recordPayment(amount: number, paymentStatus: 'paid' | 'pending' | 'failed'): PartnerSubscription {
     return new PartnerSubscription(
       this.id,
       this.partnerId,

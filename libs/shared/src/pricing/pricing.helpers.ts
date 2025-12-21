@@ -2,11 +2,7 @@
  * Helper functions para el módulo de Pricing
  */
 
-import {
-  PricingPlan,
-  PricingPromotion,
-  BillingPeriod,
-} from '@libs/domain';
+import { PricingPlan, PricingPromotion, BillingPeriod } from '@libs/domain';
 import { BILLING_PERIOD_MONTHS, EXCHANGE_RATE } from './pricing.constants';
 
 /**
@@ -14,7 +10,7 @@ import { BILLING_PERIOD_MONTHS, EXCHANGE_RATE } from './pricing.constants';
  */
 export function calculateDiscountedPrice(
   basePrice: number | null,
-  promotion?: PricingPromotion
+  promotion?: PricingPromotion,
 ): number | null {
   if (basePrice === null) return null;
   if (!promotion?.active) return basePrice;
@@ -26,10 +22,7 @@ export function calculateDiscountedPrice(
 /**
  * Obtiene el precio para un período de facturación específico
  */
-export function getPriceForPeriod(
-  plan: PricingPlan,
-  period: BillingPeriod
-): number | null {
+export function getPriceForPeriod(plan: PricingPlan, period: BillingPeriod): number | null {
   return plan.pricing?.[period] ?? null;
 }
 
@@ -38,7 +31,7 @@ export function getPriceForPeriod(
  */
 export function getPromotionForPeriod(
   plan: PricingPlan,
-  period: BillingPeriod
+  period: BillingPeriod,
 ): PricingPromotion | undefined {
   return plan.promotions?.[period];
 }
@@ -46,10 +39,7 @@ export function getPromotionForPeriod(
 /**
  * Calcula el precio final con descuentos aplicados
  */
-export function calculateFinalPrice(
-  plan: PricingPlan,
-  period: BillingPeriod
-): number | null {
+export function calculateFinalPrice(plan: PricingPlan, period: BillingPeriod): number | null {
   const basePrice = getPriceForPeriod(plan, period);
   const promotion = getPromotionForPeriod(plan, period);
   return calculateDiscountedPrice(basePrice, promotion);
@@ -60,7 +50,7 @@ export function calculateFinalPrice(
  */
 export function calculateMonthlyEquivalent(
   plan: PricingPlan,
-  period: BillingPeriod
+  period: BillingPeriod,
 ): number | null {
   const finalPrice = calculateFinalPrice(plan, period);
   if (finalPrice === null) return null;
@@ -75,7 +65,7 @@ export function calculateMonthlyEquivalent(
 export function formatPrice(
   basePrice: number | null,
   currency: 'USD' | 'GTQ',
-  promotion?: PricingPromotion
+  promotion?: PricingPromotion,
 ): string {
   if (basePrice === null) return 'Personalizado';
 
@@ -93,7 +83,7 @@ export function formatPrice(
  * Obtiene planes activos
  */
 export function getActivePlans(plans: PricingPlan[]): PricingPlan[] {
-  return plans.filter(plan => plan.status === 'active');
+  return plans.filter((plan) => plan.status === 'active');
 }
 
 /**
@@ -101,7 +91,7 @@ export function getActivePlans(plans: PricingPlan[]): PricingPlan[] {
  * @deprecated Usar repositorio IPricingPlanRepository.findById() en su lugar
  */
 export function getPlanById(plans: PricingPlan[], id: number): PricingPlan | undefined {
-  return plans.find(plan => plan.id === id);
+  return plans.find((plan) => plan.id === id);
 }
 
 /**
@@ -109,7 +99,7 @@ export function getPlanById(plans: PricingPlan[], id: number): PricingPlan | und
  * @deprecated Usar repositorio IPricingPlanRepository.findBySlug() en su lugar
  */
 export function getPlanBySlug(plans: PricingPlan[], slug: string): PricingPlan | undefined {
-  return plans.find(plan => plan.slug === slug);
+  return plans.find((plan) => plan.slug === slug);
 }
 
 /**
@@ -118,7 +108,7 @@ export function getPlanBySlug(plans: PricingPlan[], slug: string): PricingPlan |
 export function calculateSavingsPercent(
   plan: PricingPlan,
   fromPeriod: BillingPeriod,
-  toPeriod: BillingPeriod
+  toPeriod: BillingPeriod,
 ): number | null {
   const fromPrice = calculateMonthlyEquivalent(plan, fromPeriod);
   const toPrice = calculateMonthlyEquivalent(plan, toPeriod);
@@ -128,4 +118,3 @@ export function calculateSavingsPercent(
   const savings = ((fromPrice - toPrice) / fromPrice) * 100;
   return Math.round(savings);
 }
-

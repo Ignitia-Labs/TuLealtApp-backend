@@ -21,4 +21,3 @@ export class DeletePricingPlanResponse {
     this.message = 'Pricing plan deleted successfully';
   }
 }
-

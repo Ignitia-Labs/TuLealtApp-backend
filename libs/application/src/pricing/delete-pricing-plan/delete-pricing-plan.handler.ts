@@ -27,4 +27,3 @@ export class DeletePricingPlanHandler {
     return new DeletePricingPlanResponse(request.planId);
   }
 }
-

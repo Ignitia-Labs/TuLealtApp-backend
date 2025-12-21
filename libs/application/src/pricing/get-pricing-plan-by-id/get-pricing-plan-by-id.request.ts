@@ -15,4 +15,3 @@ export class GetPricingPlanByIdRequest {
   @IsNotEmpty()
   planId: number;
 }
-

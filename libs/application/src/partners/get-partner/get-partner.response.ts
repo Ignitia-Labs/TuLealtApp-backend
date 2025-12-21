@@ -1,4 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { PartnerSubscriptionSwaggerDto } from '../dto/partner-subscription-swagger.dto';
+import { PartnerLimitsSwaggerDto } from '../dto/partner-limits-swagger.dto';
+import { PartnerStatsSwaggerDto } from '../dto/partner-stats-swagger.dto';
 
 /**
  * DTO de response para obtener un partner
@@ -175,6 +178,27 @@ export class GetPartnerResponse {
   })
   updatedAt: Date;
 
+  @ApiProperty({
+    description: 'Información de la suscripción del partner',
+    type: PartnerSubscriptionSwaggerDto,
+    nullable: true,
+  })
+  subscription: PartnerSubscriptionSwaggerDto | null;
+
+  @ApiProperty({
+    description: 'Límites del partner según su plan',
+    type: PartnerLimitsSwaggerDto,
+    nullable: true,
+  })
+  limits: PartnerLimitsSwaggerDto | null;
+
+  @ApiProperty({
+    description: 'Estadísticas actuales del partner',
+    type: PartnerStatsSwaggerDto,
+    nullable: true,
+  })
+  stats: PartnerStatsSwaggerDto | null;
+
   constructor(
     id: number,
     name: string,
@@ -200,6 +224,9 @@ export class GetPartnerResponse {
     status: string,
     createdAt: Date,
     updatedAt: Date,
+    subscription: PartnerSubscriptionSwaggerDto | null = null,
+    limits: PartnerLimitsSwaggerDto | null = null,
+    stats: PartnerStatsSwaggerDto | null = null,
   ) {
     this.id = id;
     this.name = name;
@@ -225,5 +252,8 @@ export class GetPartnerResponse {
     this.status = status;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
+    this.subscription = subscription;
+    this.limits = limits;
+    this.stats = stats;
   }
 }

@@ -19,4 +19,3 @@ export class SetRateExchangeHandler {
     return new SetRateExchangeResponse(rateExchange);
   }
 }
-

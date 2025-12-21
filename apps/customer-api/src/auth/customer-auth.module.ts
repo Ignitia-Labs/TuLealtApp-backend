@@ -51,4 +51,3 @@ import { InfrastructureModule } from '@libs/infrastructure';
   exports: [JwtAuthService],
 })
 export class CustomerAuthModule {}
-

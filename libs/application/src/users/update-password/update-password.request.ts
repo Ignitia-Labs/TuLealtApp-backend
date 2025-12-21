@@ -36,4 +36,3 @@ export class UpdatePasswordRequest {
   @MinLength(6)
   newPassword: string;
 }
-

@@ -34,4 +34,3 @@ export class CalculatePriceRequest {
   })
   currency?: 'USD' | 'GTQ';
 }
-

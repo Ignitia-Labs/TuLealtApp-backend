@@ -21,4 +21,3 @@ export const BILLING_PERIOD_MONTHS: Record<BillingPeriod, number> = {
   semiannual: 6,
   annual: 12,
 };
-

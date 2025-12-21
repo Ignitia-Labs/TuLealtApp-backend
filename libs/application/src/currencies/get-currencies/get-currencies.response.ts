@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Currency } from '@libs/domain';
+import { CurrencySwaggerDto } from '../dto/currency-swagger.dto';
 
 /**
  * DTO de response para obtener monedas
@@ -7,7 +8,7 @@ import { Currency } from '@libs/domain';
 export class GetCurrenciesResponse {
   @ApiProperty({
     description: 'Lista de monedas',
-    type: Array,
+    type: CurrencySwaggerDto,
     isArray: true,
     example: [
       {
@@ -29,4 +30,3 @@ export class GetCurrenciesResponse {
     this.currencies = currencies;
   }
 }
-

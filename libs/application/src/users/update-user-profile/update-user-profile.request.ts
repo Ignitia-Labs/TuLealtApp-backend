@@ -62,4 +62,3 @@ export class UpdateUserProfileRequest {
   @IsOptional()
   profile?: Record<string, any> | null;
 }
-

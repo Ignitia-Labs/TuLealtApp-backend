@@ -8,13 +8,7 @@ import {
   HttpStatus,
   ParseIntPipe,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-  ApiBody,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import {
   CreateTenantHandler,
   CreateTenantRequest,
@@ -107,9 +101,7 @@ export class TenantsController {
       error: 'Not Found',
     },
   })
-  async createTenant(
-    @Body() request: CreateTenantRequest,
-  ): Promise<CreateTenantResponse> {
+  async createTenant(@Body() request: CreateTenantRequest): Promise<CreateTenantResponse> {
     return this.createTenantHandler.execute(request);
   }
 
@@ -155,9 +147,7 @@ export class TenantsController {
       error: 'Not Found',
     },
   })
-  async getTenant(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<GetTenantResponse> {
+  async getTenant(@Param('id', ParseIntPipe) id: number): Promise<GetTenantResponse> {
     const request = new GetTenantRequest();
     request.tenantId = id;
     return this.getTenantHandler.execute(request);

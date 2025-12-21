@@ -81,4 +81,3 @@ export class UpdatePricingPlanHandler {
     return new UpdatePricingPlanResponse(savedPlan);
   }
 }
-

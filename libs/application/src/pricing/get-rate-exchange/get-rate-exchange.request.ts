@@ -5,4 +5,3 @@
 export class GetRateExchangeRequest {
   // No requiere parámetros
 }
-

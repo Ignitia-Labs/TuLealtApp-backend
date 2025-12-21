@@ -17,10 +17,11 @@ export class GetRateExchangeHandler {
     const rateExchange = await this.rateExchangeRepository.getCurrent();
 
     if (!rateExchange) {
-      throw new NotFoundException('Rate exchange not found. Please configure the exchange rate first.');
+      throw new NotFoundException(
+        'Rate exchange not found. Please configure the exchange rate first.',
+      );
     }
 
     return new GetRateExchangeResponse(rateExchange);
   }
 }
-

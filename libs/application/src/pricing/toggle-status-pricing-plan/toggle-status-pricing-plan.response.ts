@@ -24,4 +24,3 @@ export class ToggleStatusPricingPlanResponse {
     this.status = plan.status;
   }
 }
-

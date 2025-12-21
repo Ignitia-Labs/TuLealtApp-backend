@@ -17,9 +17,7 @@ export class GetTenantHandler {
     const tenant = await this.tenantRepository.findById(request.tenantId);
 
     if (!tenant) {
-      throw new NotFoundException(
-        `Tenant with ID ${request.tenantId} not found`,
-      );
+      throw new NotFoundException(`Tenant with ID ${request.tenantId} not found`);
     }
 
     return new GetTenantResponse(

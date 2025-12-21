@@ -17,9 +17,7 @@ export class GetBranchHandler {
     const branch = await this.branchRepository.findById(request.branchId);
 
     if (!branch) {
-      throw new NotFoundException(
-        `Branch with ID ${request.branchId} not found`,
-      );
+      throw new NotFoundException(`Branch with ID ${request.branchId} not found`);
     }
 
     return new GetBranchResponse(

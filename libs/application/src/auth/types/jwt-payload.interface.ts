@@ -28,4 +28,3 @@ export interface JwtPayload {
    */
   type?: 'access' | 'refresh';
 }
-

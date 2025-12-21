@@ -16,4 +16,3 @@ export class SetRateExchangeRequest {
   @IsNotEmpty()
   rate: number;
 }
-

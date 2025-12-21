@@ -20,4 +20,3 @@ export class CustomerSeed extends BaseSeed {
     this.log('Seeds de Customer API completadas');
   }
 }
-

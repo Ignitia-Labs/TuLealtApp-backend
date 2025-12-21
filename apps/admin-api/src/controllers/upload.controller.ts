@@ -111,9 +111,7 @@ export class UploadController {
     // Validar tipo de archivo
     const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedMimeTypes.includes(file.mimetype)) {
-      throw new BadRequestException(
-        'Invalid file format. Only jpg, jpeg, png, webp are allowed',
-      );
+      throw new BadRequestException('Invalid file format. Only jpg, jpeg, png, webp are allowed');
     }
 
     // Validar tamaño (5MB máximo)
@@ -186,9 +184,7 @@ export class UploadController {
     // Validar tipo de archivo
     const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedMimeTypes.includes(file.mimetype)) {
-      throw new BadRequestException(
-        'Invalid file format. Only jpg, jpeg, png, webp are allowed',
-      );
+      throw new BadRequestException('Invalid file format. Only jpg, jpeg, png, webp are allowed');
     }
 
     // Validar tamaño (5MB máximo)

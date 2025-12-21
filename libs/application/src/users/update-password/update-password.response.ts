@@ -31,4 +31,3 @@ export class UpdatePasswordResponse {
     this.updatedAt = updatedAt;
   }
 }
-

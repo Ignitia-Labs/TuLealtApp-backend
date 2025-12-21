@@ -15,4 +15,3 @@ export class ToggleStatusPricingPlanRequest {
   @IsNotEmpty()
   planId: number;
 }
-

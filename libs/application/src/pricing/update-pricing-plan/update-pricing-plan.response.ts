@@ -16,4 +16,3 @@ export class UpdatePricingPlanResponse {
     this.plan = plan;
   }
 }
-

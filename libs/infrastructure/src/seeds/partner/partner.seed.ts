@@ -20,4 +20,3 @@ export class PartnerSeed extends BaseSeed {
     this.log('Seeds de Partner API completadas');
   }
 }
-

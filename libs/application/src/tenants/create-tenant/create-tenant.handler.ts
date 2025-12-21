@@ -1,10 +1,5 @@
 import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
-import {
-  IPartnerRepository,
-  ITenantRepository,
-  Tenant,
-  TenantFeatures,
-} from '@libs/domain';
+import { IPartnerRepository, ITenantRepository, Tenant, TenantFeatures } from '@libs/domain';
 import { CreateTenantRequest } from './create-tenant.request';
 import { CreateTenantResponse } from './create-tenant.response';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -29,9 +24,7 @@ export class CreateTenantHandler {
     // Validar que el partner exista
     const partner = await this.partnerRepository.findById(request.partnerId);
     if (!partner) {
-      throw new NotFoundException(
-        `Partner with ID ${request.partnerId} not found`,
-      );
+      throw new NotFoundException(`Partner with ID ${request.partnerId} not found`);
     }
 
     // Crear la entidad de dominio del tenant sin ID (la BD lo generará automáticamente)

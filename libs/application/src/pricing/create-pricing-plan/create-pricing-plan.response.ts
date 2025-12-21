@@ -16,4 +16,3 @@ export class CreatePricingPlanResponse {
     this.plan = plan;
   }
 }
-

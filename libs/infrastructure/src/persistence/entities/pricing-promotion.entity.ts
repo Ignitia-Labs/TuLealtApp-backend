@@ -49,4 +49,3 @@ export class PricingPromotionEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

@@ -508,16 +508,56 @@ createdAt: Date;
 
 #### Array
 
+**⚠️ IMPORTANTE para compatibilidad con Orval/OpenAPI Generator:**
+
+Para arrays de objetos complejos (DTOs), **NO uses `type: Array` o `type: [ClassName]`**. En su lugar, usa `type: ClassName` con `isArray: true`:
+
 ```typescript
+// ✅ CORRECTO - Para arrays de objetos complejos (DTOs)
+@ApiProperty({
+  description: 'Lista de partners',
+  type: GetPartnerResponse,  // Usa la clase directamente, NO [GetPartnerResponse]
+  isArray: true,
+  example: [
+    {
+      id: 1,
+      name: 'Partner Name',
+      // ... más campos
+    },
+  ],
+})
+partners: GetPartnerResponse[];
+
+// ✅ CORRECTO - Para arrays de tipos primitivos
 @ApiProperty({
   description: 'Roles del usuario',
   example: ['CUSTOMER', 'PREMIUM'],
-  type: [String],
+  type: String,  // O type: [String] también funciona para primitivos
   isArray: true,
 })
 @IsString({ each: true })
 roles: string[];
+
+// ❌ INCORRECTO - Causa error en Orval: "All arrays must have an `items` key defined"
+@ApiProperty({
+  description: 'Lista de monedas',
+  type: Array,  // ❌ NO usar Array genérico
+  isArray: true,
+})
+currencies: Currency[];
+
+// ❌ INCORRECTO - También causa error en Orval
+@ApiProperty({
+  description: 'Lista de monedas',
+  type: [CurrencySwaggerDto],  // ❌ NO usar [ClassName] para arrays
+  isArray: true,
+})
+currencies: CurrencySwaggerDto[];
 ```
+
+**Regla general:**
+- Para arrays de **objetos complejos (DTOs)**: `type: ClassName` + `isArray: true`
+- Para arrays de **tipos primitivos**: `type: String` (o `Number`, `Boolean`, etc.) + `isArray: true`, o `type: [String]` + `isArray: true`
 
 #### Enum
 

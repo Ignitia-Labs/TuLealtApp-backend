@@ -43,4 +43,3 @@ export class RateExchangeEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

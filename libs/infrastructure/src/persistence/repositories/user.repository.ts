@@ -1,10 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  IUserRepository,
-  User,
-} from '@libs/domain';
+import { IUserRepository, User } from '@libs/domain';
 import { UserEntity } from '../entities/user.entity';
 import { UserMapper } from '../mappers/user.mapper';
 

@@ -1,9 +1,4 @@
-import {
-  Partner,
-  PartnerSubscription,
-  PartnerLimits,
-  PartnerStats,
-} from '@libs/domain';
+import { Partner, PartnerSubscription, PartnerLimits, PartnerStats } from '@libs/domain';
 import { PartnerEntity } from '../entities/partner.entity';
 import { PartnerSubscriptionEntity } from '../entities/partner-subscription.entity';
 import { PartnerLimitsEntity } from '../entities/partner-limits.entity';
@@ -87,9 +82,7 @@ export class PartnerMapper {
   /**
    * Convierte una entidad de persistencia de suscripción a entidad de dominio
    */
-  static subscriptionToDomain(
-    persistenceEntity: PartnerSubscriptionEntity,
-  ): PartnerSubscription {
+  static subscriptionToDomain(persistenceEntity: PartnerSubscriptionEntity): PartnerSubscription {
     return PartnerSubscription.create(
       persistenceEntity.partnerId,
       persistenceEntity.planId,
@@ -107,9 +100,7 @@ export class PartnerMapper {
   /**
    * Convierte una entidad de dominio de suscripción a entidad de persistencia
    */
-  static subscriptionToPersistence(
-    domainEntity: PartnerSubscription,
-  ): PartnerSubscriptionEntity {
+  static subscriptionToPersistence(domainEntity: PartnerSubscription): PartnerSubscriptionEntity {
     const entity = new PartnerSubscriptionEntity();
     if (domainEntity.id > 0) {
       entity.id = domainEntity.id;

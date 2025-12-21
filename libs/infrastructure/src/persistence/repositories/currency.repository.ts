@@ -66,4 +66,3 @@ export class CurrencyRepository implements ICurrencyRepository {
     return currencyEntities.map((entity) => CurrencyMapper.toDomain(entity));
   }
 }
-

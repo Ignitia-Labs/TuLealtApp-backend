@@ -29,10 +29,7 @@ export class UpdatePasswordHandler {
     }
 
     // Verificar que la contraseña actual sea correcta
-    const isCurrentPasswordValid = await bcrypt.compare(
-      request.currentPassword,
-      user.passwordHash,
-    );
+    const isCurrentPasswordValid = await bcrypt.compare(request.currentPassword, user.passwordHash);
 
     if (!isCurrentPasswordValid) {
       throw new UnauthorizedException('Current password is incorrect');
@@ -51,4 +48,3 @@ export class UpdatePasswordHandler {
     return new UpdatePasswordResponse(savedUser.id, savedUser.updatedAt);
   }
 }
-

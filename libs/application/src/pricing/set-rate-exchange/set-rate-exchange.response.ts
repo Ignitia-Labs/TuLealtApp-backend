@@ -50,4 +50,3 @@ export class SetRateExchangeResponse {
     this.message = 'Rate exchange updated successfully';
   }
 }
-

@@ -21,4 +21,3 @@ export class GetCurrenciesHandler {
     return new GetCurrenciesResponse(currencies);
   }
 }
-

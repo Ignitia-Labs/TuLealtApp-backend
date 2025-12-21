@@ -27,14 +27,6 @@ import { CustomerSeed } from './customer/customer.seed';
     PartnerSeed,
     CustomerSeed,
   ],
-  exports: [
-    AdminUserSeed,
-    PricingPlanSeed,
-    CurrencySeed,
-    AdminSeed,
-    PartnerSeed,
-    CustomerSeed,
-  ],
+  exports: [AdminUserSeed, PricingPlanSeed, CurrencySeed, AdminSeed, PartnerSeed, CustomerSeed],
 })
 export class SeedsModule {}
-

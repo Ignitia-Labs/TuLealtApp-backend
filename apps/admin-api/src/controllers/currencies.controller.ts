@@ -1,16 +1,5 @@
-import {
-  Controller,
-  Get,
-  Query,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { Controller, Get, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import {
   GetCurrenciesHandler,
   GetCurrenciesRequest,
@@ -27,9 +16,7 @@ import {
 @ApiTags('Currencies')
 @Controller('currencies')
 export class CurrenciesController {
-  constructor(
-    private readonly getCurrenciesHandler: GetCurrenciesHandler,
-  ) {}
+  constructor(private readonly getCurrenciesHandler: GetCurrenciesHandler) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -84,4 +71,3 @@ export class CurrenciesController {
     return this.getCurrenciesHandler.execute(request);
   }
 }
-

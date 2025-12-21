@@ -23,4 +23,3 @@ export class GetPricingPlanBySlugHandler {
     return new GetPricingPlanBySlugResponse(plan);
   }
 }
-

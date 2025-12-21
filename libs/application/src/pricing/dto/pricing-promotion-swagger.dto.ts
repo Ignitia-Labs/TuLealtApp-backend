@@ -23,4 +23,3 @@ export class PricingPromotionSwaggerDto {
   })
   validUntil?: string;
 }
-

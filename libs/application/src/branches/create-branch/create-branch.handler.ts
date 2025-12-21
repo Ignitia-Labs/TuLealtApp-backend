@@ -19,9 +19,7 @@ export class CreateBranchHandler {
     // Validar que el tenant exista
     const tenant = await this.tenantRepository.findById(request.tenantId);
     if (!tenant) {
-      throw new NotFoundException(
-        `Tenant with ID ${request.tenantId} not found`,
-      );
+      throw new NotFoundException(`Tenant with ID ${request.tenantId} not found`);
     }
 
     // Crear la entidad de dominio de la branch sin ID (la BD lo generará automáticamente)

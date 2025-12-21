@@ -52,9 +52,7 @@ export class TenantRepository implements ITenantRepository {
       },
     });
 
-    return tenantEntities.map((entity) =>
-      TenantMapper.toDomain(entity, entity.features),
-    );
+    return tenantEntities.map((entity) => TenantMapper.toDomain(entity, entity.features));
   }
 
   async findAll(): Promise<Tenant[]> {
@@ -65,8 +63,6 @@ export class TenantRepository implements ITenantRepository {
       },
     });
 
-    return tenantEntities.map((entity) =>
-      TenantMapper.toDomain(entity, entity.features),
-    );
+    return tenantEntities.map((entity) => TenantMapper.toDomain(entity, entity.features));
   }
 }

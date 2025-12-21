@@ -18,4 +18,3 @@ export interface IRateExchangeRepository {
    */
   setRate(rate: number): Promise<RateExchange>;
 }
-

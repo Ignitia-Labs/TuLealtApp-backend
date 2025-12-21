@@ -100,6 +100,15 @@ export * from './partners/get-partner/get-partner.handler';
 export * from './partners/get-partner/get-partner.request';
 export * from './partners/get-partner/get-partner.response';
 
+export * from './partners/get-partners/get-partners.handler';
+export * from './partners/get-partners/get-partners.request';
+export * from './partners/get-partners/get-partners.response';
+
+// Partners DTOs for Swagger
+export * from './partners/dto/partner-subscription-swagger.dto';
+export * from './partners/dto/partner-limits-swagger.dto';
+export * from './partners/dto/partner-stats-swagger.dto';
+
 // Tenants Handlers
 export * from './tenants/create-tenant/create-tenant.handler';
 export * from './tenants/create-tenant/create-tenant.request';
@@ -122,3 +131,6 @@ export * from './branches/get-branch/get-branch.response';
 export * from './currencies/get-currencies/get-currencies.handler';
 export * from './currencies/get-currencies/get-currencies.request';
 export * from './currencies/get-currencies/get-currencies.response';
+
+// Currencies DTOs for Swagger
+export * from './currencies/dto/currency-swagger.dto';

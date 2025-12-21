@@ -1,5 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import * as crypto from 'crypto';
 import * as path from 'path';
@@ -38,11 +43,7 @@ export class S3Service {
    * @param originalName Nombre original del archivo
    * @returns URL pública del archivo subido
    */
-  async uploadFile(
-    file: UploadedFile,
-    folder: string,
-    originalName?: string,
-  ): Promise<string> {
+  async uploadFile(file: UploadedFile, folder: string, originalName?: string): Promise<string> {
     try {
       // Generar nombre único para el archivo
       const fileExtension = path.extname(file.originalname);

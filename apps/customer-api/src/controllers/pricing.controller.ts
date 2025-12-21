@@ -1,19 +1,5 @@
-import {
-  Controller,
-  Get,
-  Query,
-  Param,
-  HttpCode,
-  HttpStatus,
-  ParseIntPipe,
-} from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { Controller, Get, Query, Param, HttpCode, HttpStatus, ParseIntPipe } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import {
   GetPricingPlansHandler,
   GetPricingPlansRequest,
@@ -112,9 +98,7 @@ export class PricingController {
     status: 404,
     description: 'Plan de precios no encontrado o inactivo',
   })
-  async getPlanBySlug(
-    @Param('slug') slug: string,
-  ): Promise<GetPricingPlanBySlugResponse> {
+  async getPlanBySlug(@Param('slug') slug: string): Promise<GetPricingPlanBySlugResponse> {
     const request = new GetPricingPlanBySlugRequest();
     request.slug = slug;
     return this.getPricingPlanBySlugHandler.execute(request);
@@ -124,7 +108,8 @@ export class PricingController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Calcular precio de un plan',
-    description: 'Calcula el precio final de un plan activo para un período de facturación específico.',
+    description:
+      'Calcula el precio final de un plan activo para un período de facturación específico.',
   })
   @ApiQuery({
     name: 'planId',
@@ -168,4 +153,3 @@ export class PricingController {
     return this.calculatePriceHandler.execute(request);
   }
 }
-

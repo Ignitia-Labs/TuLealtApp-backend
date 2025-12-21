@@ -100,4 +100,3 @@ export class UpdateUserProfileResponse {
     this.updatedAt = updatedAt;
   }
 }
-

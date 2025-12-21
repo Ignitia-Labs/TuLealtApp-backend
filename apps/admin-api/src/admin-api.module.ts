@@ -25,6 +25,7 @@ import {
   SetRateExchangeHandler,
   CreatePartnerHandler,
   GetPartnerHandler,
+  GetPartnersHandler,
   CreateTenantHandler,
   GetTenantHandler,
   CreateBranchHandler,
@@ -73,6 +74,7 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     // Handlers de aplicación - Partners
     CreatePartnerHandler,
     GetPartnerHandler,
+    GetPartnersHandler,
     // Handlers de aplicación - Tenants
     CreateTenantHandler,
     GetTenantHandler,

@@ -23,4 +23,3 @@ export class GetPricingPlanByIdHandler {
     return new GetPricingPlanByIdResponse(plan);
   }
 }
-

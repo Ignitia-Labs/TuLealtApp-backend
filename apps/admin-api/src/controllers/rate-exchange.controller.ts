@@ -1,19 +1,5 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  HttpCode,
-  HttpStatus,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBody,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { Controller, Get, Post, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import {
   GetRateExchangeHandler,
   GetRateExchangeRequest,
@@ -113,10 +99,7 @@ export class RateExchangeController {
     description: 'No tiene permisos de administrador',
     type: ForbiddenErrorResponseDto,
   })
-  async setRateExchange(
-    @Body() request: SetRateExchangeRequest,
-  ): Promise<SetRateExchangeResponse> {
+  async setRateExchange(@Body() request: SetRateExchangeRequest): Promise<SetRateExchangeResponse> {
     return this.setRateExchangeHandler.execute(request);
   }
 }
-
