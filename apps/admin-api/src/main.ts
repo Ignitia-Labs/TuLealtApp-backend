@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AdminApiModule } from './admin-api.module';
 import { HttpExceptionFilter, AllExceptionsFilter } from '@libs/shared';
+import { S3Service } from '@libs/infrastructure';
 
 /**
  * Bootstrap de la aplicación Admin API
@@ -46,11 +47,23 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('Users', 'Gestión de usuarios')
     .addTag('Auth', 'Autenticación y autorización')
+    .addTag('Upload', 'Subida de archivos e imágenes')
+    .addTag('Partners', 'Gestión de partners')
+    .addTag('Tenants', 'Gestión de tenants')
+    .addTag('Branches', 'Gestión de branches')
     .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('admin/docs', app, document);
+
+  // Inicializar S3Service y asegurar que el bucket existe
+  try {
+    const s3Service = app.get(S3Service);
+    await s3Service.ensureBucketExists();
+  } catch (error) {
+    console.warn('Could not initialize S3Service:', error.message);
+  }
 
   const port = process.env.PORT || 3000;
   await app.listen(port);

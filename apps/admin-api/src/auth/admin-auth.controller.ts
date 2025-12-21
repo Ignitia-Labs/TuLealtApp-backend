@@ -36,8 +36,8 @@ import { JwtAuthGuard, RolesGuard, Roles, CurrentUser } from '@libs/shared';
  * - PATCH /admin/auth/me - Actualizar perfil del administrador autenticado (requiere autenticación)
  * - PATCH /admin/auth/password - Actualizar contraseña del administrador autenticado (requiere autenticación)
  */
-@ApiTags('Admin Auth')
-@Controller('admin/auth')
+@ApiTags('Auth')
+@Controller('auth')
 export class AdminAuthController {
   constructor(
     private readonly authenticateUserHandler: AuthenticateUserHandler,

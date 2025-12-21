@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BaseSeed } from '../base/base-seed';
 import { AdminUserSeed } from '../shared/admin-user.seed';
 import { PricingPlanSeed } from '../shared/pricing-plan.seed';
+import { CurrencySeed } from '../shared/currency.seed';
 
 /**
  * Seed específica para el contexto de Admin API
@@ -12,6 +13,7 @@ export class AdminSeed extends BaseSeed {
   constructor(
     private readonly adminUserSeed: AdminUserSeed,
     private readonly pricingPlanSeed: PricingPlanSeed,
+    private readonly currencySeed: CurrencySeed,
   ) {
     super();
   }
@@ -22,6 +24,9 @@ export class AdminSeed extends BaseSeed {
 
   async run(): Promise<void> {
     this.log('Ejecutando seeds para Admin API...');
+
+    // Ejecutar seed de monedas primero (necesaria para partners y tenants)
+    await this.currencySeed.run();
 
     // Ejecutar seed de usuario admin
     await this.adminUserSeed.run();

@@ -41,7 +41,7 @@ import {
  * - POST /admin/pricing/rate-exchange - Establecer/actualizar el tipo de cambio
  */
 @ApiTags('Admin Rate Exchange')
-@Controller('admin/pricing/rate-exchange')
+@Controller('pricing/rate-exchange')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('ADMIN')
 @ApiBearerAuth()

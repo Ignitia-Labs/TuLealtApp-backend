@@ -15,6 +15,8 @@ export * from './base/base-seed';
 
 // Shared seeds
 export * from './shared/admin-user.seed';
+export * from './shared/pricing-plan.seed';
+export * from './shared/currency.seed';
 
 // Context-specific seeds
 export * from './admin/admin.seed';
@@ -23,4 +25,3 @@ export * from './customer/customer.seed';
 
 // NO exportar seed-runner aquí para evitar ejecución automática
 // El seed-runner se ejecuta directamente mediante ts-node
-

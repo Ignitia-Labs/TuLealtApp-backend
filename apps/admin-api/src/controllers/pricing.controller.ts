@@ -72,7 +72,7 @@ import {
  * - DELETE /admin/pricing/plans/:id - Eliminar un plan de precios
  */
 @ApiTags('Admin Pricing')
-@Controller('admin/pricing')
+@Controller('pricing')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('ADMIN')
 @ApiBearerAuth()

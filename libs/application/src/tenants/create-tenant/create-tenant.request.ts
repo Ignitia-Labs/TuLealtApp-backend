@@ -1,0 +1,159 @@
+import {
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  IsOptional,
+  IsNumber,
+  IsBoolean,
+} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+
+/**
+ * DTO de request para crear un tenant
+ */
+export class CreateTenantRequest {
+  @ApiProperty({
+    description: 'ID del partner al que pertenece el tenant',
+    example: 1,
+    type: Number,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  partnerId: number;
+
+  @ApiProperty({
+    description: 'Nombre del tenant',
+    example: 'Café Delicia',
+    type: String,
+    minLength: 2,
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(2)
+  name: string;
+
+  @ApiProperty({
+    description: 'Categoría del tenant',
+    example: 'Cafeterías',
+    type: String,
+  })
+  @IsString()
+  @IsNotEmpty()
+  category: string;
+
+  @ApiProperty({
+    description: 'ID de la moneda',
+    example: 'currency-8',
+    type: String,
+  })
+  @IsString()
+  @IsNotEmpty()
+  currencyId: string;
+
+  @ApiProperty({
+    description: 'Color primario del tenant',
+    example: '#ec4899',
+    type: String,
+  })
+  @IsString()
+  @IsNotEmpty()
+  primaryColor: string;
+
+  @ApiProperty({
+    description: 'Color secundario del tenant',
+    example: '#fbbf24',
+    type: String,
+  })
+  @IsString()
+  @IsNotEmpty()
+  secondaryColor: string;
+
+  @ApiProperty({
+    description: 'Descripción del tenant',
+    example: 'Cafetería gourmet con sabor artesanal',
+    type: String,
+    required: false,
+    nullable: true,
+  })
+  @IsString()
+  @IsOptional()
+  description?: string | null;
+
+  @ApiProperty({
+    description: 'URL del logo del tenant',
+    example: 'https://ui-avatars.com/api/?name=Cafe+Delicia&background=ec4899&color=fff',
+    type: String,
+    required: false,
+    nullable: true,
+  })
+  @IsString()
+  @IsOptional()
+  logo?: string | null;
+
+  @ApiProperty({
+    description: 'Días hasta que expiren los puntos',
+    example: 365,
+    type: Number,
+    required: false,
+    default: 365,
+  })
+  @IsNumber()
+  @IsOptional()
+  pointsExpireDays?: number;
+
+  @ApiProperty({
+    description: 'Puntos mínimos para canjear',
+    example: 100,
+    type: Number,
+    required: false,
+    default: 100,
+  })
+  @IsNumber()
+  @IsOptional()
+  minPointsToRedeem?: number;
+
+  // Features
+  @ApiProperty({
+    description: 'Habilitar escaneo QR',
+    example: true,
+    type: Boolean,
+    required: false,
+    default: true,
+  })
+  @IsBoolean()
+  @IsOptional()
+  qrScanning?: boolean;
+
+  @ApiProperty({
+    description: 'Habilitar modo offline',
+    example: true,
+    type: Boolean,
+    required: false,
+    default: true,
+  })
+  @IsBoolean()
+  @IsOptional()
+  offlineMode?: boolean;
+
+  @ApiProperty({
+    description: 'Habilitar programa de referidos',
+    example: true,
+    type: Boolean,
+    required: false,
+    default: true,
+  })
+  @IsBoolean()
+  @IsOptional()
+  referralProgram?: boolean;
+
+  @ApiProperty({
+    description: 'Habilitar recompensas de cumpleaños',
+    example: true,
+    type: Boolean,
+    required: false,
+    default: true,
+  })
+  @IsBoolean()
+  @IsOptional()
+  birthdayRewards?: boolean;
+}

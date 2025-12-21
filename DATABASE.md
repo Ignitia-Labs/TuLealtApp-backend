@@ -129,17 +129,63 @@ CREATE TABLE users (
 
 En producción, se recomienda usar migraciones en lugar de `synchronize: true`.
 
-### Crear migración:
+### Estructura de Migraciones
+
+Las migraciones se encuentran en: `libs/infrastructure/src/persistence/migrations/`
+
+### Comandos Disponibles
+
+#### Crear una nueva migración:
 
 ```bash
-npm run typeorm migration:create -- -n CreateUsersTable
+npm run migration:create libs/infrastructure/src/persistence/migrations/NombreDeLaMigracion
 ```
 
-### Ejecutar migraciones:
+#### Generar migración automáticamente desde entidades:
 
 ```bash
-npm run typeorm migration:run
+npm run migration:generate libs/infrastructure/src/persistence/migrations/NombreDeLaMigracion
 ```
+
+#### Ejecutar migraciones pendientes:
+
+```bash
+npm run migration:run
+```
+
+#### Revertir la última migración:
+
+```bash
+npm run migration:revert
+```
+
+#### Ver el estado de las migraciones:
+
+```bash
+npm run migration:show
+```
+
+### Migraciones Existentes
+
+Las migraciones se ejecutan en orden cronológico según su timestamp:
+
+1. **`1730000000000-CreateInitialTables.ts`** - Crea las tablas iniciales del sistema:
+   - `users` - Usuarios del sistema
+   - `pricing_plans` - Planes de precios
+   - `pricing_periods` - Períodos de facturación de los planes
+   - `pricing_promotions` - Promociones por período
+   - `pricing_features` - Características de los planes
+   - `legacy_promotions` - Promociones legacy (una por plan)
+   - `rate_exchanges` - Tipos de cambio GTQ/USD
+
+2. **`1734567890000-CreatePartnersTenantsBranches.ts`** - Crea las tablas de partners, tenants, branches y sus relaciones:
+   - `partners` - Partners del sistema
+   - `partner_subscriptions` - Suscripciones de partners
+   - `partner_limits` - Límites de partners según su plan
+   - `partner_stats` - Estadísticas actuales de partners
+   - `tenants` - Tenants (negocios)
+   - `tenant_features` - Características habilitadas de tenants
+   - `branches` - Sucursales de tenants
 
 ## Conexión Manual
 

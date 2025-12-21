@@ -16,8 +16,8 @@ import { InfrastructureModule } from '@libs/infrastructure';
  * Módulo de autenticación para Admin API
  *
  * Proporciona endpoints de autenticación específicos para administradores:
- * - POST /admin/auth/login
- * - GET /admin/auth/me
+ * - POST /admin/auth/login (el prefijo 'admin' se añade automáticamente por setGlobalPrefix)
+ * - GET /admin/auth/me (el prefijo 'admin' se añade automáticamente por setGlobalPrefix)
  *
  * Reutiliza los handlers de la capa de aplicación (@libs/application)
  * para mantener la lógica de negocio centralizada.
