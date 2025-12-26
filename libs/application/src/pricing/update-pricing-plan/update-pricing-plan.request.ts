@@ -220,4 +220,24 @@ export class UpdatePricingPlanRequest {
   @Min(0)
   @IsOptional()
   order?: number;
+
+  @ApiProperty({
+    example: 14,
+    description: 'Días de prueba gratuita',
+    required: false,
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  trialDays?: number;
+
+  @ApiProperty({
+    example: false,
+    description: 'Indica si es el plan más popular',
+    required: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  popular?: boolean;
 }

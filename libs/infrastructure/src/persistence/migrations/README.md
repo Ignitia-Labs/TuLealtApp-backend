@@ -76,6 +76,18 @@ Incluye:
 - Índices para mejorar rendimiento
 - Campos con valores por defecto apropiados
 
+### 3. CreatePartnerArchives (1766769531000)
+
+Crea la tabla para archivar partners eliminados:
+- `partner_archives` - Almacena partners eliminados con toda su información relacionada en formato JSON
+
+Incluye:
+- Campo JSON para almacenar toda la información del partner y sus relaciones (subscription, limits, stats, tenants con features y branches)
+- Índices para búsquedas por ID original del partner y fecha de archivado
+- Campo opcional `deletedBy` para auditoría
+
+**Nota**: Esta tabla puede tener datos JSON ya que solo es para archivo/historial, no para consultas operativas.
+
 ## Notas Importantes
 
 1. **Nunca modificar migraciones ya ejecutadas**: Si necesitas cambiar una migración que ya se ejecutó, crea una nueva migración.

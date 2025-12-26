@@ -71,6 +71,8 @@ export class UpdatePricingPlanHandler {
           : null
         : existingPlan.promotion,
       request.order !== undefined ? request.order : existingPlan.order,
+      request.trialDays !== undefined ? request.trialDays : existingPlan.trialDays,
+      request.popular !== undefined ? request.popular : existingPlan.popular,
       existingPlan.createdAt,
       new Date(), // updatedAt se actualiza automáticamente
     );

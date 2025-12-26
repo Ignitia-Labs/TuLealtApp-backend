@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { ICurrencyRepository, Currency } from '@libs/domain';
+import { ICurrencyRepository, Currency, ICountryRepository } from '@libs/domain';
 import { BaseSeed } from '../base/base-seed';
 
 /**
@@ -10,6 +10,8 @@ export class CurrencySeed extends BaseSeed {
   constructor(
     @Inject('ICurrencyRepository')
     private readonly currencyRepository: ICurrencyRepository,
+    @Inject('ICountryRepository')
+    private readonly countryRepository: ICountryRepository,
   ) {
     super();
   }
@@ -240,10 +242,24 @@ export class CurrencySeed extends BaseSeed {
         { code: 'EUR', name: 'Euro', symbol: '€', symbolPosition: 'before', decimalPlaces: 2 },
       ];
 
+      // Obtener todos los países una vez para asociar con monedas
+      const countries = await this.countryRepository.findAll();
+      const countriesByCurrencyCode = new Map<string, number>();
+      countries.forEach((country) => {
+        // Si hay múltiples países con la misma moneda, tomamos el primero
+        // (ej: varios países usan USD o XCD)
+        if (!countriesByCurrencyCode.has(country.currencyCode)) {
+          countriesByCurrencyCode.set(country.currencyCode, country.id);
+        }
+      });
+
       for (const currencyData of currencies) {
         const existingCurrency = await this.currencyRepository.findByCode(currencyData.code);
 
         if (!existingCurrency) {
+          // Buscar el país asociado por código de moneda
+          const countryId = countriesByCurrencyCode.get(currencyData.code) || null;
+
           const currency = Currency.create(
             currencyData.code,
             currencyData.name,
@@ -251,12 +267,43 @@ export class CurrencySeed extends BaseSeed {
             currencyData.symbolPosition,
             currencyData.decimalPlaces,
             'active',
+            countryId,
           );
 
           await this.currencyRepository.save(currency);
-          this.log(`✓ Moneda creada: ${currencyData.code} - ${currencyData.name}`);
+          const countryInfo = countryId
+            ? ` (asociada a país ID: ${countryId})`
+            : ' (sin país asociado)';
+          this.log(`✓ Moneda creada: ${currencyData.code} - ${currencyData.name}${countryInfo}`);
         } else {
-          this.log(`- Moneda ya existe: ${currencyData.code} - ${currencyData.name}`);
+          // Si la moneda ya existe pero no tiene país asociado, intentar asociarlo
+          if (!existingCurrency.countryId) {
+            const countryId = countriesByCurrencyCode.get(currencyData.code);
+            if (countryId) {
+              const updatedCurrency = Currency.create(
+                existingCurrency.code,
+                existingCurrency.name,
+                existingCurrency.symbol,
+                existingCurrency.symbolPosition,
+                existingCurrency.decimalPlaces,
+                existingCurrency.status,
+                countryId,
+                existingCurrency.id,
+              );
+              await this.currencyRepository.save(updatedCurrency);
+              this.log(
+                `✓ Moneda actualizada: ${currencyData.code} - asociada a país ID: ${countryId}`,
+              );
+            } else {
+              this.log(
+                `- Moneda ya existe: ${currencyData.code} - ${currencyData.name} (sin país asociado)`,
+              );
+            }
+          } else {
+            this.log(
+              `- Moneda ya existe: ${currencyData.code} - ${currencyData.name} (país ID: ${existingCurrency.countryId})`,
+            );
+          }
         }
       }
 

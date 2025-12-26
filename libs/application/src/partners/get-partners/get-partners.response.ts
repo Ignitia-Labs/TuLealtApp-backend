@@ -16,7 +16,7 @@ export class GetPartnersResponse {
         responsibleName: 'María González',
         email: 'maria@abc-comercial.com',
         phone: '+502 2345-6789',
-        country: 'Guatemala',
+        countryId: 1,
         city: 'Ciudad de Guatemala',
         plan: 'conecta',
         logo: 'https://ui-avatars.com/api/?name=Grupo+ABC&background=4f46e5&color=fff',

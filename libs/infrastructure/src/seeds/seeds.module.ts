@@ -3,6 +3,7 @@ import { DatabaseModule } from '../persistence/database.module';
 import { AdminUserSeed } from './shared/admin-user.seed';
 import { PricingPlanSeed } from './shared/pricing-plan.seed';
 import { CurrencySeed } from './shared/currency.seed';
+import { CountrySeed } from './shared/country.seed';
 import { AdminSeed } from './admin/admin.seed';
 import { PartnerSeed } from './partner/partner.seed';
 import { CustomerSeed } from './customer/customer.seed';
@@ -22,11 +23,12 @@ import { CustomerSeed } from './customer/customer.seed';
     AdminUserSeed,
     PricingPlanSeed,
     CurrencySeed,
+    CountrySeed,
     // Seeds por contexto
     AdminSeed,
     PartnerSeed,
     CustomerSeed,
   ],
-  exports: [AdminUserSeed, PricingPlanSeed, CurrencySeed, AdminSeed, PartnerSeed, CustomerSeed],
+  exports: [AdminUserSeed, PricingPlanSeed, CurrencySeed, CountrySeed, AdminSeed, PartnerSeed, CustomerSeed],
 })
 export class SeedsModule {}

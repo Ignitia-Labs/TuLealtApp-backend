@@ -34,4 +34,14 @@ export interface IPartnerRepository {
    * Obtiene todos los partners
    */
   findAll(): Promise<Partner[]>;
+
+  /**
+   * Actualiza las estadísticas del partner basándose en los datos reales de la base de datos
+   */
+  updateStats(partnerId: number): Promise<void>;
+
+  /**
+   * Elimina un partner por su ID
+   */
+  delete(id: number): Promise<void>;
 }

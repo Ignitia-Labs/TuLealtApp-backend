@@ -12,6 +12,7 @@ export class Currency {
     public readonly symbolPosition: 'before' | 'after', // Posición del símbolo
     public readonly decimalPlaces: number, // Número de decimales
     public readonly status: 'active' | 'inactive',
+    public readonly countryId: number | null, // ID del país asociado (opcional)
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
   ) {}
@@ -27,6 +28,7 @@ export class Currency {
     symbolPosition: 'before' | 'after',
     decimalPlaces: number,
     status: 'active' | 'inactive' = 'active',
+    countryId: number | null = null,
     id?: number,
   ): Currency {
     const now = new Date();
@@ -38,6 +40,7 @@ export class Currency {
       symbolPosition,
       decimalPlaces,
       status,
+      countryId,
       now,
       now,
     );
@@ -62,6 +65,7 @@ export class Currency {
       this.symbolPosition,
       this.decimalPlaces,
       'active',
+      this.countryId,
       this.createdAt,
       new Date(),
     );
@@ -79,6 +83,7 @@ export class Currency {
       this.symbolPosition,
       this.decimalPlaces,
       'inactive',
+      this.countryId,
       this.createdAt,
       new Date(),
     );

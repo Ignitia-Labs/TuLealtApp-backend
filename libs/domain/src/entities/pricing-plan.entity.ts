@@ -58,6 +58,8 @@ export class PricingPlan {
     public readonly status: 'active' | 'inactive',
     public readonly promotion: PricingPromotion | null, // Legacy support
     public readonly order: number,
+    public readonly trialDays: number, // Días de prueba gratuita
+    public readonly popular: boolean, // Si es el plan más popular
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
   ) {}
@@ -81,6 +83,8 @@ export class PricingPlan {
     status: 'active' | 'inactive',
     promotion: PricingPromotion | null,
     order: number,
+    trialDays: number = 14,
+    popular: boolean = false,
     id?: number,
   ): PricingPlan {
     const now = new Date();
@@ -100,6 +104,8 @@ export class PricingPlan {
       status,
       promotion,
       order,
+      trialDays,
+      popular,
       now,
       now,
     );
@@ -132,6 +138,8 @@ export class PricingPlan {
       'active',
       this.promotion,
       this.order,
+      this.trialDays,
+      this.popular,
       this.createdAt,
       new Date(),
     );
@@ -157,6 +165,8 @@ export class PricingPlan {
       'inactive',
       this.promotion,
       this.order,
+      this.trialDays,
+      this.popular,
       this.createdAt,
       new Date(),
     );

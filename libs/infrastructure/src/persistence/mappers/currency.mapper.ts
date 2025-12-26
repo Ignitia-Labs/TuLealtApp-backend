@@ -16,6 +16,7 @@ export class CurrencyMapper {
       persistenceEntity.symbolPosition,
       persistenceEntity.decimalPlaces,
       persistenceEntity.status,
+      persistenceEntity.countryId || null,
       persistenceEntity.id,
     );
   }
@@ -34,6 +35,7 @@ export class CurrencyMapper {
     entity.symbolPosition = domainEntity.symbolPosition;
     entity.decimalPlaces = domainEntity.decimalPlaces;
     entity.status = domainEntity.status;
+    entity.countryId = domainEntity.countryId;
     if (domainEntity.id > 0) {
       entity.createdAt = domainEntity.createdAt;
       entity.updatedAt = domainEntity.updatedAt;

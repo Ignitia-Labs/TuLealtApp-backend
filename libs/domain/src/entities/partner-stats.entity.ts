@@ -70,4 +70,57 @@ export class PartnerStats {
       new Date(),
     );
   }
+
+  /**
+   * Método de dominio para decrementar el conteo de tenants
+   */
+  decrementTenantsCount(): PartnerStats {
+    return new PartnerStats(
+      this.id,
+      this.partnerId,
+      Math.max(0, this.tenantsCount - 1),
+      this.branchesCount,
+      this.customersCount,
+      this.rewardsCount,
+      this.createdAt,
+      new Date(),
+    );
+  }
+
+  /**
+   * Método de dominio para decrementar el conteo de branches
+   */
+  decrementBranchesCount(): PartnerStats {
+    return new PartnerStats(
+      this.id,
+      this.partnerId,
+      this.tenantsCount,
+      Math.max(0, this.branchesCount - 1),
+      this.customersCount,
+      this.rewardsCount,
+      this.createdAt,
+      new Date(),
+    );
+  }
+
+  /**
+   * Método de dominio para actualizar los conteos con valores específicos
+   */
+  updateCounts(
+    tenantsCount: number,
+    branchesCount: number,
+    customersCount?: number,
+    rewardsCount?: number,
+  ): PartnerStats {
+    return new PartnerStats(
+      this.id,
+      this.partnerId,
+      tenantsCount,
+      branchesCount,
+      customersCount !== undefined ? customersCount : this.customersCount,
+      rewardsCount !== undefined ? rewardsCount : this.rewardsCount,
+      this.createdAt,
+      new Date(),
+    );
+  }
 }

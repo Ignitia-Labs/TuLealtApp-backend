@@ -4,7 +4,10 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
+import { CountryEntity } from './country.entity';
 
 /**
  * Entidad de persistencia para Currency
@@ -32,6 +35,17 @@ export class CurrencyEntity {
 
   @Column('varchar', { length: 20, default: 'active' })
   status: 'active' | 'inactive';
+
+  @ManyToOne(() => CountryEntity, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'countryId' })
+  country: CountryEntity | null;
+
+  @Column('int', { nullable: true })
+  countryId: number | null;
 
   @CreateDateColumn()
   createdAt: Date;

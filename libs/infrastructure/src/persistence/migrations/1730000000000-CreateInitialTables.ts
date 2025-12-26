@@ -160,206 +160,219 @@ export class CreateInitialTables1730000000000 implements MigrationInterface {
     );
 
     // Crear tabla pricing_periods
-    await queryRunner.createTable(
-      new Table({
-        name: 'pricing_periods',
-        columns: [
-          {
-            name: 'id',
-            type: 'int',
-            isPrimary: true,
-            isGenerated: true,
-            generationStrategy: 'increment',
-          },
-          {
-            name: 'pricingPlanId',
-            type: 'int',
-          },
-          {
-            name: 'period',
-            type: 'varchar',
-            length: '20',
-          },
-          {
-            name: 'price',
-            type: 'decimal',
-            precision: 10,
-            scale: 2,
-            isNullable: true,
-          },
-          {
-            name: 'createdAt',
-            type: 'datetime',
-            default: 'CURRENT_TIMESTAMP',
-          },
-          {
-            name: 'updatedAt',
-            type: 'datetime',
-            default: 'CURRENT_TIMESTAMP',
-            onUpdate: 'CURRENT_TIMESTAMP',
-          },
-        ],
-      }),
-      true,
-    );
+    // Verificar si la tabla ya existe antes de crearla
+    const pricingPeriodsTableExists = await queryRunner.hasTable('pricing_periods');
+    if (!pricingPeriodsTableExists) {
+      await queryRunner.createTable(
+        new Table({
+          name: 'pricing_periods',
+          columns: [
+            {
+              name: 'id',
+              type: 'int',
+              isPrimary: true,
+              isGenerated: true,
+              generationStrategy: 'increment',
+            },
+            {
+              name: 'pricingPlanId',
+              type: 'int',
+            },
+            {
+              name: 'period',
+              type: 'varchar',
+              length: '20',
+            },
+            {
+              name: 'price',
+              type: 'decimal',
+              precision: 10,
+              scale: 2,
+              isNullable: true,
+            },
+            {
+              name: 'createdAt',
+              type: 'datetime',
+              default: 'CURRENT_TIMESTAMP',
+            },
+            {
+              name: 'updatedAt',
+              type: 'datetime',
+              default: 'CURRENT_TIMESTAMP',
+              onUpdate: 'CURRENT_TIMESTAMP',
+            },
+          ],
+        }),
+        true,
+      );
+    }
 
     // Crear tabla pricing_promotions
-    await queryRunner.createTable(
-      new Table({
-        name: 'pricing_promotions',
-        columns: [
-          {
-            name: 'id',
-            type: 'int',
-            isPrimary: true,
-            isGenerated: true,
-            generationStrategy: 'increment',
-          },
-          {
-            name: 'pricingPlanId',
-            type: 'int',
-          },
-          {
-            name: 'period',
-            type: 'varchar',
-            length: '20',
-          },
-          {
-            name: 'active',
-            type: 'boolean',
-            default: true,
-          },
-          {
-            name: 'discountPercent',
-            type: 'decimal',
-            precision: 5,
-            scale: 2,
-          },
-          {
-            name: 'label',
-            type: 'varchar',
-            length: '255',
-          },
-          {
-            name: 'validUntil',
-            type: 'datetime',
-            isNullable: true,
-          },
-          {
-            name: 'createdAt',
-            type: 'datetime',
-            default: 'CURRENT_TIMESTAMP',
-          },
-          {
-            name: 'updatedAt',
-            type: 'datetime',
-            default: 'CURRENT_TIMESTAMP',
-            onUpdate: 'CURRENT_TIMESTAMP',
-          },
-        ],
-      }),
-      true,
-    );
+    const pricingPromotionsTableExists = await queryRunner.hasTable('pricing_promotions');
+    if (!pricingPromotionsTableExists) {
+      await queryRunner.createTable(
+        new Table({
+          name: 'pricing_promotions',
+          columns: [
+            {
+              name: 'id',
+              type: 'int',
+              isPrimary: true,
+              isGenerated: true,
+              generationStrategy: 'increment',
+            },
+            {
+              name: 'pricingPlanId',
+              type: 'int',
+            },
+            {
+              name: 'period',
+              type: 'varchar',
+              length: '20',
+            },
+            {
+              name: 'active',
+              type: 'boolean',
+              default: true,
+            },
+            {
+              name: 'discountPercent',
+              type: 'decimal',
+              precision: 5,
+              scale: 2,
+            },
+            {
+              name: 'label',
+              type: 'varchar',
+              length: '255',
+            },
+            {
+              name: 'validUntil',
+              type: 'datetime',
+              isNullable: true,
+            },
+            {
+              name: 'createdAt',
+              type: 'datetime',
+              default: 'CURRENT_TIMESTAMP',
+            },
+            {
+              name: 'updatedAt',
+              type: 'datetime',
+              default: 'CURRENT_TIMESTAMP',
+              onUpdate: 'CURRENT_TIMESTAMP',
+            },
+          ],
+        }),
+        true,
+      );
+    }
 
     // Crear tabla pricing_features
-    await queryRunner.createTable(
-      new Table({
-        name: 'pricing_features',
-        columns: [
-          {
-            name: 'id',
-            type: 'int',
-            isPrimary: true,
-            isGenerated: true,
-            generationStrategy: 'increment',
-          },
-          {
-            name: 'pricingPlanId',
-            type: 'int',
-          },
-          {
-            name: 'featureId',
-            type: 'varchar',
-            length: '100',
-          },
-          {
-            name: 'text',
-            type: 'text',
-          },
-          {
-            name: 'enabled',
-            type: 'boolean',
-            default: true,
-          },
-          {
-            name: 'createdAt',
-            type: 'datetime',
-            default: 'CURRENT_TIMESTAMP',
-          },
-          {
-            name: 'updatedAt',
-            type: 'datetime',
-            default: 'CURRENT_TIMESTAMP',
-            onUpdate: 'CURRENT_TIMESTAMP',
-          },
-        ],
-      }),
-      true,
-    );
+    const pricingFeaturesTableExists = await queryRunner.hasTable('pricing_features');
+    if (!pricingFeaturesTableExists) {
+      await queryRunner.createTable(
+        new Table({
+          name: 'pricing_features',
+          columns: [
+            {
+              name: 'id',
+              type: 'int',
+              isPrimary: true,
+              isGenerated: true,
+              generationStrategy: 'increment',
+            },
+            {
+              name: 'pricingPlanId',
+              type: 'int',
+            },
+            {
+              name: 'featureId',
+              type: 'varchar',
+              length: '100',
+            },
+            {
+              name: 'text',
+              type: 'text',
+            },
+            {
+              name: 'enabled',
+              type: 'boolean',
+              default: true,
+            },
+            {
+              name: 'createdAt',
+              type: 'datetime',
+              default: 'CURRENT_TIMESTAMP',
+            },
+            {
+              name: 'updatedAt',
+              type: 'datetime',
+              default: 'CURRENT_TIMESTAMP',
+              onUpdate: 'CURRENT_TIMESTAMP',
+            },
+          ],
+        }),
+        true,
+      );
+    }
 
     // Crear tabla legacy_promotions
-    await queryRunner.createTable(
-      new Table({
-        name: 'legacy_promotions',
-        columns: [
-          {
-            name: 'id',
-            type: 'int',
-            isPrimary: true,
-            isGenerated: true,
-            generationStrategy: 'increment',
-          },
-          {
-            name: 'pricingPlanId',
-            type: 'int',
-            isUnique: true,
-          },
-          {
-            name: 'active',
-            type: 'boolean',
-            default: true,
-          },
-          {
-            name: 'discountPercent',
-            type: 'decimal',
-            precision: 5,
-            scale: 2,
-          },
-          {
-            name: 'label',
-            type: 'varchar',
-            length: '255',
-          },
-          {
-            name: 'validUntil',
-            type: 'datetime',
-            isNullable: true,
-          },
-          {
-            name: 'createdAt',
-            type: 'datetime',
-            default: 'CURRENT_TIMESTAMP',
-          },
-          {
-            name: 'updatedAt',
-            type: 'datetime',
-            default: 'CURRENT_TIMESTAMP',
-            onUpdate: 'CURRENT_TIMESTAMP',
-          },
-        ],
-      }),
-      true,
-    );
+    const legacyPromotionsTableExists = await queryRunner.hasTable('legacy_promotions');
+    if (!legacyPromotionsTableExists) {
+      await queryRunner.createTable(
+        new Table({
+          name: 'legacy_promotions',
+          columns: [
+            {
+              name: 'id',
+              type: 'int',
+              isPrimary: true,
+              isGenerated: true,
+              generationStrategy: 'increment',
+            },
+            {
+              name: 'pricingPlanId',
+              type: 'int',
+              isUnique: true,
+            },
+            {
+              name: 'active',
+              type: 'boolean',
+              default: true,
+            },
+            {
+              name: 'discountPercent',
+              type: 'decimal',
+              precision: 5,
+              scale: 2,
+            },
+            {
+              name: 'label',
+              type: 'varchar',
+              length: '255',
+            },
+            {
+              name: 'validUntil',
+              type: 'datetime',
+              isNullable: true,
+            },
+            {
+              name: 'createdAt',
+              type: 'datetime',
+              default: 'CURRENT_TIMESTAMP',
+            },
+            {
+              name: 'updatedAt',
+              type: 'datetime',
+              default: 'CURRENT_TIMESTAMP',
+              onUpdate: 'CURRENT_TIMESTAMP',
+            },
+          ],
+        }),
+        true,
+      );
+    }
 
     // Crear tabla rate_exchanges
     await queryRunner.createTable(
@@ -408,48 +421,166 @@ export class CreateInitialTables1730000000000 implements MigrationInterface {
     );
 
     // Crear foreign keys para pricing_periods
-    await queryRunner.createForeignKey(
-      'pricing_periods',
-      new TableForeignKey({
-        columnNames: ['pricingPlanId'],
-        referencedColumnNames: ['id'],
-        referencedTableName: 'pricing_plans',
-        onDelete: 'CASCADE',
-      }),
-    );
+    // Verificar si la constraint ya existe antes de crearla para evitar errores
+    try {
+      const pricingPeriodsTable = await queryRunner.getTable('pricing_periods');
+      if (pricingPeriodsTable) {
+        const existingFk = pricingPeriodsTable.foreignKeys.find(
+          (fk) => fk.columnNames.indexOf('pricingPlanId') !== -1,
+        );
+        if (!existingFk) {
+          await queryRunner.createForeignKey(
+            'pricing_periods',
+            new TableForeignKey({
+              columnNames: ['pricingPlanId'],
+              referencedColumnNames: ['id'],
+              referencedTableName: 'pricing_plans',
+              onDelete: 'CASCADE',
+            }),
+          );
+        }
+      }
+    } catch (error) {
+      // Si hay un error al crear la foreign key, intentar eliminarla primero y luego crearla
+      const pricingPeriodsTable = await queryRunner.getTable('pricing_periods');
+      if (pricingPeriodsTable) {
+        const existingFk = pricingPeriodsTable.foreignKeys.find(
+          (fk) => fk.columnNames.indexOf('pricingPlanId') !== -1,
+        );
+        if (existingFk) {
+          await queryRunner.dropForeignKey('pricing_periods', existingFk);
+        }
+        await queryRunner.createForeignKey(
+          'pricing_periods',
+          new TableForeignKey({
+            columnNames: ['pricingPlanId'],
+            referencedColumnNames: ['id'],
+            referencedTableName: 'pricing_plans',
+            onDelete: 'CASCADE',
+          }),
+        );
+      }
+    }
 
     // Crear foreign keys para pricing_promotions
-    await queryRunner.createForeignKey(
-      'pricing_promotions',
-      new TableForeignKey({
-        columnNames: ['pricingPlanId'],
-        referencedColumnNames: ['id'],
-        referencedTableName: 'pricing_plans',
-        onDelete: 'CASCADE',
-      }),
-    );
+    try {
+      const pricingPromotionsTable = await queryRunner.getTable('pricing_promotions');
+      if (pricingPromotionsTable) {
+        const existingFk = pricingPromotionsTable.foreignKeys.find(
+          (fk) => fk.columnNames.indexOf('pricingPlanId') !== -1,
+        );
+        if (!existingFk) {
+          await queryRunner.createForeignKey(
+            'pricing_promotions',
+            new TableForeignKey({
+              columnNames: ['pricingPlanId'],
+              referencedColumnNames: ['id'],
+              referencedTableName: 'pricing_plans',
+              onDelete: 'CASCADE',
+            }),
+          );
+        }
+      }
+    } catch (error) {
+      const pricingPromotionsTable = await queryRunner.getTable('pricing_promotions');
+      if (pricingPromotionsTable) {
+        const existingFk = pricingPromotionsTable.foreignKeys.find(
+          (fk) => fk.columnNames.indexOf('pricingPlanId') !== -1,
+        );
+        if (existingFk) {
+          await queryRunner.dropForeignKey('pricing_promotions', existingFk);
+        }
+        await queryRunner.createForeignKey(
+          'pricing_promotions',
+          new TableForeignKey({
+            columnNames: ['pricingPlanId'],
+            referencedColumnNames: ['id'],
+            referencedTableName: 'pricing_plans',
+            onDelete: 'CASCADE',
+          }),
+        );
+      }
+    }
 
     // Crear foreign keys para pricing_features
-    await queryRunner.createForeignKey(
-      'pricing_features',
-      new TableForeignKey({
-        columnNames: ['pricingPlanId'],
-        referencedColumnNames: ['id'],
-        referencedTableName: 'pricing_plans',
-        onDelete: 'CASCADE',
-      }),
-    );
+    try {
+      const pricingFeaturesTable = await queryRunner.getTable('pricing_features');
+      if (pricingFeaturesTable) {
+        const existingFk = pricingFeaturesTable.foreignKeys.find(
+          (fk) => fk.columnNames.indexOf('pricingPlanId') !== -1,
+        );
+        if (!existingFk) {
+          await queryRunner.createForeignKey(
+            'pricing_features',
+            new TableForeignKey({
+              columnNames: ['pricingPlanId'],
+              referencedColumnNames: ['id'],
+              referencedTableName: 'pricing_plans',
+              onDelete: 'CASCADE',
+            }),
+          );
+        }
+      }
+    } catch (error) {
+      const pricingFeaturesTable = await queryRunner.getTable('pricing_features');
+      if (pricingFeaturesTable) {
+        const existingFk = pricingFeaturesTable.foreignKeys.find(
+          (fk) => fk.columnNames.indexOf('pricingPlanId') !== -1,
+        );
+        if (existingFk) {
+          await queryRunner.dropForeignKey('pricing_features', existingFk);
+        }
+        await queryRunner.createForeignKey(
+          'pricing_features',
+          new TableForeignKey({
+            columnNames: ['pricingPlanId'],
+            referencedColumnNames: ['id'],
+            referencedTableName: 'pricing_plans',
+            onDelete: 'CASCADE',
+          }),
+        );
+      }
+    }
 
     // Crear foreign keys para legacy_promotions
-    await queryRunner.createForeignKey(
-      'legacy_promotions',
-      new TableForeignKey({
-        columnNames: ['pricingPlanId'],
-        referencedColumnNames: ['id'],
-        referencedTableName: 'pricing_plans',
-        onDelete: 'CASCADE',
-      }),
-    );
+    try {
+      const legacyPromotionsTable = await queryRunner.getTable('legacy_promotions');
+      if (legacyPromotionsTable) {
+        const existingFk = legacyPromotionsTable.foreignKeys.find(
+          (fk) => fk.columnNames.indexOf('pricingPlanId') !== -1,
+        );
+        if (!existingFk) {
+          await queryRunner.createForeignKey(
+            'legacy_promotions',
+            new TableForeignKey({
+              columnNames: ['pricingPlanId'],
+              referencedColumnNames: ['id'],
+              referencedTableName: 'pricing_plans',
+              onDelete: 'CASCADE',
+            }),
+          );
+        }
+      }
+    } catch (error) {
+      const legacyPromotionsTable = await queryRunner.getTable('legacy_promotions');
+      if (legacyPromotionsTable) {
+        const existingFk = legacyPromotionsTable.foreignKeys.find(
+          (fk) => fk.columnNames.indexOf('pricingPlanId') !== -1,
+        );
+        if (existingFk) {
+          await queryRunner.dropForeignKey('legacy_promotions', existingFk);
+        }
+        await queryRunner.createForeignKey(
+          'legacy_promotions',
+          new TableForeignKey({
+            columnNames: ['pricingPlanId'],
+            referencedColumnNames: ['id'],
+            referencedTableName: 'pricing_plans',
+            onDelete: 'CASCADE',
+          }),
+        );
+      }
+    }
 
     // Crear índices para mejorar el rendimiento
     await queryRunner.createIndex(

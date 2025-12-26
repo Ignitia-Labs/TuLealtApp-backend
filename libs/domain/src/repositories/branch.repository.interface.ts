@@ -29,4 +29,9 @@ export interface IBranchRepository {
    * Obtiene todas las branches
    */
   findAll(): Promise<Branch[]>;
+
+  /**
+   * Elimina una branch por su ID
+   */
+  delete(id: number): Promise<void>;
 }

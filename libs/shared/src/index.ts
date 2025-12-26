@@ -15,6 +15,14 @@ export * from './controllers/health.controller';
 // Types
 export * from './types/common.types';
 export * from './types/error-response.dto';
+export {
+  ErrorResponseDto,
+  NotFoundErrorResponseDto,
+  UnauthorizedErrorResponseDto,
+  ForbiddenErrorResponseDto,
+  BadRequestErrorResponseDto,
+  InternalServerErrorResponseDto,
+} from './types/error-response.dto';
 
 // Guards
 export * from './guards/jwt-auth.guard';

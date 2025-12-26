@@ -65,4 +65,8 @@ export class TenantRepository implements ITenantRepository {
 
     return tenantEntities.map((entity) => TenantMapper.toDomain(entity, entity.features));
   }
+
+  async delete(id: number): Promise<void> {
+    await this.tenantRepository.delete(id);
+  }
 }

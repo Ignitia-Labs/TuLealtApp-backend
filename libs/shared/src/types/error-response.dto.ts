@@ -116,3 +116,26 @@ export class BadRequestErrorResponseDto extends ErrorResponseDto {
   })
   error: 'Bad Request';
 }
+
+/**
+ * DTO para respuestas de error 500
+ */
+export class InternalServerErrorResponseDto extends ErrorResponseDto {
+  @ApiProperty({
+    description: 'Código de estado HTTP',
+    example: 500,
+  })
+  statusCode: 500;
+
+  @ApiProperty({
+    description: 'Mensaje de error',
+    example: 'Internal server error',
+  })
+  message: string;
+
+  @ApiProperty({
+    description: 'Tipo de error',
+    example: 'Internal Server Error',
+  })
+  error: 'Internal Server Error';
+}

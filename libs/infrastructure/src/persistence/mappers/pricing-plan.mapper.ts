@@ -85,6 +85,8 @@ export class PricingPlanMapper {
       persistenceEntity.status,
       legacyPromotion,
       persistenceEntity.order,
+      persistenceEntity.trialDays ?? 14,
+      persistenceEntity.popular ?? false,
       persistenceEntity.createdAt,
       persistenceEntity.updatedAt,
     );
@@ -111,6 +113,8 @@ export class PricingPlanMapper {
     entity.highlighted = domainEntity.highlighted;
     entity.status = domainEntity.status;
     entity.order = domainEntity.order;
+    entity.trialDays = domainEntity.trialDays;
+    entity.popular = domainEntity.popular;
     entity.createdAt = domainEntity.createdAt;
     entity.updatedAt = domainEntity.updatedAt;
 
@@ -184,6 +188,8 @@ export class PricingPlanMapper {
     existingEntity.highlighted = domainEntity.highlighted;
     existingEntity.status = domainEntity.status;
     existingEntity.order = domainEntity.order;
+    existingEntity.trialDays = domainEntity.trialDays;
+    existingEntity.popular = domainEntity.popular;
     existingEntity.updatedAt = new Date();
 
     // Eliminar pricingPeriods existentes y crear nuevos

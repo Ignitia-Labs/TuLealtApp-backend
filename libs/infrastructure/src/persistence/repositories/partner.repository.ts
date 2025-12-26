@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { IPartnerRepository, Partner } from '@libs/domain';
+import { Repository, In } from 'typeorm';
+import { IPartnerRepository, Partner, PartnerStats } from '@libs/domain';
 import { PartnerEntity } from '../entities/partner.entity';
 import { PartnerSubscriptionEntity } from '../entities/partner-subscription.entity';
 import { PartnerLimitsEntity } from '../entities/partner-limits.entity';
 import { PartnerStatsEntity } from '../entities/partner-stats.entity';
+import { TenantEntity } from '../entities/tenant.entity';
+import { BranchEntity } from '../entities/branch.entity';
 import { PartnerMapper } from '../mappers/partner.mapper';
 
 /**
@@ -22,6 +24,10 @@ export class PartnerRepository implements IPartnerRepository {
     private readonly limitsRepository: Repository<PartnerLimitsEntity>,
     @InjectRepository(PartnerStatsEntity)
     private readonly statsRepository: Repository<PartnerStatsEntity>,
+    @InjectRepository(TenantEntity)
+    private readonly tenantRepository: Repository<TenantEntity>,
+    @InjectRepository(BranchEntity)
+    private readonly branchRepository: Repository<BranchEntity>,
   ) {}
 
   async save(partner: Partner): Promise<Partner> {
@@ -101,5 +107,54 @@ export class PartnerRepository implements IPartnerRepository {
     return partnerEntities.map((entity) =>
       PartnerMapper.toDomain(entity, entity.subscription, entity.limits, entity.stats),
     );
+  }
+
+  /**
+   * Actualiza las estadísticas del partner basándose en los datos reales de la base de datos
+   */
+  async updateStats(partnerId: number): Promise<void> {
+    // Contar tenants del partner
+    const tenantsCount = await this.tenantRepository.count({
+      where: { partnerId },
+    });
+
+    // Contar branches de todos los tenants del partner
+    const tenants = await this.tenantRepository.find({
+      where: { partnerId },
+      select: ['id'],
+    });
+    const tenantIds = tenants.map((t) => t.id);
+    const branchesCount =
+      tenantIds.length > 0
+        ? await this.branchRepository.count({
+            where: { tenantId: In(tenantIds) },
+          })
+        : 0;
+
+    // Obtener o crear las stats del partner
+    let statsEntity = await this.statsRepository.findOne({
+      where: { partnerId },
+    });
+
+    if (!statsEntity) {
+      // Crear stats si no existen
+      statsEntity = new PartnerStatsEntity();
+      statsEntity.partnerId = partnerId;
+      statsEntity.tenantsCount = 0;
+      statsEntity.branchesCount = 0;
+      statsEntity.customersCount = 0;
+      statsEntity.rewardsCount = 0;
+    }
+
+    // Actualizar los conteos
+    statsEntity.tenantsCount = tenantsCount;
+    statsEntity.branchesCount = branchesCount;
+    // customersCount y rewardsCount se mantienen (se actualizarán por otros procesos)
+
+    await this.statsRepository.save(statsEntity);
+  }
+
+  async delete(id: number): Promise<void> {
+    await this.partnerRepository.delete(id);
   }
 }

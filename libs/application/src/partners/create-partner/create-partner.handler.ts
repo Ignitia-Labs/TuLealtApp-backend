@@ -53,7 +53,7 @@ export class CreatePartnerHandler {
       request.responsibleName,
       request.email,
       request.phone,
-      request.country,
+      request.countryId || null,
       request.city,
       request.plan,
       request.category,
@@ -75,16 +75,48 @@ export class CreatePartnerHandler {
     // Guardar el partner (la BD asignará el ID automáticamente)
     const savedPartner = await this.partnerRepository.save(partner);
 
+    // Determinar planType basado en el plan del partner
+    const planTypeMap: Record<string, 'esencia' | 'conecta' | 'inspira'> = {
+      esencia: 'esencia',
+      conecta: 'conecta',
+      inspira: 'inspira',
+    };
+    const planType = planTypeMap[savedPartner.plan] || 'conecta';
+
+    // Calcular fechas y montos por defecto
+    const startDate = new Date(request.subscriptionStartDate);
+    const renewalDate = new Date(request.subscriptionRenewalDate);
+    const billingFrequency = 'monthly'; // Por defecto mensual
+    const billingAmount = request.subscriptionLastPaymentAmount || 0;
+    const currency = 'USD'; // Por defecto USD
+
     // Crear y guardar la suscripción
     const subscription = PartnerSubscription.create(
       savedPartner.id,
       request.subscriptionPlanId,
-      new Date(request.subscriptionStartDate),
-      new Date(request.subscriptionRenewalDate),
+      planType,
+      startDate,
+      renewalDate,
+      billingFrequency,
+      billingAmount,
+      currency,
+      renewalDate, // nextBillingDate = renewalDate por defecto
+      billingAmount, // nextBillingAmount = billingAmount por defecto
+      startDate, // currentPeriodStart = startDate por defecto
+      renewalDate, // currentPeriodEnd = renewalDate por defecto
       'active',
-      null,
+      null, // trialEndDate
+      null, // pausedAt
+      null, // pauseReason
+      7, // gracePeriodDays
+      0, // retryAttempts
+      3, // maxRetryAttempts
+      0, // creditBalance
+      null, // discountPercent
+      null, // discountCode
+      null, // lastPaymentDate
       request.subscriptionLastPaymentAmount || null,
-      null,
+      null, // paymentStatus
       request.subscriptionAutoRenew !== undefined ? request.subscriptionAutoRenew : true,
     );
     const subscriptionEntity = PartnerMapper.subscriptionToPersistence(subscription);

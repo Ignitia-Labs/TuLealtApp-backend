@@ -18,27 +18,27 @@ export class PartnerMapper {
     stats?: PartnerStatsEntity | null,
   ): Partner {
     return Partner.create(
-      persistenceEntity.name,
-      persistenceEntity.responsibleName,
-      persistenceEntity.email,
-      persistenceEntity.phone,
-      persistenceEntity.country,
-      persistenceEntity.city,
-      persistenceEntity.plan,
-      persistenceEntity.category,
-      persistenceEntity.rewardType,
-      persistenceEntity.currencyId.toString(),
-      persistenceEntity.businessName,
-      persistenceEntity.taxId,
-      persistenceEntity.fiscalAddress,
-      persistenceEntity.paymentMethod,
-      persistenceEntity.billingEmail,
-      persistenceEntity.domain,
-      persistenceEntity.logo,
-      persistenceEntity.branchesNumber,
-      persistenceEntity.website,
-      persistenceEntity.socialMedia,
-      persistenceEntity.status,
+      persistenceEntity.name || '',
+      persistenceEntity.responsibleName || '',
+      persistenceEntity.email || '',
+      persistenceEntity.phone || '',
+      persistenceEntity.countryId || null,
+      persistenceEntity.city || '',
+      persistenceEntity.plan || '',
+      persistenceEntity.category || '',
+      persistenceEntity.rewardType || '',
+      persistenceEntity.currencyId ? persistenceEntity.currencyId.toString() : '0',
+      persistenceEntity.businessName || '',
+      persistenceEntity.taxId || '',
+      persistenceEntity.fiscalAddress || '',
+      persistenceEntity.paymentMethod || '',
+      persistenceEntity.billingEmail || '',
+      persistenceEntity.domain || '',
+      persistenceEntity.logo || null,
+      persistenceEntity.branchesNumber || 0,
+      persistenceEntity.website || null,
+      persistenceEntity.socialMedia || null,
+      persistenceEntity.status || 'active',
       persistenceEntity.id,
     );
   }
@@ -55,7 +55,7 @@ export class PartnerMapper {
     entity.responsibleName = domainEntity.responsibleName;
     entity.email = domainEntity.email;
     entity.phone = domainEntity.phone;
-    entity.country = domainEntity.country;
+    entity.countryId = domainEntity.countryId;
     entity.city = domainEntity.city;
     entity.plan = domainEntity.plan;
     entity.logo = domainEntity.logo;
@@ -86,9 +86,26 @@ export class PartnerMapper {
     return PartnerSubscription.create(
       persistenceEntity.partnerId,
       persistenceEntity.planId,
+      persistenceEntity.planType,
       persistenceEntity.startDate,
       persistenceEntity.renewalDate,
+      persistenceEntity.billingFrequency,
+      persistenceEntity.billingAmount,
+      persistenceEntity.currency,
+      persistenceEntity.nextBillingDate,
+      persistenceEntity.nextBillingAmount,
+      persistenceEntity.currentPeriodStart,
+      persistenceEntity.currentPeriodEnd,
       persistenceEntity.status,
+      persistenceEntity.trialEndDate,
+      persistenceEntity.pausedAt,
+      persistenceEntity.pauseReason,
+      persistenceEntity.gracePeriodDays,
+      persistenceEntity.retryAttempts,
+      persistenceEntity.maxRetryAttempts,
+      persistenceEntity.creditBalance,
+      persistenceEntity.discountPercent,
+      persistenceEntity.discountCode,
       persistenceEntity.lastPaymentDate,
       persistenceEntity.lastPaymentAmount,
       persistenceEntity.paymentStatus,
@@ -107,9 +124,26 @@ export class PartnerMapper {
     }
     entity.partnerId = domainEntity.partnerId;
     entity.planId = domainEntity.planId;
+    entity.planType = domainEntity.planType;
     entity.startDate = domainEntity.startDate;
     entity.renewalDate = domainEntity.renewalDate;
     entity.status = domainEntity.status;
+    entity.billingFrequency = domainEntity.billingFrequency;
+    entity.billingAmount = domainEntity.billingAmount;
+    entity.currency = domainEntity.currency;
+    entity.nextBillingDate = domainEntity.nextBillingDate;
+    entity.nextBillingAmount = domainEntity.nextBillingAmount;
+    entity.currentPeriodStart = domainEntity.currentPeriodStart;
+    entity.currentPeriodEnd = domainEntity.currentPeriodEnd;
+    entity.trialEndDate = domainEntity.trialEndDate;
+    entity.pausedAt = domainEntity.pausedAt;
+    entity.pauseReason = domainEntity.pauseReason;
+    entity.gracePeriodDays = domainEntity.gracePeriodDays;
+    entity.retryAttempts = domainEntity.retryAttempts;
+    entity.maxRetryAttempts = domainEntity.maxRetryAttempts;
+    entity.creditBalance = domainEntity.creditBalance;
+    entity.discountPercent = domainEntity.discountPercent;
+    entity.discountCode = domainEntity.discountCode;
     entity.lastPaymentDate = domainEntity.lastPaymentDate;
     entity.lastPaymentAmount = domainEntity.lastPaymentAmount;
     entity.paymentStatus = domainEntity.paymentStatus;

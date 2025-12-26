@@ -7,6 +7,10 @@ import { TenantsController } from './controllers/tenants.controller';
 import { BranchesController } from './controllers/branches.controller';
 import { UploadController } from './controllers/upload.controller';
 import { CurrenciesController } from './controllers/currencies.controller';
+import { RewardsController } from './controllers/rewards.controller';
+import { TransactionsController } from './controllers/transactions.controller';
+import { NotificationsController } from './controllers/notifications.controller';
+import { PartnerRequestsController } from './controllers/partner-requests.controller';
 import {
   CreateUserHandler,
   GetUserProfileHandler,
@@ -26,11 +30,34 @@ import {
   CreatePartnerHandler,
   GetPartnerHandler,
   GetPartnersHandler,
+  UpdatePartnerHandler,
+  DeletePartnerHandler,
   CreateTenantHandler,
   GetTenantHandler,
+  GetTenantsByPartnerHandler,
+  UpdateTenantHandler,
+  DeleteTenantHandler,
   CreateBranchHandler,
   GetBranchHandler,
+  GetBranchesByTenantHandler,
+  UpdateBranchHandler,
+  DeleteBranchHandler,
   GetCurrenciesHandler,
+  GetCountriesHandler,
+  CreateRewardHandler,
+  GetRewardsHandler,
+  GetRewardHandler,
+  GetTransactionsHandler,
+  GetNotificationsHandler,
+  MarkNotificationReadHandler,
+  MarkAllNotificationsReadHandler,
+  CreatePartnerRequestHandler,
+  GetPartnerRequestHandler,
+  GetPartnerRequestsHandler,
+  UpdatePartnerRequestStatusHandler,
+  AddPartnerRequestNotesHandler,
+  RejectPartnerRequestHandler,
+  ProcessPartnerRequestHandler,
 } from '@libs/application';
 import { InfrastructureModule, StorageModule } from '@libs/infrastructure';
 import { HealthController } from '@libs/shared';
@@ -51,6 +78,10 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     BranchesController,
     UploadController,
     CurrenciesController,
+    RewardsController,
+    TransactionsController,
+    NotificationsController,
+    PartnerRequestsController,
     HealthController,
   ],
   providers: [
@@ -75,14 +106,42 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     CreatePartnerHandler,
     GetPartnerHandler,
     GetPartnersHandler,
+    UpdatePartnerHandler,
+    DeletePartnerHandler,
     // Handlers de aplicación - Tenants
     CreateTenantHandler,
     GetTenantHandler,
+    GetTenantsByPartnerHandler,
+    UpdateTenantHandler,
+    DeleteTenantHandler,
     // Handlers de aplicación - Branches
     CreateBranchHandler,
     GetBranchHandler,
+    GetBranchesByTenantHandler,
+    UpdateBranchHandler,
+    DeleteBranchHandler,
     // Handlers de aplicación - Currencies
     GetCurrenciesHandler,
+    // Handlers de aplicación - Countries
+    GetCountriesHandler,
+    // Handlers de aplicación - Rewards
+    CreateRewardHandler,
+    GetRewardsHandler,
+    GetRewardHandler,
+    // Handlers de aplicación - Transactions
+    GetTransactionsHandler,
+    // Handlers de aplicación - Notifications
+    GetNotificationsHandler,
+    MarkNotificationReadHandler,
+    MarkAllNotificationsReadHandler,
+    // Handlers de aplicación - Partner Requests
+    CreatePartnerRequestHandler,
+    GetPartnerRequestHandler,
+    GetPartnerRequestsHandler,
+    UpdatePartnerRequestStatusHandler,
+    AddPartnerRequestNotesHandler,
+    RejectPartnerRequestHandler,
+    ProcessPartnerRequestHandler,
   ],
 })
 export class AdminApiModule {}

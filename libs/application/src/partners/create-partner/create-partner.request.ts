@@ -55,13 +55,14 @@ export class CreatePartnerRequest {
   phone: string;
 
   @ApiProperty({
-    description: 'País del partner',
-    example: 'Guatemala',
-    type: String,
+    description: 'ID del país del partner',
+    example: 1,
+    type: Number,
+    required: false,
   })
-  @IsString()
-  @IsNotEmpty()
-  country: string;
+  @IsNumber()
+  @IsOptional()
+  countryId?: number | null;
 
   @ApiProperty({
     description: 'Ciudad del partner',

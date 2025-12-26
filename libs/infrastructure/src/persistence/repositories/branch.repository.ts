@@ -59,4 +59,8 @@ export class BranchRepository implements IBranchRepository {
 
     return branchEntities.map((entity) => BranchMapper.toDomain(entity));
   }
+
+  async delete(id: number): Promise<void> {
+    await this.branchRepository.delete(id);
+  }
 }

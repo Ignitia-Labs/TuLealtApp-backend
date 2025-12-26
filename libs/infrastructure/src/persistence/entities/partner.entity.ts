@@ -14,6 +14,7 @@ import { PartnerLimitsEntity } from './partner-limits.entity';
 import { PartnerStatsEntity } from './partner-stats.entity';
 import { TenantEntity } from './tenant.entity';
 import { CurrencyEntity } from './currency.entity';
+import { CountryEntity } from './country.entity';
 
 /**
  * Entidad de persistencia para Partner
@@ -36,8 +37,16 @@ export class PartnerEntity {
   @Column('varchar', { length: 50 })
   phone: string;
 
-  @Column('varchar', { length: 100 })
-  country: string;
+  @ManyToOne(() => CountryEntity, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'countryId' })
+  country: CountryEntity | null;
+
+  @Column('int', { nullable: true })
+  countryId: number | null;
 
   @Column('varchar', { length: 100 })
   city: string;

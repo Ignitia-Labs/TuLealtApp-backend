@@ -104,6 +104,34 @@ export class GetTenantResponse {
   })
   updatedAt: Date;
 
+  @ApiProperty({
+    description: 'Habilitar escaneo QR',
+    example: true,
+    type: Boolean,
+  })
+  qrScanning: boolean;
+
+  @ApiProperty({
+    description: 'Habilitar modo offline',
+    example: true,
+    type: Boolean,
+  })
+  offlineMode: boolean;
+
+  @ApiProperty({
+    description: 'Habilitar programa de referidos',
+    example: true,
+    type: Boolean,
+  })
+  referralProgram: boolean;
+
+  @ApiProperty({
+    description: 'Habilitar recompensas de cumpleaños',
+    example: true,
+    type: Boolean,
+  })
+  birthdayRewards: boolean;
+
   constructor(
     id: number,
     partnerId: number,
@@ -119,6 +147,10 @@ export class GetTenantResponse {
     status: string,
     createdAt: Date,
     updatedAt: Date,
+    qrScanning: boolean,
+    offlineMode: boolean,
+    referralProgram: boolean,
+    birthdayRewards: boolean,
   ) {
     this.id = id;
     this.partnerId = partnerId;
@@ -134,5 +166,9 @@ export class GetTenantResponse {
     this.status = status;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
+    this.qrScanning = qrScanning;
+    this.offlineMode = offlineMode;
+    this.referralProgram = referralProgram;
+    this.birthdayRewards = birthdayRewards;
   }
 }

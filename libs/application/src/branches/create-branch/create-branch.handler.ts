@@ -1,5 +1,5 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { ITenantRepository, IBranchRepository, Branch } from '@libs/domain';
+import { ITenantRepository, IBranchRepository, IPartnerRepository, Branch } from '@libs/domain';
 import { CreateBranchRequest } from './create-branch.request';
 import { CreateBranchResponse } from './create-branch.response';
 
@@ -13,6 +13,8 @@ export class CreateBranchHandler {
     private readonly tenantRepository: ITenantRepository,
     @Inject('IBranchRepository')
     private readonly branchRepository: IBranchRepository,
+    @Inject('IPartnerRepository')
+    private readonly partnerRepository: IPartnerRepository,
   ) {}
 
   async execute(request: CreateBranchRequest): Promise<CreateBranchResponse> {
@@ -36,6 +38,9 @@ export class CreateBranchHandler {
 
     // Guardar la branch (la BD asignará el ID automáticamente)
     const savedBranch = await this.branchRepository.save(branch);
+
+    // Actualizar las estadísticas del partner
+    await this.partnerRepository.updateStats(tenant.partnerId);
 
     // Retornar response DTO
     return new CreateBranchResponse(

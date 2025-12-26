@@ -43,11 +43,13 @@ export class GetPartnerResponse {
   phone: string;
 
   @ApiProperty({
-    description: 'País del partner',
-    example: 'Guatemala',
-    type: String,
+    description: 'ID del país del partner',
+    example: 1,
+    type: Number,
+    nullable: true,
+    required: false,
   })
-  country: string;
+  countryId: number | null;
 
   @ApiProperty({
     description: 'Ciudad del partner',
@@ -205,7 +207,7 @@ export class GetPartnerResponse {
     responsibleName: string,
     email: string,
     phone: string,
-    country: string,
+    countryId: number | null,
     city: string,
     plan: string,
     logo: string | null,
@@ -233,7 +235,7 @@ export class GetPartnerResponse {
     this.responsibleName = responsibleName;
     this.email = email;
     this.phone = phone;
-    this.country = country;
+    this.countryId = countryId;
     this.city = city;
     this.plan = plan;
     this.logo = logo;

@@ -11,6 +11,7 @@ import { PricingPeriodEntity } from './pricing-period.entity';
 import { PricingPromotionEntity } from './pricing-promotion.entity';
 import { PricingFeatureEntity } from './pricing-feature.entity';
 import { LegacyPromotionEntity } from './legacy-promotion.entity';
+import { PricingPlanLimitsEntity } from './pricing-plan-limits.entity';
 
 /**
  * Entidad de persistencia para PricingPlan
@@ -52,7 +53,20 @@ export class PricingPlanEntity {
   @Column('int', { default: 0 })
   order: number;
 
+  @Column('int', { default: 14 })
+  trialDays: number;
+
+  @Column('boolean', { default: false })
+  popular: boolean;
+
   // Relations
+  @OneToOne(() => PricingPlanLimitsEntity, (limits) => limits.pricingPlan, {
+    cascade: true,
+    eager: false,
+    nullable: true,
+  })
+  limits: PricingPlanLimitsEntity | null;
+
   @OneToMany(() => PricingPeriodEntity, (period) => period.pricingPlan, {
     cascade: true,
     eager: false,

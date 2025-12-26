@@ -6,6 +6,17 @@
 // Users Handlers
 export * from './users/create-user/create-user.handler';
 export * from './users/create-user/create-user.request';
+
+// Rewards Handlers
+export * from './rewards/create-reward/create-reward.handler';
+export * from './rewards/create-reward/create-reward.request';
+export * from './rewards/create-reward/create-reward.response';
+export * from './rewards/get-rewards/get-rewards.handler';
+export * from './rewards/get-rewards/get-rewards.request';
+export * from './rewards/get-rewards/get-rewards.response';
+export * from './rewards/get-reward/get-reward.handler';
+export * from './rewards/get-reward/get-reward.request';
+export * from './rewards/get-reward/get-reward.response';
 export * from './users/create-user/create-user.response';
 
 export * from './users/get-user-profile/get-user-profile.handler';
@@ -104,10 +115,47 @@ export * from './partners/get-partners/get-partners.handler';
 export * from './partners/get-partners/get-partners.request';
 export * from './partners/get-partners/get-partners.response';
 
+export * from './partners/update-partner/update-partner.handler';
+export * from './partners/update-partner/update-partner.request';
+export * from './partners/update-partner/update-partner.response';
+
+export * from './partners/delete-partner/delete-partner.handler';
+export * from './partners/delete-partner/delete-partner.request';
+export * from './partners/delete-partner/delete-partner.response';
+
 // Partners DTOs for Swagger
 export * from './partners/dto/partner-subscription-swagger.dto';
 export * from './partners/dto/partner-limits-swagger.dto';
 export * from './partners/dto/partner-stats-swagger.dto';
+
+// Partner Requests Handlers
+export * from './partner-requests/create-partner-request/create-partner-request.handler';
+export * from './partner-requests/create-partner-request/create-partner-request.request';
+export * from './partner-requests/create-partner-request/create-partner-request.response';
+
+export * from './partner-requests/get-partner-request/get-partner-request.handler';
+export * from './partner-requests/get-partner-request/get-partner-request.request';
+export * from './partner-requests/get-partner-request/get-partner-request.response';
+
+export * from './partner-requests/get-partner-requests/get-partner-requests.handler';
+export * from './partner-requests/get-partner-requests/get-partner-requests.request';
+export * from './partner-requests/get-partner-requests/get-partner-requests.response';
+
+export * from './partner-requests/update-partner-request-status/update-partner-request-status.handler';
+export * from './partner-requests/update-partner-request-status/update-partner-request-status.request';
+export * from './partner-requests/update-partner-request-status/update-partner-request-status.response';
+
+export * from './partner-requests/add-partner-request-notes/add-partner-request-notes.handler';
+export * from './partner-requests/add-partner-request-notes/add-partner-request-notes.request';
+export * from './partner-requests/add-partner-request-notes/add-partner-request-notes.response';
+
+export * from './partner-requests/reject-partner-request/reject-partner-request.handler';
+export * from './partner-requests/reject-partner-request/reject-partner-request.request';
+export * from './partner-requests/reject-partner-request/reject-partner-request.response';
+
+export * from './partner-requests/process-partner-request/process-partner-request.handler';
+export * from './partner-requests/process-partner-request/process-partner-request.request';
+export * from './partner-requests/process-partner-request/process-partner-request.response';
 
 // Tenants Handlers
 export * from './tenants/create-tenant/create-tenant.handler';
@@ -118,6 +166,18 @@ export * from './tenants/get-tenant/get-tenant.handler';
 export * from './tenants/get-tenant/get-tenant.request';
 export * from './tenants/get-tenant/get-tenant.response';
 
+export * from './tenants/get-tenants-by-partner/get-tenants-by-partner.handler';
+export * from './tenants/get-tenants-by-partner/get-tenants-by-partner.request';
+export * from './tenants/get-tenants-by-partner/get-tenants-by-partner.response';
+
+export * from './tenants/update-tenant/update-tenant.handler';
+export * from './tenants/update-tenant/update-tenant.request';
+export * from './tenants/update-tenant/update-tenant.response';
+
+export * from './tenants/delete-tenant/delete-tenant.handler';
+export * from './tenants/delete-tenant/delete-tenant.request';
+export * from './tenants/delete-tenant/delete-tenant.response';
+
 // Branches Handlers
 export * from './branches/create-branch/create-branch.handler';
 export * from './branches/create-branch/create-branch.request';
@@ -127,6 +187,18 @@ export * from './branches/get-branch/get-branch.handler';
 export * from './branches/get-branch/get-branch.request';
 export * from './branches/get-branch/get-branch.response';
 
+export * from './branches/get-branches-by-tenant/get-branches-by-tenant.handler';
+export * from './branches/get-branches-by-tenant/get-branches-by-tenant.request';
+export * from './branches/get-branches-by-tenant/get-branches-by-tenant.response';
+
+export * from './branches/update-branch/update-branch.handler';
+export * from './branches/update-branch/update-branch.request';
+export * from './branches/update-branch/update-branch.response';
+
+export * from './branches/delete-branch/delete-branch.handler';
+export * from './branches/delete-branch/delete-branch.request';
+export * from './branches/delete-branch/delete-branch.response';
+
 // Currencies Handlers
 export * from './currencies/get-currencies/get-currencies.handler';
 export * from './currencies/get-currencies/get-currencies.request';
@@ -134,3 +206,38 @@ export * from './currencies/get-currencies/get-currencies.response';
 
 // Currencies DTOs for Swagger
 export * from './currencies/dto/currency-swagger.dto';
+
+// Countries Handlers
+export * from './countries/get-countries/get-countries.handler';
+export * from './countries/get-countries/get-countries.request';
+export * from './countries/get-countries/get-countries.response';
+
+// Countries DTOs for Swagger
+export * from './countries/dto/country-swagger.dto';
+
+// Rewards Handlers
+export * from './rewards/create-reward/create-reward.handler';
+export * from './rewards/create-reward/create-reward.request';
+export * from './rewards/create-reward/create-reward.response';
+export * from './rewards/get-rewards/get-rewards.handler';
+export * from './rewards/get-rewards/get-rewards.request';
+export * from './rewards/get-rewards/get-rewards.response';
+export * from './rewards/get-reward/get-reward.handler';
+export * from './rewards/get-reward/get-reward.request';
+export * from './rewards/get-reward/get-reward.response';
+
+// Transactions Handlers
+export * from './transactions/get-transactions/get-transactions.handler';
+export * from './transactions/get-transactions/get-transactions.request';
+export * from './transactions/get-transactions/get-transactions.response';
+
+// Notifications Handlers
+export * from './notifications/get-notifications/get-notifications.handler';
+export * from './notifications/get-notifications/get-notifications.request';
+export * from './notifications/get-notifications/get-notifications.response';
+export * from './notifications/mark-notification-read/mark-notification-read.handler';
+export * from './notifications/mark-notification-read/mark-notification-read.request';
+export * from './notifications/mark-notification-read/mark-notification-read.response';
+export * from './notifications/mark-all-notifications-read/mark-all-notifications-read.handler';
+export * from './notifications/mark-all-notifications-read/mark-all-notifications-read.request';
+export * from './notifications/mark-all-notifications-read/mark-all-notifications-read.response';

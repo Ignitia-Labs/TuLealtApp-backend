@@ -3,6 +3,7 @@ import { BaseSeed } from '../base/base-seed';
 import { AdminUserSeed } from '../shared/admin-user.seed';
 import { PricingPlanSeed } from '../shared/pricing-plan.seed';
 import { CurrencySeed } from '../shared/currency.seed';
+import { CountrySeed } from '../shared/country.seed';
 
 /**
  * Seed específica para el contexto de Admin API
@@ -14,6 +15,7 @@ export class AdminSeed extends BaseSeed {
     private readonly adminUserSeed: AdminUserSeed,
     private readonly pricingPlanSeed: PricingPlanSeed,
     private readonly currencySeed: CurrencySeed,
+    private readonly countrySeed: CountrySeed,
   ) {
     super();
   }
@@ -25,7 +27,10 @@ export class AdminSeed extends BaseSeed {
   async run(): Promise<void> {
     this.log('Ejecutando seeds para Admin API...');
 
-    // Ejecutar seed de monedas primero (necesaria para partners y tenants)
+    // Ejecutar seed de países PRIMERO (necesaria para asociar con monedas)
+    await this.countrySeed.run();
+
+    // Ejecutar seed de monedas después (asociará cada moneda con su país)
     await this.currencySeed.run();
 
     // Ejecutar seed de usuario admin

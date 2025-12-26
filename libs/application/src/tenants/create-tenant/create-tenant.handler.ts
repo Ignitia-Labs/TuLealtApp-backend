@@ -57,6 +57,9 @@ export class CreateTenantHandler {
     featuresEntity.tenantId = savedTenant.id;
     await this.featuresRepository.save(featuresEntity);
 
+    // Actualizar las estadísticas del partner
+    await this.partnerRepository.updateStats(savedTenant.partnerId);
+
     // Retornar response DTO
     return new CreateTenantResponse(
       savedTenant.id,

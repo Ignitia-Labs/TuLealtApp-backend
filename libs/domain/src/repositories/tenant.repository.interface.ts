@@ -29,4 +29,9 @@ export interface ITenantRepository {
    * Obtiene todos los tenants
    */
   findAll(): Promise<Tenant[]>;
+
+  /**
+   * Elimina un tenant por su ID
+   */
+  delete(id: number): Promise<void>;
 }
