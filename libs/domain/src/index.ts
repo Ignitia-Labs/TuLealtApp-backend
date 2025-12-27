@@ -33,6 +33,7 @@ export * from './entities/subscription-alert.entity';
 export * from './entities/coupon.entity';
 export * from './entities/plan-change.entity';
 export * from './entities/partner-request.entity';
+export * from './entities/catalog.entity';
 
 // Repository Interfaces
 export * from './repositories/user.repository.interface';
@@ -58,3 +59,4 @@ export * from './repositories/subscription-alert.repository.interface';
 export * from './repositories/coupon.repository.interface';
 export * from './repositories/plan-change.repository.interface';
 export * from './repositories/partner-request.repository.interface';
+export * from './repositories/catalog.repository.interface';

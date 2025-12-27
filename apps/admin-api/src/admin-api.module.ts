@@ -14,6 +14,7 @@ import { PartnerRequestsController } from './controllers/partner-requests.contro
 import { SubscriptionsController } from './controllers/subscriptions.controller';
 import { SubscriptionUsageController } from './controllers/subscription-usage.controller';
 import { PartnerLimitsController } from './controllers/partner-limits.controller';
+import { CatalogsController } from './controllers/catalogs.controller';
 import {
   CreateUserHandler,
   GetUserProfileHandler,
@@ -75,6 +76,11 @@ import {
   UpdateSubscriptionUsageHandler,
   DeleteSubscriptionUsageHandler,
   CreateSubscriptionAlertHandler,
+  GetCatalogsHandler,
+  GetCatalogHandler,
+  CreateCatalogHandler,
+  UpdateCatalogHandler,
+  DeleteCatalogHandler,
 } from '@libs/application';
 import { InfrastructureModule, StorageModule } from '@libs/infrastructure';
 import { HealthController } from '@libs/shared';
@@ -102,6 +108,7 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     SubscriptionsController,
     SubscriptionUsageController,
     PartnerLimitsController,
+    CatalogsController,
     HealthController,
   ],
   providers: [
@@ -179,6 +186,12 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     DeleteSubscriptionUsageHandler,
     // Handlers de aplicación - Subscription Alerts
     CreateSubscriptionAlertHandler,
+    // Handlers de aplicación - Catalogs
+    GetCatalogsHandler,
+    GetCatalogHandler,
+    CreateCatalogHandler,
+    UpdateCatalogHandler,
+    DeleteCatalogHandler,
   ],
 })
 export class AdminApiModule {}

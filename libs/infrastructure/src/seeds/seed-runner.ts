@@ -5,6 +5,7 @@ import { SeedsModule } from './seeds.module';
 import { AdminUserSeed } from './shared/admin-user.seed';
 import { CurrencySeed } from './shared/currency.seed';
 import { CountrySeed } from './shared/country.seed';
+import { CatalogSeed } from './shared/catalog.seed';
 import { AdminSeed } from './admin/admin.seed';
 import { PartnerSeed } from './partner/partner.seed';
 import { CustomerSeed } from './customer/customer.seed';
@@ -36,6 +37,7 @@ export enum SeedContext {
   CUSTOMER = 'customer',
   COUNTRY = 'country',
   CURRENCY = 'currency',
+  CATALOG = 'catalog',
 }
 
 /**
@@ -48,6 +50,7 @@ export enum SeedContext {
  * - ts-node -r tsconfig-paths/register libs/infrastructure/src/seeds/seed-runner.ts customer
  * - ts-node -r tsconfig-paths/register libs/infrastructure/src/seeds/seed-runner.ts country
  * - ts-node -r tsconfig-paths/register libs/infrastructure/src/seeds/seed-runner.ts currency
+ * - ts-node -r tsconfig-paths/register libs/infrastructure/src/seeds/seed-runner.ts catalog
  */
 async function bootstrap() {
   const context = (process.argv[2] || SeedContext.ALL) as SeedContext;
@@ -69,6 +72,7 @@ async function bootstrap() {
     const adminUserSeed = app.get(AdminUserSeed);
     const currencySeed = app.get(CurrencySeed);
     const countrySeed = app.get(CountrySeed);
+    const catalogSeed = app.get(CatalogSeed);
     const adminSeed = app.get(AdminSeed);
     const partnerSeed = app.get(PartnerSeed);
     const customerSeed = app.get(CustomerSeed);
@@ -93,6 +97,10 @@ async function bootstrap() {
 
       case SeedContext.CURRENCY:
         await currencySeed.run();
+        break;
+
+      case SeedContext.CATALOG:
+        await catalogSeed.run();
         break;
 
       case SeedContext.ALL:

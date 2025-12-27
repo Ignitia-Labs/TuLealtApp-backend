@@ -4,6 +4,7 @@ import { AdminUserSeed } from '../shared/admin-user.seed';
 import { PricingPlanSeed } from '../shared/pricing-plan.seed';
 import { CurrencySeed } from '../shared/currency.seed';
 import { CountrySeed } from '../shared/country.seed';
+import { CatalogSeed } from '../shared/catalog.seed';
 
 /**
  * Seed específica para el contexto de Admin API
@@ -16,6 +17,7 @@ export class AdminSeed extends BaseSeed {
     private readonly pricingPlanSeed: PricingPlanSeed,
     private readonly currencySeed: CurrencySeed,
     private readonly countrySeed: CountrySeed,
+    private readonly catalogSeed: CatalogSeed,
   ) {
     super();
   }
@@ -38,6 +40,9 @@ export class AdminSeed extends BaseSeed {
 
     // Ejecutar seed de planes de precios
     await this.pricingPlanSeed.run();
+
+    // Ejecutar seed de catálogos (categorías, tipos de recompensas, métodos de pago)
+    await this.catalogSeed.run();
 
     // Aquí se pueden agregar más seeds específicas de admin en el futuro
     // Ejemplo: permisos, roles, configuraciones, etc.

@@ -293,3 +293,23 @@ export * from './subscription-usage/delete-subscription-usage/delete-subscriptio
 export * from './subscription-alerts/create-subscription-alert/create-subscription-alert.handler';
 export * from './subscription-alerts/create-subscription-alert/create-subscription-alert.request';
 export * from './subscription-alerts/create-subscription-alert/create-subscription-alert.response';
+
+// Catalogs Handlers
+export * from './catalogs/get-catalogs/get-catalogs.handler';
+export * from './catalogs/get-catalogs/get-catalogs.request';
+export * from './catalogs/get-catalogs/get-catalogs.response';
+export * from './catalogs/get-catalog/get-catalog.handler';
+export * from './catalogs/get-catalog/get-catalog.request';
+export * from './catalogs/get-catalog/get-catalog.response';
+export * from './catalogs/create-catalog/create-catalog.handler';
+export * from './catalogs/create-catalog/create-catalog.request';
+export * from './catalogs/create-catalog/create-catalog.response';
+export * from './catalogs/update-catalog/update-catalog.handler';
+export * from './catalogs/update-catalog/update-catalog.request';
+export * from './catalogs/update-catalog/update-catalog.response';
+export * from './catalogs/delete-catalog/delete-catalog.handler';
+export * from './catalogs/delete-catalog/delete-catalog.request';
+export * from './catalogs/delete-catalog/delete-catalog.response';
+
+// Catalogs DTOs for Swagger
+export * from './catalogs/dto/catalog-swagger.dto';

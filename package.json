@@ -45,6 +45,7 @@
     "seed:customer": "npm run seed customer",
     "seed:country": "npm run seed country",
     "seed:currency": "npm run seed currency",
+    "seed:catalog": "npm run seed catalog",
     "migration:generate": "typeorm-ts-node-commonjs migration:generate -d libs/infrastructure/src/persistence/data-source.ts",
     "migration:create": "typeorm-ts-node-commonjs migration:create",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d libs/infrastructure/src/persistence/data-source.ts",

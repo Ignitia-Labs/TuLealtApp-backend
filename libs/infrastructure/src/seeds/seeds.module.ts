@@ -4,6 +4,7 @@ import { AdminUserSeed } from './shared/admin-user.seed';
 import { PricingPlanSeed } from './shared/pricing-plan.seed';
 import { CurrencySeed } from './shared/currency.seed';
 import { CountrySeed } from './shared/country.seed';
+import { CatalogSeed } from './shared/catalog.seed';
 import { AdminSeed } from './admin/admin.seed';
 import { PartnerSeed } from './partner/partner.seed';
 import { CustomerSeed } from './customer/customer.seed';
@@ -24,11 +25,12 @@ import { CustomerSeed } from './customer/customer.seed';
     PricingPlanSeed,
     CurrencySeed,
     CountrySeed,
+    CatalogSeed,
     // Seeds por contexto
     AdminSeed,
     PartnerSeed,
     CustomerSeed,
   ],
-  exports: [AdminUserSeed, PricingPlanSeed, CurrencySeed, CountrySeed, AdminSeed, PartnerSeed, CustomerSeed],
+  exports: [AdminUserSeed, PricingPlanSeed, CurrencySeed, CountrySeed, CatalogSeed, AdminSeed, PartnerSeed, CustomerSeed],
 })
 export class SeedsModule {}

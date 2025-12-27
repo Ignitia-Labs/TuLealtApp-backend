@@ -34,3 +34,6 @@ export * from './decorators/current-user.decorator';
 
 // Pricing
 export * from './pricing';
+
+// Utils
+export * from './utils/slug.util';

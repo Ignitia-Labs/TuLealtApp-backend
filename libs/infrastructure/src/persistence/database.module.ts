@@ -37,6 +37,7 @@ import { CouponEntity } from './entities/coupon.entity';
 import { PlanChangeEntity } from './entities/plan-change.entity';
 import { PartnerRequestEntity } from './entities/partner-request.entity';
 import { PartnerArchiveEntity } from './entities/partner-archive.entity';
+import { CatalogEntity } from './entities/catalog.entity';
 import { UserRepository } from './repositories/user.repository';
 import { PricingPlanRepository } from './repositories/pricing-plan.repository';
 import { RateExchangeRepository } from './repositories/rate-exchange.repository';
@@ -61,6 +62,7 @@ import { CouponRepository } from './repositories/coupon.repository';
 import { PlanChangeRepository } from './repositories/plan-change.repository';
 import { PartnerRequestRepository } from './repositories/partner-request.repository';
 import { PartnerArchiveRepository } from './repositories/partner-archive.repository';
+import { CatalogRepository } from './repositories/catalog.repository';
 import {
   IUserRepository,
   IPricingPlanRepository,
@@ -83,9 +85,10 @@ import {
   ISubscriptionEventRepository,
   ISubscriptionAlertRepository,
   ICouponRepository,
-  IPlanChangeRepository,
-  IPartnerRequestRepository,
-} from '@libs/domain';
+      IPlanChangeRepository,
+      IPartnerRequestRepository,
+      ICatalogRepository,
+    } from '@libs/domain';
 
 /**
  * Módulo de base de datos
@@ -132,6 +135,7 @@ import {
       PlanChangeEntity,
       PartnerRequestEntity,
       PartnerArchiveEntity,
+      CatalogEntity,
     ]),
   ],
   providers: [
@@ -251,6 +255,11 @@ import {
       useClass: PartnerRequestRepository,
     },
     PartnerArchiveRepository,
+    CatalogRepository,
+    {
+      provide: 'ICatalogRepository',
+      useClass: CatalogRepository,
+    },
   ],
   exports: [
     'IUserRepository',
@@ -276,6 +285,7 @@ import {
     'ICouponRepository',
     'IPlanChangeRepository',
     'IPartnerRequestRepository',
+    'ICatalogRepository',
     UserRepository,
     PricingPlanRepository,
     RateExchangeRepository,
@@ -300,6 +310,7 @@ import {
     PlanChangeRepository,
     PartnerRequestRepository,
     PartnerArchiveRepository,
+    CatalogRepository,
     TypeOrmModule,
   ],
 })
