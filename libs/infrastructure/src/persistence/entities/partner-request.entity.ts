@@ -9,6 +9,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { CountryEntity } from './country.entity';
+import { CurrencyEntity } from './currency.entity';
 
 /**
  * Entidad de persistencia para PartnerRequest
@@ -56,6 +57,12 @@ export class PartnerRequestEntity {
   @Column('varchar', { length: 50 })
   plan: string;
 
+  @Column('int', { nullable: true })
+  planId: number | null;
+
+  @Column('varchar', { length: 20, nullable: true })
+  billingFrequency: 'monthly' | 'quarterly' | 'semiannual' | 'annual' | null;
+
   @Column('text', { nullable: true })
   logo: string | null;
 
@@ -74,8 +81,16 @@ export class PartnerRequestEntity {
   @Column('varchar', { length: 255 })
   rewardType: string;
 
-  @Column('varchar', { length: 50 })
-  currencyId: string;
+  @ManyToOne(() => CurrencyEntity, {
+    onDelete: 'RESTRICT',
+    onUpdate: 'CASCADE',
+    nullable: false,
+  })
+  @JoinColumn({ name: 'currencyId' })
+  currency: CurrencyEntity;
+
+  @Column('int')
+  currencyId: number;
 
   @Column('varchar', { length: 255 })
   businessName: string;
@@ -107,4 +122,3 @@ export class PartnerRequestEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

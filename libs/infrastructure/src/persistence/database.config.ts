@@ -19,10 +19,13 @@ if (process.env.NODE_ENV !== 'production') {
  * Prioridad: variables de entorno del sistema > .env.local > valores por defecto
  */
 export const getDatabaseConfig = (): TypeOrmModuleOptions => {
-  // Activar synchronize cuando NO esté en producción
-  // Esto permite crear tablas automáticamente en desarrollo y al ejecutar seeds
   const isProduction = process.env.NODE_ENV === 'production';
-  const synchronize = !isProduction;
+
+  // IMPORTANTE: Desactivar synchronize cuando se usan migraciones
+  // Las migraciones son la fuente de verdad para el esquema de la base de datos
+  // synchronize solo debe usarse en desarrollo TEMPORAL cuando NO hay migraciones
+  // Si tienes migraciones ejecutadas, synchronize debe estar en false para evitar conflictos
+  const synchronize = process.env.DB_SYNCHRONIZE === 'true' && !isProduction;
 
   return {
     type: 'mariadb',
@@ -32,7 +35,7 @@ export const getDatabaseConfig = (): TypeOrmModuleOptions => {
     password: process.env.DB_PASSWORD || 'tulealtapp',
     database: process.env.DB_NAME || 'tulealtapp',
     entities: [UserEntity],
-    synchronize, // Crea/actualiza tablas automáticamente en desarrollo
+    synchronize, // Por defecto false - solo activar explícitamente con DB_SYNCHRONIZE=true
     logging: !isProduction, // Logging en desarrollo
     retryAttempts: 3,
     retryDelay: 3000,

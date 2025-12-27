@@ -10,8 +10,17 @@ import {
   HttpCode,
   HttpStatus,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBody,
+  ApiQuery,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import {
   CreateBranchHandler,
   CreateBranchRequest,
@@ -35,6 +44,7 @@ import {
   UnauthorizedErrorResponseDto,
   ForbiddenErrorResponseDto,
   InternalServerErrorResponseDto,
+  JwtAuthGuard,
 } from '@libs/shared';
 
 /**
@@ -169,6 +179,8 @@ export class BranchesController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Crear una nueva branch',
     description:
@@ -233,6 +245,8 @@ export class BranchesController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener branch por ID',
     description: 'Obtiene la información completa de una branch por su ID',
@@ -356,7 +370,10 @@ export class BranchesController {
     type: BadRequestErrorResponseDto,
     example: {
       statusCode: 400,
-      message: ['name must be longer than or equal to 2 characters', 'status must be one of the following values: active, inactive, closed'],
+      message: [
+        'name must be longer than or equal to 2 characters',
+        'status must be one of the following values: active, inactive, closed',
+      ],
       error: 'Bad Request',
     },
   })

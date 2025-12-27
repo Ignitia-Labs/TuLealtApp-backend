@@ -88,9 +88,6 @@ export class GetPartnersHandler {
           }
         : null;
 
-      // Formatear currencyId como 'currency-{id}'
-      const formattedCurrencyId = `currency-${partnerEntity.currencyId}`;
-
       return new GetPartnerResponse(
         partner.id,
         partner.name,
@@ -106,7 +103,7 @@ export class GetPartnersHandler {
         partner.website,
         partner.socialMedia,
         partner.rewardType,
-        formattedCurrencyId,
+        partner.currencyId || 0,
         partner.businessName,
         partner.taxId,
         partner.fiscalAddress,

@@ -1,5 +1,13 @@
 import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
-import { IPartnerRequestRepository, IPartnerRepository } from '@libs/domain';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import {
+  IPartnerRequestRepository,
+  IPartnerRepository,
+  ISubscriptionEventRepository,
+  SubscriptionEvent,
+} from '@libs/domain';
+import { PartnerSubscriptionEntity } from '@libs/infrastructure';
 import { CreatePartnerHandler } from '../../partners/create-partner/create-partner.handler';
 import { CreatePartnerRequest } from '../../partners/create-partner/create-partner.request';
 import { ProcessPartnerRequestRequest } from './process-partner-request.request';
@@ -15,6 +23,10 @@ export class ProcessPartnerRequestHandler {
     private readonly partnerRequestRepository: IPartnerRequestRepository,
     @Inject('IPartnerRepository')
     private readonly partnerRepository: IPartnerRepository,
+    @Inject('ISubscriptionEventRepository')
+    private readonly subscriptionEventRepository: ISubscriptionEventRepository,
+    @InjectRepository(PartnerSubscriptionEntity)
+    private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
     private readonly createPartnerHandler: CreatePartnerHandler,
   ) {}
 
@@ -64,6 +76,7 @@ export class ProcessPartnerRequestHandler {
     createPartnerRequest.website = partnerRequest.website;
     createPartnerRequest.socialMedia = partnerRequest.socialMedia;
     createPartnerRequest.rewardType = partnerRequest.rewardType;
+    // currencyId es number tanto en dominio como en request
     createPartnerRequest.currencyId = partnerRequest.currencyId;
     createPartnerRequest.businessName = partnerRequest.businessName;
     createPartnerRequest.taxId = partnerRequest.taxId;
@@ -71,8 +84,13 @@ export class ProcessPartnerRequestHandler {
     createPartnerRequest.paymentMethod = partnerRequest.paymentMethod;
     createPartnerRequest.billingEmail = partnerRequest.billingEmail;
     createPartnerRequest.domain = domain;
+
+    // Usar planId del partnerRequest si está disponible, sino usar el del request o generar uno basado en el plan
+    // subscriptionPlanId debe ser un string (puede ser el ID convertido a string o un slug)
     createPartnerRequest.subscriptionPlanId =
-      request.subscriptionPlanId || `plan-${partnerRequest.plan}`;
+      request.subscriptionPlanId ||
+      (partnerRequest.planId ? `plan-${partnerRequest.planId}` : `plan-${partnerRequest.plan}`);
+
     createPartnerRequest.subscriptionStartDate =
       request.subscriptionStartDate || new Date().toISOString();
     createPartnerRequest.subscriptionRenewalDate =
@@ -81,6 +99,25 @@ export class ProcessPartnerRequestHandler {
     createPartnerRequest.subscriptionLastPaymentAmount = request.subscriptionLastPaymentAmount || 0;
     createPartnerRequest.subscriptionAutoRenew =
       request.subscriptionAutoRenew !== undefined ? request.subscriptionAutoRenew : true;
+    // Usar billingFrequency del partnerRequest si está disponible, sino usar el del request o 'monthly' por defecto
+    createPartnerRequest.subscriptionBillingFrequency =
+      request.subscriptionBillingFrequency || partnerRequest.billingFrequency || 'monthly';
+
+    // Configurar valores de IVA (si se proporcionan en el request, usarlos; sino usar valores por defecto)
+    createPartnerRequest.subscriptionIncludeTax = request.subscriptionIncludeTax ?? false;
+    createPartnerRequest.subscriptionTaxPercent = request.subscriptionTaxPercent ?? null;
+
+    // Si se proporcionan valores directos de precio, usarlos
+    if (request.subscriptionBasePrice !== undefined) {
+      createPartnerRequest.subscriptionBasePrice = request.subscriptionBasePrice;
+    }
+    if (request.subscriptionTaxAmount !== undefined) {
+      createPartnerRequest.subscriptionTaxAmount = request.subscriptionTaxAmount;
+    }
+    if (request.subscriptionTotalPrice !== undefined) {
+      createPartnerRequest.subscriptionTotalPrice = request.subscriptionTotalPrice;
+    }
+
     createPartnerRequest.limitsMaxTenants = request.limitsMaxTenants || 5;
     createPartnerRequest.limitsMaxBranches = request.limitsMaxBranches || 20;
     createPartnerRequest.limitsMaxCustomers = request.limitsMaxCustomers || 5000;
@@ -88,6 +125,35 @@ export class ProcessPartnerRequestHandler {
 
     // Crear el partner
     const createPartnerResponse = await this.createPartnerHandler.execute(createPartnerRequest);
+
+    // Obtener la suscripción creada para el partner
+    const subscriptionEntity = await this.subscriptionRepository.findOne({
+      where: { partnerId: createPartnerResponse.id },
+      order: { createdAt: 'DESC' },
+    });
+
+    // Registrar evento de creación de suscripción si existe
+    if (subscriptionEntity) {
+      const subscriptionEvent = SubscriptionEvent.create(
+        subscriptionEntity.id,
+        createPartnerResponse.id,
+        'created',
+        'Suscripción creada',
+        `Suscripción creada para el partner ${createPartnerResponse.name} con plan ${createPartnerRequest.subscriptionPlanId}`,
+        new Date(),
+        null, // paymentId
+        null, // invoiceId
+        {
+          partnerRequestId: partnerRequest.id,
+          planId: createPartnerRequest.subscriptionPlanId,
+          planType: partnerRequest.plan,
+          billingFrequency: createPartnerRequest.subscriptionBillingFrequency || 'monthly',
+          billingAmount: createPartnerRequest.subscriptionLastPaymentAmount || 0,
+        },
+      );
+
+      await this.subscriptionEventRepository.save(subscriptionEvent);
+    }
 
     // Marcar la solicitud como enrolled
     const enrolledRequest = partnerRequest.markEnrolled();

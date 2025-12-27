@@ -27,7 +27,7 @@ export class PartnerMapper {
       persistenceEntity.plan || '',
       persistenceEntity.category || '',
       persistenceEntity.rewardType || '',
-      persistenceEntity.currencyId ? persistenceEntity.currencyId.toString() : '0',
+      persistenceEntity.currencyId || 0,
       persistenceEntity.businessName || '',
       persistenceEntity.taxId || '',
       persistenceEntity.fiscalAddress || '',
@@ -64,7 +64,8 @@ export class PartnerMapper {
     entity.website = domainEntity.website;
     entity.socialMedia = domainEntity.socialMedia;
     entity.rewardType = domainEntity.rewardType;
-    entity.currencyId = parseInt(domainEntity.currencyId, 10) || 0;
+    // currencyId es INTEGER tanto en dominio como en BD
+    entity.currencyId = domainEntity.currencyId || 0;
     entity.businessName = domainEntity.businessName;
     entity.taxId = domainEntity.taxId;
     entity.fiscalAddress = domainEntity.fiscalAddress;
@@ -96,6 +97,11 @@ export class PartnerMapper {
       persistenceEntity.nextBillingAmount,
       persistenceEntity.currentPeriodStart,
       persistenceEntity.currentPeriodEnd,
+      persistenceEntity.includeTax ?? false,
+      persistenceEntity.taxPercent ?? null,
+      persistenceEntity.basePrice,
+      persistenceEntity.taxAmount,
+      persistenceEntity.totalPrice,
       persistenceEntity.status,
       persistenceEntity.trialEndDate,
       persistenceEntity.pausedAt,
@@ -130,6 +136,11 @@ export class PartnerMapper {
     entity.status = domainEntity.status;
     entity.billingFrequency = domainEntity.billingFrequency;
     entity.billingAmount = domainEntity.billingAmount;
+    entity.includeTax = domainEntity.includeTax;
+    entity.taxPercent = domainEntity.taxPercent;
+    entity.basePrice = domainEntity.basePrice;
+    entity.taxAmount = domainEntity.taxAmount;
+    entity.totalPrice = domainEntity.totalPrice;
     entity.currency = domainEntity.currency;
     entity.nextBillingDate = domainEntity.nextBillingDate;
     entity.nextBillingAmount = domainEntity.nextBillingAmount;

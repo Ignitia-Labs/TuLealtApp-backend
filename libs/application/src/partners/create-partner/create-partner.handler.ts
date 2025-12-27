@@ -1,6 +1,7 @@
-import { Injectable, Inject, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, BadRequestException, NotFoundException } from '@nestjs/common';
 import {
   IPartnerRepository,
+  ICurrencyRepository,
   Partner,
   PartnerSubscription,
   PartnerLimits,
@@ -26,6 +27,8 @@ export class CreatePartnerHandler {
   constructor(
     @Inject('IPartnerRepository')
     private readonly partnerRepository: IPartnerRepository,
+    @Inject('ICurrencyRepository')
+    private readonly currencyRepository: ICurrencyRepository,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
     @InjectRepository(PartnerLimitsEntity)
@@ -83,12 +86,54 @@ export class CreatePartnerHandler {
     };
     const planType = planTypeMap[savedPartner.plan] || 'conecta';
 
+    // Obtener la currency del partner
+    // currencyId es un número directamente
+    const currencyIdNumber = request.currencyId;
+
+    // Buscar la currency en la base de datos
+    const currency = await this.currencyRepository.findById(currencyIdNumber);
+    if (!currency) {
+      throw new NotFoundException(`Currency with ID ${currencyIdNumber} not found`);
+    }
+
+    // Usar el código de la currency (ej: 'GTQ', 'USD')
+    const currencyCode = currency.code;
+
     // Calcular fechas y montos por defecto
     const startDate = new Date(request.subscriptionStartDate);
     const renewalDate = new Date(request.subscriptionRenewalDate);
-    const billingFrequency = 'monthly'; // Por defecto mensual
+    const billingFrequency = request.subscriptionBillingFrequency || 'monthly'; // Usar el del request o 'monthly' por defecto
     const billingAmount = request.subscriptionLastPaymentAmount || 0;
-    const currency = 'USD'; // Por defecto USD
+
+    // Calcular valores de IVA
+    // Si se proporcionan directamente basePrice, taxAmount y totalPrice, usarlos
+    // Si no, calcularlos basándose en billingAmount, includeTax y taxPercent
+    let basePrice: number;
+    let taxAmount: number;
+    let totalPrice: number;
+    const includeTax = request.subscriptionIncludeTax ?? false;
+    const taxPercent = request.subscriptionTaxPercent ?? null;
+
+    if (
+      request.subscriptionBasePrice !== undefined &&
+      request.subscriptionTaxAmount !== undefined &&
+      request.subscriptionTotalPrice !== undefined
+    ) {
+      // Usar valores proporcionados directamente
+      basePrice = request.subscriptionBasePrice;
+      taxAmount = request.subscriptionTaxAmount;
+      totalPrice = request.subscriptionTotalPrice;
+    } else {
+      // Calcular valores basándose en billingAmount
+      basePrice = billingAmount;
+      taxAmount = 0;
+      totalPrice = basePrice;
+
+      if (includeTax && taxPercent !== null && taxPercent > 0) {
+        taxAmount = basePrice * (taxPercent / 100);
+        totalPrice = basePrice + taxAmount;
+      }
+    }
 
     // Crear y guardar la suscripción
     const subscription = PartnerSubscription.create(
@@ -99,11 +144,16 @@ export class CreatePartnerHandler {
       renewalDate,
       billingFrequency,
       billingAmount,
-      currency,
+      currencyCode,
       renewalDate, // nextBillingDate = renewalDate por defecto
-      billingAmount, // nextBillingAmount = billingAmount por defecto
+      totalPrice, // nextBillingAmount = totalPrice (incluye IVA si aplica)
       startDate, // currentPeriodStart = startDate por defecto
       renewalDate, // currentPeriodEnd = renewalDate por defecto
+      includeTax,
+      taxPercent,
+      basePrice,
+      taxAmount,
+      totalPrice,
       'active',
       null, // trialEndDate
       null, // pausedAt

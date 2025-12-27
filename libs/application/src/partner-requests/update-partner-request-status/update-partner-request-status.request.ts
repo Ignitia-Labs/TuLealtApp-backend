@@ -24,7 +24,8 @@ export class UpdatePartnerRequestStatusRequest {
   status: 'pending' | 'in-progress' | 'enrolled' | 'rejected';
 
   @ApiProperty({
-    description: 'ID del usuario que asigna la solicitud (requerido si status es in-progress)',
+    description:
+      'ID del usuario asignado a la solicitud (opcional, solo para actualizar la asignación durante el cambio de estado)',
     example: 1,
     type: Number,
     required: false,

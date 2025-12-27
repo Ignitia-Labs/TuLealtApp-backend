@@ -8,6 +8,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { PartnerSubscriptionEntity } from './partner-subscription.entity';
 import { PartnerLimitsEntity } from './partner-limits.entity';
@@ -21,6 +22,8 @@ import { CountryEntity } from './country.entity';
  * Mapea la entidad de dominio Partner a la tabla de base de datos
  */
 @Entity('partners')
+@Index('IDX_PARTNERS_EMAIL', ['email'])
+@Index('IDX_PARTNERS_DOMAIN', ['domain'])
 export class PartnerEntity {
   @PrimaryGeneratedColumn()
   id: number;

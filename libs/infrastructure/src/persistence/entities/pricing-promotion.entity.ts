@@ -6,6 +6,7 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { PricingPlanEntity } from './pricing-plan.entity';
 import { BillingPeriod } from '@libs/domain';
@@ -15,6 +16,7 @@ import { BillingPeriod } from '@libs/domain';
  * Almacena las promociones por período de facturación de un plan
  */
 @Entity('pricing_promotions')
+@Index('IDX_PRICING_PROMOTIONS_PLAN_ID', ['pricingPlanId'])
 export class PricingPromotionEntity {
   @PrimaryGeneratedColumn()
   id: number;

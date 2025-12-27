@@ -6,6 +6,7 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { TenantEntity } from './tenant.entity';
 
@@ -14,6 +15,7 @@ import { TenantEntity } from './tenant.entity';
  * Mapea la entidad de dominio Branch a la tabla de base de datos
  */
 @Entity('branches')
+@Index('IDX_BRANCHES_TENANT_ID', ['tenantId'])
 export class BranchEntity {
   @PrimaryGeneratedColumn()
   id: number;

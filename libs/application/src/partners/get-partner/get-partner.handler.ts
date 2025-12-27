@@ -182,11 +182,6 @@ export class GetPartnerHandler {
         }
       }
 
-      // Formatear currencyId como 'currency-{id}'
-      const formattedCurrencyId = partnerEntity.currencyId
-        ? `currency-${partnerEntity.currencyId}`
-        : 'currency-0';
-
       console.log(`[GetPartnerHandler] Creando GetPartnerResponse para partner ID: ${partner.id}`);
       console.log(`[GetPartnerHandler] Partner createdAt:`, partner.createdAt);
       console.log(`[GetPartnerHandler] Partner updatedAt:`, partner.updatedAt);
@@ -207,7 +202,7 @@ export class GetPartnerHandler {
           partner.website || null,
           partner.socialMedia || null,
           partner.rewardType || '',
-          formattedCurrencyId,
+          partner.currencyId || 0,
           partner.businessName || '',
           partner.taxId || '',
           partner.fiscalAddress || '',

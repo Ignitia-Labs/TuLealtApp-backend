@@ -519,71 +519,119 @@ export class CreatePartnersTenantsBranches1734567890000 implements MigrationInte
       true,
     );
 
-    // Crear foreign keys para partner_subscriptions
-    await queryRunner.createForeignKey(
-      'partner_subscriptions',
-      new TableForeignKey({
-        columnNames: ['partnerId'],
-        referencedColumnNames: ['id'],
-        referencedTableName: 'partners',
-        onDelete: 'CASCADE',
-      }),
-    );
+    // Crear foreign keys para partner_subscriptions (solo si no existe)
+    const partnerSubscriptionsTable = await queryRunner.getTable('partner_subscriptions');
+    if (partnerSubscriptionsTable) {
+      const existingFk = partnerSubscriptionsTable.foreignKeys.find(
+        (fk) => fk.columnNames.indexOf('partnerId') !== -1,
+      );
+      if (!existingFk) {
+        await queryRunner.createForeignKey(
+          'partner_subscriptions',
+          new TableForeignKey({
+            columnNames: ['partnerId'],
+            referencedColumnNames: ['id'],
+            referencedTableName: 'partners',
+            onDelete: 'CASCADE',
+          }),
+        );
+      }
+    }
 
-    // Crear foreign keys para partner_limits
-    await queryRunner.createForeignKey(
-      'partner_limits',
-      new TableForeignKey({
-        columnNames: ['partnerId'],
-        referencedColumnNames: ['id'],
-        referencedTableName: 'partners',
-        onDelete: 'CASCADE',
-      }),
-    );
+    // Crear foreign keys para partner_limits (solo si no existe)
+    const partnerLimitsTable = await queryRunner.getTable('partner_limits');
+    if (partnerLimitsTable) {
+      const existingFk = partnerLimitsTable.foreignKeys.find(
+        (fk) => fk.columnNames.indexOf('partnerId') !== -1,
+      );
+      if (!existingFk) {
+        await queryRunner.createForeignKey(
+          'partner_limits',
+          new TableForeignKey({
+            columnNames: ['partnerId'],
+            referencedColumnNames: ['id'],
+            referencedTableName: 'partners',
+            onDelete: 'CASCADE',
+          }),
+        );
+      }
+    }
 
-    // Crear foreign keys para partner_stats
-    await queryRunner.createForeignKey(
-      'partner_stats',
-      new TableForeignKey({
-        columnNames: ['partnerId'],
-        referencedColumnNames: ['id'],
-        referencedTableName: 'partners',
-        onDelete: 'CASCADE',
-      }),
-    );
+    // Crear foreign keys para partner_stats (solo si no existe)
+    const partnerStatsTable = await queryRunner.getTable('partner_stats');
+    if (partnerStatsTable) {
+      const existingFk = partnerStatsTable.foreignKeys.find(
+        (fk) => fk.columnNames.indexOf('partnerId') !== -1,
+      );
+      if (!existingFk) {
+        await queryRunner.createForeignKey(
+          'partner_stats',
+          new TableForeignKey({
+            columnNames: ['partnerId'],
+            referencedColumnNames: ['id'],
+            referencedTableName: 'partners',
+            onDelete: 'CASCADE',
+          }),
+        );
+      }
+    }
 
-    // Crear foreign keys para tenants
-    await queryRunner.createForeignKey(
-      'tenants',
-      new TableForeignKey({
-        columnNames: ['partnerId'],
-        referencedColumnNames: ['id'],
-        referencedTableName: 'partners',
-        onDelete: 'CASCADE',
-      }),
-    );
+    // Crear foreign keys para tenants (solo si no existe)
+    const tenantsTable = await queryRunner.getTable('tenants');
+    if (tenantsTable) {
+      const existingFk = tenantsTable.foreignKeys.find(
+        (fk) => fk.columnNames.indexOf('partnerId') !== -1,
+      );
+      if (!existingFk) {
+        await queryRunner.createForeignKey(
+          'tenants',
+          new TableForeignKey({
+            columnNames: ['partnerId'],
+            referencedColumnNames: ['id'],
+            referencedTableName: 'partners',
+            onDelete: 'CASCADE',
+          }),
+        );
+      }
+    }
 
-    // Crear foreign keys para tenant_features
-    await queryRunner.createForeignKey(
-      'tenant_features',
-      new TableForeignKey({
-        columnNames: ['tenantId'],
-        referencedColumnNames: ['id'],
-        referencedTableName: 'tenants',
-        onDelete: 'CASCADE',
-      }),
-    );
+    // Crear foreign keys para tenant_features (solo si no existe)
+    const tenantFeaturesTable = await queryRunner.getTable('tenant_features');
+    if (tenantFeaturesTable) {
+      const existingFk = tenantFeaturesTable.foreignKeys.find(
+        (fk) => fk.columnNames.indexOf('tenantId') !== -1,
+      );
+      if (!existingFk) {
+        await queryRunner.createForeignKey(
+          'tenant_features',
+          new TableForeignKey({
+            columnNames: ['tenantId'],
+            referencedColumnNames: ['id'],
+            referencedTableName: 'tenants',
+            onDelete: 'CASCADE',
+          }),
+        );
+      }
+    }
 
-    // Crear foreign keys para branches
-    await queryRunner.createForeignKey(
-      'branches',
-      new TableForeignKey({
-        columnNames: ['tenantId'],
-        referencedColumnNames: ['id'],
-        referencedTableName: 'tenants',
-        onDelete: 'CASCADE',
-      }),
-    );
+    // Crear foreign keys para branches (solo si no existe)
+    const branchesTable = await queryRunner.getTable('branches');
+    if (branchesTable) {
+      const existingFk = branchesTable.foreignKeys.find(
+        (fk) => fk.columnNames.indexOf('tenantId') !== -1,
+      );
+      if (!existingFk) {
+        await queryRunner.createForeignKey(
+          'branches',
+          new TableForeignKey({
+            columnNames: ['tenantId'],
+            referencedColumnNames: ['id'],
+            referencedTableName: 'tenants',
+            onDelete: 'CASCADE',
+          }),
+        );
+      }
+    }
 
     // Crear índices para mejorar el rendimiento
     await queryRunner.createIndex(

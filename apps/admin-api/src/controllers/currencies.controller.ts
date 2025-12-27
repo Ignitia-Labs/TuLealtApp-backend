@@ -8,6 +8,7 @@ import {
   GetCountriesRequest,
   GetCountriesResponse,
 } from '@libs/application';
+import { BadRequestErrorResponseDto, InternalServerErrorResponseDto } from '@libs/shared';
 
 /**
  * Controlador de currencies para Admin API
@@ -69,6 +70,26 @@ export class CurrenciesController {
       ],
     },
   })
+  @ApiResponse({
+    status: 400,
+    description: 'Parámetros de consulta inválidos',
+    type: BadRequestErrorResponseDto,
+    example: {
+      statusCode: 400,
+      message: ['includeInactive must be a boolean value'],
+      error: 'Bad Request',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+    example: {
+      statusCode: 500,
+      message: 'Internal server error',
+      error: 'Internal Server Error',
+    },
+  })
   async getCurrencies(
     @Query('includeInactive') includeInactive?: string,
   ): Promise<GetCurrenciesResponse> {
@@ -128,8 +149,19 @@ export class CurrenciesController {
     },
   })
   @ApiResponse({
+    status: 400,
+    description: 'Parámetros de consulta inválidos',
+    type: BadRequestErrorResponseDto,
+    example: {
+      statusCode: 400,
+      message: ['includeInactive must be a boolean value'],
+      error: 'Bad Request',
+    },
+  })
+  @ApiResponse({
     status: 500,
-    description: 'Error del servidor',
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
     example: {
       statusCode: 500,
       message: 'Internal server error',

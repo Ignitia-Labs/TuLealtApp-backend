@@ -3,6 +3,8 @@
  * Representa una solicitud de onboarding de un nuevo partner
  * No depende de frameworks ni librerías externas
  */
+import type { BillingFrequency } from './partner-subscription.entity';
+
 export type PartnerRequestStatus = 'pending' | 'in-progress' | 'enrolled' | 'rejected';
 
 export class PartnerRequest {
@@ -17,13 +19,15 @@ export class PartnerRequest {
     public readonly countryId: number | null,
     public readonly city: string,
     public readonly plan: string,
+    public readonly planId: number | null,
+    public readonly billingFrequency: BillingFrequency | null,
     public readonly logo: string | null,
     public readonly category: string,
     public readonly branchesNumber: number,
     public readonly website: string | null,
     public readonly socialMedia: string | null,
     public readonly rewardType: string,
-    public readonly currencyId: string,
+    public readonly currencyId: number,
     public readonly businessName: string,
     public readonly taxId: string,
     public readonly fiscalAddress: string,
@@ -47,7 +51,7 @@ export class PartnerRequest {
     plan: string,
     category: string,
     rewardType: string,
-    currencyId: string,
+    currencyId: number,
     businessName: string,
     taxId: string,
     fiscalAddress: string,
@@ -61,6 +65,8 @@ export class PartnerRequest {
     status: PartnerRequestStatus = 'pending',
     assignedTo: number | null = null,
     submittedAt: Date = new Date(),
+    planId: number | null = null,
+    billingFrequency: BillingFrequency | null = null,
     id?: number,
   ): PartnerRequest {
     const now = new Date();
@@ -75,6 +81,8 @@ export class PartnerRequest {
       countryId,
       city,
       plan,
+      planId,
+      billingFrequency,
       logo,
       category,
       branchesNumber,
@@ -102,8 +110,9 @@ export class PartnerRequest {
 
   /**
    * Método de dominio para marcar la solicitud como en progreso
+   * Si assignedTo no se proporciona, mantiene el valor actual o lo deja como null
    */
-  markInProgress(assignedTo: number): PartnerRequest {
+  markInProgress(assignedTo?: number | null): PartnerRequest {
     return new PartnerRequest(
       this.id,
       'in-progress',
@@ -115,6 +124,8 @@ export class PartnerRequest {
       this.countryId,
       this.city,
       this.plan,
+      this.planId,
+      this.billingFrequency,
       this.logo,
       this.category,
       this.branchesNumber,
@@ -128,7 +139,7 @@ export class PartnerRequest {
       this.paymentMethod,
       this.billingEmail,
       this.notes,
-      assignedTo,
+      assignedTo !== undefined ? assignedTo : this.assignedTo,
       new Date(),
     );
   }
@@ -148,6 +159,8 @@ export class PartnerRequest {
       this.countryId,
       this.city,
       this.plan,
+      this.planId,
+      this.billingFrequency,
       this.logo,
       this.category,
       this.branchesNumber,
@@ -181,6 +194,43 @@ export class PartnerRequest {
       this.countryId,
       this.city,
       this.plan,
+      this.planId,
+      this.billingFrequency,
+      this.logo,
+      this.category,
+      this.branchesNumber,
+      this.website,
+      this.socialMedia,
+      this.rewardType,
+      this.currencyId,
+      this.businessName,
+      this.taxId,
+      this.fiscalAddress,
+      this.paymentMethod,
+      this.billingEmail,
+      this.notes,
+      this.assignedTo,
+      new Date(),
+    );
+  }
+
+  /**
+   * Método de dominio para marcar la solicitud como pendiente
+   */
+  markPending(): PartnerRequest {
+    return new PartnerRequest(
+      this.id,
+      'pending',
+      this.submittedAt,
+      this.name,
+      this.responsibleName,
+      this.email,
+      this.phone,
+      this.countryId,
+      this.city,
+      this.plan,
+      this.planId,
+      this.billingFrequency,
       this.logo,
       this.category,
       this.branchesNumber,
@@ -214,6 +264,8 @@ export class PartnerRequest {
       this.countryId,
       this.city,
       this.plan,
+      this.planId,
+      this.billingFrequency,
       this.logo,
       this.category,
       this.branchesNumber,
@@ -231,5 +283,39 @@ export class PartnerRequest {
       new Date(),
     );
   }
-}
 
+  /**
+   * Método de dominio para asignar o actualizar el usuario asignado
+   */
+  assignUser(userId: number): PartnerRequest {
+    return new PartnerRequest(
+      this.id,
+      this.status,
+      this.submittedAt,
+      this.name,
+      this.responsibleName,
+      this.email,
+      this.phone,
+      this.countryId,
+      this.city,
+      this.plan,
+      this.planId,
+      this.billingFrequency,
+      this.logo,
+      this.category,
+      this.branchesNumber,
+      this.website,
+      this.socialMedia,
+      this.rewardType,
+      this.currencyId,
+      this.businessName,
+      this.taxId,
+      this.fiscalAddress,
+      this.paymentMethod,
+      this.billingEmail,
+      this.notes,
+      userId,
+      new Date(),
+    );
+  }
+}

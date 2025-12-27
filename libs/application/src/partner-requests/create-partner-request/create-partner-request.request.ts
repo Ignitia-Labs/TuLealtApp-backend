@@ -5,6 +5,7 @@ import {
   MinLength,
   IsOptional,
   IsNumber,
+  IsEnum,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -72,13 +73,33 @@ export class CreatePartnerRequestRequest {
   city: string;
 
   @ApiProperty({
-    description: 'Plan del partner',
+    description: 'Plan del partner (slug del plan)',
     example: 'conecta',
     enum: ['esencia', 'conecta', 'inspira'],
   })
   @IsString()
   @IsNotEmpty()
   plan: string;
+
+  @ApiProperty({
+    description: 'ID del plan de precios (referencia a pricing_plans.id). Este es el campo principal que se usará para la suscripción.',
+    example: 1,
+    type: Number,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  planId?: number | null;
+
+  @ApiProperty({
+    description: 'Frecuencia de facturación para la suscripción del partner',
+    example: 'monthly',
+    enum: ['monthly', 'quarterly', 'semiannual', 'annual'],
+    required: false,
+  })
+  @IsEnum(['monthly', 'quarterly', 'semiannual', 'annual'])
+  @IsOptional()
+  billingFrequency?: 'monthly' | 'quarterly' | 'semiannual' | 'annual' | null;
 
   @ApiProperty({
     description: 'Logo del partner (URL)',
@@ -139,13 +160,13 @@ export class CreatePartnerRequestRequest {
   rewardType: string;
 
   @ApiProperty({
-    description: 'ID de la moneda (formato: currency-{id})',
-    example: 'currency-8',
-    type: String,
+    description: 'ID de la moneda',
+    example: 8,
+    type: Number,
   })
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  currencyId: string;
+  currencyId: number;
 
   @ApiProperty({
     description: 'Razón social',

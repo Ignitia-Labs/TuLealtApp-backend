@@ -50,6 +50,21 @@ export class PartnerSubscriptionEntity {
   @Column('decimal', { precision: 10, scale: 2 })
   billingAmount: number;
 
+  @Column('boolean', { default: false })
+  includeTax: boolean;
+
+  @Column('decimal', { precision: 5, scale: 2, nullable: true })
+  taxPercent: number | null;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  basePrice: number;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  taxAmount: number;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  totalPrice: number;
+
   @Column('varchar', { length: 10, default: 'USD' })
   currency: string;
 

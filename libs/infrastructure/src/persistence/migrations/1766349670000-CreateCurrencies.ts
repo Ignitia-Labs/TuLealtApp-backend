@@ -4,6 +4,13 @@ export class CreateCurrencies1766349670000 implements MigrationInterface {
   name = 'CreateCurrencies1766349670000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
+    // Verificar si la tabla currencies ya existe
+    const table = await queryRunner.getTable('currencies');
+    if (table) {
+      // La tabla ya existe, no hacer nada
+      return;
+    }
+
     // Crear tabla currencies
     await queryRunner.createTable(
       new Table({

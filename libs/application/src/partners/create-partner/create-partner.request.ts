@@ -7,6 +7,7 @@ import {
   IsNumber,
   IsBoolean,
   IsDateString,
+  IsEnum,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -102,12 +103,12 @@ export class CreatePartnerRequest {
 
   @ApiProperty({
     description: 'ID de la moneda',
-    example: 'currency-8',
-    type: String,
+    example: 8,
+    type: Number,
   })
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  currencyId: string;
+  currencyId: number;
 
   @ApiProperty({
     description: 'Razón social del negocio',
@@ -247,6 +248,36 @@ export class CreatePartnerRequest {
   subscriptionLastPaymentAmount?: number | null;
 
   @ApiProperty({
+    description: 'Base price for the subscription (amount without tax)',
+    example: 99.0,
+    type: Number,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  subscriptionBasePrice?: number;
+
+  @ApiProperty({
+    description: 'Tax amount to apply to the subscription',
+    example: 11.88,
+    type: Number,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  subscriptionTaxAmount?: number;
+
+  @ApiProperty({
+    description: 'Total price to bill (basePrice + taxAmount)',
+    example: 110.88,
+    type: Number,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  subscriptionTotalPrice?: number;
+
+  @ApiProperty({
     description: 'Renovación automática',
     example: true,
     type: Boolean,
@@ -256,6 +287,38 @@ export class CreatePartnerRequest {
   @IsBoolean()
   @IsOptional()
   subscriptionAutoRenew?: boolean;
+
+  @ApiProperty({
+    description: 'Frecuencia de facturación',
+    example: 'monthly',
+    enum: ['monthly', 'quarterly', 'semiannual', 'annual'],
+    required: false,
+  })
+  @IsEnum(['monthly', 'quarterly', 'semiannual', 'annual'])
+  @IsOptional()
+  subscriptionBillingFrequency?: 'monthly' | 'quarterly' | 'semiannual' | 'annual';
+
+  @ApiProperty({
+    description: 'Whether to include tax in the subscription price',
+    example: true,
+    type: Boolean,
+    required: false,
+    default: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  subscriptionIncludeTax?: boolean;
+
+  @ApiProperty({
+    description: 'Tax percentage to apply (e.g., 12 for 12%)',
+    example: 12.0,
+    type: Number,
+    required: false,
+    nullable: true,
+  })
+  @IsNumber()
+  @IsOptional()
+  subscriptionTaxPercent?: number | null;
 
   // Limits data
   @ApiProperty({

@@ -38,24 +38,36 @@ export class UpdatePartnersTenantsCurrencyRelation1766349680000 implements Migra
       'currency-30': 'XCD',
     };
 
-    // Crear columna temporal para almacenar el ID numérico de la moneda
-    await queryRunner.addColumn(
-      'partners',
-      new TableColumn({
-        name: 'currencyId_temp',
-        type: 'int',
-        isNullable: true,
-      }),
-    );
+    // Crear columna temporal para almacenar el ID numérico de la moneda (solo si no existe)
+    const partnersTableCheck = await queryRunner.getTable('partners');
+    if (partnersTableCheck) {
+      const existingColumn = partnersTableCheck.findColumnByName('currencyId_temp');
+      if (!existingColumn) {
+        await queryRunner.addColumn(
+          'partners',
+          new TableColumn({
+            name: 'currencyId_temp',
+            type: 'int',
+            isNullable: true,
+          }),
+        );
+      }
+    }
 
-    await queryRunner.addColumn(
-      'tenants',
-      new TableColumn({
-        name: 'currencyId_temp',
-        type: 'int',
-        isNullable: true,
-      }),
-    );
+    const tenantsTableCheck = await queryRunner.getTable('tenants');
+    if (tenantsTableCheck) {
+      const existingColumn = tenantsTableCheck.findColumnByName('currencyId_temp');
+      if (!existingColumn) {
+        await queryRunner.addColumn(
+          'tenants',
+          new TableColumn({
+            name: 'currencyId_temp',
+            type: 'int',
+            isNullable: true,
+          }),
+        );
+      }
+    }
 
     // Migrar datos de partners: convertir currencyId string a ID numérico
     const partners = await queryRunner.query('SELECT id, currencyId FROM partners');
@@ -88,6 +100,27 @@ export class UpdatePartnersTenantsCurrencyRelation1766349680000 implements Migra
             tenant.id,
           ]);
         }
+      }
+    }
+
+    // Eliminar foreign keys antes de eliminar las columnas
+    const partnersTableForFk = await queryRunner.getTable('partners');
+    if (partnersTableForFk) {
+      const existingFk = partnersTableForFk.foreignKeys.find(
+        (fk) => fk.columnNames.indexOf('currencyId') !== -1,
+      );
+      if (existingFk) {
+        await queryRunner.dropForeignKey('partners', existingFk);
+      }
+    }
+
+    const tenantsTableForFk = await queryRunner.getTable('tenants');
+    if (tenantsTableForFk) {
+      const existingFk = tenantsTableForFk.foreignKeys.find(
+        (fk) => fk.columnNames.indexOf('currencyId') !== -1,
+      );
+      if (existingFk) {
+        await queryRunner.dropForeignKey('tenants', existingFk);
       }
     }
 

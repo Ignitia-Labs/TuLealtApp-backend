@@ -53,6 +53,8 @@ export class CreatePartnerRequestHandler {
       'pending',
       null,
       new Date(),
+      request.planId || null,
+      request.billingFrequency || null,
     );
 
     // Guardar la solicitud

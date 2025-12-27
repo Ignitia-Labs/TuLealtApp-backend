@@ -9,6 +9,7 @@ export class PartnerRequestMapper {
    * Convierte una entidad de persistencia a entidad de dominio
    */
   static toDomain(persistenceEntity: PartnerRequestEntity): PartnerRequest {
+    // currencyId es INTEGER tanto en BD como en dominio
     return new PartnerRequest(
       persistenceEntity.id,
       persistenceEntity.status,
@@ -20,13 +21,15 @@ export class PartnerRequestMapper {
       persistenceEntity.countryId,
       persistenceEntity.city,
       persistenceEntity.plan,
+      persistenceEntity.planId,
+      persistenceEntity.billingFrequency,
       persistenceEntity.logo,
       persistenceEntity.category,
       persistenceEntity.branchesNumber,
       persistenceEntity.website,
       persistenceEntity.socialMedia,
       persistenceEntity.rewardType,
-      persistenceEntity.currencyId,
+      persistenceEntity.currencyId || 0,
       persistenceEntity.businessName,
       persistenceEntity.taxId,
       persistenceEntity.fiscalAddress,
@@ -55,13 +58,16 @@ export class PartnerRequestMapper {
     entity.countryId = domainEntity.countryId;
     entity.city = domainEntity.city;
     entity.plan = domainEntity.plan;
+    entity.planId = domainEntity.planId;
+    entity.billingFrequency = domainEntity.billingFrequency;
     entity.logo = domainEntity.logo;
     entity.category = domainEntity.category;
     entity.branchesNumber = domainEntity.branchesNumber;
     entity.website = domainEntity.website;
     entity.socialMedia = domainEntity.socialMedia;
     entity.rewardType = domainEntity.rewardType;
-    entity.currencyId = domainEntity.currencyId;
+    // currencyId es INTEGER tanto en dominio como en BD
+    entity.currencyId = domainEntity.currencyId || 0;
     entity.businessName = domainEntity.businessName;
     entity.taxId = domainEntity.taxId;
     entity.fiscalAddress = domainEntity.fiscalAddress;

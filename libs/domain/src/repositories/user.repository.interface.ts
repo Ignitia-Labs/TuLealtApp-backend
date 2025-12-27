@@ -40,4 +40,16 @@ export interface IUserRepository {
    * Cuenta el total de usuarios
    */
   count(): Promise<number>;
+
+  /**
+   * Busca usuarios por roles (array de roles)
+   * Retorna usuarios que tengan al menos uno de los roles especificados
+   */
+  findByRoles(roles: string[], skip?: number, take?: number): Promise<User[]>;
+
+  /**
+   * Cuenta usuarios por roles (array de roles)
+   * Retorna el total de usuarios que tengan al menos uno de los roles especificados
+   */
+  countByRoles(roles: string[]): Promise<number>;
 }

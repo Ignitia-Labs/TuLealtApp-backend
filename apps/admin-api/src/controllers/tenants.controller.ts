@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -43,6 +44,7 @@ import {
   UnauthorizedErrorResponseDto,
   ForbiddenErrorResponseDto,
   InternalServerErrorResponseDto,
+  JwtAuthGuard,
 } from '@libs/shared';
 
 /**
@@ -191,6 +193,8 @@ export class TenantsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Crear un nuevo tenant',
     description:
@@ -261,6 +265,8 @@ export class TenantsController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener tenant por ID',
     description: 'Obtiene la información completa de un tenant por su ID',

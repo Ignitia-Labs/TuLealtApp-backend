@@ -25,6 +25,11 @@ export class PartnerSubscription {
     public readonly status: SubscriptionStatus,
     public readonly billingFrequency: BillingFrequency,
     public readonly billingAmount: number,
+    public readonly includeTax: boolean,
+    public readonly taxPercent: number | null,
+    public readonly basePrice: number,
+    public readonly taxAmount: number,
+    public readonly totalPrice: number,
     public readonly currency: string,
     public readonly nextBillingDate: Date,
     public readonly nextBillingAmount: number,
@@ -63,6 +68,11 @@ export class PartnerSubscription {
     nextBillingAmount: number,
     currentPeriodStart: Date,
     currentPeriodEnd: Date,
+    includeTax: boolean = false,
+    taxPercent: number | null = null,
+    basePrice?: number,
+    taxAmount?: number,
+    totalPrice?: number,
     status: SubscriptionStatus = 'active',
     trialEndDate: Date | null = null,
     pausedAt: Date | null = null,
@@ -80,6 +90,24 @@ export class PartnerSubscription {
     id?: number,
   ): PartnerSubscription {
     const now = new Date();
+
+    // Calcular valores de IVA si no se proporcionan
+    let calculatedBasePrice = basePrice;
+    let calculatedTaxAmount = taxAmount;
+    let calculatedTotalPrice = totalPrice;
+
+    if (calculatedBasePrice === undefined || calculatedTaxAmount === undefined || calculatedTotalPrice === undefined) {
+      calculatedBasePrice = billingAmount;
+
+      if (includeTax && taxPercent !== null && taxPercent > 0) {
+        calculatedTaxAmount = calculatedBasePrice * (taxPercent / 100);
+        calculatedTotalPrice = calculatedBasePrice + calculatedTaxAmount;
+      } else {
+        calculatedTaxAmount = 0;
+        calculatedTotalPrice = calculatedBasePrice;
+      }
+    }
+
     return new PartnerSubscription(
       id || 0,
       partnerId,
@@ -90,6 +118,11 @@ export class PartnerSubscription {
       status,
       billingFrequency,
       billingAmount,
+      includeTax,
+      taxPercent,
+      calculatedBasePrice,
+      calculatedTaxAmount,
+      calculatedTotalPrice,
       currency,
       nextBillingDate,
       nextBillingAmount,
@@ -134,6 +167,11 @@ export class PartnerSubscription {
       status,
       this.billingFrequency,
       this.billingAmount,
+      this.includeTax,
+      this.taxPercent,
+      this.basePrice,
+      this.taxAmount,
+      this.totalPrice,
       this.currency,
       this.nextBillingDate,
       this.nextBillingAmount,
@@ -171,6 +209,11 @@ export class PartnerSubscription {
       this.status,
       this.billingFrequency,
       this.billingAmount,
+      this.includeTax,
+      this.taxPercent,
+      this.basePrice,
+      this.taxAmount,
+      this.totalPrice,
       this.currency,
       this.nextBillingDate,
       this.nextBillingAmount,
@@ -208,6 +251,11 @@ export class PartnerSubscription {
       'paused',
       this.billingFrequency,
       this.billingAmount,
+      this.includeTax,
+      this.taxPercent,
+      this.basePrice,
+      this.taxAmount,
+      this.totalPrice,
       this.currency,
       this.nextBillingDate,
       this.nextBillingAmount,
@@ -245,6 +293,11 @@ export class PartnerSubscription {
       'active',
       this.billingFrequency,
       this.billingAmount,
+      this.includeTax,
+      this.taxPercent,
+      this.basePrice,
+      this.taxAmount,
+      this.totalPrice,
       this.currency,
       this.nextBillingDate,
       this.nextBillingAmount,

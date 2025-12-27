@@ -25,7 +25,7 @@ export class GetPartnersResponse {
         website: 'https://abc-comercial.com',
         socialMedia: '@abccomercial',
         rewardType: 'Por monto de compra',
-        currencyId: 'currency-8',
+        currencyId: 8,
         businessName: 'Grupo Comercial ABC S.A. de C.V.',
         taxId: 'RFC-ABC-123456',
         fiscalAddress: 'Zona 10, Guatemala City, Guatemala',

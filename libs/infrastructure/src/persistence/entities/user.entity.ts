@@ -6,6 +6,7 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { PartnerEntity } from './partner.entity';
 import { TenantEntity } from './tenant.entity';
@@ -16,6 +17,7 @@ import { BranchEntity } from './branch.entity';
  * Mapea la entidad de dominio User a la tabla de base de datos
  */
 @Entity('users')
+@Index('IDX_USERS_EMAIL', ['email'])
 export class UserEntity {
   @PrimaryGeneratedColumn()
   id: number;

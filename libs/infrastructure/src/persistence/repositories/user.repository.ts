@@ -70,4 +70,53 @@ export class UserRepository implements IUserRepository {
   async count(): Promise<number> {
     return this.userRepository.count();
   }
+
+  async findByRoles(roles: string[], skip = 0, take = 100): Promise<User[]> {
+    // Buscar usuarios que tengan al menos uno de los roles especificados
+    // Los roles están almacenados como JSON array en la columna roles
+    // Usamos JSON_CONTAINS que es específico de MySQL/MariaDB
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .where('user.isActive = :isActive', { isActive: true });
+
+    // Construir condiciones OR para cada rol
+    const roleConditions = roles
+      .map((role, index) => `JSON_CONTAINS(user.roles, :role${index})`)
+      .join(' OR ');
+
+    const roleParams = roles.reduce((acc, role, index) => {
+      acc[`role${index}`] = JSON.stringify(role);
+      return acc;
+    }, {} as Record<string, string>);
+
+    queryBuilder.andWhere(`(${roleConditions})`, roleParams);
+
+    const userEntities = await queryBuilder
+      .orderBy('user.createdAt', 'DESC')
+      .skip(skip)
+      .take(take)
+      .getMany();
+
+    return userEntities.map((entity) => UserMapper.toDomain(entity));
+  }
+
+  async countByRoles(roles: string[]): Promise<number> {
+    // Contar usuarios que tengan al menos uno de los roles especificados
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .where('user.isActive = :isActive', { isActive: true });
+
+    const roleConditions = roles
+      .map((role, index) => `JSON_CONTAINS(user.roles, :role${index})`)
+      .join(' OR ');
+
+    const roleParams = roles.reduce((acc, role, index) => {
+      acc[`role${index}`] = JSON.stringify(role);
+      return acc;
+    }, {} as Record<string, string>);
+
+    queryBuilder.andWhere(`(${roleConditions})`, roleParams);
+
+    return queryBuilder.getCount();
+  }
 }

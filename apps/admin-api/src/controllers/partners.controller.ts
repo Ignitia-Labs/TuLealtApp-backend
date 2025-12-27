@@ -73,6 +73,8 @@ export class PartnersController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener todos los partners',
     description:
@@ -191,6 +193,8 @@ export class PartnersController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Crear un nuevo partner',
     description:
@@ -270,6 +274,8 @@ export class PartnersController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener partner por ID',
     description: 'Obtiene la información completa de un partner por su ID',

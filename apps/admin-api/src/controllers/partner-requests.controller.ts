@@ -41,6 +41,9 @@ import {
   ProcessPartnerRequestHandler,
   ProcessPartnerRequestRequest,
   ProcessPartnerRequestResponse,
+  AssignPartnerRequestUserHandler,
+  AssignPartnerRequestUserRequest,
+  AssignPartnerRequestUserResponse,
 } from '@libs/application';
 import {
   UnauthorizedErrorResponseDto,
@@ -74,6 +77,7 @@ export class PartnerRequestsController {
     private readonly addPartnerRequestNotesHandler: AddPartnerRequestNotesHandler,
     private readonly rejectPartnerRequestHandler: RejectPartnerRequestHandler,
     private readonly processPartnerRequestHandler: ProcessPartnerRequestHandler,
+    private readonly assignPartnerRequestUserHandler: AssignPartnerRequestUserHandler,
   ) {}
 
   @Post()
@@ -97,6 +101,8 @@ export class PartnerRequestsController {
           countryId: 1,
           city: 'Antigua Guatemala',
           plan: 'conecta',
+          planId: 1,
+          billingFrequency: 'monthly',
           logo: 'https://ui-avatars.com/api/?name=Cocina+Sol&background=f97316&color=fff',
           category: 'Restaurantes',
           branchesNumber: 3,
@@ -265,7 +271,9 @@ export class PartnerRequestsController {
   @ApiOperation({
     summary: 'Actualizar estado de solicitud',
     description:
-      'Actualiza el estado de una solicitud de partner. Permite cambiar entre: pending, in-progress, enrolled, rejected.',
+      'Actualiza el estado de una solicitud de partner. Permite cambiar entre: pending, in-progress, enrolled, rejected. ' +
+      'Nota: Para asignar un usuario a la solicitud, use el endpoint PATCH /partner-requests/:id/assign-user. ' +
+      'El campo assignedTo es opcional y solo se usa si se desea actualizar la asignación durante el cambio de estado.',
   })
   @ApiParam({
     name: 'id',
@@ -278,7 +286,16 @@ export class PartnerRequestsController {
     type: UpdatePartnerRequestStatusRequest,
     examples: {
       markInProgress: {
-        summary: 'Marcar como en progreso',
+        summary: 'Marcar como en progreso (sin asignar usuario)',
+        value: {
+          requestId: 1,
+          status: 'in-progress',
+        },
+      },
+      markInProgressWithAssignment: {
+        summary: 'Marcar como en progreso y asignar usuario (opcional)',
+        description:
+          'Nota: Se recomienda usar el endpoint PATCH /partner-requests/:id/assign-user para asignar usuarios',
         value: {
           requestId: 1,
           status: 'in-progress',
@@ -404,6 +421,77 @@ export class PartnerRequestsController {
     return this.addPartnerRequestNotesHandler.execute(request);
   }
 
+  @Patch(':id/assign-user')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Asignar usuario a solicitud',
+    description:
+      'Asigna o actualiza el usuario asignado a una solicitud de partner. El usuario debe tener rol ADMIN o STAFF.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único de la solicitud',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiBody({
+    type: AssignPartnerRequestUserRequest,
+    examples: {
+      example1: {
+        summary: 'Asignar usuario',
+        value: {
+          userId: 5,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuario asignado exitosamente',
+    type: AssignPartnerRequestUserResponse,
+    example: {
+      id: 1,
+      assignedTo: 5,
+      lastUpdated: '2024-11-14T09:30:00Z',
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'El usuario no tiene rol ADMIN o STAFF, o el usuario no está activo',
+    type: BadRequestErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos suficientes',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Solicitud o usuario no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async assignPartnerRequestUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: Omit<AssignPartnerRequestUserRequest, 'requestId'>,
+  ): Promise<AssignPartnerRequestUserResponse> {
+    const request = new AssignPartnerRequestUserRequest();
+    request.requestId = id;
+    request.userId = body.userId;
+    return this.assignPartnerRequestUserHandler.execute(request);
+  }
+
   @Patch(':id/reject')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
@@ -481,7 +569,7 @@ export class PartnerRequestsController {
         value: {},
       },
       example2: {
-        summary: 'Procesar con valores personalizados',
+        summary: 'Procesar con valores personalizados (calculando IVA automáticamente)',
         value: {
           requestId: 1,
           subscriptionPlanId: 'plan-conecta',
@@ -489,6 +577,33 @@ export class PartnerRequestsController {
           subscriptionRenewalDate: '2025-01-01T00:00:00Z',
           subscriptionLastPaymentAmount: 99.0,
           subscriptionAutoRenew: true,
+          subscriptionBillingFrequency: 'monthly',
+          subscriptionIncludeTax: true,
+          subscriptionTaxPercent: 12.0,
+          limitsMaxTenants: 5,
+          limitsMaxBranches: 20,
+          limitsMaxCustomers: 5000,
+          limitsMaxRewards: 50,
+          domain: 'cocinasol.gt',
+        },
+      },
+      example3: {
+        summary: 'Procesar con valores de precio e IVA especificados directamente',
+        description:
+          'Cuando se proporcionan subscriptionBasePrice, subscriptionTaxAmount y subscriptionTotalPrice, estos valores se usan directamente sin calcular.',
+        value: {
+          requestId: 1,
+          subscriptionPlanId: 'plan-conecta',
+          subscriptionStartDate: '2024-01-01T00:00:00Z',
+          subscriptionRenewalDate: '2025-01-01T00:00:00Z',
+          subscriptionLastPaymentAmount: 99.0,
+          subscriptionBasePrice: 99.0,
+          subscriptionTaxAmount: 11.88,
+          subscriptionTotalPrice: 110.88,
+          subscriptionAutoRenew: true,
+          subscriptionBillingFrequency: 'monthly',
+          subscriptionIncludeTax: true,
+          subscriptionTaxPercent: 12.0,
           limitsMaxTenants: 5,
           limitsMaxBranches: 20,
           limitsMaxCustomers: 5000,

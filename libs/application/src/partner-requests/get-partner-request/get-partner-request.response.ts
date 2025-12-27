@@ -69,11 +69,27 @@ export class GetPartnerRequestResponse {
   city: string;
 
   @ApiProperty({
-    description: 'Plan',
+    description: 'Plan (slug del plan)',
     example: 'conecta',
     type: String,
   })
   plan: string;
+
+  @ApiProperty({
+    description: 'ID del plan de precios (referencia a pricing_plans.id)',
+    example: 1,
+    type: Number,
+    nullable: true,
+  })
+  planId: number | null;
+
+  @ApiProperty({
+    description: 'Frecuencia de facturación para la suscripción',
+    example: 'monthly',
+    enum: ['monthly', 'quarterly', 'semiannual', 'annual'],
+    nullable: true,
+  })
+  billingFrequency: 'monthly' | 'quarterly' | 'semiannual' | 'annual' | null;
 
   @ApiProperty({
     description: 'Logo',
@@ -122,10 +138,10 @@ export class GetPartnerRequestResponse {
 
   @ApiProperty({
     description: 'ID de moneda',
-    example: 'currency-8',
-    type: String,
+    example: 8,
+    type: Number,
   })
-  currencyId: string;
+  currencyId: number;
 
   @ApiProperty({
     description: 'Razón social',
@@ -210,6 +226,8 @@ export class GetPartnerRequestResponse {
     this.countryId = partnerRequest.countryId;
     this.city = partnerRequest.city;
     this.plan = partnerRequest.plan;
+    this.planId = partnerRequest.planId;
+    this.billingFrequency = partnerRequest.billingFrequency;
     this.logo = partnerRequest.logo;
     this.category = partnerRequest.category;
     this.branchesNumber = partnerRequest.branchesNumber;

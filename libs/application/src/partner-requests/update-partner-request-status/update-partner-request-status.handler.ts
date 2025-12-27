@@ -35,11 +35,7 @@ export class UpdatePartnerRequestStatusHandler {
 
     switch (request.status) {
       case 'in-progress':
-        if (!request.assignedTo) {
-          throw new BadRequestException(
-            'El campo assignedTo es requerido cuando el estado es in-progress',
-          );
-        }
+        // Si se proporciona assignedTo, lo usa; si no, mantiene el actual o null
         updatedRequest = partnerRequest.markInProgress(request.assignedTo);
         break;
       case 'enrolled':
@@ -49,38 +45,14 @@ export class UpdatePartnerRequestStatusHandler {
         updatedRequest = partnerRequest.reject();
         break;
       case 'pending':
-        // Para volver a pending, creamos una nueva instancia con el estado pending
-        updatedRequest = PartnerRequest.create(
-          partnerRequest.name,
-          partnerRequest.responsibleName,
-          partnerRequest.email,
-          partnerRequest.phone,
-          partnerRequest.countryId,
-          partnerRequest.city,
-          partnerRequest.plan,
-          partnerRequest.category,
-          partnerRequest.rewardType,
-          partnerRequest.currencyId,
-          partnerRequest.businessName,
-          partnerRequest.taxId,
-          partnerRequest.fiscalAddress,
-          partnerRequest.paymentMethod,
-          partnerRequest.billingEmail,
-          partnerRequest.branchesNumber,
-          partnerRequest.logo,
-          partnerRequest.website,
-          partnerRequest.socialMedia,
-          partnerRequest.notes,
-          'pending',
-          null,
-          partnerRequest.submittedAt,
-          partnerRequest.id,
-        );
+        // Usar el método de dominio para marcar como pending, preservando todos los campos
+        updatedRequest = partnerRequest.markPending();
         break;
       default:
         throw new BadRequestException(`Estado inválido: ${request.status}`);
     }
 
+    // Actualizar la solicitud existente (no crear una nueva)
     const savedRequest = await this.partnerRequestRepository.update(updatedRequest);
 
     return new UpdatePartnerRequestStatusResponse(

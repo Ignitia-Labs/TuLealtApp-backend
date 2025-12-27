@@ -5,11 +5,21 @@ import {
   Patch,
   Body,
   Param,
+  Query,
   HttpCode,
   HttpStatus,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBody,
+  ApiQuery,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import {
   CreateUserHandler,
   CreateUserRequest,
@@ -23,7 +33,18 @@ import {
   UpdateUserProfileHandler,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
+  GetAdminStaffUsersHandler,
+  GetAdminStaffUsersRequest,
+  GetAdminStaffUsersResponse,
 } from '@libs/application';
+import {
+  JwtAuthGuard,
+  BadRequestErrorResponseDto,
+  UnauthorizedErrorResponseDto,
+  ForbiddenErrorResponseDto,
+  NotFoundErrorResponseDto,
+  InternalServerErrorResponseDto,
+} from '@libs/shared';
 
 /**
  * Controlador de usuarios para Admin API
@@ -37,12 +58,21 @@ export class UsersController {
     private readonly getUserProfileHandler: GetUserProfileHandler,
     private readonly lockUserHandler: LockUserHandler,
     private readonly updateUserProfileHandler: UpdateUserProfileHandler,
+    private readonly getAdminStaffUsersHandler: GetAdminStaffUsersHandler,
   ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Crear un nuevo usuario' })
-  @ApiBody({ type: CreateUserRequest })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Crear un nuevo usuario',
+    description: 'Crea un nuevo usuario en el sistema. Requiere permisos de administrador.',
+  })
+  @ApiBody({
+    type: CreateUserRequest,
+    description: 'Datos del usuario a crear',
+  })
   @ApiResponse({
     status: 201,
     description: 'Usuario creado exitosamente',
@@ -60,13 +90,177 @@ export class UsersController {
       createdAt: '2024-01-15T10:30:00.000Z',
     },
   })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos de entrada inválidos',
+    type: BadRequestErrorResponseDto,
+    example: {
+      statusCode: 400,
+      message: ['email must be an email', 'name should not be empty', 'password must be longer than or equal to 6 characters'],
+      error: 'Bad Request',
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+    example: {
+      statusCode: 401,
+      message: 'Unauthorized',
+      error: 'Unauthorized',
+    },
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos de administrador',
+    type: ForbiddenErrorResponseDto,
+    example: {
+      statusCode: 403,
+      message: 'Forbidden resource',
+      error: 'Forbidden',
+    },
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'El usuario ya existe',
+    example: {
+      statusCode: 409,
+      message: 'El email ya está registrado',
+      error: 'Conflict',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+    example: {
+      statusCode: 500,
+      message: 'Internal server error',
+      error: 'Internal Server Error',
+    },
+  })
   async createUser(@Body() request: CreateUserRequest): Promise<CreateUserResponse> {
     return this.createUserHandler.execute(request);
   }
 
+  @Get('admin-staff')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Obtener usuarios con roles ADMIN o STAFF',
+    description:
+      'Retorna una lista de usuarios que tienen al menos uno de los roles ADMIN o STAFF. Útil para asignar usuarios a solicitudes de partners.',
+  })
+  @ApiQuery({
+    name: 'skip',
+    required: false,
+    type: Number,
+    description: 'Número de registros a omitir (para paginación)',
+    example: 0,
+  })
+  @ApiQuery({
+    name: 'take',
+    required: false,
+    type: Number,
+    description: 'Número máximo de registros a retornar',
+    example: 50,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de usuarios obtenida exitosamente',
+    type: GetAdminStaffUsersResponse,
+    example: {
+      users: [
+        {
+          id: 1,
+          email: 'admin@example.com',
+          name: 'John Doe',
+          firstName: 'John',
+          lastName: 'Doe',
+          phone: '+502 1234-5678',
+          roles: ['ADMIN'],
+          isActive: true,
+          createdAt: '2024-01-15T10:30:00.000Z',
+        },
+        {
+          id: 2,
+          email: 'staff@example.com',
+          name: 'Jane Smith',
+          firstName: 'Jane',
+          lastName: 'Smith',
+          phone: '+502 9876-5432',
+          roles: ['STAFF'],
+          isActive: true,
+          createdAt: '2024-01-16T11:00:00.000Z',
+        },
+      ],
+      total: 2,
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    example: {
+      statusCode: 401,
+      message: 'Unauthorized',
+      error: 'Unauthorized',
+    },
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos suficientes',
+    example: {
+      statusCode: 403,
+      message: 'Forbidden resource',
+      error: 'Forbidden',
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Parámetros de consulta inválidos',
+    type: BadRequestErrorResponseDto,
+    example: {
+      statusCode: 400,
+      message: ['skip must be a positive number', 'take must be a positive number'],
+      error: 'Bad Request',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+    example: {
+      statusCode: 500,
+      message: 'Internal server error',
+      error: 'Internal Server Error',
+    },
+  })
+  async getAdminStaffUsers(
+    @Query('skip') skip?: number,
+    @Query('take') take?: number,
+  ): Promise<GetAdminStaffUsersResponse> {
+    const request = new GetAdminStaffUsersRequest();
+    request.skip = skip ? parseInt(skip.toString(), 10) : undefined;
+    request.take = take ? parseInt(take.toString(), 10) : undefined;
+    return this.getAdminStaffUsersHandler.execute(request);
+  }
+
   @Get(':id')
-  @ApiOperation({ summary: 'Obtener perfil de usuario por ID' })
-  @ApiParam({ name: 'id', description: 'ID del usuario', type: Number, example: 1 })
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Obtener perfil de usuario por ID',
+    description: 'Obtiene los detalles completos del perfil de un usuario específico por su ID.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único del usuario',
+    type: Number,
+    example: 1,
+    required: true,
+  })
   @ApiResponse({
     status: 200,
     description: 'Perfil de usuario encontrado',
@@ -86,12 +280,53 @@ export class UsersController {
     },
   })
   @ApiResponse({
+    status: 400,
+    description: 'ID de usuario inválido',
+    type: BadRequestErrorResponseDto,
+    example: {
+      statusCode: 400,
+      message: ['id must be a positive number'],
+      error: 'Bad Request',
+    },
+  })
+  @ApiResponse({
     status: 404,
     description: 'Usuario no encontrado',
+    type: NotFoundErrorResponseDto,
     example: {
       statusCode: 404,
       message: 'Usuario no encontrado',
       error: 'Not Found',
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+    example: {
+      statusCode: 401,
+      message: 'Unauthorized',
+      error: 'Unauthorized',
+    },
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos',
+    type: ForbiddenErrorResponseDto,
+    example: {
+      statusCode: 403,
+      message: 'Forbidden resource',
+      error: 'Forbidden',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+    example: {
+      statusCode: 500,
+      message: 'Internal server error',
+      error: 'Internal Server Error',
     },
   })
   async getUserProfile(@Param('id', ParseIntPipe) id: number): Promise<GetUserProfileResponse> {
@@ -102,8 +337,19 @@ export class UsersController {
 
   @Patch(':id/lock')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Bloquear un usuario' })
-  @ApiParam({ name: 'id', description: 'ID del usuario a bloquear', type: Number, example: 1 })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Bloquear un usuario',
+    description: 'Bloquea un usuario del sistema, desactivando su cuenta. Requiere permisos de administrador.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID del usuario a bloquear',
+    type: Number,
+    example: 1,
+    required: true,
+  })
   @ApiResponse({
     status: 200,
     description: 'Usuario bloqueado exitosamente',
@@ -115,12 +361,53 @@ export class UsersController {
     },
   })
   @ApiResponse({
+    status: 400,
+    description: 'ID de usuario inválido',
+    type: BadRequestErrorResponseDto,
+    example: {
+      statusCode: 400,
+      message: ['id must be a positive number'],
+      error: 'Bad Request',
+    },
+  })
+  @ApiResponse({
     status: 404,
     description: 'Usuario no encontrado',
+    type: NotFoundErrorResponseDto,
     example: {
       statusCode: 404,
       message: 'Usuario no encontrado',
       error: 'Not Found',
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+    example: {
+      statusCode: 401,
+      message: 'Unauthorized',
+      error: 'Unauthorized',
+    },
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos',
+    type: ForbiddenErrorResponseDto,
+    example: {
+      statusCode: 403,
+      message: 'Forbidden resource',
+      error: 'Forbidden',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+    example: {
+      statusCode: 500,
+      message: 'Internal server error',
+      error: 'Internal Server Error',
     },
   })
   async lockUser(@Param('id', ParseIntPipe) id: number): Promise<LockUserResponse> {
@@ -131,9 +418,23 @@ export class UsersController {
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Actualizar perfil de usuario' })
-  @ApiParam({ name: 'id', description: 'ID del usuario a actualizar', type: Number, example: 1 })
-  @ApiBody({ type: UpdateUserProfileRequest })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Actualizar perfil de usuario',
+    description: 'Actualiza el perfil de un usuario existente (actualización parcial). Requiere permisos de administrador.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID del usuario a actualizar',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiBody({
+    type: UpdateUserProfileRequest,
+    description: 'Datos a actualizar',
+  })
   @ApiResponse({
     status: 200,
     description: 'Perfil de usuario actualizado exitosamente',
@@ -153,12 +454,62 @@ export class UsersController {
     },
   })
   @ApiResponse({
+    status: 400,
+    description: 'Datos de entrada inválidos',
+    type: BadRequestErrorResponseDto,
+    example: {
+      statusCode: 400,
+      message: ['email must be an email', 'firstName should not be empty'],
+      error: 'Bad Request',
+    },
+  })
+  @ApiResponse({
     status: 404,
     description: 'Usuario no encontrado',
+    type: NotFoundErrorResponseDto,
     example: {
       statusCode: 404,
       message: 'Usuario no encontrado',
       error: 'Not Found',
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+    example: {
+      statusCode: 401,
+      message: 'Unauthorized',
+      error: 'Unauthorized',
+    },
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos',
+    type: ForbiddenErrorResponseDto,
+    example: {
+      statusCode: 403,
+      message: 'Forbidden resource',
+      error: 'Forbidden',
+    },
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'El email ya está en uso',
+    example: {
+      statusCode: 409,
+      message: 'El email ya está registrado',
+      error: 'Conflict',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+    example: {
+      statusCode: 500,
+      message: 'Internal server error',
+      error: 'Internal Server Error',
     },
   })
   async updateUserProfile(

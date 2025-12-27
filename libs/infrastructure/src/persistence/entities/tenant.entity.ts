@@ -8,6 +8,7 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { PartnerEntity } from './partner.entity';
 import { TenantFeaturesEntity } from './tenant-features.entity';
@@ -19,6 +20,7 @@ import { CurrencyEntity } from './currency.entity';
  * Mapea la entidad de dominio Tenant a la tabla de base de datos
  */
 @Entity('tenants')
+@Index('IDX_TENANTS_PARTNER_ID', ['partnerId'])
 export class TenantEntity {
   @PrimaryGeneratedColumn()
   id: number;

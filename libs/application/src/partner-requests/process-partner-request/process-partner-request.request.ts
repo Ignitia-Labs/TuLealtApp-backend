@@ -1,4 +1,4 @@
-import { IsNumber } from 'class-validator';
+import { IsNumber, IsOptional, IsEnum, IsBoolean } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
@@ -46,12 +46,74 @@ export class ProcessPartnerRequestRequest {
   subscriptionLastPaymentAmount?: number;
 
   @ApiProperty({
+    description: 'Base price for the subscription (amount without tax)',
+    example: 99.0,
+    type: Number,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  subscriptionBasePrice?: number;
+
+  @ApiProperty({
+    description: 'Tax amount to apply to the subscription',
+    example: 11.88,
+    type: Number,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  subscriptionTaxAmount?: number;
+
+  @ApiProperty({
+    description: 'Total price to bill (basePrice + taxAmount)',
+    example: 110.88,
+    type: Number,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  subscriptionTotalPrice?: number;
+
+  @ApiProperty({
     description: 'Auto-renovación de la suscripción',
     example: true,
     type: Boolean,
     required: false,
   })
   subscriptionAutoRenew?: boolean;
+
+  @ApiProperty({
+    description: 'Frecuencia de facturación (sobrescribe la del partner request si se proporciona)',
+    example: 'monthly',
+    enum: ['monthly', 'quarterly', 'semiannual', 'annual'],
+    required: false,
+  })
+  @IsEnum(['monthly', 'quarterly', 'semiannual', 'annual'])
+  @IsOptional()
+  subscriptionBillingFrequency?: 'monthly' | 'quarterly' | 'semiannual' | 'annual';
+
+  @ApiProperty({
+    description: 'Whether to include tax in the subscription price',
+    example: true,
+    type: Boolean,
+    required: false,
+    default: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  subscriptionIncludeTax?: boolean;
+
+  @ApiProperty({
+    description: 'Tax percentage to apply (e.g., 12 for 12%)',
+    example: 12.0,
+    type: Number,
+    required: false,
+    nullable: true,
+  })
+  @IsNumber()
+  @IsOptional()
+  subscriptionTaxPercent?: number | null;
 
   @ApiProperty({
     description: 'Límite máximo de tenants',

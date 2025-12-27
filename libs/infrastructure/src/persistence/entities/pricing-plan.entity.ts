@@ -6,6 +6,7 @@ import {
   OneToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { PricingPeriodEntity } from './pricing-period.entity';
 import { PricingPromotionEntity } from './pricing-promotion.entity';
@@ -18,6 +19,7 @@ import { PricingPlanLimitsEntity } from './pricing-plan-limits.entity';
  * Mapea la entidad de dominio PricingPlan a la tabla de base de datos
  */
 @Entity('pricing_plans')
+@Index('IDX_PRICING_PLANS_SLUG', ['slug'])
 export class PricingPlanEntity {
   @PrimaryGeneratedColumn()
   id: number;

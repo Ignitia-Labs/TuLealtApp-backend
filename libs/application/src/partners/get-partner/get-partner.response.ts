@@ -112,10 +112,10 @@ export class GetPartnerResponse {
 
   @ApiProperty({
     description: 'ID de la moneda',
-    example: 'currency-8',
-    type: String,
+    example: 8,
+    type: Number,
   })
-  currencyId: string;
+  currencyId: number;
 
   @ApiProperty({
     description: 'Razón social del negocio',
@@ -216,7 +216,7 @@ export class GetPartnerResponse {
     website: string | null,
     socialMedia: string | null,
     rewardType: string,
-    currencyId: string,
+    currencyId: number,
     businessName: string,
     taxId: string,
     fiscalAddress: string,

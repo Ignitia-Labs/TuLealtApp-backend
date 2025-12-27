@@ -11,6 +11,9 @@ import { RewardsController } from './controllers/rewards.controller';
 import { TransactionsController } from './controllers/transactions.controller';
 import { NotificationsController } from './controllers/notifications.controller';
 import { PartnerRequestsController } from './controllers/partner-requests.controller';
+import { SubscriptionsController } from './controllers/subscriptions.controller';
+import { SubscriptionUsageController } from './controllers/subscription-usage.controller';
+import { PartnerLimitsController } from './controllers/partner-limits.controller';
 import {
   CreateUserHandler,
   GetUserProfileHandler,
@@ -32,6 +35,8 @@ import {
   GetPartnersHandler,
   UpdatePartnerHandler,
   DeletePartnerHandler,
+  GetPartnerLimitsHandler,
+  UpdatePartnerLimitsHandler,
   CreateTenantHandler,
   GetTenantHandler,
   GetTenantsByPartnerHandler,
@@ -58,6 +63,18 @@ import {
   AddPartnerRequestNotesHandler,
   RejectPartnerRequestHandler,
   ProcessPartnerRequestHandler,
+  AssignPartnerRequestUserHandler,
+  GetAdminStaffUsersHandler,
+  CreateSubscriptionHandler,
+  GetSubscriptionHandler,
+  GetSubscriptionsHandler,
+  UpdateSubscriptionHandler,
+  DeleteSubscriptionHandler,
+  CreateSubscriptionUsageHandler,
+  GetSubscriptionUsageHandler,
+  UpdateSubscriptionUsageHandler,
+  DeleteSubscriptionUsageHandler,
+  CreateSubscriptionAlertHandler,
 } from '@libs/application';
 import { InfrastructureModule, StorageModule } from '@libs/infrastructure';
 import { HealthController } from '@libs/shared';
@@ -82,6 +99,9 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     TransactionsController,
     NotificationsController,
     PartnerRequestsController,
+    SubscriptionsController,
+    SubscriptionUsageController,
+    PartnerLimitsController,
     HealthController,
   ],
   providers: [
@@ -91,6 +111,7 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     LockUserHandler,
     UpdateUserProfileHandler,
     UpdateMyProfileHandler,
+    GetAdminStaffUsersHandler,
     // Handlers de aplicación - Pricing
     GetPricingPlansHandler,
     GetPricingPlanByIdHandler,
@@ -108,6 +129,8 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     GetPartnersHandler,
     UpdatePartnerHandler,
     DeletePartnerHandler,
+    GetPartnerLimitsHandler,
+    UpdatePartnerLimitsHandler,
     // Handlers de aplicación - Tenants
     CreateTenantHandler,
     GetTenantHandler,
@@ -142,6 +165,20 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     AddPartnerRequestNotesHandler,
     RejectPartnerRequestHandler,
     ProcessPartnerRequestHandler,
+    AssignPartnerRequestUserHandler,
+    // Handlers de aplicación - Subscriptions
+    CreateSubscriptionHandler,
+    GetSubscriptionHandler,
+    GetSubscriptionsHandler,
+    UpdateSubscriptionHandler,
+    DeleteSubscriptionHandler,
+    // Handlers de aplicación - Subscription Usage
+    CreateSubscriptionUsageHandler,
+    GetSubscriptionUsageHandler,
+    UpdateSubscriptionUsageHandler,
+    DeleteSubscriptionUsageHandler,
+    // Handlers de aplicación - Subscription Alerts
+    CreateSubscriptionAlertHandler,
   ],
 })
 export class AdminApiModule {}

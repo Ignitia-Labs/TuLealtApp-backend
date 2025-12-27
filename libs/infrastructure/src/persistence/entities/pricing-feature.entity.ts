@@ -6,6 +6,7 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { PricingPlanEntity } from './pricing-plan.entity';
 
@@ -14,6 +15,7 @@ import { PricingPlanEntity } from './pricing-plan.entity';
  * Almacena las características de un plan
  */
 @Entity('pricing_features')
+@Index('IDX_PRICING_FEATURES_PLAN_ID', ['pricingPlanId'])
 export class PricingFeatureEntity {
   @PrimaryGeneratedColumn()
   id: number;
