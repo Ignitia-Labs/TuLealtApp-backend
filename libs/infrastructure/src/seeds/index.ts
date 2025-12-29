@@ -17,6 +17,7 @@ export * from './base/base-seed';
 export * from './shared/admin-user.seed';
 export * from './shared/pricing-plan.seed';
 export * from './shared/currency.seed';
+export * from './shared/migrate-user-data-to-memberships.seed';
 
 // Context-specific seeds
 export * from './admin/admin.seed';

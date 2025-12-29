@@ -12,7 +12,7 @@ import {
   GetUserProfileResponse,
   JwtPayload,
 } from '@libs/application';
-import { JwtAuthGuard, RolesGuard, Roles, CurrentUser } from '@libs/shared';
+import { JwtAuthGuard, CurrentUser } from '@libs/shared';
 
 /**
  * Controlador de autenticación para Customer API
@@ -34,17 +34,32 @@ export class CustomerAuthController {
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar un nuevo cliente' })
+  @ApiOperation({
+    summary: 'Registrar un nuevo cliente',
+    description:
+      'Registra un nuevo cliente. Si se proporcionan tenantId y registrationBranchId, se creará automáticamente una membership para ese tenant.',
+  })
   @ApiBody({ type: RegisterUserRequest })
   @ApiResponse({
     status: 201,
-    description: 'Cliente registrado exitosamente',
+    description:
+      'Cliente registrado exitosamente. Si se proporcionaron tenantId y registrationBranchId, incluye información de la membership creada.',
     type: RegisterUserResponse,
     example: {
       id: 1,
       email: 'customer@example.com',
       name: 'John Doe',
       createdAt: '2024-01-15T10:30:00.000Z',
+      membership: {
+        id: 1,
+        userId: 1,
+        tenantId: 1,
+        tenantName: 'Café Delicia',
+        points: 0,
+        qrCode: 'QR-USER-1-TENANT-1-A3B5C7',
+        status: 'active',
+        joinedDate: '2024-01-15T10:30:00.000Z',
+      },
     },
   })
   async register(@Body() request: RegisterUserRequest): Promise<RegisterUserResponse> {

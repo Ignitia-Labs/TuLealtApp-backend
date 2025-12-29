@@ -27,13 +27,17 @@ export {
 // Guards
 export * from './guards/jwt-auth.guard';
 export * from './guards/roles.guard';
+export * from './guards/customer-resource.guard';
+export * from './guards/membership-ownership.guard';
 
 // Decorators
 export * from './decorators/roles.decorator';
 export * from './decorators/current-user.decorator';
+export * from './decorators/resource-type.decorator';
 
 // Pricing
 export * from './pricing';
 
 // Utils
 export * from './utils/slug.util';
+export * from './utils/qr-code.util';

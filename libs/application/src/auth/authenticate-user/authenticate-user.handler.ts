@@ -54,6 +54,19 @@ export class AuthenticateUserHandler {
       throw new UnauthorizedException(`User does not have required role: ${requiredRole}`);
     }
 
+    // Validar contexto según rol del usuario
+    if (context === 'customer' && !user.hasRole('CUSTOMER')) {
+      throw new UnauthorizedException('Only customers can access customer API');
+    }
+
+    if (context === 'admin' && !user.hasRole('ADMIN') && !user.hasRole('STAFF')) {
+      throw new UnauthorizedException('Only admins and staff can access admin API');
+    }
+
+    if (context === 'partner' && !user.hasRole('PARTNER')) {
+      throw new UnauthorizedException('Only partners can access partner API');
+    }
+
     // Generar token JWT
     const token = this.generateJwtToken(user, context || 'default');
 

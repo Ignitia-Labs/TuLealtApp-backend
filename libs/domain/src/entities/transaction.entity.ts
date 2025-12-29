@@ -10,6 +10,7 @@ export class Transaction {
   constructor(
     public readonly id: number,
     public readonly userId: number,
+    public readonly membershipId: number | null, // FK a customer_memberships (opcional para compatibilidad)
     public readonly type: TransactionType,
     public readonly points: number, // Positivo para ganar, negativo para canjear/expirar
     public readonly description: string,
@@ -29,12 +30,14 @@ export class Transaction {
     description: string,
     metadata: Record<string, any> | null = null,
     status: TransactionStatus = 'completed',
+    membershipId: number | null = null,
     id?: number,
   ): Transaction {
     const now = new Date();
     return new Transaction(
       id || 0,
       userId,
+      membershipId,
       type,
       points,
       description,
@@ -53,8 +56,9 @@ export class Transaction {
     points: number,
     description: string,
     metadata: Record<string, any> | null = null,
+    membershipId: number | null = null,
   ): Transaction {
-    return Transaction.create(userId, 'earn', Math.abs(points), description, metadata);
+    return Transaction.create(userId, 'earn', Math.abs(points), description, metadata, 'completed', membershipId);
   }
 
   /**
@@ -65,8 +69,9 @@ export class Transaction {
     points: number,
     description: string,
     metadata: Record<string, any> | null = null,
+    membershipId: number | null = null,
   ): Transaction {
-    return Transaction.create(userId, 'redeem', -Math.abs(points), description, metadata);
+    return Transaction.create(userId, 'redeem', -Math.abs(points), description, metadata, 'completed', membershipId);
   }
 
   /**
@@ -76,8 +81,9 @@ export class Transaction {
     userId: number,
     points: number,
     description: string,
+    membershipId: number | null = null,
   ): Transaction {
-    return Transaction.create(userId, 'expire', -Math.abs(points), description, null);
+    return Transaction.create(userId, 'expire', -Math.abs(points), description, null, 'completed', membershipId);
   }
 
   /**
@@ -88,8 +94,9 @@ export class Transaction {
     points: number,
     description: string,
     metadata: Record<string, any> | null = null,
+    membershipId: number | null = null,
   ): Transaction {
-    return Transaction.create(userId, 'adjust', points, description, metadata);
+    return Transaction.create(userId, 'adjust', points, description, metadata, 'completed', membershipId);
   }
 
   /**
@@ -106,6 +113,7 @@ export class Transaction {
     return new Transaction(
       this.id,
       this.userId,
+      this.membershipId,
       this.type,
       this.points,
       this.description,
@@ -123,6 +131,7 @@ export class Transaction {
     return new Transaction(
       this.id,
       this.userId,
+      this.membershipId,
       this.type,
       this.points,
       this.description,

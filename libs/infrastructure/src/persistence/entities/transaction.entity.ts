@@ -6,14 +6,18 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { UserEntity } from './user.entity';
+import { CustomerMembershipEntity } from './customer-membership.entity';
 
 /**
  * Entidad de persistencia para Transaction
  * Almacena las transacciones de puntos
  */
 @Entity('transactions')
+@Index('IDX_TRANSACTIONS_USER_ID', ['userId'])
+@Index('IDX_TRANSACTIONS_MEMBERSHIP_ID', ['membershipId'])
 export class TransactionEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -26,6 +30,16 @@ export class TransactionEntity {
 
   @Column('int')
   userId: number;
+
+  @ManyToOne(() => CustomerMembershipEntity, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'membershipId' })
+  membership: CustomerMembershipEntity | null;
+
+  @Column('int', { nullable: true })
+  membershipId: number | null;
 
   @Column('varchar', { length: 20 })
   type: 'earn' | 'redeem' | 'expire' | 'adjust';

@@ -19,6 +19,15 @@ export class TransactionDto {
   userId: number;
 
   @ApiProperty({
+    description: 'ID de la membership asociada a la transacción (opcional)',
+    example: 1,
+    type: Number,
+    nullable: true,
+    required: false,
+  })
+  membershipId: number | null;
+
+  @ApiProperty({
     description: 'Tipo de transacción',
     example: 'earn',
     enum: ['earn', 'redeem', 'expire', 'adjust'],
@@ -73,6 +82,7 @@ export class TransactionDto {
   constructor(
     id: number,
     userId: number,
+    membershipId: number | null,
     type: 'earn' | 'redeem' | 'expire' | 'adjust',
     points: number,
     description: string,
@@ -83,6 +93,7 @@ export class TransactionDto {
   ) {
     this.id = id;
     this.userId = userId;
+    this.membershipId = membershipId;
     this.type = type;
     this.points = points;
     this.description = description;

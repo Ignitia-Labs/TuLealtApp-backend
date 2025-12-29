@@ -38,6 +38,7 @@ import { PlanChangeEntity } from './entities/plan-change.entity';
 import { PartnerRequestEntity } from './entities/partner-request.entity';
 import { PartnerArchiveEntity } from './entities/partner-archive.entity';
 import { CatalogEntity } from './entities/catalog.entity';
+import { CustomerMembershipEntity } from './entities/customer-membership.entity';
 import { UserRepository } from './repositories/user.repository';
 import { PricingPlanRepository } from './repositories/pricing-plan.repository';
 import { RateExchangeRepository } from './repositories/rate-exchange.repository';
@@ -63,6 +64,7 @@ import { PlanChangeRepository } from './repositories/plan-change.repository';
 import { PartnerRequestRepository } from './repositories/partner-request.repository';
 import { PartnerArchiveRepository } from './repositories/partner-archive.repository';
 import { CatalogRepository } from './repositories/catalog.repository';
+import { CustomerMembershipRepository } from './repositories/customer-membership.repository';
 import {
   IUserRepository,
   IPricingPlanRepository,
@@ -85,10 +87,11 @@ import {
   ISubscriptionEventRepository,
   ISubscriptionAlertRepository,
   ICouponRepository,
-      IPlanChangeRepository,
-      IPartnerRequestRepository,
-      ICatalogRepository,
-    } from '@libs/domain';
+  IPlanChangeRepository,
+  IPartnerRequestRepository,
+  ICatalogRepository,
+  ICustomerMembershipRepository,
+} from '@libs/domain';
 
 /**
  * Módulo de base de datos
@@ -136,6 +139,7 @@ import {
       PartnerRequestEntity,
       PartnerArchiveEntity,
       CatalogEntity,
+      CustomerMembershipEntity,
     ]),
   ],
   providers: [
@@ -260,6 +264,11 @@ import {
       provide: 'ICatalogRepository',
       useClass: CatalogRepository,
     },
+    CustomerMembershipRepository,
+    {
+      provide: 'ICustomerMembershipRepository',
+      useClass: CustomerMembershipRepository,
+    },
   ],
   exports: [
     'IUserRepository',
@@ -286,6 +295,7 @@ import {
     'IPlanChangeRepository',
     'IPartnerRequestRepository',
     'ICatalogRepository',
+    'ICustomerMembershipRepository',
     UserRepository,
     PricingPlanRepository,
     RateExchangeRepository,
@@ -311,6 +321,7 @@ import {
     PartnerRequestRepository,
     PartnerArchiveRepository,
     CatalogRepository,
+    CustomerMembershipRepository,
     TypeOrmModule,
   ],
 })

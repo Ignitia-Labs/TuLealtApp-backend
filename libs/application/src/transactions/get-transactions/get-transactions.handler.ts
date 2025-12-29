@@ -16,9 +16,25 @@ export class GetTransactionsHandler {
   async execute(request: GetTransactionsRequest): Promise<GetTransactionsResponse> {
     let transactions;
 
-    if (request.type) {
+    // Si se proporciona membershipId, filtrar por membership
+    if (request.membershipId) {
+      if (request.type) {
+        transactions = await this.transactionRepository.findByTypeAndMembershipId(
+          request.membershipId,
+          request.type,
+        );
+      } else {
+        transactions = await this.transactionRepository.findByMembershipId(
+          request.membershipId,
+          request.skip || 0,
+          request.take || 20,
+        );
+      }
+    } else if (request.type) {
+      // Filtrar por tipo y userId
       transactions = await this.transactionRepository.findByType(request.userId, request.type);
     } else {
+      // Filtrar solo por userId
       transactions = await this.transactionRepository.findByUserId(
         request.userId,
         request.skip || 0,
@@ -33,6 +49,7 @@ export class GetTransactionsHandler {
         new TransactionDto(
           transaction.id,
           transaction.userId,
+          transaction.membershipId,
           transaction.type,
           transaction.points,
           transaction.description,

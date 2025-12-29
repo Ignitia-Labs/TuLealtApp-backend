@@ -8,12 +8,13 @@ export class CustomerTier {
     public readonly id: number,
     public readonly tenantId: number,
     public readonly name: string,
-    public readonly description: string,
+    public readonly description: string | null,
     public readonly minPoints: number,
     public readonly maxPoints: number | null, // null para el tier más alto (sin límite)
     public readonly color: string,
     public readonly benefits: string[],
     public readonly multiplier: number | null, // Multiplicador de puntos (ej: 1.05 = 5% bonus)
+    public readonly icon: string | null, // Nombre del icono o URL
     public readonly priority: number, // Orden del tier (1 = más bajo, mayor número = más alto)
     public readonly status: 'active' | 'inactive',
     public readonly createdAt: Date,
@@ -26,13 +27,14 @@ export class CustomerTier {
   static create(
     tenantId: number,
     name: string,
-    description: string,
     minPoints: number,
     color: string,
     benefits: string[],
     priority: number,
+    description: string | null = null,
     maxPoints: number | null = null,
     multiplier: number | null = null,
+    icon: string | null = null,
     status: 'active' | 'inactive' = 'active',
     id?: number,
   ): CustomerTier {
@@ -47,6 +49,7 @@ export class CustomerTier {
       color,
       benefits,
       multiplier,
+      icon,
       priority,
       status,
       now,

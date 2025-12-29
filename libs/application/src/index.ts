@@ -313,3 +313,63 @@ export * from './catalogs/delete-catalog/delete-catalog.response';
 
 // Catalogs DTOs for Swagger
 export * from './catalogs/dto/catalog-swagger.dto';
+
+// Points Rules Handlers
+export * from './points-rules/get-points-rules/get-points-rules.handler';
+export * from './points-rules/get-points-rules/get-points-rules.request';
+export * from './points-rules/get-points-rules/get-points-rules.response';
+export * from './points-rules/get-points-rule/get-points-rule.handler';
+export * from './points-rules/get-points-rule/get-points-rule.request';
+export * from './points-rules/get-points-rule/get-points-rule.response';
+export * from './points-rules/create-points-rule/create-points-rule.handler';
+export * from './points-rules/create-points-rule/create-points-rule.request';
+export * from './points-rules/create-points-rule/create-points-rule.response';
+export * from './points-rules/update-points-rule/update-points-rule.handler';
+export * from './points-rules/update-points-rule/update-points-rule.request';
+export * from './points-rules/update-points-rule/update-points-rule.response';
+export * from './points-rules/delete-points-rule/delete-points-rule.handler';
+export * from './points-rules/delete-points-rule/delete-points-rule.request';
+export * from './points-rules/delete-points-rule/delete-points-rule.response';
+
+// Points Rules DTOs for Swagger
+export * from './points-rules/dto/points-rule.dto';
+
+// Customer Tiers Handlers
+export * from './customer-tiers/get-customer-tiers/get-customer-tiers.handler';
+export * from './customer-tiers/get-customer-tiers/get-customer-tiers.request';
+export * from './customer-tiers/get-customer-tiers/get-customer-tiers.response';
+export * from './customer-tiers/get-customer-tier/get-customer-tier.handler';
+export * from './customer-tiers/get-customer-tier/get-customer-tier.request';
+export * from './customer-tiers/get-customer-tier/get-customer-tier.response';
+export * from './customer-tiers/create-customer-tier/create-customer-tier.handler';
+export * from './customer-tiers/create-customer-tier/create-customer-tier.request';
+export * from './customer-tiers/create-customer-tier/create-customer-tier.response';
+export * from './customer-tiers/update-customer-tier/update-customer-tier.handler';
+export * from './customer-tiers/update-customer-tier/update-customer-tier.request';
+export * from './customer-tiers/update-customer-tier/update-customer-tier.response';
+export * from './customer-tiers/delete-customer-tier/delete-customer-tier.handler';
+export * from './customer-tiers/delete-customer-tier/delete-customer-tier.request';
+export * from './customer-tiers/delete-customer-tier/delete-customer-tier.response';
+
+// Customer Tiers DTOs for Swagger
+export * from './customer-tiers/dto/customer-tier.dto';
+
+// Customer Memberships Handlers
+export * from './customer-memberships/get-customer-memberships/get-customer-memberships.handler';
+export * from './customer-memberships/get-customer-memberships/get-customer-memberships.request';
+export * from './customer-memberships/get-customer-memberships/get-customer-memberships.response';
+export * from './customer-memberships/get-customer-membership/get-customer-membership.handler';
+export * from './customer-memberships/get-customer-membership/get-customer-membership.request';
+export * from './customer-memberships/get-customer-membership/get-customer-membership.response';
+export * from './customer-memberships/create-customer-membership/create-customer-membership.handler';
+export * from './customer-memberships/create-customer-membership/create-customer-membership.request';
+export * from './customer-memberships/create-customer-membership/create-customer-membership.response';
+export * from './customer-memberships/update-customer-membership/update-customer-membership.handler';
+export * from './customer-memberships/update-customer-membership/update-customer-membership.request';
+export * from './customer-memberships/update-customer-membership/update-customer-membership.response';
+export * from './customer-memberships/delete-customer-membership/delete-customer-membership.handler';
+export * from './customer-memberships/delete-customer-membership/delete-customer-membership.request';
+export * from './customer-memberships/delete-customer-membership/delete-customer-membership.response';
+
+// Customer Memberships DTOs for Swagger
+export * from './customer-memberships/dto/customer-membership.dto';

@@ -9,8 +9,6 @@ import {
   Index,
 } from 'typeorm';
 import { PartnerEntity } from './partner.entity';
-import { TenantEntity } from './tenant.entity';
-import { BranchEntity } from './branch.entity';
 
 /**
  * Entidad de persistencia para User
@@ -59,37 +57,8 @@ export class UserEntity {
   @Column('int', { nullable: true })
   partnerId: number | null;
 
-  @ManyToOne(() => TenantEntity, {
-    onDelete: 'SET NULL',
-    nullable: true,
-  })
-  @JoinColumn({ name: 'tenantId' })
-  tenant: TenantEntity | null;
-
-  @Column('int', { nullable: true })
-  tenantId: number | null;
-
-  @ManyToOne(() => BranchEntity, {
-    onDelete: 'SET NULL',
-    nullable: true,
-  })
-  @JoinColumn({ name: 'branchId' })
-  branch: BranchEntity | null;
-
-  @Column('int', { nullable: true })
-  branchId: number | null;
-
-  @Column('int', { default: 0 })
-  points: number;
-
-  @Column('varchar', { length: 100, unique: true, nullable: true })
-  qrCode: string | null;
-
   @Column('text', { nullable: true })
   avatar: string | null;
-
-  @Column('int', { nullable: true })
-  tierId: number | null; // FK a CustomerTier (se creará después)
 
   @Column('varchar', { length: 20, default: 'active' })
   status: 'active' | 'inactive' | 'suspended';

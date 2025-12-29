@@ -3,11 +3,14 @@ import { InfrastructureModule } from '@libs/infrastructure';
 import { HealthController } from '@libs/shared';
 import { CustomerAuthModule } from './auth/customer-auth.module';
 import { PricingController } from './controllers/pricing.controller';
+import { CustomerMembershipsController } from './controllers/customer-memberships.controller';
 import {
   GetPricingPlansHandler,
   GetPricingPlanByIdHandler,
   GetPricingPlanBySlugHandler,
   CalculatePriceHandler,
+  GetCustomerMembershipsHandler,
+  GetCustomerMembershipHandler,
 } from '@libs/application';
 
 /**
@@ -16,13 +19,16 @@ import {
  */
 @Module({
   imports: [InfrastructureModule, CustomerAuthModule],
-  controllers: [PricingController, HealthController],
+  controllers: [PricingController, CustomerMembershipsController, HealthController],
   providers: [
     // Handlers de aplicación - Pricing
     GetPricingPlansHandler,
     GetPricingPlanByIdHandler,
     GetPricingPlanBySlugHandler,
     CalculatePriceHandler,
+    // Handlers de aplicación - Customer Memberships
+    GetCustomerMembershipsHandler,
+    GetCustomerMembershipHandler,
   ],
 })
 export class CustomerApiModule {}

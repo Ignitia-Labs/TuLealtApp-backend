@@ -47,5 +47,17 @@ export class GetTransactionsRequest {
   })
   @IsOptional()
   type?: 'earn' | 'redeem' | 'expire' | 'adjust';
+
+  @ApiProperty({
+    description: 'ID de la membership para filtrar transacciones',
+    example: 1,
+    type: Number,
+    required: false,
+    minimum: 1,
+  })
+  @IsNumber()
+  @IsOptional()
+  @Min(1)
+  membershipId?: number;
 }
 

@@ -50,6 +50,9 @@ export class CustomerTierEntity {
   @Column('decimal', { precision: 5, scale: 2, nullable: true })
   multiplier: number | null; // Multiplicador de puntos (ej: 1.05 = 5% bonus)
 
+  @Column('varchar', { length: 255, nullable: true })
+  icon: string | null; // Nombre del icono o URL
+
   @Column('int')
   priority: number; // Orden del tier (1 = más bajo, mayor número = más alto)
 

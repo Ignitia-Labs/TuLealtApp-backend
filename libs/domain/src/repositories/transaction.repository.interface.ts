@@ -16,9 +16,22 @@ export interface ITransactionRepository {
   findByUserId(userId: number, skip?: number, take?: number): Promise<Transaction[]>;
 
   /**
+   * Busca todas las transacciones de una membership
+   */
+  findByMembershipId(membershipId: number, skip?: number, take?: number): Promise<Transaction[]>;
+
+  /**
    * Busca transacciones por tipo
    */
   findByType(userId: number, type: 'earn' | 'redeem' | 'expire' | 'adjust'): Promise<Transaction[]>;
+
+  /**
+   * Busca transacciones por tipo y membership
+   */
+  findByTypeAndMembershipId(
+    membershipId: number,
+    type: 'earn' | 'redeem' | 'expire' | 'adjust',
+  ): Promise<Transaction[]>;
 
   /**
    * Guarda una nueva transacción

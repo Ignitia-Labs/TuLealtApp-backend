@@ -15,6 +15,9 @@ import { SubscriptionsController } from './controllers/subscriptions.controller'
 import { SubscriptionUsageController } from './controllers/subscription-usage.controller';
 import { PartnerLimitsController } from './controllers/partner-limits.controller';
 import { CatalogsController } from './controllers/catalogs.controller';
+import { PointsRulesController } from './controllers/points-rules.controller';
+import { CustomerTiersController } from './controllers/customer-tiers.controller';
+import { CustomerMembershipsController } from './controllers/customer-memberships.controller';
 import {
   CreateUserHandler,
   GetUserProfileHandler,
@@ -81,6 +84,21 @@ import {
   CreateCatalogHandler,
   UpdateCatalogHandler,
   DeleteCatalogHandler,
+  GetPointsRulesHandler,
+  GetPointsRuleHandler,
+  CreatePointsRuleHandler,
+  UpdatePointsRuleHandler,
+  DeletePointsRuleHandler,
+  GetCustomerTiersHandler,
+  GetCustomerTierHandler,
+  CreateCustomerTierHandler,
+  UpdateCustomerTierHandler,
+  DeleteCustomerTierHandler,
+  GetCustomerMembershipsHandler,
+  GetCustomerMembershipHandler,
+  CreateCustomerMembershipHandler,
+  UpdateCustomerMembershipHandler,
+  DeleteCustomerMembershipHandler,
 } from '@libs/application';
 import { InfrastructureModule, StorageModule } from '@libs/infrastructure';
 import { HealthController } from '@libs/shared';
@@ -109,6 +127,9 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     SubscriptionUsageController,
     PartnerLimitsController,
     CatalogsController,
+    PointsRulesController,
+    CustomerTiersController,
+    CustomerMembershipsController,
     HealthController,
   ],
   providers: [
@@ -192,6 +213,24 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     CreateCatalogHandler,
     UpdateCatalogHandler,
     DeleteCatalogHandler,
+    // Handlers de aplicación - Points Rules
+    GetPointsRulesHandler,
+    GetPointsRuleHandler,
+    CreatePointsRuleHandler,
+    UpdatePointsRuleHandler,
+    DeletePointsRuleHandler,
+    // Handlers de aplicación - Customer Tiers
+    GetCustomerTiersHandler,
+    GetCustomerTierHandler,
+    CreateCustomerTierHandler,
+    UpdateCustomerTierHandler,
+    DeleteCustomerTierHandler,
+    // Handlers de aplicación - Customer Memberships
+    GetCustomerMembershipsHandler,
+    GetCustomerMembershipHandler,
+    CreateCustomerMembershipHandler,
+    UpdateCustomerMembershipHandler,
+    DeleteCustomerMembershipHandler,
   ],
 })
 export class AdminApiModule {}

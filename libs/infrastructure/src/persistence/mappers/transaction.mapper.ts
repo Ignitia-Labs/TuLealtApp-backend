@@ -12,6 +12,7 @@ export class TransactionMapper {
     return new Transaction(
       persistenceEntity.id,
       persistenceEntity.userId,
+      persistenceEntity.membershipId ?? null,
       persistenceEntity.type,
       persistenceEntity.points,
       persistenceEntity.description,
@@ -31,6 +32,7 @@ export class TransactionMapper {
       entity.id = domainEntity.id;
     }
     entity.userId = domainEntity.userId;
+    entity.membershipId = domainEntity.membershipId ?? null;
     entity.type = domainEntity.type;
     entity.points = domainEntity.points;
     entity.description = domainEntity.description;

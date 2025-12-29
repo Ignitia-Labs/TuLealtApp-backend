@@ -38,12 +38,35 @@ export class TransactionRepository implements ITransactionRepository {
     return entities.map((entity) => TransactionMapper.toDomain(entity));
   }
 
+  async findByMembershipId(membershipId: number, skip = 0, take = 100): Promise<Transaction[]> {
+    const entities = await this.transactionRepository.find({
+      where: { membershipId },
+      skip,
+      take,
+      order: { createdAt: 'DESC' },
+    });
+
+    return entities.map((entity) => TransactionMapper.toDomain(entity));
+  }
+
   async findByType(
     userId: number,
     type: 'earn' | 'redeem' | 'expire' | 'adjust',
   ): Promise<Transaction[]> {
     const entities = await this.transactionRepository.find({
       where: { userId, type },
+      order: { createdAt: 'DESC' },
+    });
+
+    return entities.map((entity) => TransactionMapper.toDomain(entity));
+  }
+
+  async findByTypeAndMembershipId(
+    membershipId: number,
+    type: 'earn' | 'redeem' | 'expire' | 'adjust',
+  ): Promise<Transaction[]> {
+    const entities = await this.transactionRepository.find({
+      where: { membershipId, type },
       order: { createdAt: 'DESC' },
     });
 

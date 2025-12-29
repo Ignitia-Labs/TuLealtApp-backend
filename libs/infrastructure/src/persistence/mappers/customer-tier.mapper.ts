@@ -19,6 +19,7 @@ export class CustomerTierMapper {
       persistenceEntity.color,
       persistenceEntity.benefits,
       persistenceEntity.multiplier,
+      persistenceEntity.icon,
       persistenceEntity.priority,
       persistenceEntity.status,
       persistenceEntity.createdAt,
@@ -42,10 +43,13 @@ export class CustomerTierMapper {
     entity.color = domainEntity.color;
     entity.benefits = domainEntity.benefits;
     entity.multiplier = domainEntity.multiplier;
+    entity.icon = domainEntity.icon;
     entity.priority = domainEntity.priority;
     entity.status = domainEntity.status;
+    if (domainEntity.id > 0) {
     entity.createdAt = domainEntity.createdAt;
     entity.updatedAt = domainEntity.updatedAt;
+    }
     return entity;
   }
 }

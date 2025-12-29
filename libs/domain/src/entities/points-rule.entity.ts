@@ -5,6 +5,11 @@
  */
 export type PointsRuleType = 'purchase' | 'birthday' | 'referral' | 'visit' | 'custom';
 
+export type ApplicableHours = {
+  start: string; // Format: "HH:mm" (e.g., "09:00")
+  end: string; // Format: "HH:mm" (e.g., "18:00")
+};
+
 export class PointsRule {
   constructor(
     public readonly id: number,
@@ -16,6 +21,9 @@ export class PointsRule {
     public readonly multiplier: number | null,
     public readonly minAmount: number | null,
     public readonly applicableDays: number[] | null, // 0 = Domingo, 1 = Lunes, etc.
+    public readonly applicableHours: ApplicableHours | null,
+    public readonly validFrom: Date | null,
+    public readonly validUntil: Date | null,
     public readonly status: 'active' | 'inactive',
     public readonly priority: number,
     public readonly createdAt: Date,
@@ -35,6 +43,9 @@ export class PointsRule {
     multiplier: number | null = null,
     minAmount: number | null = null,
     applicableDays: number[] | null = null,
+    applicableHours: ApplicableHours | null = null,
+    validFrom: Date | null = null,
+    validUntil: Date | null = null,
     status: 'active' | 'inactive' = 'active',
     id?: number,
   ): PointsRule {
@@ -49,6 +60,9 @@ export class PointsRule {
       multiplier,
       minAmount,
       applicableDays,
+      applicableHours,
+      validFrom,
+      validUntil,
       status,
       priority,
       now,

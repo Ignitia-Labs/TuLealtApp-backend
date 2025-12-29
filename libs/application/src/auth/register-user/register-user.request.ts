@@ -1,8 +1,9 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, IsNumber, IsOptional, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
  * DTO de request para registrar un usuario
+ * Si se proporcionan tenantId y registrationBranchId, se creará automáticamente una membership
  */
 export class RegisterUserRequest {
   @ApiProperty({
@@ -60,4 +61,28 @@ export class RegisterUserRequest {
   @IsNotEmpty()
   @MinLength(6)
   password: string;
+
+  @ApiProperty({
+    description: 'ID del tenant para crear automáticamente la membership (opcional)',
+    example: 1,
+    type: Number,
+    minimum: 1,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  @Min(1)
+  tenantId?: number;
+
+  @ApiProperty({
+    description: 'ID de la branch donde se registra el customer (opcional, requerido si se proporciona tenantId)',
+    example: 5,
+    type: Number,
+    minimum: 1,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  @Min(1)
+  registrationBranchId?: number;
 }

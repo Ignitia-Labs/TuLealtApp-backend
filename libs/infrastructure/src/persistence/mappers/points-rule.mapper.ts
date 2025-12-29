@@ -19,6 +19,9 @@ export class PointsRuleMapper {
       persistenceEntity.multiplier,
       persistenceEntity.minAmount,
       persistenceEntity.applicableDays,
+      persistenceEntity.applicableHours,
+      persistenceEntity.validFrom,
+      persistenceEntity.validUntil,
       persistenceEntity.status,
       persistenceEntity.priority,
       persistenceEntity.createdAt,
@@ -42,10 +45,15 @@ export class PointsRuleMapper {
     entity.multiplier = domainEntity.multiplier;
     entity.minAmount = domainEntity.minAmount;
     entity.applicableDays = domainEntity.applicableDays;
+    entity.applicableHours = domainEntity.applicableHours;
+    entity.validFrom = domainEntity.validFrom;
+    entity.validUntil = domainEntity.validUntil;
     entity.status = domainEntity.status;
     entity.priority = domainEntity.priority;
+    if (domainEntity.id > 0) {
     entity.createdAt = domainEntity.createdAt;
     entity.updatedAt = domainEntity.updatedAt;
+    }
     return entity;
   }
 }

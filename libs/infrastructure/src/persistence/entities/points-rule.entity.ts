@@ -48,6 +48,15 @@ export class PointsRuleEntity {
   @Column('json', { nullable: true })
   applicableDays: number[] | null; // 0 = Domingo, 1 = Lunes, etc.
 
+  @Column('json', { nullable: true })
+  applicableHours: { start: string; end: string } | null; // { start: "09:00", end: "18:00" }
+
+  @Column('datetime', { nullable: true })
+  validFrom: Date | null;
+
+  @Column('datetime', { nullable: true })
+  validUntil: Date | null;
+
   @Column('varchar', { length: 20, default: 'active' })
   status: 'active' | 'inactive';
 
