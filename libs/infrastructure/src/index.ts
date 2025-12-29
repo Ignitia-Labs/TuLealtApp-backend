@@ -7,6 +7,7 @@
 export * from './infrastructure.module';
 export * from './persistence/database.module';
 export * from './storage/storage.module';
+export * from './services/services.module';
 
 // Entities
 export * from './persistence/entities/user.entity';
@@ -82,6 +83,11 @@ export * from './persistence/mappers/partner-request.mapper';
 
 // Storage Services
 export * from './storage/s3.service';
+
+// Infrastructure Services
+export * from './services/invoice-pdf.service';
+export * from './services/email.service';
+export * from './services/payment-gateway.service';
 
 // Seeds
 export * from './seeds';

@@ -187,6 +187,44 @@ Las migraciones se ejecutan en orden cronológico según su timestamp:
    - `tenant_features` - Características habilitadas de tenants
    - `branches` - Sucursales de tenants
 
+3. **`1766349670000-CreateCurrencies.ts`** - Crea la tabla de monedas
+
+4. **`1766349680000-UpdatePartnersTenantsCurrencyRelation.ts`** - Actualiza relaciones de moneda en partners y tenants
+
+5. **`1766753859000-CreateCountries.ts`** - Crea la tabla de países
+
+6. **`1766753860000-AddCountryRelations.ts`** - Agrega relaciones de país a partners y tenants
+
+7. **`1766769531000-CreatePartnerArchives.ts`** - Crea tabla para archivar partners eliminados
+
+8. **`1766772588000-UpdatePartnerRequestCountryToCountryId.ts`** - Actualiza partner requests para usar countryId
+
+9. **`1766785140000-AddPlanIdAndBillingFrequencyToPartnerRequests.ts`** - Agrega campos de plan a partner requests
+
+10. **`1766787800000-AddTaxFieldsToPartnerSubscriptions.ts`** - Agrega campos de impuestos a suscripciones
+
+11. **`1766870089000-UpdatePartnerRequestCurrencyIdToInt.ts`** - Actualiza currencyId a entero en partner requests
+
+12. **`1766872709000-CreateCatalogs.ts`** - Crea tabla de catálogos
+
+13. **`1766873000000-AddSlugToCatalogs.ts`** - Agrega campo slug a catálogos
+
+14. **`1766873100000-MakeSlugNotNullAndUnique.ts`** - Hace slug obligatorio y único
+
+15. **`1766873200000-UpdateCategoriesToBusinessCategories.ts`** - Actualiza categorías a business categories
+
+16. **`1767000000000-UpdateExistingTablesAndCreateNewEntities.ts`** - Migración grande que actualiza tablas existentes y crea nuevas entidades:
+    - Actualiza tabla `users` con nuevos campos (partnerId, tenantId, branchId, points, qrCode, tierId)
+    - Crea tablas: `pricing_plan_limits`, `rewards`, `transactions`, `points_rules`, `customer_tiers`, `reward_tiers`, `notifications`, `invitation_codes`, `billing_cycles`, `invoices`, `invoice_items`, `payments`, `saved_payment_methods`, `subscription_events`, `subscription_alerts`, `coupons`, `plan_changes`, `partner_requests`
+
+17. **`1768000000000-AddPointsRuleAndCustomerTierFields.ts`** - Agrega campos relacionados con puntos y tiers
+
+18. **`1768100000000-CreateCustomerMemberships.ts`** - Crea tabla de membresías de clientes
+
+19. **`1768200000000-AddMembershipIdToTransactions.ts`** - Agrega membershipId a transacciones
+
+20. **`1768200000000-RemoveCustomerFieldsFromUsers.ts`** - Elimina campos obsoletos de users (tenantId, branchId, points, tierId, qrCode) que ahora están en customer_memberships
+
 ## Conexión Manual
 
 ### Desde línea de comandos:

@@ -1314,6 +1314,6 @@ export class [Nombre]Response {
 
 ---
 
-**Última actualización:** 2024-01-20
+**Última actualización:** 2025-01-20
 **Versión del guideline:** 1.0
 

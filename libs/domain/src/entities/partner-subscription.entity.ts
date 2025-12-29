@@ -320,4 +320,149 @@ export class PartnerSubscription {
       new Date(),
     );
   }
+
+  /**
+   * Método de dominio para agregar crédito a la suscripción
+   * Se usa cuando un partner realiza un pago excedente o un pago sin factura asociada
+   */
+  addCredit(amount: number): PartnerSubscription {
+    if (amount <= 0) {
+      throw new Error('Credit amount must be positive');
+    }
+
+    return new PartnerSubscription(
+      this.id,
+      this.partnerId,
+      this.planId,
+      this.planType,
+      this.startDate,
+      this.renewalDate,
+      this.status,
+      this.billingFrequency,
+      this.billingAmount,
+      this.includeTax,
+      this.taxPercent,
+      this.basePrice,
+      this.taxAmount,
+      this.totalPrice,
+      this.currency,
+      this.nextBillingDate,
+      this.nextBillingAmount,
+      this.currentPeriodStart,
+      this.currentPeriodEnd,
+      this.trialEndDate,
+      this.pausedAt,
+      this.pauseReason,
+      this.gracePeriodDays,
+      this.retryAttempts,
+      this.maxRetryAttempts,
+      this.creditBalance + amount, // Agregar crédito
+      this.discountPercent,
+      this.discountCode,
+      this.lastPaymentDate,
+      this.lastPaymentAmount,
+      this.paymentStatus,
+      this.autoRenew,
+      this.createdAt,
+      new Date(),
+    );
+  }
+
+  /**
+   * Método de dominio para actualizar la información del último pago
+   * Se usa cuando se registra un pago exitoso
+   */
+  updateLastPayment(amount: number, date: Date): PartnerSubscription {
+    if (amount <= 0) {
+      throw new Error('Payment amount must be positive');
+    }
+
+    return new PartnerSubscription(
+      this.id,
+      this.partnerId,
+      this.planId,
+      this.planType,
+      this.startDate,
+      this.renewalDate,
+      this.status,
+      this.billingFrequency,
+      this.billingAmount,
+      this.includeTax,
+      this.taxPercent,
+      this.basePrice,
+      this.taxAmount,
+      this.totalPrice,
+      this.currency,
+      this.nextBillingDate,
+      this.nextBillingAmount,
+      this.currentPeriodStart,
+      this.currentPeriodEnd,
+      this.trialEndDate,
+      this.pausedAt,
+      this.pauseReason,
+      this.gracePeriodDays,
+      this.retryAttempts,
+      this.maxRetryAttempts,
+      this.creditBalance,
+      this.discountPercent,
+      this.discountCode,
+      date, // lastPaymentDate
+      amount, // lastPaymentAmount
+      'paid', // paymentStatus
+      this.autoRenew,
+      this.createdAt,
+      new Date(),
+    );
+  }
+
+  /**
+   * Método de dominio para aplicar crédito a una factura
+   * Reduce el crédito disponible cuando se aplica a una factura pendiente
+   */
+  applyCreditToInvoice(amount: number): PartnerSubscription {
+    if (amount <= 0) {
+      throw new Error('Credit amount to apply must be positive');
+    }
+
+    if (amount > this.creditBalance) {
+      throw new Error('Insufficient credit balance');
+    }
+
+    return new PartnerSubscription(
+      this.id,
+      this.partnerId,
+      this.planId,
+      this.planType,
+      this.startDate,
+      this.renewalDate,
+      this.status,
+      this.billingFrequency,
+      this.billingAmount,
+      this.includeTax,
+      this.taxPercent,
+      this.basePrice,
+      this.taxAmount,
+      this.totalPrice,
+      this.currency,
+      this.nextBillingDate,
+      this.nextBillingAmount,
+      this.currentPeriodStart,
+      this.currentPeriodEnd,
+      this.trialEndDate,
+      this.pausedAt,
+      this.pauseReason,
+      this.gracePeriodDays,
+      this.retryAttempts,
+      this.maxRetryAttempts,
+      this.creditBalance - amount, // Reducir crédito
+      this.discountPercent,
+      this.discountCode,
+      this.lastPaymentDate,
+      this.lastPaymentAmount,
+      this.paymentStatus,
+      this.autoRenew,
+      this.createdAt,
+      new Date(),
+    );
+  }
 }

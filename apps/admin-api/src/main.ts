@@ -83,6 +83,10 @@ async function bootstrap() {
     .addTag('Currencies', 'Gestión de monedas')
     .addTag('Subscription Usage', 'Gestión de uso de suscripciones')
     .addTag('Subscriptions', 'Gestión de suscripciones')
+    .addTag('Billing Cycles', 'Gestión de ciclos de facturación')
+    .addTag('Invoices', 'Gestión de facturas')
+    .addTag('Payments', 'Gestión de pagos')
+    .addTag('Payment Webhooks', 'Webhooks de gateways de pago')
     .addBearerAuth(
       {
         type: 'http',

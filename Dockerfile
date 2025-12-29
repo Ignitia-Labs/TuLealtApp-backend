@@ -23,6 +23,14 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
+# Instalar tzdata para timezone
+RUN apk add --no-cache tzdata
+
+# Establecer timezone (ajustar según tu región)
+ENV TZ=America/Mexico_City
+RUN cp /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone
+
 # Copiar package.json para instalar solo dependencias de producción
 COPY package.json package-lock.json* ./
 

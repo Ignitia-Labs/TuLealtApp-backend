@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { CatalogType } from '@libs/domain';
 
 /**
  * DTO de Swagger para Catalog
@@ -15,10 +16,10 @@ export class CatalogSwaggerDto {
   @ApiProperty({
     description: 'Tipo de catálogo',
     example: 'BUSINESS_CATEGORIES',
-    enum: ['BUSINESS_CATEGORIES', 'REWARD_TYPES', 'PAYMENT_METHODS'],
+    enum: ['BUSINESS_CATEGORIES', 'REWARD_TYPES', 'PAYMENT_METHODS', 'PAYMENT_CATEGORIES'],
     type: String,
   })
-  type: 'BUSINESS_CATEGORIES' | 'REWARD_TYPES' | 'PAYMENT_METHODS';
+  type: CatalogType;
 
   @ApiProperty({
     description: 'Valor del elemento de catálogo',
@@ -64,7 +65,7 @@ export class CatalogSwaggerDto {
 
   constructor(
     id: number,
-    type: 'BUSINESS_CATEGORIES' | 'REWARD_TYPES' | 'PAYMENT_METHODS',
+    type: CatalogType,
     value: string,
     slug: string,
     displayOrder: number,

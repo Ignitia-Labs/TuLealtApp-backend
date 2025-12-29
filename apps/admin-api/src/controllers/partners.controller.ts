@@ -37,6 +37,9 @@ import {
   DeletePartnerHandler,
   DeletePartnerRequest,
   DeletePartnerResponse,
+  GetPartnerAccountBalanceHandler,
+  GetPartnerAccountBalanceRequest,
+  GetPartnerAccountBalanceResponse,
 } from '@libs/application';
 import {
   UnauthorizedErrorResponseDto,
@@ -69,6 +72,7 @@ export class PartnersController {
     private readonly getPartnersHandler: GetPartnersHandler,
     private readonly updatePartnerHandler: UpdatePartnerHandler,
     private readonly deletePartnerHandler: DeletePartnerHandler,
+    private readonly getPartnerAccountBalanceHandler: GetPartnerAccountBalanceHandler,
   ) {}
 
   @Get()
@@ -362,6 +366,71 @@ export class PartnersController {
       console.error(`[PartnersController] Error en getPartner para ID ${id}:`, error);
       throw error;
     }
+  }
+
+  @Get(':id/account-balance')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: 'Obtener estado de cuenta del partner',
+    description:
+      'Retorna el estado de cuenta completo del partner incluyendo pagos totales, facturas pendientes, crédito disponible y saldo pendiente. También incluye las últimas 10 facturas pendientes y los últimos 10 pagos realizados.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID del partner',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Estado de cuenta obtenido exitosamente',
+    type: GetPartnerAccountBalanceResponse,
+    example: {
+      partnerId: 1,
+      totalPaid: 500.0,
+      totalPending: 200.0,
+      creditBalance: 50.0,
+      outstandingBalance: 150.0,
+      availableCredit: 0.0,
+      currency: 'USD',
+      lastPaymentDate: '2024-01-15T10:30:00.000Z',
+      lastPaymentAmount: 99.99,
+      pendingInvoices: [
+        {
+          id: 5,
+          invoiceNumber: 'INV-2024-005',
+          total: 200.0,
+          dueDate: '2024-02-15T00:00:00.000Z',
+          status: 'pending',
+        },
+      ],
+      recentPayments: [
+        {
+          id: 10,
+          amount: 99.99,
+          paymentDate: '2024-01-15T10:30:00.000Z',
+          status: 'paid',
+        },
+      ],
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Partner no encontrado o sin suscripción',
+    example: {
+      statusCode: 404,
+      message: 'Partner with ID 1 not found',
+      error: 'Not Found',
+    },
+  })
+  async getPartnerAccountBalance(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<GetPartnerAccountBalanceResponse> {
+    const request = new GetPartnerAccountBalanceRequest();
+    request.partnerId = id;
+    return this.getPartnerAccountBalanceHandler.execute(request);
   }
 
   @Patch(':id')

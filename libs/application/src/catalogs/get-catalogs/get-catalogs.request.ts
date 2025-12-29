@@ -9,10 +9,10 @@ export class GetCatalogsRequest {
   @ApiProperty({
     description: 'Tipo de catálogo a filtrar (opcional, si no se especifica retorna todos)',
     example: 'BUSINESS_CATEGORIES',
-    enum: ['BUSINESS_CATEGORIES', 'REWARD_TYPES', 'PAYMENT_METHODS'],
+    enum: ['BUSINESS_CATEGORIES', 'REWARD_TYPES', 'PAYMENT_METHODS', 'PAYMENT_CATEGORIES'],
     required: false,
   })
-  @IsEnum(['BUSINESS_CATEGORIES', 'REWARD_TYPES', 'PAYMENT_METHODS'])
+  @IsEnum(['BUSINESS_CATEGORIES', 'REWARD_TYPES', 'PAYMENT_METHODS', 'PAYMENT_CATEGORIES'])
   @IsOptional()
   type?: CatalogType;
 

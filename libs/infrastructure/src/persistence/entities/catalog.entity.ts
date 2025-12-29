@@ -20,7 +20,7 @@ export class CatalogEntity {
   id: number;
 
   @Column('varchar', { length: 50 })
-  type: 'BUSINESS_CATEGORIES' | 'REWARD_TYPES' | 'PAYMENT_METHODS';
+  type: 'BUSINESS_CATEGORIES' | 'REWARD_TYPES' | 'PAYMENT_METHODS' | 'PAYMENT_CATEGORIES';
 
   @Column('varchar', { length: 255 })
   value: string;

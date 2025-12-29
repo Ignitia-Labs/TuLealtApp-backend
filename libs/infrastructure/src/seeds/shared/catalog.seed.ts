@@ -77,6 +77,13 @@ export class CatalogSeed extends BaseSeed {
         { value: 'efectivo', label: 'Efectivo' },
       ];
 
+      // PAYMENT_CATEGORIES - Categorías de pago
+      const PAYMENT_CATEGORIES = [
+        { value: 'account_credit', label: 'Abono a Cuenta' },
+        { value: 'advance_payment', label: 'Pago Anticipado' },
+        { value: 'extraordinary', label: 'Pago Extraordinario' },
+      ];
+
       // Procesar BUSINESS_CATEGORIES
       let displayOrder = 1;
       for (const category of BUSINESS_CATEGORIES) {
@@ -251,6 +258,48 @@ export class CatalogSeed extends BaseSeed {
           } else {
             this.log(
               `- Catálogo ya existe: PAYMENT_METHODS - ${paymentMethod.label} (ID: ${existingCatalog.id}, slug: ${existingCatalog.slug})`,
+            );
+          }
+        }
+        displayOrder++;
+      }
+
+      // Procesar PAYMENT_CATEGORIES
+      displayOrder = 1;
+      for (const paymentCategory of PAYMENT_CATEGORIES) {
+        const key = `PAYMENT_CATEGORIES:${paymentCategory.value}`;
+        const existingCatalog = existingCatalogsMap.get(key.toLowerCase());
+
+        if (!existingCatalog) {
+          const catalog = Catalog.create(
+            'PAYMENT_CATEGORIES',
+            paymentCategory.label,
+            paymentCategory.value,
+            displayOrder,
+            true,
+          );
+          const savedCatalog = await this.catalogRepository.save(catalog);
+          existingCatalogsMap.set(key.toLowerCase(), savedCatalog);
+          this.log(
+            `✓ Catálogo creado: PAYMENT_CATEGORIES - ${paymentCategory.label} (slug: ${paymentCategory.value}, ID: ${savedCatalog.id})`,
+          );
+        } else {
+          // Verificar si necesita actualización
+          if (
+            existingCatalog.value !== paymentCategory.label ||
+            existingCatalog.slug !== paymentCategory.value
+          ) {
+            const updatedCatalog = existingCatalog.updateValue(
+              paymentCategory.label,
+              paymentCategory.value,
+            );
+            await this.catalogRepository.update(updatedCatalog);
+            this.log(
+              `✓ Catálogo actualizado: PAYMENT_CATEGORIES - ${paymentCategory.label} (ID: ${existingCatalog.id}, slug: ${paymentCategory.value})`,
+            );
+          } else {
+            this.log(
+              `- Catálogo ya existe: PAYMENT_CATEGORIES - ${paymentCategory.label} (ID: ${existingCatalog.id}, slug: ${existingCatalog.slug})`,
             );
           }
         }

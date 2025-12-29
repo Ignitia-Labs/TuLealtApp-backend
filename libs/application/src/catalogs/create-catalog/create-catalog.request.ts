@@ -17,10 +17,10 @@ export class CreateCatalogRequest {
   @ApiProperty({
     description: 'Tipo de catálogo',
     example: 'BUSINESS_CATEGORIES',
-    enum: ['BUSINESS_CATEGORIES', 'REWARD_TYPES', 'PAYMENT_METHODS'],
+    enum: ['BUSINESS_CATEGORIES', 'REWARD_TYPES', 'PAYMENT_METHODS', 'PAYMENT_CATEGORIES'],
     type: String,
   })
-  @IsEnum(['BUSINESS_CATEGORIES', 'REWARD_TYPES', 'PAYMENT_METHODS'])
+  @IsEnum(['BUSINESS_CATEGORIES', 'REWARD_TYPES', 'PAYMENT_METHODS', 'PAYMENT_CATEGORIES'])
   @IsNotEmpty()
   type: CatalogType;
 

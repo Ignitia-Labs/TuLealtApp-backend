@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { UsersController } from './controllers/users.controller';
 import { PricingController } from './controllers/pricing.controller';
 import { RateExchangeController } from './controllers/rate-exchange.controller';
@@ -18,6 +19,10 @@ import { CatalogsController } from './controllers/catalogs.controller';
 import { PointsRulesController } from './controllers/points-rules.controller';
 import { CustomerTiersController } from './controllers/customer-tiers.controller';
 import { CustomerMembershipsController } from './controllers/customer-memberships.controller';
+import { BillingCyclesController } from './controllers/billing-cycles.controller';
+import { InvoicesController } from './controllers/invoices.controller';
+import { PaymentsController } from './controllers/payments.controller';
+import { PaymentWebhooksController } from './controllers/payment-webhooks.controller';
 import {
   CreateUserHandler,
   GetUserProfileHandler,
@@ -41,6 +46,7 @@ import {
   DeletePartnerHandler,
   GetPartnerLimitsHandler,
   UpdatePartnerLimitsHandler,
+  GetPartnerAccountBalanceHandler,
   CreateTenantHandler,
   GetTenantHandler,
   GetTenantsByPartnerHandler,
@@ -99,6 +105,17 @@ import {
   CreateCustomerMembershipHandler,
   UpdateCustomerMembershipHandler,
   DeleteCustomerMembershipHandler,
+  CreateBillingCycleHandler,
+  GetBillingCycleHandler,
+  GetBillingCyclesHandler,
+  CreateInvoiceHandler,
+  GetInvoiceHandler,
+  GetInvoicesHandler,
+  CreatePaymentHandler,
+  GetPaymentHandler,
+  GetPaymentsHandler,
+  BillingCycleGeneratorService,
+  InvoiceReminderService,
 } from '@libs/application';
 import { InfrastructureModule, StorageModule } from '@libs/infrastructure';
 import { HealthController } from '@libs/shared';
@@ -109,7 +126,12 @@ import { AdminAuthModule } from './auth/admin-auth.module';
  * Configura todos los controladores y servicios necesarios
  */
 @Module({
-  imports: [InfrastructureModule, StorageModule, AdminAuthModule],
+  imports: [
+    ScheduleModule.forRoot(),
+    InfrastructureModule,
+    StorageModule,
+    AdminAuthModule,
+  ],
   controllers: [
     UsersController,
     PricingController,
@@ -130,6 +152,10 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     PointsRulesController,
     CustomerTiersController,
     CustomerMembershipsController,
+    BillingCyclesController,
+    InvoicesController,
+    PaymentsController,
+    PaymentWebhooksController,
     HealthController,
   ],
   providers: [
@@ -159,6 +185,7 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     DeletePartnerHandler,
     GetPartnerLimitsHandler,
     UpdatePartnerLimitsHandler,
+    GetPartnerAccountBalanceHandler,
     // Handlers de aplicación - Tenants
     CreateTenantHandler,
     GetTenantHandler,
@@ -231,6 +258,22 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     CreateCustomerMembershipHandler,
     UpdateCustomerMembershipHandler,
     DeleteCustomerMembershipHandler,
+    // Handlers de aplicación - Billing Cycles
+    CreateBillingCycleHandler,
+    GetBillingCycleHandler,
+    GetBillingCyclesHandler,
+    // Handlers de aplicación - Invoices
+    CreateInvoiceHandler,
+    GetInvoiceHandler,
+    GetInvoicesHandler,
+    // Handlers de aplicación - Payments
+    CreatePaymentHandler,
+    GetPaymentHandler,
+    GetPaymentsHandler,
+    // Servicios de aplicación - Billing Cycles
+    BillingCycleGeneratorService,
+    // Servicios de aplicación - Invoices
+    InvoiceReminderService,
   ],
 })
 export class AdminApiModule {}

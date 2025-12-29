@@ -35,6 +35,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
+      - TZ=America/Mexico_City
       - DB_HOST=mariadb
       - DB_PORT=3306
       - DB_USER=${DB_USER}

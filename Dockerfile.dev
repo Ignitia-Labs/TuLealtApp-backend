@@ -3,8 +3,13 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Instalar dependencias del sistema necesarias para compilación
-RUN apk add --no-cache python3 make g++
+# Instalar dependencias del sistema necesarias para compilación y timezone
+RUN apk add --no-cache python3 make g++ tzdata
+
+# Establecer timezone (ajustar según tu región)
+ENV TZ=America/Mexico_City
+RUN cp /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone
 
 # Copiar archivos de configuración
 COPY package.json package-lock.json* ./
