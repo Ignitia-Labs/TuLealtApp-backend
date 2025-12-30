@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -6,6 +6,7 @@ import {
   IInvoiceRepository,
   IPaymentRepository,
   ISubscriptionEventRepository,
+  ICommissionRepository,
 } from '@libs/domain';
 import { PartnerSubscriptionEntity, PartnerMapper } from '@libs/infrastructure';
 import { roundToTwoDecimals, registerSubscriptionEvent } from '@libs/shared';
@@ -15,7 +16,11 @@ import { DeleteBillingCycleResponse } from './delete-billing-cycle.response';
 /**
  * Handler para el caso de uso de eliminar un ciclo de facturación
  * También elimina la factura asociada si existe, los payments derivados asociados,
- * y revierte el crédito aplicado en la suscripción
+ * y revierte el crédito aplicado en la suscripción.
+ *
+ * Validaciones:
+ * - No permite eliminar el billing cycle si tiene comisiones pagadas (status = 'paid')
+ * - Si tiene comisiones hechas (status = 'pending' o 'cancelled'), las elimina automáticamente
  */
 @Injectable()
 export class DeleteBillingCycleHandler {
@@ -30,6 +35,8 @@ export class DeleteBillingCycleHandler {
     private readonly paymentRepository: IPaymentRepository,
     @Inject('ISubscriptionEventRepository')
     private readonly subscriptionEventRepository: ISubscriptionEventRepository,
+    @Inject('ICommissionRepository')
+    private readonly commissionRepository: ICommissionRepository,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
   ) {}
@@ -41,11 +48,60 @@ export class DeleteBillingCycleHandler {
       throw new NotFoundException(`Billing cycle with ID ${request.billingCycleId} not found`);
     }
 
-    // 1. Buscar la factura asociada para obtener el crédito aplicado (antes de eliminarla)
+    // 1. Verificar comisiones asociadas al billing cycle
+    const commissions = await this.commissionRepository.findByBillingCycleId(
+      request.billingCycleId,
+    );
+
+    let commissionsDeleted = 0;
+
+    if (commissions.length > 0) {
+      // Verificar si hay comisiones pagadas
+      const paidCommissions = commissions.filter((c) => c.status === 'paid');
+
+      if (paidCommissions.length > 0) {
+        this.logger.warn(
+          `No se puede eliminar el billing cycle ${request.billingCycleId} porque tiene ${paidCommissions.length} comisión(es) pagada(s)`,
+        );
+        throw new BadRequestException(
+          `No se puede eliminar el billing cycle porque tiene ${paidCommissions.length} comisión(es) pagada(s). Las comisiones pagadas no pueden ser eliminadas.`,
+        );
+      }
+
+      // Si hay comisiones hechas (pending o cancelled), eliminarlas como prevención
+      const nonPaidCommissions = commissions.filter(
+        (c) => c.status === 'pending' || c.status === 'cancelled',
+      );
+
+      commissionsDeleted = nonPaidCommissions.length;
+
+      if (nonPaidCommissions.length > 0) {
+        this.logger.log(
+          `Eliminando ${nonPaidCommissions.length} comisión(es) asociada(s) al billing cycle ${request.billingCycleId} antes de eliminarlo`,
+        );
+
+        for (const commission of nonPaidCommissions) {
+          try {
+            await this.commissionRepository.delete(commission.id);
+            this.logger.log(
+              `Comisión ${commission.id} (status: ${commission.status}) eliminada exitosamente`,
+            );
+          } catch (error) {
+            this.logger.error(
+              `Error al eliminar comisión ${commission.id}: ${error.message}`,
+              error.stack,
+            );
+            throw error;
+          }
+        }
+      }
+    }
+
+    // 2. Buscar la factura asociada para obtener el crédito aplicado (antes de eliminarla)
     const invoice = await this.invoiceRepository.findByBillingCycleId(request.billingCycleId);
     const creditApplied = invoice?.creditApplied || 0;
 
-    // 2. Buscar todos los payments derivados asociados al billing cycle
+    // 3. Buscar todos los payments derivados asociados al billing cycle
     const derivedPayments = await this.paymentRepository.findByBillingCycleId(
       request.billingCycleId,
     );
@@ -54,7 +110,7 @@ export class DeleteBillingCycleHandler {
       `Encontrados ${derivedPayments.length} payments derivados asociados al billing cycle ${request.billingCycleId}`,
     );
 
-    // 3. Eliminar los payments derivados ANTES de eliminar el billing cycle
+    // 4. Eliminar los payments derivados ANTES de eliminar el billing cycle
     // Esto es crítico porque si eliminamos el billing cycle primero, TypeORM
     // automáticamente pondrá billingCycleId en null debido a onDelete: 'SET NULL'
     for (const payment of derivedPayments) {
@@ -84,7 +140,7 @@ export class DeleteBillingCycleHandler {
       }
     }
 
-    // 4. Log sobre el crédito revertido (ya no actualizamos el creditBalance almacenado)
+    // 5. Log sobre el crédito revertido (ya no actualizamos el creditBalance almacenado)
     // NOTA: El crédito se calcula dinámicamente cada vez que se necesita, por lo que no es necesario
     // actualizar el valor almacenado. Al eliminar los payments derivados, el crédito disponible
     // se recalculará automáticamente la próxima vez que se consulte.
@@ -106,22 +162,22 @@ export class DeleteBillingCycleHandler {
       }
     }
 
-    // 5. Eliminar la factura asociada si existe
+    // 6. Eliminar la factura asociada si existe
     if (invoice) {
       await this.invoiceRepository.delete(invoice.id);
       this.logger.log(`Factura ${invoice.id} eliminada (asociada al billing cycle ${request.billingCycleId})`);
     }
 
-    // 6. Obtener la suscripción para registrar el evento antes de eliminar
+    // 7. Obtener la suscripción para registrar el evento antes de eliminar
     const subscriptionEntity = await this.subscriptionRepository.findOne({
       where: { id: billingCycle.subscriptionId },
     });
 
-    // 7. Eliminar el ciclo de facturación
+    // 8. Eliminar el ciclo de facturación
     await this.billingCycleRepository.delete(request.billingCycleId);
 
     this.logger.log(
-      `Billing cycle ${request.billingCycleId} eliminado exitosamente. Payments derivados eliminados: ${derivedPayments.length}, Crédito revertido: ${creditApplied}`,
+      `Billing cycle ${request.billingCycleId} eliminado exitosamente. Payments derivados eliminados: ${derivedPayments.length}, Comisiones eliminadas: ${commissionsDeleted}, Crédito revertido: ${creditApplied}`,
     );
 
     // Registrar evento de suscripción para ciclo de facturación eliminado
@@ -133,7 +189,7 @@ export class DeleteBillingCycleHandler {
             type: 'custom',
             subscription,
             title: 'Ciclo de facturación eliminado',
-            description: `Se eliminó el ciclo de facturación #${billingCycle.cycleNumber} por un monto de ${billingCycle.totalAmount} ${billingCycle.currency}. Payments derivados eliminados: ${derivedPayments.length}`,
+            description: `Se eliminó el ciclo de facturación #${billingCycle.cycleNumber} por un monto de ${billingCycle.totalAmount} ${billingCycle.currency}. Payments derivados eliminados: ${derivedPayments.length}, Comisiones eliminadas: ${commissionsDeleted}`,
             metadata: {
               cycleNumber: billingCycle.cycleNumber,
               totalAmount: billingCycle.totalAmount,
@@ -144,6 +200,7 @@ export class DeleteBillingCycleHandler {
               status: billingCycle.status,
               paymentStatus: billingCycle.paymentStatus,
               derivedPaymentsDeleted: derivedPayments.length,
+              commissionsDeleted: commissionsDeleted,
               creditReverted: creditApplied,
             },
           },
