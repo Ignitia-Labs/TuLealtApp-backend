@@ -1,5 +1,15 @@
 import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
-import { IPaymentRepository, IBillingCycleRepository, IInvoiceRepository, Payment } from '@libs/domain';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import {
+  IPaymentRepository,
+  IBillingCycleRepository,
+  IInvoiceRepository,
+  ISubscriptionEventRepository,
+  Payment,
+} from '@libs/domain';
+import { PartnerSubscriptionEntity, PartnerMapper } from '@libs/infrastructure';
+import { registerSubscriptionEvent } from '@libs/shared';
 import { DeletePaymentRequest } from './delete-payment.request';
 import { DeletePaymentResponse } from './delete-payment.response';
 
@@ -22,6 +32,10 @@ export class DeletePaymentHandler {
     private readonly billingCycleRepository: IBillingCycleRepository,
     @Inject('IInvoiceRepository')
     private readonly invoiceRepository: IInvoiceRepository,
+    @Inject('ISubscriptionEventRepository')
+    private readonly subscriptionEventRepository: ISubscriptionEventRepository,
+    @InjectRepository(PartnerSubscriptionEntity)
+    private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
   ) {}
 
   async execute(request: DeletePaymentRequest): Promise<DeletePaymentResponse> {
@@ -48,8 +62,41 @@ export class DeletePaymentHandler {
     // Revertir el impacto del payment original (o del derivado si es que se está eliminando directamente)
     await this.revertPaymentImpact(payment);
 
+    // Obtener la suscripción para registrar el evento antes de eliminar
+    const subscriptionEntity = await this.subscriptionRepository.findOne({
+      where: { id: payment.subscriptionId },
+    });
+
     // Eliminar el pago
     await this.paymentRepository.delete(request.paymentId);
+
+    // Registrar evento de suscripción para pago eliminado
+    if (subscriptionEntity) {
+      try {
+        const subscription = PartnerMapper.subscriptionToDomain(subscriptionEntity);
+        await registerSubscriptionEvent(
+          {
+            type: 'custom',
+            subscription,
+            paymentId: payment.id,
+            invoiceId: payment.invoiceId,
+            title: 'Pago eliminado',
+            description: `Se eliminó el pago ${payment.id} de ${payment.amount} ${payment.currency}. Método: ${payment.paymentMethod}`,
+            metadata: {
+              amount: payment.amount,
+              currency: payment.currency,
+              paymentMethod: payment.paymentMethod,
+              transactionId: payment.transactionId,
+              status: payment.status,
+            },
+          },
+          this.subscriptionEventRepository,
+        );
+      } catch (error) {
+        // Log error pero no fallar el proceso de eliminación
+        console.error('Error registering subscription event for deleted payment:', error);
+      }
+    }
 
     return new DeletePaymentResponse(
       request.paymentId,

@@ -22,10 +22,10 @@ Esta carpeta contiene toda la documentación del proyecto organizada por temas.
 
 ### 💰 Pagos y Facturación
 
+- **[GUIA-FLujo-UI-SUBSCRIPTIONS-BILLING-PAYMENTS.md](./GUIA-FLujo-UI-SUBSCRIPTIONS-BILLING-PAYMENTS.md)** - 🎨 **Guía completa para implementar en UI** - Flujo de subscriptions, billing-cycles y payments
 - **[FLUJO-PAGOS-INVOICES-BILLING.md](./FLUJO-PAGOS-INVOICES-BILLING.md)** - Flujo completo de pagos, invoices y ciclos de facturación
 - **[RESUMEN-IMPLEMENTACION-MEJORAS.md](./RESUMEN-IMPLEMENTACION-MEJORAS.md)** - Resumen de implementación de mejoras realizadas ✅
 - **[STRIPE-INTEGRATION-GUIDE.md](./STRIPE-INTEGRATION-GUIDE.md)** - Guía de integración con Stripe para pagos
-- **[PLAN-MEJORAS-PAGOS-BILLING.md](./PLAN-MEJORAS-PAGOS-BILLING.md)** - ⚠️ Plan obsoleto (ya implementado, ver RESUMEN-IMPLEMENTACION-MEJORAS.md)
 
 ### 👥 Clientes y Membresías
 
@@ -81,6 +81,7 @@ z-docs/
 - **Crear una nueva API**: [API-GUIDELINE.md](./API-GUIDELINE.md)
 - **Configurar base de datos**: [DATABASE.md](./DATABASE.md)
 - **Usar Docker**: [DOCKER.md](./DOCKER.md)
+- **Implementar en UI**: [GUIA-FLujo-UI-SUBSCRIPTIONS-BILLING-PAYMENTS.md](./GUIA-FLujo-UI-SUBSCRIPTIONS-BILLING-PAYMENTS.md) 🎨
 - **Sistema de pagos**: [FLUJO-PAGOS-INVOICES-BILLING.md](./FLUJO-PAGOS-INVOICES-BILLING.md)
 - **Integrar Stripe**: [STRIPE-INTEGRATION-GUIDE.md](./STRIPE-INTEGRATION-GUIDE.md)
 - **Cron jobs**: [GUIA-CRON-JOBS.md](./GUIA-CRON-JOBS.md)

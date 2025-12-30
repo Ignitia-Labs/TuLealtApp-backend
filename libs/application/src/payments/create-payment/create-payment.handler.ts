@@ -12,6 +12,7 @@ import {
   IInvoiceRepository,
   IBillingCycleRepository,
   IPartnerRepository,
+  ISubscriptionEventRepository,
   Payment,
   PaymentMethod,
   InvoicePaymentMethod,
@@ -22,7 +23,7 @@ import {
   PartnerMapper,
   EmailService,
 } from '@libs/infrastructure';
-import { roundToTwoDecimals } from '@libs/shared';
+import { roundToTwoDecimals, registerSubscriptionEvent } from '@libs/shared';
 import { CreatePaymentRequest } from './create-payment.request';
 import { CreatePaymentResponse } from './create-payment.response';
 import { CommissionCalculationService } from '../../commissions/calculate-commission/commission-calculation.service';
@@ -43,6 +44,8 @@ export class CreatePaymentHandler {
     private readonly billingCycleRepository: IBillingCycleRepository,
     @Inject('IPartnerRepository')
     private readonly partnerRepository: IPartnerRepository,
+    @Inject('ISubscriptionEventRepository')
+    private readonly subscriptionEventRepository: ISubscriptionEventRepository,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
     private readonly emailService: EmailService,
@@ -159,6 +162,66 @@ export class CreatePaymentHandler {
     // Guardar el pago
     const savedPayment = await this.paymentRepository.save(payment);
 
+    // Si el pago es reembolsado, registrar evento de reembolso
+    if (savedPayment.status === 'refunded') {
+      try {
+        const subscriptionEntity = await this.subscriptionRepository.findOne({
+          where: { id: request.subscriptionId },
+        });
+        if (subscriptionEntity) {
+          const subscription = PartnerMapper.subscriptionToDomain(subscriptionEntity);
+          await registerSubscriptionEvent(
+            {
+              type: 'refund_issued',
+              subscription,
+              paymentId: savedPayment.id,
+              invoiceId: invoice?.id || null,
+              metadata: {
+                amount: savedPayment.amount,
+                currency: savedPayment.currency,
+                paymentMethod: savedPayment.paymentMethod,
+                transactionId: savedPayment.transactionId,
+              },
+            },
+            this.subscriptionEventRepository,
+          );
+        }
+      } catch (error) {
+        // Log error pero no fallar el proceso
+        this.logger.error('Error registering subscription event for refund:', error);
+      }
+    }
+
+    // Si el pago falla, registrar evento de pago fallido
+    if (savedPayment.status === 'failed') {
+      try {
+        const subscriptionEntity = await this.subscriptionRepository.findOne({
+          where: { id: request.subscriptionId },
+        });
+        if (subscriptionEntity) {
+          const subscription = PartnerMapper.subscriptionToDomain(subscriptionEntity);
+          await registerSubscriptionEvent(
+            {
+              type: 'payment_failed',
+              subscription,
+              paymentId: savedPayment.id,
+              invoiceId: invoice?.id || null,
+              metadata: {
+                amount: savedPayment.amount,
+                currency: savedPayment.currency,
+                paymentMethod: savedPayment.paymentMethod,
+                transactionId: savedPayment.transactionId,
+              },
+            },
+            this.subscriptionEventRepository,
+          );
+        }
+      } catch (error) {
+        // Log error pero no fallar el proceso
+        this.logger.error('Error registering subscription event for failed payment:', error);
+      }
+    }
+
     // Si el pago es exitoso, actualizar estados
     if (savedPayment.status === 'paid') {
       // Marcar como procesado
@@ -219,6 +282,31 @@ export class CreatePaymentHandler {
       } catch (error) {
         // Log error pero no fallar el proceso de pago
         this.logger.error('Error calculating commissions:', error);
+      }
+
+      // Registrar evento de suscripción para pago recibido o reintento
+      try {
+        const eventType = savedPayment.isRetry ? 'payment_retry' : 'payment_received';
+        await registerSubscriptionEvent(
+          {
+            type: eventType,
+            subscription: updatedSubscription,
+            paymentId: savedPayment.id,
+            invoiceId: invoice?.id || null,
+            metadata: {
+              amount: savedPayment.amount,
+              currency: savedPayment.currency,
+              paymentMethod: savedPayment.paymentMethod,
+              transactionId: savedPayment.transactionId,
+              isRetry: savedPayment.isRetry,
+              retryAttempt: savedPayment.retryAttempt,
+            },
+          },
+          this.subscriptionEventRepository,
+        );
+      } catch (error) {
+        // Log error pero no fallar el proceso de pago
+        this.logger.error('Error registering subscription event:', error);
       }
 
       // Si el pago no tiene factura asociada, aplicar a facturas y billing cycles pendientes

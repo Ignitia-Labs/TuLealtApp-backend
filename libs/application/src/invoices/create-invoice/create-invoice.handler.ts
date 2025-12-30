@@ -5,6 +5,7 @@ import {
   IInvoiceRepository,
   IBillingCycleRepository,
   IPartnerRepository,
+  ISubscriptionEventRepository,
   Invoice,
   InvoiceItem,
   BillingCycle,
@@ -17,7 +18,7 @@ import {
   InvoicePdfService,
   EmailService,
 } from '@libs/infrastructure';
-import { roundToTwoDecimals } from '@libs/shared';
+import { roundToTwoDecimals, registerSubscriptionEvent } from '@libs/shared';
 import { CreateInvoiceRequest } from './create-invoice.request';
 import { CreateInvoiceResponse, InvoiceItemResponse } from './create-invoice.response';
 
@@ -33,6 +34,8 @@ export class CreateInvoiceHandler {
     private readonly billingCycleRepository: IBillingCycleRepository,
     @Inject('IPartnerRepository')
     private readonly partnerRepository: IPartnerRepository,
+    @Inject('ISubscriptionEventRepository')
+    private readonly subscriptionEventRepository: ISubscriptionEventRepository,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
     @InjectRepository(InvoiceEntity)
@@ -373,6 +376,49 @@ export class CreateInvoiceHandler {
         new Date(),
       );
       await this.billingCycleRepository.update(updatedCycle);
+    }
+
+    // Registrar evento de suscripción para factura generada
+    try {
+      await registerSubscriptionEvent(
+        {
+          type: 'invoice_generated',
+          subscription,
+          invoiceId: savedInvoice.id,
+          metadata: {
+            invoiceNumber: savedInvoice.invoiceNumber,
+            total: savedInvoice.total,
+            subtotal: savedInvoice.subtotal,
+            taxAmount: savedInvoice.taxAmount,
+            discountAmount: savedInvoice.discountAmount,
+            creditApplied: savedInvoice.creditApplied,
+            currency: savedInvoice.currency,
+            dueDate: savedInvoice.dueDate,
+            billingCycleId: savedInvoice.billingCycleId,
+          },
+        },
+        this.subscriptionEventRepository,
+      );
+
+      // Si se aplicó crédito, registrar evento adicional
+      if (savedInvoice.creditApplied > 0) {
+        await registerSubscriptionEvent(
+          {
+            type: 'credit_applied',
+            subscription,
+            invoiceId: savedInvoice.id,
+            metadata: {
+              amount: savedInvoice.creditApplied,
+              currency: savedInvoice.currency,
+              invoiceNumber: savedInvoice.invoiceNumber,
+            },
+          },
+          this.subscriptionEventRepository,
+        );
+      }
+    } catch (error) {
+      // Log error pero no fallar la creación de la factura
+      console.error('Error registering subscription event for created invoice:', error);
     }
 
     // Convertir items a response format

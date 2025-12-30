@@ -10,9 +10,11 @@ import {
   IBillingCycleRepository,
   IPartnerRepository,
   ICurrencyRepository,
+  ISubscriptionEventRepository,
   BillingCycle,
 } from '@libs/domain';
 import { PartnerSubscriptionEntity, PartnerMapper } from '@libs/infrastructure';
+import { registerSubscriptionEvent } from '@libs/shared';
 import { CreateBillingCycleRequest } from './create-billing-cycle.request';
 import { CreateBillingCycleResponse } from './create-billing-cycle.response';
 
@@ -28,6 +30,8 @@ export class CreateBillingCycleHandler {
     private readonly partnerRepository: IPartnerRepository,
     @Inject('ICurrencyRepository')
     private readonly currencyRepository: ICurrencyRepository,
+    @Inject('ISubscriptionEventRepository')
+    private readonly subscriptionEventRepository: ISubscriptionEventRepository,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
   ) {}
@@ -110,6 +114,34 @@ export class CreateBillingCycleHandler {
 
     // Guardar el ciclo
     const savedCycle = await this.billingCycleRepository.save(billingCycle);
+
+    // Registrar evento de suscripción para ciclo de facturación creado
+    try {
+      await registerSubscriptionEvent(
+        {
+          type: 'custom',
+          subscription,
+          title: 'Ciclo de facturación creado',
+          description: `Se creó el ciclo de facturación #${savedCycle.cycleNumber} por un monto de ${savedCycle.totalAmount} ${savedCycle.currency}`,
+          metadata: {
+            cycleNumber: savedCycle.cycleNumber,
+            totalAmount: savedCycle.totalAmount,
+            amount: savedCycle.amount,
+            discountApplied: savedCycle.discountApplied,
+            currency: savedCycle.currency,
+            startDate: savedCycle.startDate,
+            endDate: savedCycle.endDate,
+            billingDate: savedCycle.billingDate,
+            dueDate: savedCycle.dueDate,
+            durationDays: savedCycle.durationDays,
+          },
+        },
+        this.subscriptionEventRepository,
+      );
+    } catch (error) {
+      // Log error pero no fallar la creación del ciclo
+      console.error('Error registering subscription event for created billing cycle:', error);
+    }
 
     // Obtener información de la moneda
     const currencyCode = request.currency || subscription.currency;

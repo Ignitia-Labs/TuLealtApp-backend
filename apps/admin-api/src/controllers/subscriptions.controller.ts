@@ -43,6 +43,7 @@ import {
   GetSubscriptionEventsHandler,
   GetSubscriptionEventsRequest,
   GetSubscriptionEventsResponse,
+  GetSubscriptionEventsByIdRequest,
   GetSubscriptionStatsCompareHandler,
   GetSubscriptionStatsCompareRequest,
   GetSubscriptionStatsCompareResponse,
@@ -308,6 +309,69 @@ export class SubscriptionsController {
     @Body() request: CreateSubscriptionRequest,
   ): Promise<CreateSubscriptionResponse> {
     return this.createSubscriptionHandler.execute(request);
+  }
+
+  @Post(':id/events')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Obtener eventos de una suscripción específica',
+    description: 'Obtiene una lista paginada de eventos de una suscripción específica con filtros opcionales. Las fechas deben estar en formato YYYY-MM-DD (ej: 2024-01-01)',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID de la suscripción',
+    type: Number,
+    example: 1,
+  })
+  @ApiBody({
+    type: GetSubscriptionEventsByIdRequest,
+    description: 'Filtros para obtener eventos de la suscripción',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Eventos obtenidos exitosamente',
+    type: GetSubscriptionEventsResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Parámetros inválidos',
+    type: BadRequestErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Suscripción no encontrada',
+    type: NotFoundErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async getEventsBySubscriptionId(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: GetSubscriptionEventsByIdRequest,
+  ): Promise<GetSubscriptionEventsResponse> {
+    // Crear un request del tipo original y asignar el subscriptionId del parámetro de ruta
+    const request = new GetSubscriptionEventsRequest();
+    request.subscriptionId = id;
+    request.startDate = body.startDate;
+    request.endDate = body.endDate;
+    request.type = body.type;
+    request.page = body.page;
+    request.limit = body.limit;
+    return this.getSubscriptionEventsHandler.execute(request);
   }
 
   @Get(':id')

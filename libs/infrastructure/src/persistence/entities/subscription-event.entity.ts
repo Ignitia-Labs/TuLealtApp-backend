@@ -50,12 +50,20 @@ export class SubscriptionEventEntity {
     | 'renewed'
     | 'payment_received'
     | 'payment_failed'
+    | 'payment_retry'
     | 'plan_changed'
+    | 'plan_upgraded'
+    | 'plan_downgraded'
     | 'paused'
     | 'resumed'
     | 'expired'
     | 'trial_started'
     | 'trial_ended'
+    | 'invoice_generated'
+    | 'refund_issued'
+    | 'credit_applied'
+    | 'limit_reached'
+    | 'usage_alert'
     | 'custom';
 
   @Column('varchar', { length: 255 })

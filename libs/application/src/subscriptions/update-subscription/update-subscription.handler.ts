@@ -138,11 +138,25 @@ export class UpdateSubscriptionHandler {
     }
 
     if ((request.planId || request.planType) && oldPlanType !== savedSubscription.planType) {
-      await this.subscriptionEventHelper.createEvent(savedSubscription, 'plan_changed', {
+      // Determinar si es upgrade o downgrade comparando los precios
+      const oldPrice = subscription.billingAmount || 0;
+      const newPrice = savedSubscription.billingAmount || 0;
+
+      let eventType: 'plan_upgraded' | 'plan_downgraded' | 'plan_changed' = 'plan_changed';
+
+      if (newPrice > oldPrice) {
+        eventType = 'plan_upgraded';
+      } else if (newPrice < oldPrice) {
+        eventType = 'plan_downgraded';
+      }
+
+      await this.subscriptionEventHelper.createEvent(savedSubscription, eventType, {
         oldPlanType,
         newPlanType: savedSubscription.planType,
         oldPlanId: subscription.planId,
         newPlanId: savedSubscription.planId,
+        oldPrice,
+        newPrice,
       });
     }
 

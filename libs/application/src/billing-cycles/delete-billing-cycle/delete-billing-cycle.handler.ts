@@ -5,9 +5,10 @@ import {
   IBillingCycleRepository,
   IInvoiceRepository,
   IPaymentRepository,
+  ISubscriptionEventRepository,
 } from '@libs/domain';
 import { PartnerSubscriptionEntity, PartnerMapper } from '@libs/infrastructure';
-import { roundToTwoDecimals } from '@libs/shared';
+import { roundToTwoDecimals, registerSubscriptionEvent } from '@libs/shared';
 import { DeleteBillingCycleRequest } from './delete-billing-cycle.request';
 import { DeleteBillingCycleResponse } from './delete-billing-cycle.response';
 
@@ -27,6 +28,8 @@ export class DeleteBillingCycleHandler {
     private readonly invoiceRepository: IInvoiceRepository,
     @Inject('IPaymentRepository')
     private readonly paymentRepository: IPaymentRepository,
+    @Inject('ISubscriptionEventRepository')
+    private readonly subscriptionEventRepository: ISubscriptionEventRepository,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
   ) {}
@@ -109,12 +112,48 @@ export class DeleteBillingCycleHandler {
       this.logger.log(`Factura ${invoice.id} eliminada (asociada al billing cycle ${request.billingCycleId})`);
     }
 
-    // 6. Eliminar el ciclo de facturación
+    // 6. Obtener la suscripción para registrar el evento antes de eliminar
+    const subscriptionEntity = await this.subscriptionRepository.findOne({
+      where: { id: billingCycle.subscriptionId },
+    });
+
+    // 7. Eliminar el ciclo de facturación
     await this.billingCycleRepository.delete(request.billingCycleId);
 
     this.logger.log(
       `Billing cycle ${request.billingCycleId} eliminado exitosamente. Payments derivados eliminados: ${derivedPayments.length}, Crédito revertido: ${creditApplied}`,
     );
+
+    // Registrar evento de suscripción para ciclo de facturación eliminado
+    if (subscriptionEntity) {
+      try {
+        const subscription = PartnerMapper.subscriptionToDomain(subscriptionEntity);
+        await registerSubscriptionEvent(
+          {
+            type: 'custom',
+            subscription,
+            title: 'Ciclo de facturación eliminado',
+            description: `Se eliminó el ciclo de facturación #${billingCycle.cycleNumber} por un monto de ${billingCycle.totalAmount} ${billingCycle.currency}. Payments derivados eliminados: ${derivedPayments.length}`,
+            metadata: {
+              cycleNumber: billingCycle.cycleNumber,
+              totalAmount: billingCycle.totalAmount,
+              amount: billingCycle.amount,
+              paidAmount: billingCycle.paidAmount,
+              discountApplied: billingCycle.discountApplied,
+              currency: billingCycle.currency,
+              status: billingCycle.status,
+              paymentStatus: billingCycle.paymentStatus,
+              derivedPaymentsDeleted: derivedPayments.length,
+              creditReverted: creditApplied,
+            },
+          },
+          this.subscriptionEventRepository,
+        );
+      } catch (error) {
+        // Log error pero no fallar el proceso de eliminación
+        this.logger.error('Error registering subscription event for deleted billing cycle:', error);
+      }
+    }
 
     return new DeleteBillingCycleResponse(
       request.billingCycleId,

@@ -285,6 +285,7 @@ export * from './subscriptions/get-subscription-stats/subscription-stats.service
 export * from './subscriptions/get-subscription-events/get-subscription-events.handler';
 export * from './subscriptions/get-subscription-events/get-subscription-events.request';
 export * from './subscriptions/get-subscription-events/get-subscription-events.response';
+export * from './subscriptions/get-subscription-events-by-id/get-subscription-events-by-id.request';
 export * from './subscriptions/get-subscription-stats-compare/get-subscription-stats-compare.handler';
 export * from './subscriptions/get-subscription-stats-compare/get-subscription-stats-compare.request';
 export * from './subscriptions/get-subscription-stats-compare/get-subscription-stats-compare.response';

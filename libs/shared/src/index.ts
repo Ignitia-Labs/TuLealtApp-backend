@@ -42,3 +42,4 @@ export * from './pricing';
 export * from './utils/slug.util';
 export * from './utils/qr-code.util';
 export * from './utils/math.util';
+export * from './utils/subscription-event.util';

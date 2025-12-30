@@ -56,12 +56,20 @@ export class SubscriptionEventHelper {
       renewed: 'Suscripción renovada',
       payment_received: 'Pago recibido',
       payment_failed: 'Pago fallido',
+      payment_retry: 'Reintento de pago',
       plan_changed: 'Plan cambiado',
+      plan_upgraded: 'Plan mejorado',
+      plan_downgraded: 'Plan reducido',
       paused: 'Suscripción pausada',
       resumed: 'Suscripción reanudada',
       expired: 'Suscripción expirada',
       trial_started: 'Período de prueba iniciado',
       trial_ended: 'Período de prueba finalizado',
+      invoice_generated: 'Factura generada',
+      refund_issued: 'Reembolso emitido',
+      credit_applied: 'Crédito aplicado',
+      limit_reached: 'Límite alcanzado',
+      usage_alert: 'Alerta de uso',
       custom: 'Evento personalizado',
     };
 
@@ -95,10 +103,21 @@ export class SubscriptionEventHelper {
         return `Se recibió un pago para la suscripción ${subscription.id}`;
       case 'payment_failed':
         return `Falló un pago para la suscripción ${subscription.id}`;
+      case 'payment_retry':
+        const retryAttempt = metadata?.retryAttempt || 'desconocido';
+        return `Reintento de pago #${retryAttempt} para la suscripción ${subscription.id}`;
       case 'plan_changed':
         const oldPlan = metadata?.oldPlanType || 'desconocido';
         const newPlan = metadata?.newPlanType || planType;
         return `El plan de la suscripción ${subscription.id} cambió de ${oldPlan} a ${newPlan}`;
+      case 'plan_upgraded':
+        const oldPlanUpgrade = metadata?.oldPlanType || 'desconocido';
+        const newPlanUpgrade = metadata?.newPlanType || planType;
+        return `El plan de la suscripción ${subscription.id} fue mejorado de ${oldPlanUpgrade} a ${newPlanUpgrade}`;
+      case 'plan_downgraded':
+        const oldPlanDowngrade = metadata?.oldPlanType || 'desconocido';
+        const newPlanDowngrade = metadata?.newPlanType || planType;
+        return `El plan de la suscripción ${subscription.id} fue reducido de ${oldPlanDowngrade} a ${newPlanDowngrade}`;
       case 'paused':
         const reason = metadata?.reason || 'Sin razón especificada';
         return `La suscripción ${subscription.id} fue pausada. Razón: ${reason}`;
@@ -110,6 +129,21 @@ export class SubscriptionEventHelper {
         return `Se inició el período de prueba para la suscripción ${subscription.id}`;
       case 'trial_ended':
         return `Finalizó el período de prueba para la suscripción ${subscription.id}`;
+      case 'invoice_generated':
+        const invoiceNumber = metadata?.invoiceNumber || 'N/A';
+        return `Se generó la factura ${invoiceNumber} para la suscripción ${subscription.id}`;
+      case 'refund_issued':
+        const refundAmount = metadata?.amount || 'desconocido';
+        return `Se emitió un reembolso de ${refundAmount} ${currency} para la suscripción ${subscription.id}`;
+      case 'credit_applied':
+        const creditAmount = metadata?.amount || 'desconocido';
+        return `Se aplicó un crédito de ${creditAmount} ${currency} a la suscripción ${subscription.id}`;
+      case 'limit_reached':
+        const limitType = metadata?.limitType || 'desconocido';
+        return `Se alcanzó el límite de ${limitType} para la suscripción ${subscription.id}`;
+      case 'usage_alert':
+        const alertType = metadata?.alertType || 'desconocido';
+        return `Alerta de uso: ${alertType} para la suscripción ${subscription.id}`;
       case 'custom':
         return metadata?.description || 'Evento personalizado';
       default:
