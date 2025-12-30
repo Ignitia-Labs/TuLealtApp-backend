@@ -42,6 +42,10 @@ import { CustomerMembershipEntity } from './entities/customer-membership.entity'
 import { GoalEntity } from './entities/goal.entity';
 import { PartnerStaffAssignmentEntity } from './entities/partner-staff-assignment.entity';
 import { CommissionEntity } from './entities/commission.entity';
+import { MessageTemplateEntity } from './entities/message-template.entity';
+import { PartnerMessageEntity } from './entities/partner-message.entity';
+import { MessageRecipientEntity } from './entities/message-recipient.entity';
+import { MessageFilterEntity } from './entities/message-filter.entity';
 import { UserRepository } from './repositories/user.repository';
 import { PricingPlanRepository } from './repositories/pricing-plan.repository';
 import { RateExchangeRepository } from './repositories/rate-exchange.repository';
@@ -71,6 +75,10 @@ import { CustomerMembershipRepository } from './repositories/customer-membership
 import { GoalRepository } from './repositories/goal.repository';
 import { PartnerStaffAssignmentRepository } from './repositories/partner-staff-assignment.repository';
 import { CommissionRepository } from './repositories/commission.repository';
+import { MessageTemplateRepository } from './repositories/message-template.repository';
+import { PartnerMessageRepository } from './repositories/partner-message.repository';
+import { MessageRecipientRepository } from './repositories/message-recipient.repository';
+import { MessageFilterRepository } from './repositories/message-filter.repository';
 import {
   IUserRepository,
   IPricingPlanRepository,
@@ -100,6 +108,10 @@ import {
   IGoalRepository,
   IPartnerStaffAssignmentRepository,
   ICommissionRepository,
+  IMessageTemplateRepository,
+  IPartnerMessageRepository,
+  IMessageRecipientRepository,
+  IMessageFilterRepository,
 } from '@libs/domain';
 
 /**
@@ -152,6 +164,10 @@ import {
       GoalEntity,
       PartnerStaffAssignmentEntity,
       CommissionEntity,
+      MessageTemplateEntity,
+      PartnerMessageEntity,
+      MessageRecipientEntity,
+      MessageFilterEntity,
     ]),
   ],
   providers: [
@@ -296,6 +312,26 @@ import {
       provide: 'ICommissionRepository',
       useClass: CommissionRepository,
     },
+    MessageTemplateRepository,
+    {
+      provide: 'IMessageTemplateRepository',
+      useClass: MessageTemplateRepository,
+    },
+    PartnerMessageRepository,
+    {
+      provide: 'IPartnerMessageRepository',
+      useClass: PartnerMessageRepository,
+    },
+    MessageRecipientRepository,
+    {
+      provide: 'IMessageRecipientRepository',
+      useClass: MessageRecipientRepository,
+    },
+    MessageFilterRepository,
+    {
+      provide: 'IMessageFilterRepository',
+      useClass: MessageFilterRepository,
+    },
   ],
   exports: [
     'IUserRepository',
@@ -326,6 +362,10 @@ import {
     'IGoalRepository',
     'IPartnerStaffAssignmentRepository',
     'ICommissionRepository',
+    'IMessageTemplateRepository',
+    'IPartnerMessageRepository',
+    'IMessageRecipientRepository',
+    'IMessageFilterRepository',
     UserRepository,
     PricingPlanRepository,
     RateExchangeRepository,
@@ -355,6 +395,10 @@ import {
     GoalRepository,
     PartnerStaffAssignmentRepository,
     CommissionRepository,
+    MessageTemplateRepository,
+    PartnerMessageRepository,
+    MessageRecipientRepository,
+    MessageFilterRepository,
     TypeOrmModule,
   ],
 })

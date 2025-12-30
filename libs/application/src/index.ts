@@ -506,3 +506,47 @@ export * from './commissions/get-pending-disbursements/get-pending-disbursements
 export * from './commissions/get-commissions-dashboard/get-commissions-dashboard.handler';
 export * from './commissions/get-commissions-dashboard/get-commissions-dashboard.request';
 export * from './commissions/get-commissions-dashboard/get-commissions-dashboard.response';
+
+// Communication Handlers - Templates
+export * from './communication/message-templates/create-template/create-template.handler';
+export * from './communication/message-templates/create-template/create-template.request';
+export * from './communication/message-templates/create-template/create-template.response';
+export * from './communication/message-templates/get-templates/get-templates.handler';
+export * from './communication/message-templates/get-templates/get-templates.request';
+export * from './communication/message-templates/get-templates/get-templates.response';
+export * from './communication/message-templates/get-template/get-template.handler';
+export * from './communication/message-templates/get-template/get-template.response';
+export * from './communication/message-templates/update-template/update-template.handler';
+export * from './communication/message-templates/update-template/update-template.request';
+export * from './communication/message-templates/update-template/update-template.response';
+export * from './communication/message-templates/delete-template/delete-template.handler';
+export * from './communication/message-templates/delete-template/delete-template.response';
+
+// Communication Handlers - Messages
+export * from './communication/messages/create-message/create-message.handler';
+export * from './communication/messages/create-message/create-message.request';
+export * from './communication/messages/create-message/create-message.response';
+export * from './communication/messages/get-messages/get-messages.handler';
+export * from './communication/messages/get-messages/get-messages.request';
+export * from './communication/messages/get-messages/get-messages.response';
+export * from './communication/messages/get-message/get-message.handler';
+export * from './communication/messages/get-message/get-message.response';
+export * from './communication/messages/get-stats/get-stats.handler';
+export * from './communication/messages/get-stats/get-stats.request';
+export * from './communication/messages/get-stats/get-stats.response';
+export * from './communication/messages/dto/delivery-stats.dto';
+export * from './communication/messages/update-message/update-message.handler';
+export * from './communication/messages/update-message/update-message.request';
+export * from './communication/messages/update-message/update-message.response';
+export * from './communication/messages/delete-message/delete-message.handler';
+export * from './communication/messages/delete-message/delete-message.response';
+export * from './communication/messages/get-recipients/get-recipients.handler';
+export * from './communication/messages/get-recipients/get-recipients.request';
+export * from './communication/messages/get-recipients/get-recipients.response';
+export * from './communication/messages/update-recipient-status/update-recipient-status.handler';
+export * from './communication/messages/update-recipient-status/update-recipient-status.request';
+export * from './communication/messages/update-recipient-status/update-recipient-status.response';
+
+// Communication Services
+export * from './communication/messages/message-sender.service';
+export * from './communication/messages/scheduled-message-sender.service';

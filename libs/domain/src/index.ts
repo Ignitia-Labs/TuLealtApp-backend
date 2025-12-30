@@ -38,6 +38,10 @@ export * from './entities/catalog.entity';
 export * from './entities/goal.entity';
 export * from './entities/partner-staff-assignment.entity';
 export * from './entities/commission.entity';
+export * from './entities/message-template.entity';
+export * from './entities/partner-message.entity';
+export * from './entities/message-recipient.entity';
+export * from './entities/message-filter.entity';
 
 // Repository Interfaces
 export * from './repositories/user.repository.interface';
@@ -68,3 +72,7 @@ export * from './repositories/customer-membership.repository.interface';
 export * from './repositories/goal.repository.interface';
 export * from './repositories/partner-staff-assignment.repository.interface';
 export * from './repositories/commission.repository.interface';
+export * from './repositories/message-template.repository.interface';
+export * from './repositories/partner-message.repository.interface';
+export * from './repositories/message-recipient.repository.interface';
+export * from './repositories/message-filter.repository.interface';

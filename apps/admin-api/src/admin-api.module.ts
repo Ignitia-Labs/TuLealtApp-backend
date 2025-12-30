@@ -26,6 +26,8 @@ import { PaymentsController } from './controllers/payments.controller';
 import { PaymentWebhooksController } from './controllers/payment-webhooks.controller';
 import { PartnerStaffAssignmentsController } from './controllers/partner-staff-assignments.controller';
 import { CommissionsController } from './controllers/commissions.controller';
+import { CommunicationController } from './controllers/communication.controller';
+import { CommunicationWebhooksController } from './controllers/communication-webhooks.controller';
 import {
   CreateUserHandler,
   GetUserProfileHandler,
@@ -143,9 +145,27 @@ import {
   GetCommissionSummaryHandler,
   MarkCommissionsPaidHandler,
   GetPendingDisbursementsHandler,
-  GetCommissionsDashboardHandler,
-  CreateGoalHandler,
-  GetGoalHandler,
+    GetCommissionsDashboardHandler,
+    CreateGoalHandler,
+    // Communication Handlers - Templates
+    CreateTemplateHandler,
+    GetTemplatesHandler,
+    GetTemplateHandler,
+    UpdateTemplateHandler,
+    DeleteTemplateHandler,
+    // Communication Handlers - Messages
+    CreateMessageHandler,
+    GetMessagesHandler,
+    GetMessageHandler,
+    GetStatsHandler,
+    UpdateMessageHandler,
+    DeleteMessageHandler,
+    GetRecipientsHandler,
+    UpdateRecipientStatusHandler,
+    MessageSenderService,
+    ScheduledMessageSenderService,
+    // Handlers de aplicación - Goals
+    GetGoalHandler,
   GetGoalsHandler,
   UpdateGoalHandler,
   DeleteGoalHandler,
@@ -194,6 +214,8 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     GoalsController,
     PartnerStaffAssignmentsController,
     CommissionsController,
+    CommunicationController,
+    CommunicationWebhooksController,
     HealthController,
   ],
   providers: [
@@ -349,6 +371,23 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     DeleteGoalHandler,
     GetGoalProgressHandler,
     GoalProgressService,
+    // Communication Handlers - Templates
+    CreateTemplateHandler,
+    GetTemplatesHandler,
+    GetTemplateHandler,
+    UpdateTemplateHandler,
+    DeleteTemplateHandler,
+    // Communication Handlers - Messages
+    CreateMessageHandler,
+    GetMessagesHandler,
+    GetMessageHandler,
+    GetStatsHandler,
+    UpdateMessageHandler,
+    DeleteMessageHandler,
+    GetRecipientsHandler,
+    UpdateRecipientStatusHandler,
+    MessageSenderService,
+    ScheduledMessageSenderService,
   ],
 })
 export class AdminApiModule {}
