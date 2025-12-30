@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PartnerSubscription, IPricingPlanRepository } from '@libs/domain';
 import { PartnerSubscriptionEntity, PartnerMapper } from '@libs/infrastructure';
+import { CreditBalanceService } from '../credit-balance.service';
 import { GetSubscriptionRequest } from './get-subscription.request';
 import { GetSubscriptionResponse } from './get-subscription.response';
 
@@ -16,6 +17,7 @@ export class GetSubscriptionHandler {
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
     @Inject('IPricingPlanRepository')
     private readonly pricingPlanRepository: IPricingPlanRepository,
+    private readonly creditBalanceService: CreditBalanceService,
   ) {}
 
   async execute(request: GetSubscriptionRequest): Promise<GetSubscriptionResponse> {
@@ -28,6 +30,12 @@ export class GetSubscriptionHandler {
     }
 
     const subscription = PartnerMapper.subscriptionToDomain(subscriptionEntity);
+
+    // Calcular crédito disponible dinámicamente desde los pagos reales
+    const calculatedCreditBalance = await this.creditBalanceService.calculateAvailableCreditBalance(
+      subscription.id,
+      subscription.currency,
+    );
 
     // Buscar el plan de precios para obtener el ID numérico y el slug
     let planId: number = 0;
@@ -69,6 +77,11 @@ export class GetSubscriptionHandler {
       subscription.renewalDate,
       subscription.billingFrequency,
       subscription.billingAmount,
+      subscription.includeTax,
+      subscription.taxPercent,
+      subscription.basePrice,
+      subscription.taxAmount,
+      subscription.totalPrice,
       subscription.currency,
       subscription.nextBillingDate,
       subscription.nextBillingAmount,
@@ -80,7 +93,7 @@ export class GetSubscriptionHandler {
       subscription.gracePeriodDays,
       subscription.retryAttempts,
       subscription.maxRetryAttempts,
-      subscription.creditBalance,
+      calculatedCreditBalance, // Usar crédito calculado dinámicamente
       subscription.discountPercent,
       subscription.discountCode,
       subscription.lastPaymentDate,

@@ -98,8 +98,8 @@ export class PartnerSubscriptionEntity {
   @Column('int', { default: 3 })
   maxRetryAttempts: number;
 
-  @Column('decimal', { precision: 10, scale: 2, default: 0 })
-  creditBalance: number;
+  // NOTA: creditBalance fue eliminado - se calcula dinámicamente desde los pagos
+  // Ver CreditBalanceService para el cálculo dinámico
 
   @Column('decimal', { precision: 5, scale: 2, nullable: true })
   discountPercent: number | null;

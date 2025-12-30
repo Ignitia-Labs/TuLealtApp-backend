@@ -235,16 +235,8 @@ export class CreateSubscriptionRequest {
   @IsOptional()
   maxRetryAttempts?: number;
 
-  @ApiProperty({
-    description: 'Saldo de crédito disponible',
-    example: 0,
-    type: Number,
-    required: false,
-    default: 0,
-  })
-  @IsNumber()
-  @IsOptional()
-  creditBalance?: number;
+  // NOTA: creditBalance fue eliminado - se calcula dinámicamente desde los pagos
+  // Ver CreditBalanceService para el cálculo dinámico
 
   @ApiProperty({
     description: 'Porcentaje de descuento aplicado',

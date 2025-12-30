@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Get,
+  Delete,
   Body,
   Param,
   Query,
@@ -29,6 +30,9 @@ import {
   GetInvoicesHandler,
   GetInvoicesRequest,
   GetInvoicesResponse,
+  DeleteInvoiceHandler,
+  DeleteInvoiceRequest,
+  DeleteInvoiceResponse,
 } from '@libs/application';
 import { JwtAuthGuard, RolesGuard, Roles } from '@libs/shared';
 
@@ -41,6 +45,7 @@ import { JwtAuthGuard, RolesGuard, Roles } from '@libs/shared';
  * - GET /admin/invoices?subscriptionId={id} - Obtener facturas de una suscripción
  * - GET /admin/invoices?partnerId={id} - Obtener facturas de un partner
  * - POST /admin/invoices - Crear una nueva factura
+ * - DELETE /admin/invoices/:id - Eliminar una factura
  */
 @ApiTags('Invoices')
 @Controller('invoices')
@@ -49,6 +54,7 @@ export class InvoicesController {
     private readonly createInvoiceHandler: CreateInvoiceHandler,
     private readonly getInvoiceHandler: GetInvoiceHandler,
     private readonly getInvoicesHandler: GetInvoicesHandler,
+    private readonly deleteInvoiceHandler: DeleteInvoiceHandler,
   ) {}
 
   @Post()
@@ -351,6 +357,74 @@ export class InvoicesController {
       request.limit = Number(limit);
     }
     return this.getInvoicesHandler.execute(request);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Eliminar factura',
+    description:
+      'Elimina una factura del sistema. Esta acción es irreversible. Solo disponible para administradores. Se recomienda verificar que la factura no tenga pagos asociados antes de eliminarla.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único de la factura a eliminar',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Factura eliminada exitosamente',
+    type: DeleteInvoiceResponse,
+    example: {
+      id: 1,
+      message: 'Invoice deleted successfully',
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    example: {
+      statusCode: 401,
+      message: 'Unauthorized',
+      error: 'Unauthorized',
+    },
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos de administrador',
+    example: {
+      statusCode: 403,
+      message: 'Forbidden resource',
+      error: 'Forbidden',
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Factura no encontrada',
+    example: {
+      statusCode: 404,
+      message: 'Invoice with ID 1 not found',
+      error: 'Not Found',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    example: {
+      statusCode: 500,
+      message: 'Internal server error',
+      error: 'Internal Server Error',
+    },
+  })
+  async deleteInvoice(@Param('id', ParseIntPipe) id: number): Promise<DeleteInvoiceResponse> {
+    const request = new DeleteInvoiceRequest();
+    request.invoiceId = id;
+    return this.deleteInvoiceHandler.execute(request);
   }
 }
 

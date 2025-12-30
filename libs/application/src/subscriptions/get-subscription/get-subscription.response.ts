@@ -75,6 +75,42 @@ export class GetSubscriptionResponse {
   billingAmount: number;
 
   @ApiProperty({
+    description: 'Incluir impuestos en el precio',
+    example: false,
+    type: Boolean,
+  })
+  includeTax: boolean;
+
+  @ApiProperty({
+    description: 'Porcentaje de impuesto (ej: 12 para 12%)',
+    example: 12.0,
+    type: Number,
+    nullable: true,
+  })
+  taxPercent: number | null;
+
+  @ApiProperty({
+    description: 'Precio base (sin impuestos)',
+    example: 79.99,
+    type: Number,
+  })
+  basePrice: number;
+
+  @ApiProperty({
+    description: 'Monto de impuesto',
+    example: 9.60,
+    type: Number,
+  })
+  taxAmount: number;
+
+  @ApiProperty({
+    description: 'Precio total (base + impuestos)',
+    example: 89.59,
+    type: Number,
+  })
+  totalPrice: number;
+
+  @ApiProperty({
     description: 'Moneda',
     example: 'USD',
     type: String,
@@ -233,6 +269,11 @@ export class GetSubscriptionResponse {
     renewalDate: Date,
     billingFrequency: string,
     billingAmount: number,
+    includeTax: boolean,
+    taxPercent: number | null,
+    basePrice: number,
+    taxAmount: number,
+    totalPrice: number,
     currency: string,
     nextBillingDate: Date,
     nextBillingAmount: number,
@@ -264,6 +305,11 @@ export class GetSubscriptionResponse {
     this.renewalDate = renewalDate;
     this.billingFrequency = billingFrequency;
     this.billingAmount = billingAmount;
+    this.includeTax = includeTax;
+    this.taxPercent = taxPercent;
+    this.basePrice = basePrice;
+    this.taxAmount = taxAmount;
+    this.totalPrice = totalPrice;
     this.currency = currency;
     this.nextBillingDate = nextBillingDate;
     this.nextBillingAmount = nextBillingAmount;

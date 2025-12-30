@@ -102,16 +102,6 @@ export class CreatePaymentRequest {
   paymentDate?: string;
 
   @ApiProperty({
-    description: 'ID de transacción externa',
-    example: 'txn_123456789',
-    type: String,
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  transactionId?: string;
-
-  @ApiProperty({
     description: 'Referencia del pago',
     example: 'REF-2024-001',
     type: String,
@@ -212,4 +202,3 @@ export class CreatePaymentRequest {
   @IsOptional()
   notes?: string;
 }
-

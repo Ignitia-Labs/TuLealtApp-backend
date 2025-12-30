@@ -330,6 +330,9 @@ export class PartnerSubscription {
       throw new Error('Credit amount must be positive');
     }
 
+    // Redondear el nuevo balance a 2 decimales para evitar problemas de precisión
+    const newCreditBalance = Math.round((this.creditBalance + amount) * 100) / 100;
+
     return new PartnerSubscription(
       this.id,
       this.partnerId,
@@ -356,7 +359,7 @@ export class PartnerSubscription {
       this.gracePeriodDays,
       this.retryAttempts,
       this.maxRetryAttempts,
-      this.creditBalance + amount, // Agregar crédito
+      newCreditBalance, // Agregar crédito (redondeado a 2 decimales)
       this.discountPercent,
       this.discountCode,
       this.lastPaymentDate,
@@ -428,6 +431,9 @@ export class PartnerSubscription {
       throw new Error('Insufficient credit balance');
     }
 
+    // Redondear el nuevo balance a 2 decimales para evitar problemas de precisión
+    const newCreditBalance = Math.round((this.creditBalance - amount) * 100) / 100;
+
     return new PartnerSubscription(
       this.id,
       this.partnerId,
@@ -454,7 +460,7 @@ export class PartnerSubscription {
       this.gracePeriodDays,
       this.retryAttempts,
       this.maxRetryAttempts,
-      this.creditBalance - amount, // Reducir crédito
+      newCreditBalance, // Reducir crédito (redondeado a 2 decimales)
       this.discountPercent,
       this.discountCode,
       this.lastPaymentDate,

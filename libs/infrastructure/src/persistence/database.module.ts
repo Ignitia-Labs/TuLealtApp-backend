@@ -39,6 +39,9 @@ import { PartnerRequestEntity } from './entities/partner-request.entity';
 import { PartnerArchiveEntity } from './entities/partner-archive.entity';
 import { CatalogEntity } from './entities/catalog.entity';
 import { CustomerMembershipEntity } from './entities/customer-membership.entity';
+import { GoalEntity } from './entities/goal.entity';
+import { PartnerStaffAssignmentEntity } from './entities/partner-staff-assignment.entity';
+import { CommissionEntity } from './entities/commission.entity';
 import { UserRepository } from './repositories/user.repository';
 import { PricingPlanRepository } from './repositories/pricing-plan.repository';
 import { RateExchangeRepository } from './repositories/rate-exchange.repository';
@@ -65,6 +68,9 @@ import { PartnerRequestRepository } from './repositories/partner-request.reposit
 import { PartnerArchiveRepository } from './repositories/partner-archive.repository';
 import { CatalogRepository } from './repositories/catalog.repository';
 import { CustomerMembershipRepository } from './repositories/customer-membership.repository';
+import { GoalRepository } from './repositories/goal.repository';
+import { PartnerStaffAssignmentRepository } from './repositories/partner-staff-assignment.repository';
+import { CommissionRepository } from './repositories/commission.repository';
 import {
   IUserRepository,
   IPricingPlanRepository,
@@ -91,6 +97,9 @@ import {
   IPartnerRequestRepository,
   ICatalogRepository,
   ICustomerMembershipRepository,
+  IGoalRepository,
+  IPartnerStaffAssignmentRepository,
+  ICommissionRepository,
 } from '@libs/domain';
 
 /**
@@ -140,6 +149,9 @@ import {
       PartnerArchiveEntity,
       CatalogEntity,
       CustomerMembershipEntity,
+      GoalEntity,
+      PartnerStaffAssignmentEntity,
+      CommissionEntity,
     ]),
   ],
   providers: [
@@ -269,6 +281,21 @@ import {
       provide: 'ICustomerMembershipRepository',
       useClass: CustomerMembershipRepository,
     },
+    GoalRepository,
+    {
+      provide: 'IGoalRepository',
+      useClass: GoalRepository,
+    },
+    PartnerStaffAssignmentRepository,
+    {
+      provide: 'IPartnerStaffAssignmentRepository',
+      useClass: PartnerStaffAssignmentRepository,
+    },
+    CommissionRepository,
+    {
+      provide: 'ICommissionRepository',
+      useClass: CommissionRepository,
+    },
   ],
   exports: [
     'IUserRepository',
@@ -296,6 +323,9 @@ import {
     'IPartnerRequestRepository',
     'ICatalogRepository',
     'ICustomerMembershipRepository',
+    'IGoalRepository',
+    'IPartnerStaffAssignmentRepository',
+    'ICommissionRepository',
     UserRepository,
     PricingPlanRepository,
     RateExchangeRepository,
@@ -322,6 +352,9 @@ import {
     PartnerArchiveRepository,
     CatalogRepository,
     CustomerMembershipRepository,
+    GoalRepository,
+    PartnerStaffAssignmentRepository,
+    CommissionRepository,
     TypeOrmModule,
   ],
 })

@@ -19,7 +19,7 @@ export class Payment {
     public readonly status: PaymentStatus,
     public readonly paymentDate: Date,
     public readonly processedDate: Date | null,
-    public readonly transactionId: string | null,
+    public readonly transactionId: number | null,
     public readonly reference: string | null,
     public readonly confirmationCode: string | null,
     public readonly gateway: string | null,
@@ -31,6 +31,7 @@ export class Payment {
     public readonly retryAttempt: number | null,
     public readonly notes: string | null,
     public readonly processedBy: number | null,
+    public readonly originalPaymentId: number | null,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
   ) {}
@@ -48,7 +49,7 @@ export class Payment {
     billingCycleId: number | null = null,
     paymentDate: Date = new Date(),
     status: PaymentStatus = 'pending',
-    transactionId: string | null = null,
+    transactionId: number | null = null,
     reference: string | null = null,
     confirmationCode: string | null = null,
     gateway: string | null = null,
@@ -60,6 +61,7 @@ export class Payment {
     retryAttempt: number | null = null,
     notes: string | null = null,
     processedBy: number | null = null,
+    originalPaymentId: number | null = null,
     id?: number,
   ): Payment {
     const now = new Date();
@@ -87,6 +89,7 @@ export class Payment {
       retryAttempt,
       notes,
       processedBy,
+      originalPaymentId,
       now,
       now,
     );
@@ -127,6 +130,7 @@ export class Payment {
       this.retryAttempt,
       this.notes,
       this.processedBy,
+      this.originalPaymentId,
       this.createdAt,
       new Date(),
     );
@@ -160,6 +164,7 @@ export class Payment {
       this.retryAttempt,
       notes,
       this.processedBy,
+      this.originalPaymentId,
       this.createdAt,
       new Date(),
     );

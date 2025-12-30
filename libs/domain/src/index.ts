@@ -35,6 +35,9 @@ export * from './entities/coupon.entity';
 export * from './entities/plan-change.entity';
 export * from './entities/partner-request.entity';
 export * from './entities/catalog.entity';
+export * from './entities/goal.entity';
+export * from './entities/partner-staff-assignment.entity';
+export * from './entities/commission.entity';
 
 // Repository Interfaces
 export * from './repositories/user.repository.interface';
@@ -62,3 +65,6 @@ export * from './repositories/plan-change.repository.interface';
 export * from './repositories/partner-request.repository.interface';
 export * from './repositories/catalog.repository.interface';
 export * from './repositories/customer-membership.repository.interface';
+export * from './repositories/goal.repository.interface';
+export * from './repositories/partner-staff-assignment.repository.interface';
+export * from './repositories/commission.repository.interface';

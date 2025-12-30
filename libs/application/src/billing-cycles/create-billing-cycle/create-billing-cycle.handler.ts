@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 import {
   IBillingCycleRepository,
   IPartnerRepository,
+  ICurrencyRepository,
   BillingCycle,
 } from '@libs/domain';
 import { PartnerSubscriptionEntity, PartnerMapper } from '@libs/infrastructure';
@@ -25,6 +26,8 @@ export class CreateBillingCycleHandler {
     private readonly billingCycleRepository: IBillingCycleRepository,
     @Inject('IPartnerRepository')
     private readonly partnerRepository: IPartnerRepository,
+    @Inject('ICurrencyRepository')
+    private readonly currencyRepository: ICurrencyRepository,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
   ) {}
@@ -108,6 +111,12 @@ export class CreateBillingCycleHandler {
     // Guardar el ciclo
     const savedCycle = await this.billingCycleRepository.save(billingCycle);
 
+    // Obtener información de la moneda
+    const currencyCode = request.currency || subscription.currency;
+    const currency = await this.currencyRepository.findByCode(currencyCode);
+    const currencyId = currency?.id ?? null;
+    const currencyLabel = currency?.name ?? null;
+
     // Retornar response
     return new CreateBillingCycleResponse(
       savedCycle.id,
@@ -123,6 +132,8 @@ export class CreateBillingCycleHandler {
       savedCycle.paidAmount,
       savedCycle.totalAmount,
       savedCycle.currency,
+      currencyId,
+      currencyLabel,
       savedCycle.status,
       savedCycle.paymentStatus,
       savedCycle.paymentDate,

@@ -47,6 +47,9 @@ export * from './persistence/entities/partner-request.entity';
 export * from './persistence/entities/partner-archive.entity';
 export * from './persistence/entities/country.entity';
 export * from './persistence/entities/currency.entity';
+export * from './persistence/entities/goal.entity';
+export * from './persistence/entities/partner-staff-assignment.entity';
+export * from './persistence/entities/commission.entity';
 
 // Repositories
 export * from './persistence/repositories/user.repository';
@@ -55,6 +58,8 @@ export * from './persistence/repositories/partner.repository';
 export * from './persistence/repositories/partner-archive.repository';
 export * from './persistence/repositories/tenant.repository';
 export * from './persistence/repositories/branch.repository';
+export * from './persistence/repositories/partner-staff-assignment.repository';
+export * from './persistence/repositories/commission.repository';
 
 // Mappers
 export * from './persistence/mappers/user.mapper';
@@ -80,6 +85,9 @@ export * from './persistence/mappers/subscription-alert.mapper';
 export * from './persistence/mappers/coupon.mapper';
 export * from './persistence/mappers/plan-change.mapper';
 export * from './persistence/mappers/partner-request.mapper';
+export * from './persistence/mappers/goal.mapper';
+export * from './persistence/mappers/partner-staff-assignment.mapper';
+export * from './persistence/mappers/commission.mapper';
 
 // Storage Services
 export * from './storage/s3.service';

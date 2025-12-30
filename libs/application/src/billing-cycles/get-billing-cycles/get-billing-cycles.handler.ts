@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { IBillingCycleRepository } from '@libs/domain';
+import { IBillingCycleRepository, ICurrencyRepository } from '@libs/domain';
 import { GetBillingCyclesRequest } from './get-billing-cycles.request';
 import { GetBillingCyclesResponse } from './get-billing-cycles.response';
 import { GetBillingCycleResponse } from '../get-billing-cycle/get-billing-cycle.response';
@@ -12,6 +12,8 @@ export class GetBillingCyclesHandler {
   constructor(
     @Inject('IBillingCycleRepository')
     private readonly billingCycleRepository: IBillingCycleRepository,
+    @Inject('ICurrencyRepository')
+    private readonly currencyRepository: ICurrencyRepository,
   ) {}
 
   async execute(request: GetBillingCyclesRequest): Promise<GetBillingCyclesResponse> {
@@ -27,9 +29,23 @@ export class GetBillingCyclesHandler {
       billingCycles = [];
     }
 
+    // Obtener todas las monedas únicas para evitar múltiples consultas
+    const uniqueCurrencyCodes = [...new Set(billingCycles.map(c => c.currency))] as string[];
+    const currencyMap = new Map<string, { id: number; name: string }>();
+
+    await Promise.all(
+      uniqueCurrencyCodes.map(async (code: string) => {
+        const currency = await this.currencyRepository.findByCode(code);
+        if (currency) {
+          currencyMap.set(code, { id: currency.id, name: currency.name });
+        }
+      })
+    );
+
     const billingCycleDtos: GetBillingCycleResponse[] = billingCycles.map(
-      (cycle) =>
-        new GetBillingCycleResponse(
+      (cycle) => {
+        const currencyInfo = currencyMap.get(cycle.currency);
+        return new GetBillingCycleResponse(
           cycle.id,
           cycle.subscriptionId,
           cycle.partnerId,
@@ -43,6 +59,8 @@ export class GetBillingCyclesHandler {
           cycle.paidAmount,
           cycle.totalAmount,
           cycle.currency,
+          currencyInfo?.id ?? null,
+          currencyInfo?.name ?? null,
           cycle.status,
           cycle.paymentStatus,
           cycle.paymentDate,
@@ -53,7 +71,8 @@ export class GetBillingCyclesHandler {
           cycle.discountApplied,
           cycle.createdAt,
           cycle.updatedAt,
-        ),
+        );
+      }
     );
 
     return new GetBillingCyclesResponse(billingCycleDtos, billingCycleDtos.length);

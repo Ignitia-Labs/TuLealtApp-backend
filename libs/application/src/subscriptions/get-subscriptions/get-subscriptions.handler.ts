@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PartnerSubscription, IPricingPlanRepository } from '@libs/domain';
 import { PartnerSubscriptionEntity, PartnerMapper } from '@libs/infrastructure';
+import { CreditBalanceService } from '../credit-balance.service';
 import { GetSubscriptionsRequest } from './get-subscriptions.request';
 import { GetSubscriptionsResponse } from './get-subscriptions.response';
 import { GetSubscriptionResponse } from '../get-subscription/get-subscription.response';
@@ -17,6 +18,7 @@ export class GetSubscriptionsHandler {
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
     @Inject('IPricingPlanRepository')
     private readonly pricingPlanRepository: IPricingPlanRepository,
+    private readonly creditBalanceService: CreditBalanceService,
   ) {}
 
   async execute(request: GetSubscriptionsRequest): Promise<GetSubscriptionsResponse> {
@@ -59,6 +61,12 @@ export class GetSubscriptionsHandler {
       subscriptionEntities.map(async (entity) => {
         const subscription = PartnerMapper.subscriptionToDomain(entity);
 
+        // Calcular crédito disponible dinámicamente desde los pagos reales
+        const calculatedCreditBalance = await this.creditBalanceService.calculateAvailableCreditBalance(
+          subscription.id,
+          subscription.currency,
+        );
+
         // Buscar el plan de precios para obtener el ID numérico y el slug
         let planId: number = 0;
         let planSlug: string = subscription.planId; // Por defecto usar el planId como slug
@@ -99,6 +107,11 @@ export class GetSubscriptionsHandler {
           subscription.renewalDate,
           subscription.billingFrequency,
           subscription.billingAmount,
+          subscription.includeTax,
+          subscription.taxPercent,
+          subscription.basePrice,
+          subscription.taxAmount,
+          subscription.totalPrice,
           subscription.currency,
           subscription.nextBillingDate,
           subscription.nextBillingAmount,
@@ -110,7 +123,7 @@ export class GetSubscriptionsHandler {
           subscription.gracePeriodDays,
           subscription.retryAttempts,
           subscription.maxRetryAttempts,
-          subscription.creditBalance,
+          calculatedCreditBalance, // Usar crédito calculado dinámicamente
           subscription.discountPercent,
           subscription.discountCode,
           subscription.lastPaymentDate,

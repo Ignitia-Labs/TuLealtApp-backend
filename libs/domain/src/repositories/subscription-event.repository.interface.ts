@@ -1,4 +1,4 @@
-import { SubscriptionEvent } from '../entities/subscription-event.entity';
+import { SubscriptionEvent, SubscriptionEventType } from '../entities/subscription-event.entity';
 
 /**
  * Interfaz del repositorio de SubscriptionEvent
@@ -23,6 +23,34 @@ export interface ISubscriptionEventRepository {
    * Busca eventos por tipo
    */
   findByType(subscriptionId: number, type: SubscriptionEvent['type']): Promise<SubscriptionEvent[]>;
+
+  /**
+   * Busca eventos por rango de fechas con filtros opcionales
+   */
+  findByDateRange(
+    startDate: Date,
+    endDate: Date,
+    filters?: {
+      subscriptionId?: number;
+      partnerId?: number;
+      type?: SubscriptionEventType;
+    },
+    skip?: number,
+    take?: number,
+  ): Promise<SubscriptionEvent[]>;
+
+  /**
+   * Cuenta eventos por rango de fechas con filtros opcionales
+   */
+  countByDateRange(
+    startDate: Date,
+    endDate: Date,
+    filters?: {
+      subscriptionId?: number;
+      partnerId?: number;
+      type?: SubscriptionEventType;
+    },
+  ): Promise<number>;
 
   /**
    * Guarda un nuevo evento

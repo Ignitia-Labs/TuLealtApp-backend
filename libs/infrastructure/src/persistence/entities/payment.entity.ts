@@ -22,6 +22,7 @@ import { BillingCycleEntity } from './billing-cycle.entity';
 @Index(['partnerId'])
 @Index(['invoiceId'])
 @Index(['status'])
+@Index(['transactionId']) // Índice normal para mejorar búsquedas (la unicidad se valida a nivel de aplicación)
 export class PaymentEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -82,8 +83,8 @@ export class PaymentEntity {
   @Column('datetime', { nullable: true })
   processedDate: Date | null;
 
-  @Column('varchar', { length: 100, nullable: true })
-  transactionId: string | null;
+  @Column('int', { nullable: true })
+  transactionId: number | null;
 
   @Column('varchar', { length: 100, nullable: true })
   reference: string | null;
@@ -117,6 +118,9 @@ export class PaymentEntity {
 
   @Column('int', { nullable: true })
   processedBy: number | null;
+
+  @Column('int', { nullable: true })
+  originalPaymentId: number | null;
 
   @CreateDateColumn()
   createdAt: Date;

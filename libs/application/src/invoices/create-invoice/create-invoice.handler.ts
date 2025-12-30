@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  Inject,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -13,6 +8,7 @@ import {
   Invoice,
   InvoiceItem,
   BillingCycle,
+  InvoicePaymentMethod,
 } from '@libs/domain';
 import {
   PartnerSubscriptionEntity,
@@ -21,6 +17,7 @@ import {
   InvoicePdfService,
   EmailService,
 } from '@libs/infrastructure';
+import { roundToTwoDecimals } from '@libs/shared';
 import { CreateInvoiceRequest } from './create-invoice.request';
 import { CreateInvoiceResponse, InvoiceItemResponse } from './create-invoice.response';
 
@@ -82,39 +79,152 @@ export class CreateInvoiceHandler {
     }
 
     // Procesar items y calcular totales
+    // Si se proporcionan subtotal y taxAmount en el request, usarlos directamente (valores de la suscripción)
+    // Esto evita errores de redondeo y asegura consistencia con los valores de la suscripción
+    const usePreCalculatedValues =
+      request.subtotal !== undefined && request.taxAmount !== undefined;
+
     const processedItems: InvoiceItem[] = [];
     let subtotal = 0;
     let totalTaxAmount = 0;
 
-    for (const item of request.items) {
-      const amount = item.quantity * item.unitPrice;
-      const taxRate = item.taxRate || 0;
-      const taxAmount = amount * (taxRate / 100);
-      const discountPercent = item.discountPercent || 0;
-      const discountAmount = amount * (discountPercent / 100);
-      const itemTotal = amount + taxAmount - discountAmount;
+    if (usePreCalculatedValues) {
+      // Usar los valores ya calculados de la suscripción directamente
+      // Asegurarse de que sean números, no strings
+      subtotal = Number(request.subtotal) || 0;
+      totalTaxAmount = Number(request.taxAmount) || 0;
 
-      processedItems.push({
-        id: item.id,
-        description: item.description,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        amount,
-        taxRate,
-        taxAmount,
-        discountPercent: discountPercent > 0 ? discountPercent : undefined,
-        discountAmount: discountAmount > 0 ? discountAmount : undefined,
-        total: itemTotal,
-      });
+      // Validar que los valores sean números válidos
+      if (isNaN(subtotal) || isNaN(totalTaxAmount)) {
+        throw new BadRequestException(
+          `Valores inválidos en request: subtotal=${request.subtotal}, taxAmount=${request.taxAmount}`,
+        );
+      }
 
-      subtotal += amount;
-      totalTaxAmount += taxAmount;
+      // Procesar items usando los valores pre-calculados de la suscripción
+      // El unitPrice es basePrice, el amount es subtotal (después de descuento si aplica),
+      // y el taxAmount es el taxAmount de la suscripción
+      for (const item of request.items) {
+        const unitPrice = Number(item.unitPrice) || 0; // basePrice de la suscripción
+        const itemSubtotalAfterDiscount = Number(request.subtotal) || 0; // subtotal después de descuento
+        const taxRate = Number(item.taxRate) || 0;
+        const itemTaxAmount = Number(request.taxAmount) || 0; // taxAmount de la suscripción
+        const discountPercent = Number(item.discountPercent) || 0;
+        const discountAmount = Number(request.discountAmount) || 0;
+
+        // Validar que todos los valores sean números válidos
+        if (
+          isNaN(unitPrice) ||
+          isNaN(itemSubtotalAfterDiscount) ||
+          isNaN(taxRate) ||
+          isNaN(itemTaxAmount) ||
+          isNaN(discountPercent) ||
+          isNaN(discountAmount)
+        ) {
+          throw new BadRequestException(
+            `Valores inválidos en item: unitPrice=${item.unitPrice}, ` +
+              `subtotal=${request.subtotal}, taxRate=${item.taxRate}, taxAmount=${request.taxAmount}`,
+          );
+        }
+
+        // Calcular el total del item: subtotal + taxAmount (redondeado)
+        const itemTotal = roundToTwoDecimals(itemSubtotalAfterDiscount + itemTaxAmount);
+
+        if (isNaN(itemTotal) || !isFinite(itemTotal)) {
+          throw new BadRequestException(
+            `itemTotal inválido: itemSubtotalAfterDiscount=${itemSubtotalAfterDiscount}, ` +
+              `itemTaxAmount=${itemTaxAmount}, itemTotal=${itemTotal}`,
+          );
+        }
+
+        processedItems.push({
+          id: item.id,
+          description: item.description,
+          quantity: item.quantity,
+          unitPrice: unitPrice, // basePrice (147.25)
+          amount: itemSubtotalAfterDiscount, // subtotal después de descuento (147.25)
+          taxRate,
+          taxAmount: itemTaxAmount, // taxAmount de la suscripción (17.67)
+          discountPercent: discountPercent > 0 ? discountPercent : undefined,
+          discountAmount: discountAmount > 0 ? discountAmount : undefined,
+          total: itemTotal, // subtotal + taxAmount (164.92) - redondeado
+        });
+      }
+    } else {
+      // Calcular valores desde los items (comportamiento anterior para compatibilidad)
+      for (const item of request.items) {
+        // Convertir todos los valores a Number para evitar concatenación de strings
+        const quantity = Number(item.quantity) || 0;
+        const unitPrice = Number(item.unitPrice) || 0;
+        const discountPercent = Number(item.discountPercent) || 0;
+        const taxRate = Number(item.taxRate) || 0;
+
+        const amount = quantity * unitPrice;
+        const discountAmount = amount * (discountPercent / 100);
+        const itemSubtotalAfterDiscount = amount - discountAmount;
+        const itemTaxAmount = itemSubtotalAfterDiscount * (taxRate / 100);
+        const itemTotal = itemSubtotalAfterDiscount + itemTaxAmount;
+
+        processedItems.push({
+          id: item.id,
+          description: item.description,
+          quantity: quantity,
+          unitPrice: unitPrice,
+          amount: itemSubtotalAfterDiscount,
+          taxRate,
+          taxAmount: itemTaxAmount,
+          discountPercent: discountPercent > 0 ? discountPercent : undefined,
+          discountAmount: discountAmount > 0 ? discountAmount : undefined,
+          total: itemTotal,
+        });
+
+        // Asegurar que subtotal y totalTaxAmount sean números antes de sumar
+        subtotal = Number(subtotal) + Number(itemSubtotalAfterDiscount);
+        totalTaxAmount = Number(totalTaxAmount) + Number(itemTaxAmount);
+      }
     }
 
-    // Aplicar descuento total si se proporciona
-    const discountAmount = request.discountAmount || 0;
-    const creditApplied = request.creditApplied || 0;
-    const total = subtotal + totalTaxAmount - discountAmount - creditApplied;
+    // Aplicar descuento total adicional si se proporciona (además del descuento del item)
+    // Asegurarse de que sean números, no strings
+    const discountAmount = Number(request.discountAmount) || 0;
+    const creditApplied = Number(request.creditApplied) || 0;
+
+    // Si usamos valores pre-calculados, usar el taxAmount del request (convertido a número)
+    // Si no, usar el totalTaxAmount calculado
+    const finalTaxAmount = usePreCalculatedValues ? Number(request.taxAmount) || 0 : totalTaxAmount;
+
+    // Asegurarse de que subtotal también sea número cuando se usan valores pre-calculados
+    const finalSubtotal = usePreCalculatedValues ? Number(request.subtotal) || 0 : subtotal;
+
+    // Validar que todos los valores sean números válidos antes de calcular el total
+    const valuesToValidate = {
+      subtotal: finalSubtotal,
+      finalTaxAmount,
+      discountAmount,
+      creditApplied,
+    };
+
+    const invalidValues = Object.entries(valuesToValidate).filter(
+      ([, value]) => typeof value === 'number' && (isNaN(value) || !isFinite(value)),
+    );
+
+    if (invalidValues.length > 0) {
+      throw new BadRequestException(
+        `Valores inválidos al calcular el total de la factura: ${JSON.stringify(invalidValues, null, 2)}. ` +
+          `subtotal=${finalSubtotal}, finalTaxAmount=${finalTaxAmount}, discountAmount=${discountAmount}, creditApplied=${creditApplied}`,
+      );
+    }
+
+    const total = roundToTwoDecimals(
+      finalSubtotal + finalTaxAmount - discountAmount - creditApplied,
+    );
+
+    if (isNaN(total) || !isFinite(total)) {
+      throw new BadRequestException(
+        `Total inválido calculado: subtotal=${finalSubtotal}, finalTaxAmount=${finalTaxAmount}, ` +
+          `discountAmount=${discountAmount}, creditApplied=${creditApplied}, total=${total}`,
+      );
+    }
 
     if (total < 0) {
       throw new BadRequestException('Total amount cannot be negative after discounts and credits');
@@ -134,8 +244,8 @@ export class CreateInvoiceHandler {
       partner.billingEmail,
       new Date(request.issueDate),
       new Date(request.dueDate),
-      subtotal,
-      totalTaxAmount,
+      finalSubtotal, // Usar el subtotal correcto (pre-calculado o calculado)
+      finalTaxAmount, // Usar el taxAmount correcto (pre-calculado o calculado)
       total,
       request.currency || subscription.currency,
       processedItems,
@@ -205,36 +315,68 @@ export class CreateInvoiceHandler {
 
     // Si hay billingCycle, actualizarlo con la información de la factura
     if (billingCycle) {
+      // Obtener el billing cycle actualizado después de aplicar pagos (si se aplicaron)
+      // Esto asegura que tenemos el paidAmount más reciente
+      const currentBillingCycle = await this.billingCycleRepository.findById(billingCycle.id);
+      const billingCycleToUse = currentBillingCycle || billingCycle;
+
+      // Actualizar el totalAmount del billing cycle para que coincida con el total de la factura
+      // El billing cycle puede haberse creado sin impuestos, pero la factura los incluye
+      const updatedTotalAmount = savedInvoice.total;
+
+      // Verificar si el billing cycle ya está completamente pagado
+      // Si es así, la factura también debe marcarse como pagada
+      const isBillingCyclePaid = billingCycleToUse.paidAmount >= updatedTotalAmount - 0.01;
+
+      // Si el billing cycle está pagado, marcar la factura como pagada también
+      if (isBillingCyclePaid && savedInvoice.status === 'pending') {
+        const paymentMethod: InvoicePaymentMethod = billingCycleToUse.paymentMethod
+          ? (billingCycleToUse.paymentMethod as InvoicePaymentMethod)
+          : 'bank_transfer';
+        const paidInvoice = savedInvoice.markAsPaid(
+          paymentMethod,
+          billingCycleToUse.paymentDate || new Date(),
+        );
+        await this.invoiceRepository.update(paidInvoice);
+        savedInvoice = paidInvoice;
+      }
+
+      // Determinar el invoiceStatus basado en el estado actual de la factura (después de posibles actualizaciones)
+      // Re-fetch la factura para asegurarnos de tener el estado más reciente
+      const finalInvoice = await this.invoiceRepository.findById(savedInvoice.id);
+      const invoiceToUse = finalInvoice || savedInvoice;
+      const invoiceStatus = invoiceToUse.status === 'paid' ? 'paid' : 'pending';
+
       const updatedCycle = new BillingCycle(
-        billingCycle.id,
-        billingCycle.subscriptionId,
-        billingCycle.partnerId,
-        billingCycle.cycleNumber,
-        billingCycle.startDate,
-        billingCycle.endDate,
-        billingCycle.durationDays,
-        billingCycle.billingDate,
-        billingCycle.dueDate,
-        billingCycle.amount,
-        billingCycle.paidAmount,
-        billingCycle.currency,
-        billingCycle.status,
-        billingCycle.paymentStatus,
-        billingCycle.paymentDate,
-        billingCycle.paymentMethod,
-        savedInvoice.id.toString(),
-        savedInvoice.invoiceNumber,
-        'pending',
-        billingCycle.discountApplied,
-        billingCycle.totalAmount,
-        billingCycle.createdAt,
+        billingCycleToUse.id,
+        billingCycleToUse.subscriptionId,
+        billingCycleToUse.partnerId,
+        billingCycleToUse.cycleNumber,
+        billingCycleToUse.startDate,
+        billingCycleToUse.endDate,
+        billingCycleToUse.durationDays,
+        billingCycleToUse.billingDate,
+        billingCycleToUse.dueDate,
+        billingCycleToUse.amount,
+        billingCycleToUse.paidAmount,
+        billingCycleToUse.currency,
+        billingCycleToUse.status,
+        billingCycleToUse.paymentStatus,
+        billingCycleToUse.paymentDate,
+        billingCycleToUse.paymentMethod,
+        invoiceToUse.id.toString(),
+        invoiceToUse.invoiceNumber,
+        invoiceStatus, // Usar el estado correcto basado en el estado actual de la factura
+        billingCycleToUse.discountApplied,
+        updatedTotalAmount, // Actualizar totalAmount para que coincida con el total de la factura
+        billingCycleToUse.createdAt,
         new Date(),
       );
       await this.billingCycleRepository.update(updatedCycle);
     }
 
     // Convertir items a response format
-    const itemsResponse: InvoiceItemResponse[] = savedInvoice.items.map(item => ({
+    const itemsResponse: InvoiceItemResponse[] = savedInvoice.items.map((item) => ({
       id: item.id,
       description: item.description,
       quantity: item.quantity,
@@ -301,11 +443,11 @@ export class CreateInvoiceHandler {
     if (currentYearInvoices.length > 0) {
       // Extraer el número de secuencia más alto
       const sequences = currentYearInvoices
-        .map(inv => {
+        .map((inv) => {
           const match = inv.invoiceNumber.match(new RegExp(`${prefix}(\\d+)`));
           return match ? parseInt(match[1], 10) : 0;
         })
-        .filter(n => n > 0);
+        .filter((n) => n > 0);
 
       if (sequences.length > 0) {
         sequence = Math.max(...sequences) + 1;
@@ -326,4 +468,3 @@ export class CreateInvoiceHandler {
     return invoiceNumber;
   }
 }
-

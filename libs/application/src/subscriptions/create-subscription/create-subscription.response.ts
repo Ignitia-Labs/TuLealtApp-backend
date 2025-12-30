@@ -19,11 +19,18 @@ export class CreateSubscriptionResponse {
   partnerId: number;
 
   @ApiProperty({
-    description: 'ID del plan',
-    example: 'plan-conecta',
+    description: 'ID numérico del plan de precios',
+    example: 1,
+    type: Number,
+  })
+  planId: number;
+
+  @ApiProperty({
+    description: 'Slug del plan de precios',
+    example: 'conecta',
     type: String,
   })
-  planId: string;
+  planSlug: string;
 
   @ApiProperty({
     description: 'Tipo de plan',
@@ -63,7 +70,8 @@ export class CreateSubscriptionResponse {
   constructor(
     id: number,
     partnerId: number,
-    planId: string,
+    planId: number,
+    planSlug: string,
     planType: string,
     status: string,
     startDate: Date,
@@ -73,6 +81,7 @@ export class CreateSubscriptionResponse {
     this.id = id;
     this.partnerId = partnerId;
     this.planId = planId;
+    this.planSlug = planSlug;
     this.planType = planType;
     this.status = status;
     this.startDate = startDate;

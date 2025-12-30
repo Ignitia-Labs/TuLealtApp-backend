@@ -106,8 +106,19 @@ export class BillingCycle {
    * Método de dominio para registrar un pago
    */
   recordPayment(amount: number, paymentMethod: string): BillingCycle {
-    const newPaidAmount = this.paidAmount + amount;
-    const isFullyPaid = newPaidAmount >= this.totalAmount;
+    // Convertir ambos valores a Number para evitar concatenación de strings
+    const paidAmountNum = Number(this.paidAmount);
+    const amountNum = Number(amount);
+    const totalAmountNum = Number(this.totalAmount);
+
+    if (isNaN(paidAmountNum) || isNaN(amountNum) || isNaN(totalAmountNum)) {
+      throw new Error(
+        `Valores inválidos en recordPayment: paidAmount=${this.paidAmount}, amount=${amount}, totalAmount=${this.totalAmount}`,
+      );
+    }
+
+    const newPaidAmount = paidAmountNum + amountNum;
+    const isFullyPaid = newPaidAmount >= totalAmountNum;
     return new BillingCycle(
       this.id,
       this.subscriptionId,
@@ -128,6 +139,51 @@ export class BillingCycle {
       this.invoiceId,
       this.invoiceNumber,
       isFullyPaid ? 'paid' : this.invoiceStatus,
+      this.discountApplied,
+      this.totalAmount,
+      this.createdAt,
+      new Date(),
+    );
+  }
+
+  /**
+   * Método de dominio para revertir un pago
+   * Se usa cuando se elimina un payment asociado
+   */
+  reversePayment(amount: number): BillingCycle {
+    // Convertir ambos valores a Number para evitar concatenación de strings
+    const paidAmountNum = Number(this.paidAmount);
+    const amountNum = Number(amount);
+    const totalAmountNum = Number(this.totalAmount);
+
+    if (isNaN(paidAmountNum) || isNaN(amountNum) || isNaN(totalAmountNum)) {
+      throw new Error(
+        `Valores inválidos en reversePayment: paidAmount=${this.paidAmount}, amount=${amount}, totalAmount=${this.totalAmount}`,
+      );
+    }
+
+    const newPaidAmount = Math.max(0, paidAmountNum - amountNum);
+    const isFullyPaid = newPaidAmount >= totalAmountNum;
+    return new BillingCycle(
+      this.id,
+      this.subscriptionId,
+      this.partnerId,
+      this.cycleNumber,
+      this.startDate,
+      this.endDate,
+      this.durationDays,
+      this.billingDate,
+      this.dueDate,
+      this.amount,
+      newPaidAmount,
+      this.currency,
+      isFullyPaid ? 'paid' : 'pending',
+      isFullyPaid ? ('paid' as BillingCyclePaymentStatus) : ('pending' as BillingCyclePaymentStatus),
+      newPaidAmount > 0 ? this.paymentDate : null,
+      newPaidAmount > 0 ? this.paymentMethod : null,
+      this.invoiceId,
+      this.invoiceNumber,
+      isFullyPaid ? 'paid' : 'pending',
       this.discountApplied,
       this.totalAmount,
       this.createdAt,

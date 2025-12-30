@@ -28,6 +28,17 @@ export class GetInvoicesHandler {
       invoices = await this.invoiceRepository.findBySubscriptionId(request.subscriptionId);
     } else if (request.partnerId) {
       invoices = await this.invoiceRepository.findByPartnerId(request.partnerId, skip, take);
+      // Ordenar por fecha de vencimiento (más antigua primero) para facturas pendientes
+      invoices.sort((a, b) => {
+        // Primero las pendientes ordenadas por dueDate ASC
+        if (a.status === 'pending' && b.status !== 'pending') return -1;
+        if (a.status !== 'pending' && b.status === 'pending') return 1;
+        if (a.status === 'pending' && b.status === 'pending') {
+          return a.dueDate.getTime() - b.dueDate.getTime();
+        }
+        // Para las demás, mantener orden por issueDate DESC
+        return b.issueDate.getTime() - a.issueDate.getTime();
+      });
     }
 
     const invoiceDtos: GetInvoiceResponse[] = invoices.map((invoice) => {
@@ -46,6 +57,19 @@ export class GetInvoicesHandler {
             item.total,
           ),
       );
+
+      // Calcular días hasta vencimiento e isOverdue
+      let daysUntilDue: number | null = null;
+      let isOverdue = false;
+      if (invoice.status === 'pending' || invoice.status === 'overdue') {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const due = new Date(invoice.dueDate);
+        due.setHours(0, 0, 0, 0);
+        const diffTime = due.getTime() - today.getTime();
+        daysUntilDue = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        isOverdue = daysUntilDue < 0;
+      }
 
       return new GetInvoiceResponse(
         invoice.id,
@@ -74,6 +98,8 @@ export class GetInvoicesHandler {
         invoice.notes,
         invoice.createdAt,
         invoice.updatedAt,
+        daysUntilDue,
+        isOverdue,
       );
     });
 

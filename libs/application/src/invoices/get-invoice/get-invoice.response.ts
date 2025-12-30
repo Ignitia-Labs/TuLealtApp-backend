@@ -192,6 +192,21 @@ export class GetInvoiceResponse {
   })
   updatedAt: Date;
 
+  @ApiProperty({
+    description: 'Días hasta el vencimiento (negativo si está vencida)',
+    example: 5,
+    type: Number,
+    nullable: true,
+  })
+  daysUntilDue: number | null;
+
+  @ApiProperty({
+    description: 'Indica si la factura está vencida',
+    example: false,
+    type: Boolean,
+  })
+  isOverdue: boolean;
+
   constructor(
     id: number,
     invoiceNumber: string,
@@ -219,6 +234,8 @@ export class GetInvoiceResponse {
     notes: string | null,
     createdAt: Date,
     updatedAt: Date,
+    daysUntilDue?: number | null,
+    isOverdue?: boolean,
   ) {
     this.id = id;
     this.invoiceNumber = invoiceNumber;
@@ -246,6 +263,20 @@ export class GetInvoiceResponse {
     this.notes = notes;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
+
+    // Calcular días hasta vencimiento e isOverdue
+    if (status === 'pending' || status === 'overdue') {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const due = new Date(dueDate);
+      due.setHours(0, 0, 0, 0);
+      const diffTime = due.getTime() - today.getTime();
+      this.daysUntilDue = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      this.isOverdue = this.daysUntilDue < 0;
+    } else {
+      this.daysUntilDue = null;
+      this.isOverdue = false;
+    }
   }
 }
 

@@ -22,8 +22,10 @@ import {
   PartnerMapper,
   EmailService,
 } from '@libs/infrastructure';
+import { roundToTwoDecimals } from '@libs/shared';
 import { CreatePaymentRequest } from './create-payment.request';
 import { CreatePaymentResponse } from './create-payment.response';
+import { CommissionCalculationService } from '../../commissions/calculate-commission/commission-calculation.service';
 
 /**
  * Handler para el caso de uso de crear un pago
@@ -44,6 +46,7 @@ export class CreatePaymentHandler {
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
     private readonly emailService: EmailService,
+    private readonly commissionCalculationService: CommissionCalculationService,
   ) {}
 
   async execute(request: CreatePaymentRequest): Promise<CreatePaymentResponse> {
@@ -76,6 +79,25 @@ export class CreatePaymentHandler {
           `Invoice ${request.invoiceId} does not belong to subscription ${request.subscriptionId}`,
         );
       }
+
+      // Validar si la factura ya está pagada
+      if (invoice.status === 'paid' || invoice.paymentStatus === 'paid') {
+        throw new BadRequestException(
+          `Invoice ${request.invoiceId} is already paid. Cannot create payment for a paid invoice.`,
+        );
+      }
+
+      // Validar si la factura está vencida y mostrar advertencia en el log
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const dueDate = new Date(invoice.dueDate);
+      dueDate.setHours(0, 0, 0, 0);
+      if (dueDate < today && invoice.status === 'pending') {
+        const daysOverdue = Math.ceil((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+        this.logger.warn(
+          `Payment being created for overdue invoice ${request.invoiceId}. Invoice is ${daysOverdue} days overdue.`,
+        );
+      }
     }
 
     // Validar billingCycleId si se proporciona
@@ -106,6 +128,9 @@ export class CreatePaymentHandler {
       );
     }
 
+    // Generar transactionId automáticamente
+    const transactionId: number = await this.paymentRepository.getNextTransactionId();
+
     // Crear el pago
     const payment = Payment.create(
       request.subscriptionId,
@@ -117,7 +142,7 @@ export class CreatePaymentHandler {
       request.billingCycleId || null,
       request.paymentDate ? new Date(request.paymentDate) : new Date(),
       request.status || 'pending',
-      request.transactionId || null,
+      transactionId,
       request.reference || null,
       request.confirmationCode || null,
       request.gateway || null,
@@ -158,15 +183,13 @@ export class CreatePaymentHandler {
           this.logger.error('Error sending payment confirmation email:', error);
         }
 
-        // Si el pago es mayor a la factura, convertir excedente a crédito
+        // Si el pago es mayor a la factura, el excedente se convertirá en crédito disponible
+        // NOTA: El crédito se calcula dinámicamente desde los pagos, no se almacena
         if (request.amount > invoice.total) {
           const excessAmount = request.amount - invoice.total;
-          const subscriptionWithCredit = subscription.addCredit(excessAmount);
-          await this.subscriptionRepository.save(
-            PartnerMapper.subscriptionToPersistence(subscriptionWithCredit),
-          );
           this.logger.log(
-            `Exceso de pago ${excessAmount} ${savedPayment.currency} convertido a crédito para suscripción ${subscription.id}`,
+            `Exceso de pago ${excessAmount} ${savedPayment.currency} disponible como crédito para suscripción ${subscription.id}. ` +
+            `El crédito se calculará dinámicamente desde los pagos.`,
           );
         }
       }
@@ -186,14 +209,28 @@ export class CreatePaymentHandler {
         PartnerMapper.subscriptionToPersistence(updatedSubscription),
       );
 
-      // Si el pago no tiene factura asociada, aplicar a facturas pendientes
+      // Calcular comisiones para el staff asignado
+      try {
+        await this.commissionCalculationService.calculateCommissionsForPayment(
+          processedPayment,
+          partner.id,
+          subscription.id,
+        );
+      } catch (error) {
+        // Log error pero no fallar el proceso de pago
+        this.logger.error('Error calculating commissions:', error);
+      }
+
+      // Si el pago no tiene factura asociada, aplicar a facturas y billing cycles pendientes
       if (!invoice) {
-        await this.applyPaymentToPendingInvoices(
-          updatedSubscription, // Usar la suscripción actualizada con lastPaymentDate
+        // Primero intentar aplicar a billing cycles pendientes
+        await this.applyPaymentToPendingBillingCycles(
+          updatedSubscription,
           savedPayment.amount,
           savedPayment.currency,
           savedPayment.paymentMethod,
           savedPayment.paymentDate,
+          savedPayment.id, // originalPaymentId
         );
       }
     }
@@ -229,6 +266,113 @@ export class CreatePaymentHandler {
   }
 
   /**
+   * Método privado para aplicar pagos sin factura a billing cycles pendientes
+   * Aplica el pago a los billing cycles pendientes ordenados por fecha de vencimiento
+   * Si sobra dinero, lo convierte a crédito en la suscripción
+   */
+  private async applyPaymentToPendingBillingCycles(
+    subscription: PartnerSubscription,
+    paymentAmount: number,
+    currency: string,
+    paymentMethod: PaymentMethod,
+    paymentDate: Date,
+    originalPaymentId: number,
+  ): Promise<void> {
+    // 1. Buscar billing cycles pendientes
+    const pendingCycles = await this.billingCycleRepository.findPendingBySubscriptionId(
+      subscription.id,
+    );
+
+    // Filtrar por moneda y ordenar por dueDate
+    const cyclesToApply = pendingCycles
+      .filter(
+        (cycle) =>
+          cycle.currency === currency && cycle.paidAmount < cycle.totalAmount,
+      )
+      .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
+
+    if (cyclesToApply.length === 0) {
+      // No hay ciclos pendientes, intentar aplicar a facturas pendientes
+      await this.applyPaymentToPendingInvoices(
+        subscription,
+        paymentAmount,
+        currency,
+        paymentMethod,
+        paymentDate,
+        originalPaymentId,
+      );
+      return;
+    }
+
+    let remainingAmount = roundToTwoDecimals(paymentAmount);
+
+    // 2. Aplicar a cada ciclo hasta agotar el pago
+    for (const cycle of cyclesToApply) {
+      if (remainingAmount <= 0) break;
+
+      const cycleRemaining = roundToTwoDecimals(
+        cycle.totalAmount - cycle.paidAmount,
+      );
+      const amountToApply = roundToTwoDecimals(
+        Math.min(remainingAmount, cycleRemaining),
+      );
+
+      // Obtener el payment original para heredar reference
+      const originalPayment = await this.paymentRepository.findById(originalPaymentId);
+
+      // Crear Payment derivado asociado al ciclo
+      const cyclePayment = Payment.create(
+        subscription.id,
+        subscription.partnerId,
+        amountToApply,
+        currency,
+        paymentMethod,
+        null, // invoiceId (se asignará cuando se cree la factura)
+        cycle.id, // billingCycleId
+        paymentDate,
+        'paid',
+        originalPayment?.transactionId || null, // Heredar transactionId del original
+        originalPayment?.reference || null, // Heredar reference del original
+        null, // confirmationCode
+        null, // gateway
+        null, // gatewayTransactionId
+        null, // cardLastFour
+        null, // cardBrand
+        null, // cardExpiry
+        false, // isRetry
+        null, // retryAttempt
+        `Pago aplicado automáticamente a billing cycle ${cycle.cycleNumber}`,
+        null, // processedBy
+        originalPaymentId, // originalPaymentId - ID del payment original del cual este es derivado
+      );
+
+      await this.paymentRepository.save(cyclePayment);
+
+      // Actualizar billing cycle
+      const updatedCycle = cycle.recordPayment(amountToApply, paymentMethod);
+      await this.billingCycleRepository.update(updatedCycle);
+
+      remainingAmount = roundToTwoDecimals(remainingAmount - amountToApply);
+
+      this.logger.log(
+        `Pago de ${amountToApply} ${currency} aplicado a billing cycle ${cycle.cycleNumber} (restante: ${remainingAmount})`,
+      );
+    }
+
+    // 3. Si sobra, intentar aplicar a facturas pendientes
+    if (remainingAmount > 0) {
+      await this.applyPaymentToPendingInvoices(
+        subscription,
+        remainingAmount,
+        currency,
+        paymentMethod,
+        paymentDate,
+        originalPaymentId,
+      );
+    }
+  }
+
+  /**
    * Método privado para aplicar pagos sin factura a facturas pendientes
    * Aplica el pago a las facturas pendientes ordenadas por fecha de vencimiento
    * Si sobra dinero, lo convierte a crédito en la suscripción
@@ -239,6 +383,7 @@ export class CreatePaymentHandler {
     currency: string,
     paymentMethod: PaymentMethod,
     paymentDate: Date,
+    originalPaymentId: number,
   ): Promise<void> {
     // Obtener facturas pendientes ordenadas por fecha de vencimiento
     const pendingInvoices = await this.invoiceRepository.findPendingByPartnerId(
@@ -251,13 +396,11 @@ export class CreatePaymentHandler {
       .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
 
     if (subscriptionInvoices.length === 0) {
-      // Si no hay facturas pendientes, convertir todo el pago a crédito
-      const subscriptionWithCredit = subscription.addCredit(paymentAmount);
-      await this.subscriptionRepository.save(
-        PartnerMapper.subscriptionToPersistence(subscriptionWithCredit),
-      );
+      // Si no hay facturas pendientes, el pago completo estará disponible como crédito
+      // NOTA: El crédito se calcula dinámicamente desde los pagos, no se almacena
       this.logger.log(
-        `Pago de ${paymentAmount} ${currency} sin factura asociada convertido a crédito para suscripción ${subscription.id}`,
+        `Pago de ${paymentAmount} ${currency} sin factura asociada disponible como crédito para suscripción ${subscription.id}. ` +
+        `El crédito se calculará dinámicamente desde los pagos.`,
       );
       return;
     }
@@ -268,9 +411,14 @@ export class CreatePaymentHandler {
       if (remainingAmount <= 0) break;
 
       // Calcular cuánto aplicar a esta factura
-      const amountToApply = Math.min(remainingAmount, pendingInvoice.total);
+      const amountToApply = roundToTwoDecimals(
+        Math.min(remainingAmount, pendingInvoice.total),
+      );
 
-      // Crear pago asociado a esta factura
+      // Obtener el payment original para heredar reference
+      const originalPayment = await this.paymentRepository.findById(originalPaymentId);
+
+      // Crear payment derivado asociado a esta factura
       const invoicePayment = Payment.create(
         subscription.id,
         subscription.partnerId,
@@ -281,8 +429,8 @@ export class CreatePaymentHandler {
         pendingInvoice.billingCycleId,
         paymentDate,
         'paid',
-        null, // transactionId
-        null, // reference
+        originalPayment?.transactionId || null, // Heredar transactionId del original
+        originalPayment?.reference || null, // Heredar reference del original
         null, // confirmationCode
         null, // gateway
         null, // gatewayTransactionId
@@ -293,6 +441,7 @@ export class CreatePaymentHandler {
         null, // retryAttempt
         `Pago aplicado automáticamente desde pago sin factura`, // notes
         null, // processedBy
+        originalPaymentId, // originalPaymentId - ID del payment original del cual este es derivado
       );
 
       await this.paymentRepository.save(invoicePayment);
@@ -312,22 +461,19 @@ export class CreatePaymentHandler {
         }
       }
 
-      remainingAmount -= amountToApply;
+      remainingAmount = roundToTwoDecimals(remainingAmount - amountToApply);
 
       this.logger.log(
         `Pago de ${amountToApply} ${currency} aplicado automáticamente a factura ${pendingInvoice.invoiceNumber}`,
       );
     }
 
-    // Si sobra, convertir a crédito
+    // Si sobra, estará disponible como crédito
+    // NOTA: El crédito se calcula dinámicamente desde los pagos, no se almacena
     if (remainingAmount > 0) {
-      const subscriptionWithCredit = subscription.addCredit(remainingAmount);
-      await this.subscriptionRepository.save(
-        PartnerMapper.subscriptionToPersistence(subscriptionWithCredit),
-      );
-
       this.logger.log(
-        `Exceso de pago ${remainingAmount} ${currency} convertido a crédito para suscripción ${subscription.id}`,
+        `Exceso de pago ${remainingAmount} ${currency} disponible como crédito para suscripción ${subscription.id}. ` +
+        `El crédito se calculará dinámicamente desde los pagos.`,
       );
     }
   }

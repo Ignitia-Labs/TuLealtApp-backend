@@ -19,8 +19,8 @@ export class BillingCycleMapper {
       persistenceEntity.durationDays,
       persistenceEntity.billingDate,
       persistenceEntity.dueDate,
-      persistenceEntity.amount,
-      persistenceEntity.paidAmount,
+      Number(persistenceEntity.amount), // Convertir DECIMAL a número
+      Number(persistenceEntity.paidAmount), // Convertir DECIMAL a número
       persistenceEntity.currency,
       persistenceEntity.status,
       persistenceEntity.paymentStatus,
@@ -29,8 +29,8 @@ export class BillingCycleMapper {
       persistenceEntity.invoiceId,
       persistenceEntity.invoiceNumber,
       persistenceEntity.invoiceStatus,
-      persistenceEntity.discountApplied,
-      persistenceEntity.totalAmount,
+      persistenceEntity.discountApplied ? Number(persistenceEntity.discountApplied) : null, // Convertir DECIMAL a número
+      Number(persistenceEntity.totalAmount), // Convertir DECIMAL a número
       persistenceEntity.createdAt,
       persistenceEntity.updatedAt,
     );

@@ -15,7 +15,7 @@ export class PaymentMapper {
       persistenceEntity.partnerId,
       persistenceEntity.invoiceId,
       persistenceEntity.billingCycleId,
-      persistenceEntity.amount,
+      Number(persistenceEntity.amount), // Convertir DECIMAL a número
       persistenceEntity.currency,
       persistenceEntity.paymentMethod,
       persistenceEntity.status,
@@ -33,6 +33,7 @@ export class PaymentMapper {
       persistenceEntity.retryAttempt,
       persistenceEntity.notes,
       persistenceEntity.processedBy,
+      persistenceEntity.originalPaymentId,
       persistenceEntity.createdAt,
       persistenceEntity.updatedAt,
     );
@@ -68,6 +69,7 @@ export class PaymentMapper {
     entity.retryAttempt = domainEntity.retryAttempt;
     entity.notes = domainEntity.notes;
     entity.processedBy = domainEntity.processedBy;
+    entity.originalPaymentId = domainEntity.originalPaymentId;
     entity.createdAt = domainEntity.createdAt;
     entity.updatedAt = domainEntity.updatedAt;
     return entity;

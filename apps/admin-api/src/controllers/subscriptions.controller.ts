@@ -37,6 +37,18 @@ import {
   DeleteSubscriptionHandler,
   DeleteSubscriptionRequest,
   DeleteSubscriptionResponse,
+  GetSubscriptionStatsHandler,
+  GetSubscriptionStatsRequest,
+  SubscriptionStatsResponse,
+  GetSubscriptionEventsHandler,
+  GetSubscriptionEventsRequest,
+  GetSubscriptionEventsResponse,
+  GetSubscriptionStatsCompareHandler,
+  GetSubscriptionStatsCompareRequest,
+  GetSubscriptionStatsCompareResponse,
+  GetSubscriptionTimeseriesHandler,
+  GetSubscriptionTimeseriesRequest,
+  GetSubscriptionTimeseriesResponse,
 } from '@libs/application';
 import {
   UnauthorizedErrorResponseDto,
@@ -67,6 +79,10 @@ export class SubscriptionsController {
     private readonly getSubscriptionsHandler: GetSubscriptionsHandler,
     private readonly updateSubscriptionHandler: UpdateSubscriptionHandler,
     private readonly deleteSubscriptionHandler: DeleteSubscriptionHandler,
+    private readonly getSubscriptionStatsHandler: GetSubscriptionStatsHandler,
+    private readonly getSubscriptionEventsHandler: GetSubscriptionEventsHandler,
+    private readonly getSubscriptionStatsCompareHandler: GetSubscriptionStatsCompareHandler,
+    private readonly getSubscriptionTimeseriesHandler: GetSubscriptionTimeseriesHandler,
   ) {}
 
   @Get()
@@ -129,6 +145,11 @@ export class SubscriptionsController {
           renewalDate: '2025-01-01T00:00:00.000Z',
           billingFrequency: 'monthly',
           billingAmount: 79.99,
+          includeTax: false,
+          taxPercent: null,
+          basePrice: 79.99,
+          taxAmount: 0,
+          totalPrice: 79.99,
           currency: 'USD',
           nextBillingDate: '2024-02-01T00:00:00.000Z',
           nextBillingAmount: 79.99,
@@ -318,6 +339,11 @@ export class SubscriptionsController {
       renewalDate: '2025-01-01T00:00:00.000Z',
       billingFrequency: 'monthly',
       billingAmount: 79.99,
+      includeTax: false,
+      taxPercent: null,
+      basePrice: 79.99,
+      taxAmount: 0,
+      totalPrice: 79.99,
       currency: 'USD',
       nextBillingDate: '2024-02-01T00:00:00.000Z',
       nextBillingAmount: 79.99,
@@ -543,6 +569,234 @@ export class SubscriptionsController {
     const request = new DeleteSubscriptionRequest();
     request.subscriptionId = id;
     return this.deleteSubscriptionHandler.execute(request);
+  }
+
+  @Get('stats')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Obtener estadísticas de suscripciones',
+    description: 'Obtiene estadísticas agregadas de suscripciones para un período determinado',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    required: true,
+    type: String,
+    description: 'Fecha de inicio del período (ISO 8601)',
+    example: '2024-01-01T00:00:00.000Z',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: true,
+    type: String,
+    description: 'Fecha de fin del período (ISO 8601)',
+    example: '2024-12-31T23:59:59.999Z',
+  })
+  @ApiQuery({
+    name: 'groupBy',
+    required: false,
+    enum: ['day', 'week', 'month', 'quarter', 'year'],
+    description: 'Agrupar resultados por período',
+    example: 'month',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Estadísticas obtenidas exitosamente',
+    type: SubscriptionStatsResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Parámetros de consulta inválidos',
+    type: BadRequestErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async getStats(@Query() query: GetSubscriptionStatsRequest): Promise<SubscriptionStatsResponse> {
+    return this.getSubscriptionStatsHandler.execute(query);
+  }
+
+  @Post('events')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Obtener eventos de suscripciones',
+    description: 'Obtiene una lista paginada de eventos de suscripciones con filtros opcionales. Las fechas deben estar en formato YYYY-MM-DD (ej: 2024-01-01)',
+  })
+  @ApiBody({
+    type: GetSubscriptionEventsRequest,
+    description: 'Filtros para obtener eventos de suscripciones',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Eventos obtenidos exitosamente',
+    type: GetSubscriptionEventsResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Parámetros inválidos',
+    type: BadRequestErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async getEvents(
+    @Body() request: GetSubscriptionEventsRequest,
+  ): Promise<GetSubscriptionEventsResponse> {
+    return this.getSubscriptionEventsHandler.execute(request);
+  }
+
+  @Get('stats/compare')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Comparar estadísticas de suscripciones entre períodos',
+    description: 'Compara estadísticas de suscripciones entre el período actual y un período anterior',
+  })
+  @ApiQuery({
+    name: 'currentStartDate',
+    required: true,
+    type: String,
+    description: 'Fecha de inicio del período actual (ISO 8601)',
+    example: '2024-01-01T00:00:00.000Z',
+  })
+  @ApiQuery({
+    name: 'currentEndDate',
+    required: true,
+    type: String,
+    description: 'Fecha de fin del período actual (ISO 8601)',
+    example: '2024-03-31T23:59:59.999Z',
+  })
+  @ApiQuery({
+    name: 'previousStartDate',
+    required: true,
+    type: String,
+    description: 'Fecha de inicio del período anterior (ISO 8601)',
+    example: '2023-10-01T00:00:00.000Z',
+  })
+  @ApiQuery({
+    name: 'previousEndDate',
+    required: true,
+    type: String,
+    description: 'Fecha de fin del período anterior (ISO 8601)',
+    example: '2023-12-31T23:59:59.999Z',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Comparación obtenida exitosamente',
+    type: GetSubscriptionStatsCompareResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Parámetros de consulta inválidos',
+    type: BadRequestErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async compareStats(
+    @Query() query: GetSubscriptionStatsCompareRequest,
+  ): Promise<GetSubscriptionStatsCompareResponse> {
+    return this.getSubscriptionStatsCompareHandler.execute(query);
+  }
+
+  @Get('stats/timeseries')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Obtener series temporales de estadísticas',
+    description: 'Obtiene estadísticas de suscripciones agrupadas por período temporal',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    required: true,
+    type: String,
+    description: 'Fecha de inicio del período (ISO 8601)',
+    example: '2024-01-01T00:00:00.000Z',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: true,
+    type: String,
+    description: 'Fecha de fin del período (ISO 8601)',
+    example: '2024-12-31T23:59:59.999Z',
+  })
+  @ApiQuery({
+    name: 'groupBy',
+    required: true,
+    enum: ['day', 'week', 'month', 'quarter'],
+    description: 'Agrupar resultados por período',
+    example: 'month',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Series temporales obtenidas exitosamente',
+    type: GetSubscriptionTimeseriesResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Parámetros de consulta inválidos',
+    type: BadRequestErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async getTimeseries(
+    @Query() query: GetSubscriptionTimeseriesRequest,
+  ): Promise<GetSubscriptionTimeseriesResponse> {
+    return this.getSubscriptionTimeseriesHandler.execute(query);
   }
 }
 

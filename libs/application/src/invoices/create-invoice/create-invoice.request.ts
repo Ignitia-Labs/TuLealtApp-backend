@@ -134,6 +134,30 @@ export class CreateInvoiceRequest {
   items: InvoiceItemRequest[];
 
   @ApiProperty({
+    description: 'Subtotal de la factura (ya calculado, opcional)',
+    example: 147.25,
+    type: Number,
+    minimum: 0,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
+  subtotal?: number;
+
+  @ApiProperty({
+    description: 'Monto de impuestos (ya calculado, opcional)',
+    example: 17.67,
+    type: Number,
+    minimum: 0,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
+  taxAmount?: number;
+
+  @ApiProperty({
     description: 'Descuento total aplicado',
     example: 10.0,
     type: Number,

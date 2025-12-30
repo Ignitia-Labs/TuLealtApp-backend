@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PartnerSubscriptionEntity } from '@libs/infrastructure';
+import { PartnerSubscriptionEntity, PartnerMapper } from '@libs/infrastructure';
 import { DeleteSubscriptionRequest } from './delete-subscription.request';
 import { DeleteSubscriptionResponse } from './delete-subscription.response';
+import { SubscriptionEventHelper } from '../subscription-event.helper';
 
 /**
  * Handler para el caso de uso de eliminar una suscripción
@@ -13,6 +14,7 @@ export class DeleteSubscriptionHandler {
   constructor(
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
+    private readonly subscriptionEventHelper: SubscriptionEventHelper,
   ) {}
 
   async execute(request: DeleteSubscriptionRequest): Promise<DeleteSubscriptionResponse> {
@@ -23,6 +25,14 @@ export class DeleteSubscriptionHandler {
     if (!subscriptionEntity) {
       throw new NotFoundException(`Subscription with ID ${request.subscriptionId} not found`);
     }
+
+    // Convertir a dominio para registrar evento antes de eliminar
+    const subscription = PartnerMapper.subscriptionToDomain(subscriptionEntity);
+
+    // Registrar evento de cancelación antes de eliminar
+    await this.subscriptionEventHelper.createEvent(subscription, 'cancelled', {
+      deleted: true,
+    });
 
     await this.subscriptionRepository.remove(subscriptionEntity);
 

@@ -31,6 +31,11 @@ export interface IInvoiceRepository {
   findPendingByPartnerId(partnerId: number): Promise<Invoice[]>;
 
   /**
+   * Busca una factura por billingCycleId
+   */
+  findByBillingCycleId(billingCycleId: number): Promise<Invoice | null>;
+
+  /**
    * Guarda una nueva factura
    */
   save(invoice: Invoice): Promise<Invoice>;
@@ -39,4 +44,9 @@ export interface IInvoiceRepository {
    * Actualiza una factura existente
    */
   update(invoice: Invoice): Promise<Invoice>;
+
+  /**
+   * Elimina una factura
+   */
+  delete(id: number): Promise<void>;
 }

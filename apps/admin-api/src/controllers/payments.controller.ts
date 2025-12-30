@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Get,
+  Delete,
   Body,
   Param,
   Query,
@@ -29,6 +30,9 @@ import {
   GetPaymentsHandler,
   GetPaymentsRequest,
   GetPaymentsResponse,
+  DeletePaymentHandler,
+  DeletePaymentRequest,
+  DeletePaymentResponse,
 } from '@libs/application';
 import { JwtAuthGuard, RolesGuard, Roles } from '@libs/shared';
 
@@ -50,6 +54,7 @@ export class PaymentsController {
     private readonly createPaymentHandler: CreatePaymentHandler,
     private readonly getPaymentHandler: GetPaymentHandler,
     private readonly getPaymentsHandler: GetPaymentsHandler,
+    private readonly deletePaymentHandler: DeletePaymentHandler,
   ) {}
 
   @Post()
@@ -130,7 +135,7 @@ export class PaymentsController {
       status: 'paid',
       paymentDate: '2024-02-05T10:30:00.000Z',
       processedDate: '2024-02-05T10:30:05.000Z',
-      transactionId: 'txn_123456789',
+      transactionId: 123456789,
       reference: null,
       confirmationCode: null,
       gateway: 'stripe',
@@ -303,6 +308,13 @@ export class PaymentsController {
     description: 'Cantidad de elementos por página',
     example: 10,
   })
+  @ApiQuery({
+    name: 'includeDerived',
+    required: false,
+    type: Boolean,
+    description: 'Incluir payments derivados en los resultados (por defecto false, solo muestra payments originales)',
+    example: false,
+  })
   @ApiResponse({
     status: 200,
     description: 'Lista de pagos encontrados',
@@ -343,6 +355,7 @@ export class PaymentsController {
     @Query('status') status?: 'pending' | 'paid' | 'failed' | 'refunded' | 'cancelled',
     @Query('page') page?: number,
     @Query('limit') limit?: number,
+    @Query('includeDerived') includeDerived?: string | boolean,
   ): Promise<GetPaymentsResponse> {
     const request = new GetPaymentsRequest();
     if (subscriptionId) {
@@ -363,7 +376,78 @@ export class PaymentsController {
     if (limit) {
       request.limit = Number(limit);
     }
+    if (includeDerived !== undefined) {
+      // Convertir string 'true' a boolean, o mantener boolean si ya lo es
+      request.includeDerived = includeDerived === true || includeDerived === 'true' || includeDerived === '1';
+    }
     return this.getPaymentsHandler.execute(request);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Eliminar un pago',
+    description:
+      'Elimina un pago del sistema. Esta acción es irreversible y solo está disponible para administradores. Al eliminar un pago, se revierte automáticamente su impacto en billing cycles e invoices asociados.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID del pago a eliminar',
+    type: Number,
+    example: 1,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Pago eliminado exitosamente',
+    type: DeletePaymentResponse,
+    example: {
+      id: 1,
+      message: 'Payment deleted successfully',
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    example: {
+      statusCode: 401,
+      message: 'Unauthorized',
+      error: 'Unauthorized',
+    },
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos de administrador',
+    example: {
+      statusCode: 403,
+      message: 'Forbidden resource',
+      error: 'Forbidden',
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Pago no encontrado',
+    example: {
+      statusCode: 404,
+      message: 'Payment with ID 1 not found',
+      error: 'Not Found',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error del servidor',
+    example: {
+      statusCode: 500,
+      message: 'Internal server error',
+      error: 'Internal Server Error',
+    },
+  })
+  async deletePayment(@Param('id', ParseIntPipe) id: number): Promise<DeletePaymentResponse> {
+    const request = new DeletePaymentRequest();
+    request.paymentId = id;
+    return this.deletePaymentHandler.execute(request);
   }
 }
 

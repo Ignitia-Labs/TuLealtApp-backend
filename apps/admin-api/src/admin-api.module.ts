@@ -14,6 +14,7 @@ import { NotificationsController } from './controllers/notifications.controller'
 import { PartnerRequestsController } from './controllers/partner-requests.controller';
 import { SubscriptionsController } from './controllers/subscriptions.controller';
 import { SubscriptionUsageController } from './controllers/subscription-usage.controller';
+import { GoalsController } from './controllers/goals.controller';
 import { PartnerLimitsController } from './controllers/partner-limits.controller';
 import { CatalogsController } from './controllers/catalogs.controller';
 import { PointsRulesController } from './controllers/points-rules.controller';
@@ -23,6 +24,8 @@ import { BillingCyclesController } from './controllers/billing-cycles.controller
 import { InvoicesController } from './controllers/invoices.controller';
 import { PaymentsController } from './controllers/payments.controller';
 import { PaymentWebhooksController } from './controllers/payment-webhooks.controller';
+import { PartnerStaffAssignmentsController } from './controllers/partner-staff-assignments.controller';
+import { CommissionsController } from './controllers/commissions.controller';
 import {
   CreateUserHandler,
   GetUserProfileHandler,
@@ -80,6 +83,13 @@ import {
   GetSubscriptionsHandler,
   UpdateSubscriptionHandler,
   DeleteSubscriptionHandler,
+  GetSubscriptionStatsHandler,
+  SubscriptionStatsService,
+  GetSubscriptionEventsHandler,
+  GetSubscriptionStatsCompareHandler,
+  GetSubscriptionTimeseriesHandler,
+  SubscriptionTimeseriesService,
+  SubscriptionEventHelper,
   CreateSubscriptionUsageHandler,
   GetSubscriptionUsageHandler,
   UpdateSubscriptionUsageHandler,
@@ -108,14 +118,37 @@ import {
   CreateBillingCycleHandler,
   GetBillingCycleHandler,
   GetBillingCyclesHandler,
+  GetBillingCyclePaymentsHandler,
+  DeleteBillingCycleHandler,
   CreateInvoiceHandler,
   GetInvoiceHandler,
   GetInvoicesHandler,
+  DeleteInvoiceHandler,
   CreatePaymentHandler,
   GetPaymentHandler,
   GetPaymentsHandler,
+  DeletePaymentHandler,
   BillingCycleGeneratorService,
   InvoiceReminderService,
+  CreditBalanceService,
+  CreatePartnerStaffAssignmentHandler,
+  UpdatePartnerStaffAssignmentHandler,
+  DeletePartnerStaffAssignmentHandler,
+  GetPartnerStaffAssignmentsHandler,
+  PartnerStaffAssignmentService,
+  CommissionCalculationService,
+  GetPaymentCommissionsHandler,
+  GetCommissionsHandler,
+  GetCommissionSummaryHandler,
+  MarkCommissionsPaidHandler,
+  GetPendingDisbursementsHandler,
+  CreateGoalHandler,
+  GetGoalHandler,
+  GetGoalsHandler,
+  UpdateGoalHandler,
+  DeleteGoalHandler,
+  GetGoalProgressHandler,
+  GoalProgressService,
 } from '@libs/application';
 import { InfrastructureModule, StorageModule } from '@libs/infrastructure';
 import { HealthController } from '@libs/shared';
@@ -156,6 +189,9 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     InvoicesController,
     PaymentsController,
     PaymentWebhooksController,
+    GoalsController,
+    PartnerStaffAssignmentsController,
+    CommissionsController,
     HealthController,
   ],
   providers: [
@@ -227,6 +263,13 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     GetSubscriptionsHandler,
     UpdateSubscriptionHandler,
     DeleteSubscriptionHandler,
+    GetSubscriptionStatsHandler,
+    SubscriptionStatsService,
+    GetSubscriptionEventsHandler,
+    GetSubscriptionStatsCompareHandler,
+    GetSubscriptionTimeseriesHandler,
+    SubscriptionTimeseriesService,
+    SubscriptionEventHelper,
     // Handlers de aplicación - Subscription Usage
     CreateSubscriptionUsageHandler,
     GetSubscriptionUsageHandler,
@@ -262,18 +305,46 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     CreateBillingCycleHandler,
     GetBillingCycleHandler,
     GetBillingCyclesHandler,
+    GetBillingCyclePaymentsHandler,
+    DeleteBillingCycleHandler,
     // Handlers de aplicación - Invoices
     CreateInvoiceHandler,
     GetInvoiceHandler,
     GetInvoicesHandler,
+    DeleteInvoiceHandler,
     // Handlers de aplicación - Payments
     CreatePaymentHandler,
     GetPaymentHandler,
     GetPaymentsHandler,
+    DeletePaymentHandler,
     // Servicios de aplicación - Billing Cycles
     BillingCycleGeneratorService,
+    // Servicios de aplicación - Subscriptions
+    CreditBalanceService,
     // Servicios de aplicación - Invoices
     InvoiceReminderService,
+    // Handlers de aplicación - Partner Staff Assignments
+    CreatePartnerStaffAssignmentHandler,
+    UpdatePartnerStaffAssignmentHandler,
+    DeletePartnerStaffAssignmentHandler,
+    GetPartnerStaffAssignmentsHandler,
+    PartnerStaffAssignmentService,
+    // Servicios de aplicación - Commissions
+    CommissionCalculationService,
+    // Handlers de aplicación - Commissions
+    GetPaymentCommissionsHandler,
+    GetCommissionsHandler,
+    GetCommissionSummaryHandler,
+    MarkCommissionsPaidHandler,
+    GetPendingDisbursementsHandler,
+    // Handlers de aplicación - Goals
+    CreateGoalHandler,
+    GetGoalHandler,
+    GetGoalsHandler,
+    UpdateGoalHandler,
+    DeleteGoalHandler,
+    GetGoalProgressHandler,
+    GoalProgressService,
   ],
 })
 export class AdminApiModule {}

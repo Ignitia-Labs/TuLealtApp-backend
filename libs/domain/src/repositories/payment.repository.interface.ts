@@ -42,4 +42,37 @@ export interface IPaymentRepository {
    * Actualiza un pago existente
    */
   update(payment: Payment): Promise<Payment>;
+
+  /**
+   * Busca pagos sin billingCycleId asignado de una suscripción
+   */
+  findUnassignedBySubscriptionId(
+    subscriptionId: number,
+    currency?: string,
+  ): Promise<Payment[]>;
+
+  /**
+   * Busca pagos asociados a un billing cycle
+   */
+  findByBillingCycleId(billingCycleId: number): Promise<Payment[]>;
+
+  /**
+   * Busca un pago por transactionId
+   */
+  findByTransactionId(transactionId: number): Promise<Payment | null>;
+
+  /**
+   * Obtiene el siguiente transactionId disponible (máximo + 1)
+   */
+  getNextTransactionId(): Promise<number>;
+
+  /**
+   * Elimina un pago por ID
+   */
+  delete(id: number): Promise<void>;
+
+  /**
+   * Busca todos los payments derivados de un payment original
+   */
+  findDerivedByOriginalPaymentId(originalPaymentId: number): Promise<Payment[]>;
 }

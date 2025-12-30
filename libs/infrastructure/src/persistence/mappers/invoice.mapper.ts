@@ -15,14 +15,14 @@ export class InvoiceMapper {
         ? persistenceEntity.items.map((item) => ({
             id: item.itemId,
             description: item.description,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            amount: item.amount,
-            taxRate: item.taxRate,
-            taxAmount: item.taxAmount,
-            discountPercent: item.discountPercent ?? undefined,
-            discountAmount: item.discountAmount ?? undefined,
-            total: item.total,
+            quantity: Number(item.quantity), // Convertir DECIMAL a número
+            unitPrice: Number(item.unitPrice), // Convertir DECIMAL a número
+            amount: Number(item.amount), // Convertir DECIMAL a número
+            taxRate: Number(item.taxRate), // Convertir DECIMAL a número
+            taxAmount: Number(item.taxAmount), // Convertir DECIMAL a número
+            discountPercent: item.discountPercent ? Number(item.discountPercent) : undefined,
+            discountAmount: item.discountAmount ? Number(item.discountAmount) : undefined,
+            total: Number(item.total), // Convertir DECIMAL a número
           }))
         : [];
 
@@ -39,11 +39,11 @@ export class InvoiceMapper {
       persistenceEntity.issueDate,
       persistenceEntity.dueDate,
       persistenceEntity.paidDate,
-      persistenceEntity.subtotal,
-      persistenceEntity.discountAmount,
-      persistenceEntity.taxAmount,
-      persistenceEntity.creditApplied,
-      persistenceEntity.total,
+      Number(persistenceEntity.subtotal), // Convertir DECIMAL a número
+      persistenceEntity.discountAmount ? Number(persistenceEntity.discountAmount) : undefined,
+      Number(persistenceEntity.taxAmount), // Convertir DECIMAL a número
+      persistenceEntity.creditApplied ? Number(persistenceEntity.creditApplied) : undefined,
+      Number(persistenceEntity.total), // Convertir DECIMAL a número
       persistenceEntity.currency,
       items,
       persistenceEntity.status,
@@ -94,6 +94,10 @@ export class InvoiceMapper {
       domainEntity.items && domainEntity.items.length > 0
         ? domainEntity.items.map((item) => {
             const itemEntity = new InvoiceItemEntity();
+            // Asignar invoiceId si la factura ya tiene ID (para updates)
+            if (domainEntity.id > 0) {
+              itemEntity.invoiceId = domainEntity.id;
+            }
             itemEntity.itemId = item.id;
             itemEntity.description = item.description;
             itemEntity.quantity = item.quantity;

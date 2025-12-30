@@ -81,4 +81,43 @@ export class BillingCycleRepository implements IBillingCycleRepository {
     const updatedEntity = await this.billingCycleRepository.save(entity);
     return BillingCycleMapper.toDomain(updatedEntity);
   }
+
+  async findPendingBySubscriptionId(subscriptionId: number): Promise<BillingCycle[]> {
+    const entities = await this.billingCycleRepository.find({
+      where: {
+        subscriptionId,
+        status: 'pending',
+      },
+      order: { dueDate: 'ASC' },
+    });
+
+    return entities.map((entity) => BillingCycleMapper.toDomain(entity));
+  }
+
+  async findWithRemainingBalance(
+    subscriptionId: number,
+    currency?: string,
+  ): Promise<BillingCycle[]> {
+    const where: any = {
+      subscriptionId,
+    };
+
+    if (currency) {
+      where.currency = currency;
+    }
+
+    const entities = await this.billingCycleRepository.find({
+      where,
+      order: { dueDate: 'ASC' },
+    });
+
+    // Filtrar solo los que tienen saldo pendiente
+    return entities
+      .map((entity) => BillingCycleMapper.toDomain(entity))
+      .filter((cycle) => cycle.paidAmount < cycle.totalAmount);
+  }
+
+  async delete(id: number): Promise<void> {
+    await this.billingCycleRepository.delete(id);
+  }
 }

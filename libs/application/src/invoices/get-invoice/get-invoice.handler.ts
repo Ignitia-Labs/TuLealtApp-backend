@@ -50,6 +50,19 @@ export class GetInvoiceHandler {
         ),
     );
 
+    // Calcular días hasta vencimiento e isOverdue
+    let daysUntilDue: number | null = null;
+    let isOverdue = false;
+    if (invoice.status === 'pending' || invoice.status === 'overdue') {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const due = new Date(invoice.dueDate);
+      due.setHours(0, 0, 0, 0);
+      const diffTime = due.getTime() - today.getTime();
+      daysUntilDue = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      isOverdue = daysUntilDue < 0;
+    }
+
     return new GetInvoiceResponse(
       invoice.id,
       invoice.invoiceNumber,
@@ -77,6 +90,8 @@ export class GetInvoiceHandler {
       invoice.notes,
       invoice.createdAt,
       invoice.updatedAt,
+      daysUntilDue,
+      isOverdue,
     );
   }
 }

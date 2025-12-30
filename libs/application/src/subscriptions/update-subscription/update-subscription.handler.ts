@@ -5,6 +5,7 @@ import { PartnerSubscription } from '@libs/domain';
 import { PartnerSubscriptionEntity, PartnerMapper } from '@libs/infrastructure';
 import { UpdateSubscriptionRequest } from './update-subscription.request';
 import { UpdateSubscriptionResponse } from './update-subscription.response';
+import { SubscriptionEventHelper } from '../subscription-event.helper';
 
 /**
  * Handler para el caso de uso de actualizar una suscripción
@@ -14,6 +15,7 @@ export class UpdateSubscriptionHandler {
   constructor(
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
+    private readonly subscriptionEventHelper: SubscriptionEventHelper,
   ) {}
 
   async execute(request: UpdateSubscriptionRequest): Promise<UpdateSubscriptionResponse> {
@@ -29,6 +31,8 @@ export class UpdateSubscriptionHandler {
 
     // Actualizar campos si se proporcionan
     let updatedSubscription = subscription;
+    const oldStatus = subscription.status;
+    const oldPlanType = subscription.planType;
 
     if (request.status) {
       updatedSubscription = updatedSubscription.updateStatus(request.status);
@@ -65,7 +69,7 @@ export class UpdateSubscriptionHandler {
         subscription.gracePeriodDays,
         subscription.retryAttempts,
         subscription.maxRetryAttempts,
-        request.creditBalance ?? subscription.creditBalance,
+        0, // creditBalance siempre es 0 - se calcula dinámicamente desde los pagos
         request.discountPercent ?? subscription.discountPercent,
         request.discountCode ?? subscription.discountCode,
         subscription.lastPaymentDate,
@@ -86,7 +90,9 @@ export class UpdateSubscriptionHandler {
           request.billingFrequency ?? subscription.billingFrequency,
           request.billingAmount ?? subscription.billingAmount,
           subscription.currency,
-          request.nextBillingDate ? new Date(request.nextBillingDate) : subscription.nextBillingDate,
+          request.nextBillingDate
+            ? new Date(request.nextBillingDate)
+            : subscription.nextBillingDate,
           request.nextBillingAmount ?? subscription.nextBillingAmount,
           request.currentPeriodStart
             ? new Date(request.currentPeriodStart)
@@ -106,7 +112,7 @@ export class UpdateSubscriptionHandler {
           subscription.gracePeriodDays,
           subscription.retryAttempts,
           subscription.maxRetryAttempts,
-          request.creditBalance ?? subscription.creditBalance,
+          0, // creditBalance siempre es 0 - se calcula dinámicamente desde los pagos
           request.discountPercent ?? subscription.discountPercent,
           request.discountCode ?? subscription.discountCode,
           subscription.lastPaymentDate,
@@ -121,6 +127,34 @@ export class UpdateSubscriptionHandler {
     // Guardar cambios
     const updatedEntity = PartnerMapper.subscriptionToPersistence(updatedSubscription);
     const savedEntity = await this.subscriptionRepository.save(updatedEntity);
+    const savedSubscription = PartnerMapper.subscriptionToDomain(savedEntity);
+
+    // Registrar eventos según los cambios
+    if (request.status && oldStatus !== savedSubscription.status) {
+      const eventType = this.getStatusEventType(savedSubscription.status);
+      if (eventType) {
+        await this.subscriptionEventHelper.createEvent(savedSubscription, eventType);
+      }
+    }
+
+    if ((request.planId || request.planType) && oldPlanType !== savedSubscription.planType) {
+      await this.subscriptionEventHelper.createEvent(savedSubscription, 'plan_changed', {
+        oldPlanType,
+        newPlanType: savedSubscription.planType,
+        oldPlanId: subscription.planId,
+        newPlanId: savedSubscription.planId,
+      });
+    }
+
+    if (request.status === 'paused' && !subscription.pausedAt) {
+      await this.subscriptionEventHelper.createEvent(savedSubscription, 'paused', {
+        reason: 'Suscripción pausada manualmente',
+      });
+    }
+
+    if (oldStatus === 'paused' && request.status && request.status !== 'paused') {
+      await this.subscriptionEventHelper.createEvent(savedSubscription, 'resumed');
+    }
 
     return new UpdateSubscriptionResponse(
       savedEntity.id,
@@ -128,5 +162,20 @@ export class UpdateSubscriptionHandler {
       savedEntity.updatedAt,
     );
   }
-}
 
+  /**
+   * Obtiene el tipo de evento según el nuevo estado
+   */
+  private getStatusEventType(
+    status: string,
+  ): 'activated' | 'suspended' | 'cancelled' | 'expired' | null {
+    const statusEventMap: Record<string, 'activated' | 'suspended' | 'cancelled' | 'expired'> = {
+      active: 'activated',
+      suspended: 'suspended',
+      cancelled: 'cancelled',
+      expired: 'expired',
+    };
+
+    return statusEventMap[status] || null;
+  }
+}

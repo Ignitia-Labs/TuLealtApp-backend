@@ -84,6 +84,10 @@ export class PartnerMapper {
    * Convierte una entidad de persistencia de suscripción a entidad de dominio
    */
   static subscriptionToDomain(persistenceEntity: PartnerSubscriptionEntity): PartnerSubscription {
+    // NOTA: creditBalance ya no se lee de la BD - se calcula dinámicamente desde los pagos
+    // Usar siempre 0 como valor por defecto
+    const creditBalance = 0;
+
     return PartnerSubscription.create(
       persistenceEntity.partnerId,
       persistenceEntity.planId,
@@ -109,7 +113,7 @@ export class PartnerMapper {
       persistenceEntity.gracePeriodDays,
       persistenceEntity.retryAttempts,
       persistenceEntity.maxRetryAttempts,
-      persistenceEntity.creditBalance,
+      creditBalance,
       persistenceEntity.discountPercent,
       persistenceEntity.discountCode,
       persistenceEntity.lastPaymentDate,
@@ -152,7 +156,8 @@ export class PartnerMapper {
     entity.gracePeriodDays = domainEntity.gracePeriodDays;
     entity.retryAttempts = domainEntity.retryAttempts;
     entity.maxRetryAttempts = domainEntity.maxRetryAttempts;
-    entity.creditBalance = domainEntity.creditBalance;
+    // NOTA: creditBalance fue eliminado - se calcula dinámicamente desde los pagos
+    // Ver CreditBalanceService para el cálculo dinámico
     entity.discountPercent = domainEntity.discountPercent;
     entity.discountCode = domainEntity.discountCode;
     entity.lastPaymentDate = domainEntity.lastPaymentDate;

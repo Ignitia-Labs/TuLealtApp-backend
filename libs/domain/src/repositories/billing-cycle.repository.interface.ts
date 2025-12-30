@@ -34,4 +34,22 @@ export interface IBillingCycleRepository {
    * Actualiza un ciclo existente
    */
   update(cycle: BillingCycle): Promise<BillingCycle>;
+
+  /**
+   * Busca billing cycles pendientes de una suscripción
+   */
+  findPendingBySubscriptionId(subscriptionId: number): Promise<BillingCycle[]>;
+
+  /**
+   * Busca billing cycles que aún tienen saldo pendiente
+   */
+  findWithRemainingBalance(
+    subscriptionId: number,
+    currency?: string,
+  ): Promise<BillingCycle[]>;
+
+  /**
+   * Elimina un ciclo de facturación
+   */
+  delete(id: number): Promise<void>;
 }

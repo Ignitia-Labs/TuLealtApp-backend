@@ -79,4 +79,73 @@ export class PaymentRepository implements IPaymentRepository {
     const updatedEntity = await this.paymentRepository.save(entity);
     return PaymentMapper.toDomain(updatedEntity);
   }
+
+  async findUnassignedBySubscriptionId(
+    subscriptionId: number,
+    currency?: string,
+  ): Promise<Payment[]> {
+    const queryBuilder = this.paymentRepository
+      .createQueryBuilder('payment')
+      .where('payment.subscriptionId = :subscriptionId', { subscriptionId })
+      .andWhere('payment.billingCycleId IS NULL')
+      .andWhere('payment.status = :status', { status: 'paid' })
+      .andWhere('(payment.originalPaymentId IS NULL OR payment.originalPaymentId = 0)'); // Solo payments originales
+
+    if (currency) {
+      queryBuilder.andWhere('payment.currency = :currency', { currency });
+    }
+
+    queryBuilder.orderBy('payment.paymentDate', 'ASC'); // FIFO: más antiguos primero
+
+    const entities = await queryBuilder.getMany();
+
+    return entities.map((entity) => PaymentMapper.toDomain(entity));
+  }
+
+  async findByBillingCycleId(billingCycleId: number): Promise<Payment[]> {
+    const entities = await this.paymentRepository.find({
+      where: { billingCycleId },
+      order: { paymentDate: 'ASC' },
+    });
+
+    return entities.map((entity) => PaymentMapper.toDomain(entity));
+  }
+
+  async findByTransactionId(transactionId: number): Promise<Payment | null> {
+    const entity = await this.paymentRepository.findOne({
+      where: { transactionId },
+    });
+
+    if (!entity) {
+      return null;
+    }
+
+    return PaymentMapper.toDomain(entity);
+  }
+
+  /**
+   * Obtiene el siguiente transactionId disponible (máximo + 1)
+   */
+  async getNextTransactionId(): Promise<number> {
+    const result = await this.paymentRepository
+      .createQueryBuilder('payment')
+      .select('MAX(payment.transactionId)', 'maxId')
+      .getRawOne();
+
+    const maxId = result?.maxId || 0;
+    return maxId + 1;
+  }
+
+  async delete(id: number): Promise<void> {
+    await this.paymentRepository.delete(id);
+  }
+
+  async findDerivedByOriginalPaymentId(originalPaymentId: number): Promise<Payment[]> {
+    const entities = await this.paymentRepository.find({
+      where: { originalPaymentId },
+      order: { createdAt: 'ASC' },
+    });
+
+    return entities.map((entity) => PaymentMapper.toDomain(entity));
+  }
 }

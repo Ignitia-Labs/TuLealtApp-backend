@@ -160,7 +160,8 @@ export class DeletePartnerHandler {
               gracePeriodDays: partnerEntity.subscription.gracePeriodDays || 7,
               retryAttempts: partnerEntity.subscription.retryAttempts || 0,
               maxRetryAttempts: partnerEntity.subscription.maxRetryAttempts || 3,
-              creditBalance: partnerEntity.subscription.creditBalance || 0,
+              // creditBalance fue eliminado - se calcula dinámicamente desde los pagos
+              creditBalance: 0,
               discountPercent: partnerEntity.subscription.discountPercent || null,
               discountCode: partnerEntity.subscription.discountCode || null,
               lastPaymentDate: partnerEntity.subscription.lastPaymentDate

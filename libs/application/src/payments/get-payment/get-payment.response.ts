@@ -90,7 +90,7 @@ export class GetPaymentResponse {
     type: String,
     nullable: true,
   })
-  transactionId: string | null;
+  transactionId: number | null;
 
   @ApiProperty({
     description: 'Referencia del pago',
@@ -180,6 +180,77 @@ export class GetPaymentResponse {
   processedBy: number | null;
 
   @ApiProperty({
+    description: 'ID del pago original del cual este es derivado (null si es un pago original)',
+    example: null,
+    type: Number,
+    nullable: true,
+  })
+  originalPaymentId: number | null;
+
+  @ApiProperty({
+    description: 'Indica si este es un pago derivado (creado automáticamente desde otro pago)',
+    example: false,
+    type: Boolean,
+  })
+  isDerived: boolean;
+
+  @ApiProperty({
+    description: 'Monto total aplicado de este payment (suma de todos los payments derivados)',
+    example: 164.92,
+    type: Number,
+    required: false,
+  })
+  appliedAmount?: number;
+
+  @ApiProperty({
+    description: 'Monto restante sin aplicar de este payment',
+    example: 0.08,
+    type: Number,
+    required: false,
+  })
+  remainingAmount?: number;
+
+  @ApiProperty({
+    description: 'Indica si el payment está completamente aplicado',
+    example: true,
+    type: Boolean,
+    required: false,
+  })
+  isFullyApplied?: boolean;
+
+  @ApiProperty({
+    description: 'Lista de aplicaciones de este payment (payments derivados)',
+    type: 'object',
+    isArray: true,
+    required: false,
+  })
+  applications?: Array<{
+    id: number;
+    amount: number;
+    billingCycleId: number | null;
+    invoiceId: number | null;
+    createdAt: Date;
+  }>;
+
+  @ApiProperty({
+    description: 'Resumen simplificado para UI: agrupa información de aplicación',
+    type: 'object',
+    required: false,
+  })
+  summary?: {
+    totalAmount: number;
+    appliedAmount: number;
+    remainingAmount: number;
+    isFullyApplied: boolean;
+    applicationsCount: number;
+    appliedTo: Array<{
+      type: 'billing_cycle' | 'invoice';
+      id: number;
+      amount: number;
+    }>;
+  };
+
+  @ApiProperty({
     description: 'Fecha de creación',
     example: '2024-02-05T10:30:00.000Z',
     type: Date,
@@ -205,7 +276,7 @@ export class GetPaymentResponse {
     status: 'pending' | 'paid' | 'failed' | 'refunded' | 'cancelled',
     paymentDate: Date,
     processedDate: Date | null,
-    transactionId: string | null,
+    transactionId: number | null,
     reference: string | null,
     confirmationCode: string | null,
     gateway: string | null,
@@ -217,8 +288,31 @@ export class GetPaymentResponse {
     retryAttempt: number | null,
     notes: string | null,
     processedBy: number | null,
+    originalPaymentId: number | null,
     createdAt: Date,
     updatedAt: Date,
+    appliedAmount?: number,
+    remainingAmount?: number,
+    isFullyApplied?: boolean,
+    applications?: Array<{
+      id: number;
+      amount: number;
+      billingCycleId: number | null;
+      invoiceId: number | null;
+      createdAt: Date;
+    }>,
+    summary?: {
+      totalAmount: number;
+      appliedAmount: number;
+      remainingAmount: number;
+      isFullyApplied: boolean;
+      applicationsCount: number;
+      appliedTo: Array<{
+        type: 'billing_cycle' | 'invoice';
+        id: number;
+        amount: number;
+      }>;
+    },
   ) {
     this.id = id;
     this.subscriptionId = subscriptionId;
@@ -243,6 +337,31 @@ export class GetPaymentResponse {
     this.retryAttempt = retryAttempt;
     this.notes = notes;
     this.processedBy = processedBy;
+    this.originalPaymentId = originalPaymentId;
+    this.isDerived = originalPaymentId !== null && originalPaymentId > 0;
+    this.appliedAmount = appliedAmount;
+    this.remainingAmount = remainingAmount;
+    this.isFullyApplied = isFullyApplied;
+    this.applications = applications;
+
+    // Generar resumen simplificado para UI
+    if (applications && applications.length > 0) {
+      const appliedTo = applications.map((app) => ({
+        type: (app.billingCycleId ? 'billing_cycle' : 'invoice') as 'billing_cycle' | 'invoice',
+        id: app.billingCycleId || app.invoiceId || 0,
+        amount: app.amount,
+      }));
+
+      this.summary = {
+        totalAmount: amount,
+        appliedAmount: appliedAmount || 0,
+        remainingAmount: remainingAmount || 0,
+        isFullyApplied: isFullyApplied || false,
+        applicationsCount: applications.length,
+        appliedTo,
+      };
+    }
+
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
   }

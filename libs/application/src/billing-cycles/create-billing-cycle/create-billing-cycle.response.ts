@@ -89,11 +89,27 @@ export class CreateBillingCycleResponse {
   totalAmount: number;
 
   @ApiProperty({
-    description: 'Moneda del ciclo',
+    description: 'Moneda del ciclo (código ISO)',
     example: 'USD',
     type: String,
   })
   currency: string;
+
+  @ApiProperty({
+    description: 'ID de la moneda en la base de datos',
+    example: 1,
+    type: Number,
+    nullable: true,
+  })
+  currencyId: number | null;
+
+  @ApiProperty({
+    description: 'Nombre completo de la moneda',
+    example: 'US Dollar',
+    type: String,
+    nullable: true,
+  })
+  currencyLabel: string | null;
 
   @ApiProperty({
     description: 'Estado del ciclo',
@@ -185,6 +201,8 @@ export class CreateBillingCycleResponse {
     paidAmount: number,
     totalAmount: number,
     currency: string,
+    currencyId: number | null,
+    currencyLabel: string | null,
     status: 'pending' | 'paid' | 'overdue' | 'cancelled',
     paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded',
     paymentDate: Date | null,
@@ -209,6 +227,8 @@ export class CreateBillingCycleResponse {
     this.paidAmount = paidAmount;
     this.totalAmount = totalAmount;
     this.currency = currency;
+    this.currencyId = currencyId;
+    this.currencyLabel = currencyLabel;
     this.status = status;
     this.paymentStatus = paymentStatus;
     this.paymentDate = paymentDate;

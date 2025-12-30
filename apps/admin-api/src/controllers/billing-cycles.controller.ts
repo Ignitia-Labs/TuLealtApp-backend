@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Get,
+  Delete,
   Body,
   Param,
   Query,
@@ -29,7 +30,13 @@ import {
   GetBillingCyclesHandler,
   GetBillingCyclesRequest,
   GetBillingCyclesResponse,
+  DeleteBillingCycleHandler,
+  DeleteBillingCycleRequest,
+  DeleteBillingCycleResponse,
   BillingCycleGeneratorService,
+  GetBillingCyclePaymentsHandler,
+  GetBillingCyclePaymentsRequest,
+  GetBillingCyclePaymentsResponse,
 } from '@libs/application';
 import { JwtAuthGuard, RolesGuard, Roles } from '@libs/shared';
 
@@ -42,6 +49,7 @@ import { JwtAuthGuard, RolesGuard, Roles } from '@libs/shared';
  * - GET /admin/billing-cycles?subscriptionId={id} - Obtener ciclos de una suscripción
  * - GET /admin/billing-cycles?partnerId={id} - Obtener ciclos pendientes de un partner
  * - POST /admin/billing-cycles - Crear un nuevo ciclo de facturación
+ * - DELETE /admin/billing-cycles/:id - Eliminar un ciclo de facturación
  */
 @ApiTags('Billing Cycles')
 @Controller('billing-cycles')
@@ -50,7 +58,9 @@ export class BillingCyclesController {
     private readonly createBillingCycleHandler: CreateBillingCycleHandler,
     private readonly getBillingCycleHandler: GetBillingCycleHandler,
     private readonly getBillingCyclesHandler: GetBillingCyclesHandler,
+    private readonly deleteBillingCycleHandler: DeleteBillingCycleHandler,
     private readonly billingCycleGeneratorService: BillingCycleGeneratorService,
+    private readonly getBillingCyclePaymentsHandler: GetBillingCyclePaymentsHandler,
   ) {}
 
   @Post()
@@ -242,10 +252,15 @@ export class BillingCyclesController {
   async generateBillingCycle(
     @Param('subscriptionId', ParseIntPipe) subscriptionId: number,
   ): Promise<{ message: string }> {
-    await this.billingCycleGeneratorService.generateBillingCycleManually(subscriptionId);
-    return {
-      message: `Billing cycle and invoice generated successfully for subscription ${subscriptionId}`,
-    };
+    try {
+      await this.billingCycleGeneratorService.generateBillingCycleManually(subscriptionId);
+      return {
+        message: `Billing cycle and invoice generated successfully for subscription ${subscriptionId}`,
+      };
+    } catch (error) {
+      // Re-lanzar el error para que el filtro global lo maneje
+      throw error;
+    }
   }
 
   @Get(':id')
@@ -526,6 +541,111 @@ export class BillingCyclesController {
     return {
       message: 'Proceso de generación automática de ciclos ejecutado exitosamente',
     };
+  }
+
+  @Get(':id/payments')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'STAFF')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Obtener payments aplicados a un billing cycle',
+    description:
+      'Obtiene todos los payments que han sido aplicados a un billing cycle específico, incluyendo información sobre si son payments derivados y su payment original.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID del billing cycle',
+    type: Number,
+    example: 7,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Payments del billing cycle obtenidos exitosamente',
+    type: GetBillingCyclePaymentsResponse,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Billing cycle no encontrado',
+    example: {
+      statusCode: 404,
+      message: 'Billing cycle with ID 7 not found',
+      error: 'Not Found',
+    },
+  })
+  async getBillingCyclePayments(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<GetBillingCyclePaymentsResponse> {
+    const request = new GetBillingCyclePaymentsRequest();
+    request.billingCycleId = id;
+    return this.getBillingCyclePaymentsHandler.execute(request);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Eliminar ciclo de facturación',
+    description:
+      'Elimina un ciclo de facturación del sistema. También elimina automáticamente la factura asociada si existe. Esta acción es irreversible. Solo disponible para administradores. Se recomienda verificar que el ciclo no tenga pagos asociados antes de eliminarlo.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único del ciclo de facturación a eliminar',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Ciclo de facturación eliminado exitosamente',
+    type: DeleteBillingCycleResponse,
+    example: {
+      id: 1,
+      message: 'Billing cycle deleted successfully',
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    example: {
+      statusCode: 401,
+      message: 'Unauthorized',
+      error: 'Unauthorized',
+    },
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos de administrador',
+    example: {
+      statusCode: 403,
+      message: 'Forbidden resource',
+      error: 'Forbidden',
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Ciclo de facturación no encontrado',
+    example: {
+      statusCode: 404,
+      message: 'Billing cycle with ID 1 not found',
+      error: 'Not Found',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    example: {
+      statusCode: 500,
+      message: 'Internal server error',
+      error: 'Internal Server Error',
+    },
+  })
+  async deleteBillingCycle(@Param('id', ParseIntPipe) id: number): Promise<DeleteBillingCycleResponse> {
+    const request = new DeleteBillingCycleRequest();
+    request.billingCycleId = id;
+    return this.deleteBillingCycleHandler.execute(request);
   }
 }
 

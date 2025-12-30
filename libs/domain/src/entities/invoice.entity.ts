@@ -157,5 +157,43 @@ export class Invoice {
       new Date(),
     );
   }
+
+  /**
+   * Método de dominio para revertir un pago
+   * Se usa cuando se elimina un payment asociado
+   */
+  reversePayment(amount: number): Invoice {
+    // Verificar si hay otros pagos asociados a esta factura
+    // Si no hay otros pagos, revertir el estado a pending
+    // Nota: Este método asume que se verificará si hay otros pagos antes de llamarlo
+    return new Invoice(
+      this.id,
+      this.invoiceNumber,
+      this.subscriptionId,
+      this.partnerId,
+      this.billingCycleId,
+      this.businessName,
+      this.taxId,
+      this.fiscalAddress,
+      this.billingEmail,
+      this.issueDate,
+      this.dueDate,
+      null, // paidDate
+      this.subtotal,
+      this.discountAmount,
+      this.taxAmount,
+      this.creditApplied,
+      this.total,
+      this.currency,
+      this.items,
+      'pending',
+      'pending',
+      null, // paymentMethod
+      this.pdfUrl,
+      this.notes,
+      this.createdAt,
+      new Date(),
+    );
+  }
 }
 

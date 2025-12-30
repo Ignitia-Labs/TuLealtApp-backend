@@ -90,7 +90,7 @@ export class CreatePaymentResponse {
     type: String,
     nullable: true,
   })
-  transactionId: string | null;
+  transactionId: number | null;
 
   @ApiProperty({
     description: 'Referencia del pago',
@@ -205,7 +205,7 @@ export class CreatePaymentResponse {
     status: 'pending' | 'paid' | 'failed' | 'refunded' | 'cancelled',
     paymentDate: Date,
     processedDate: Date | null,
-    transactionId: string | null,
+    transactionId: number | null,
     reference: string | null,
     confirmationCode: string | null,
     gateway: string | null,

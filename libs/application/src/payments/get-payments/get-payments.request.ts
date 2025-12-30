@@ -74,5 +74,14 @@ export class GetPaymentsRequest {
   @IsOptional()
   @Min(1)
   limit?: number;
+
+  @ApiProperty({
+    description: 'Incluir payments derivados en los resultados (por defecto false, solo muestra payments originales)',
+    example: false,
+    type: Boolean,
+    required: false,
+  })
+  @IsOptional()
+  includeDerived?: boolean;
 }
 

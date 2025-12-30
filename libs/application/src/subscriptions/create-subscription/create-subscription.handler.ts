@@ -1,10 +1,11 @@
 import { Injectable, BadRequestException, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PartnerSubscription, IPartnerRepository } from '@libs/domain';
+import { PartnerSubscription, IPartnerRepository, IPricingPlanRepository } from '@libs/domain';
 import { PartnerSubscriptionEntity, PartnerMapper } from '@libs/infrastructure';
 import { CreateSubscriptionRequest } from './create-subscription.request';
 import { CreateSubscriptionResponse } from './create-subscription.response';
+import { SubscriptionEventHelper } from '../subscription-event.helper';
 
 /**
  * Handler para el caso de uso de crear una suscripción
@@ -14,8 +15,11 @@ export class CreateSubscriptionHandler {
   constructor(
     @Inject('IPartnerRepository')
     private readonly partnerRepository: IPartnerRepository,
+    @Inject('IPricingPlanRepository')
+    private readonly pricingPlanRepository: IPricingPlanRepository,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
+    private readonly subscriptionEventHelper: SubscriptionEventHelper,
   ) {}
 
   async execute(request: CreateSubscriptionRequest): Promise<CreateSubscriptionResponse> {
@@ -71,7 +75,7 @@ export class CreateSubscriptionHandler {
       request.gracePeriodDays ?? 7,
       request.retryAttempts ?? 0,
       request.maxRetryAttempts ?? 3,
-      request.creditBalance ?? 0,
+      0, // creditBalance siempre es 0 - se calcula dinámicamente desde los pagos
       request.discountPercent ?? null,
       request.discountCode ?? null,
       null,
@@ -84,10 +88,49 @@ export class CreateSubscriptionHandler {
     const subscriptionEntity = PartnerMapper.subscriptionToPersistence(subscription);
     const savedEntity = await this.subscriptionRepository.save(subscriptionEntity);
 
+    // Registrar evento de creación
+    const savedSubscription = PartnerMapper.subscriptionToDomain(savedEntity);
+    await this.subscriptionEventHelper.createEvent(savedSubscription, 'created', {
+      planType: savedSubscription.planType,
+      billingAmount: savedSubscription.billingAmount,
+      currency: savedSubscription.currency,
+      billingFrequency: savedSubscription.billingFrequency,
+    });
+
+    // Buscar el plan de precios para obtener el ID numérico y el slug
+    let planId: number = 0;
+    let planSlug: string = savedEntity.planId; // Por defecto usar el planId como slug
+
+    // Intentar buscar el plan por ID numérico primero
+    const numericPlanId = parseInt(savedEntity.planId, 10);
+    if (!isNaN(numericPlanId)) {
+      const plan = await this.pricingPlanRepository.findById(numericPlanId);
+      if (plan) {
+        planId = plan.id;
+        planSlug = plan.slug;
+      }
+    } else {
+      // Si no es numérico, buscar por slug
+      const plan = await this.pricingPlanRepository.findBySlug(savedEntity.planId);
+      if (plan) {
+        planId = plan.id;
+        planSlug = plan.slug;
+      } else {
+        // Si no se encuentra, intentar buscar sin el prefijo "plan-"
+        const slugWithoutPrefix = savedEntity.planId.replace(/^plan-/, '');
+        const planBySlug = await this.pricingPlanRepository.findBySlug(slugWithoutPrefix);
+        if (planBySlug) {
+          planId = planBySlug.id;
+          planSlug = planBySlug.slug;
+        }
+      }
+    }
+
     return new CreateSubscriptionResponse(
       savedEntity.id,
       savedEntity.partnerId,
-      savedEntity.planId,
+      planId,
+      planSlug,
       savedEntity.planType,
       savedEntity.status,
       savedEntity.startDate,

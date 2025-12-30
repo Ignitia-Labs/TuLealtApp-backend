@@ -71,6 +71,53 @@ export class PaymentSummary {
     type: String,
   })
   status: string;
+
+  @ApiProperty({
+    description: 'ID del payment original del cual este es derivado (null si es original)',
+    example: null,
+    type: Number,
+    nullable: true,
+  })
+  originalPaymentId: number | null;
+
+  @ApiProperty({
+    description: 'Indica si este es un payment derivado',
+    example: false,
+    type: Boolean,
+  })
+  isDerived: boolean;
+
+  @ApiProperty({
+    description: 'Referencia del pago',
+    example: 'TAC1231231231',
+    type: String,
+    nullable: true,
+  })
+  reference: string | null;
+
+  @ApiProperty({
+    description: 'Monto total aplicado de este payment',
+    example: 164.92,
+    type: Number,
+    required: false,
+  })
+  appliedAmount?: number;
+
+  @ApiProperty({
+    description: 'Monto restante sin aplicar de este payment',
+    example: 0.08,
+    type: Number,
+    required: false,
+  })
+  remainingAmount?: number;
+
+  @ApiProperty({
+    description: 'Indica si el payment está completamente aplicado',
+    example: true,
+    type: Boolean,
+    required: false,
+  })
+  isFullyApplied?: boolean;
 }
 
 /**
