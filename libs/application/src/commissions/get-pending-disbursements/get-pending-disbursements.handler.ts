@@ -50,10 +50,8 @@ export class GetPendingDisbursementsHandler {
         filters,
       );
     } else {
-      // Necesitaríamos un método findAll con filtros, por ahora usamos findByStaffUserId
-      // con todos los usuarios staff. Para simplificar, agrupamos por staffUserId
-      allPendingCommissions = [];
-      // En una implementación completa, necesitaríamos un método findAll en el repositorio
+      // Obtener todas las comisiones pendientes cuando no hay filtros específicos
+      allPendingCommissions = await this.commissionRepository.findAll(filters);
     }
 
     // Filtrar por monto mínimo si se especifica

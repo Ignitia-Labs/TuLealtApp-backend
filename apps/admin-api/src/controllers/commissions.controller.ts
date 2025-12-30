@@ -23,6 +23,9 @@ import {
   GetPaymentCommissionsHandler,
   GetPaymentCommissionsRequest,
   GetPaymentCommissionsResponse,
+  GetBillingCycleCommissionsHandler,
+  GetBillingCycleCommissionsRequest,
+  GetBillingCycleCommissionsResponse,
   GetCommissionsHandler,
   GetCommissionsRequest,
   GetCommissionsResponse,
@@ -35,6 +38,9 @@ import {
   GetPendingDisbursementsHandler,
   GetPendingDisbursementsRequest,
   GetPendingDisbursementsResponse,
+  GetCommissionsDashboardHandler,
+  GetCommissionsDashboardRequest,
+  GetCommissionsDashboardResponse,
 } from '@libs/application';
 import {
   UnauthorizedErrorResponseDto,
@@ -58,10 +64,12 @@ import {
 export class CommissionsController {
   constructor(
     private readonly getPaymentCommissionsHandler: GetPaymentCommissionsHandler,
+    private readonly getBillingCycleCommissionsHandler: GetBillingCycleCommissionsHandler,
     private readonly getCommissionsHandler: GetCommissionsHandler,
     private readonly getCommissionSummaryHandler: GetCommissionSummaryHandler,
     private readonly markCommissionsPaidHandler: MarkCommissionsPaidHandler,
     private readonly getPendingDisbursementsHandler: GetPendingDisbursementsHandler,
+    private readonly getCommissionsDashboardHandler: GetCommissionsDashboardHandler,
   ) {}
 
   @Get('payments/:paymentId')
@@ -90,6 +98,34 @@ export class CommissionsController {
     const request = new GetPaymentCommissionsRequest();
     request.paymentId = paymentId;
     return this.getPaymentCommissionsHandler.execute(request);
+  }
+
+  @Get('billing-cycles/:billingCycleId')
+  @ApiOperation({
+    summary: 'Obtener comisiones de un billing cycle',
+    description: 'Obtiene todas las comisiones generadas para un billing cycle específico',
+  })
+  @ApiParam({
+    name: 'billingCycleId',
+    type: Number,
+    description: 'ID del billing cycle',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Comisiones del billing cycle',
+    type: GetBillingCycleCommissionsResponse,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Billing cycle no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  async getBillingCycleCommissions(
+    @Param('billingCycleId', ParseIntPipe) billingCycleId: number,
+  ): Promise<GetBillingCycleCommissionsResponse> {
+    const request = new GetBillingCycleCommissionsRequest();
+    request.billingCycleId = billingCycleId;
+    return this.getBillingCycleCommissionsHandler.execute(request);
   }
 
   @Get()
@@ -280,6 +316,69 @@ export class CommissionsController {
       request.limit = Number(query.limit);
     }
     return this.getPendingDisbursementsHandler.execute(request);
+  }
+
+  @Get('dashboard')
+  @ApiOperation({
+    summary: 'Obtener dashboard de comisiones',
+    description:
+      'Obtiene estadísticas agregadas de comisiones para visualización en dashboard: resumen general, estadísticas por período, top staff y top partners',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    type: String,
+    description: 'Fecha de inicio (ISO 8601). Por defecto: inicio del año actual',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    type: String,
+    description: 'Fecha de fin (ISO 8601). Por defecto: hoy',
+  })
+  @ApiQuery({
+    name: 'periodGroup',
+    required: false,
+    enum: ['daily', 'weekly', 'monthly'],
+    description: 'Agrupación de período para estadísticas. Por defecto: monthly',
+  })
+  @ApiQuery({
+    name: 'topStaffLimit',
+    required: false,
+    type: Number,
+    description: 'Número de top staff a retornar. Por defecto: 10',
+  })
+  @ApiQuery({
+    name: 'topPartnersLimit',
+    required: false,
+    type: Number,
+    description: 'Número de top partners a retornar. Por defecto: 10',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Dashboard de comisiones',
+    type: GetCommissionsDashboardResponse,
+  })
+  async getDashboard(
+    @Query() query: any,
+  ): Promise<GetCommissionsDashboardResponse> {
+    const request = new GetCommissionsDashboardRequest();
+    if (query.startDate) {
+      request.startDate = query.startDate;
+    }
+    if (query.endDate) {
+      request.endDate = query.endDate;
+    }
+    if (query.periodGroup) {
+      request.periodGroup = query.periodGroup;
+    }
+    if (query.topStaffLimit) {
+      request.topStaffLimit = Number(query.topStaffLimit);
+    }
+    if (query.topPartnersLimit) {
+      request.topPartnersLimit = Number(query.topPartnersLimit);
+    }
+    return this.getCommissionsDashboardHandler.execute(request);
   }
 
   @Post('mark-as-paid')

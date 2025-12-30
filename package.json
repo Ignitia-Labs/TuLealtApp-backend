@@ -51,7 +51,8 @@
     "migration:run": "typeorm-ts-node-commonjs migration:run -d libs/infrastructure/src/persistence/data-source.ts",
     "migration:revert": "typeorm-ts-node-commonjs migration:revert -d libs/infrastructure/src/persistence/data-source.ts",
     "migration:show": "typeorm-ts-node-commonjs migration:show -d libs/infrastructure/src/persistence/data-source.ts",
-    "s3:init": "ts-node -r tsconfig-paths/register libs/infrastructure/src/storage/s3-init.ts"
+    "s3:init": "ts-node -r tsconfig-paths/register libs/infrastructure/src/storage/s3-init.ts",
+    "script:generate-commissions": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/generate-commissions-for-billing-cycles.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.956.0",

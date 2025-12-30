@@ -11,16 +11,19 @@ import {
 import { PartnerEntity } from './partner.entity';
 import { UserEntity } from './user.entity';
 import { PaymentEntity } from './payment.entity';
+import { BillingCycleEntity } from './billing-cycle.entity';
 import { PartnerStaffAssignmentEntity } from './partner-staff-assignment.entity';
 
 /**
  * Entidad de persistencia para Commission
- * Almacena las comisiones calculadas para usuarios STAFF basadas en pagos
+ * Almacena las comisiones calculadas para usuarios STAFF basadas en pagos o billing cycles
+ * FASE 1: billingCycleId es opcional para mantener compatibilidad con datos existentes
  */
 @Entity('commissions')
 @Index(['partnerId'])
 @Index(['staffUserId'])
 @Index(['paymentId'])
+@Index(['billingCycleId'])
 @Index(['status'])
 @Index(['paymentDate'])
 @Index(['partnerId', 'paymentDate'])
@@ -52,12 +55,24 @@ export class CommissionEntity {
   @ManyToOne(() => PaymentEntity, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
+    nullable: true,
   })
   @JoinColumn({ name: 'paymentId' })
-  payment: PaymentEntity;
+  payment: PaymentEntity | null;
 
-  @Column('int')
-  paymentId: number;
+  @Column('int', { nullable: true })
+  paymentId: number | null;
+
+  @ManyToOne(() => BillingCycleEntity, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'billingCycleId' })
+  billingCycle: BillingCycleEntity | null;
+
+  @Column('int', { nullable: true })
+  billingCycleId: number | null;
 
   @Column('int')
   subscriptionId: number;

@@ -32,6 +32,7 @@ import { roundToTwoDecimals } from '@libs/shared';
 import { CreateBillingCycleHandler } from './create-billing-cycle/create-billing-cycle.handler';
 import { CreateInvoiceHandler } from '../invoices/create-invoice/create-invoice.handler';
 import { CreditBalanceService } from '../subscriptions/credit-balance.service';
+import { CommissionCalculationService } from '../commissions/calculate-commission/commission-calculation.service';
 
 /**
  * Servicio para generar automáticamente ciclos de facturación y facturas
@@ -56,6 +57,7 @@ export class BillingCycleGeneratorService {
     private readonly createInvoiceHandler: CreateInvoiceHandler,
     private readonly emailService: EmailService,
     private readonly creditBalanceService: CreditBalanceService,
+    private readonly commissionCalculationService: CommissionCalculationService,
   ) {}
 
   /**
@@ -1072,8 +1074,25 @@ export class BillingCycleGeneratorService {
       await this.paymentRepository.save(appliedPayment);
 
       // Actualizar ciclo
+      const previousStatus = cycle.status;
       const updatedCycle = cycle.recordPayment(amountToApply, originalPayment.paymentMethod);
       await this.billingCycleRepository.update(updatedCycle);
+
+      // Si el billing cycle pasó a 'paid', generar comisiones
+      const wasBillingCyclePaid = previousStatus !== 'paid' && updatedCycle.status === 'paid';
+      if (wasBillingCyclePaid) {
+        try {
+          await this.commissionCalculationService.calculateCommissionsForBillingCycle(updatedCycle);
+          this.logger.log(
+            `Commissions calculated for billing cycle ${updatedCycle.id} (status changed to 'paid' via applyRemainingPaymentToPendingCycles)`,
+          );
+        } catch (error) {
+          this.logger.error(
+            `Error calculating commissions for billing cycle ${updatedCycle.id}:`,
+            error,
+          );
+        }
+      }
 
       remainingToApply = roundToTwoDecimals(remainingToApply - amountToApply);
 

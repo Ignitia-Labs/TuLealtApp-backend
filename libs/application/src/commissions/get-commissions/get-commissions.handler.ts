@@ -63,10 +63,9 @@ export class GetCommissionsHandler {
         filters,
       );
     } else {
-      // Si no hay filtros específicos, necesitaríamos un método findAll
-      // Por ahora, retornamos vacío o podríamos implementar un método adicional
-      commissions = [];
-      total = 0;
+      // Si no hay filtros específicos, obtener todas las comisiones
+      commissions = await this.commissionRepository.findAll(filters);
+      total = await this.commissionRepository.count(filters);
     }
 
     // Enriquecer con información de usuarios y partners
@@ -89,18 +88,21 @@ export class GetCommissionsHandler {
           commission.status,
           commission.paidDate,
           commission.createdAt,
+          commission.currency,
         );
       }),
     );
 
     // Calcular resumen
+    // Nota: Si hay múltiples monedas, se usa la del primer elemento
+    // En un escenario real, se deberían agrupar por moneda o convertir a una moneda base
     const summary = {
       totalPending: commissionDtos.filter((c) => c.status === 'pending').length,
       totalPaid: commissionDtos.filter((c) => c.status === 'paid').length,
       totalCancelled: commissionDtos.filter((c) => c.status === 'cancelled')
         .length,
       totalAmount: commissionDtos.reduce((sum, c) => sum + c.commissionAmount, 0),
-      currency: commissions.length > 0 ? commissions[0].currency : 'USD',
+      currency: commissionDtos.length > 0 ? commissionDtos[0].currency : 'USD',
     };
 
     // Obtener información adicional si se filtró por staff o partner

@@ -77,6 +77,7 @@ export class MarkCommissionsPaidHandler {
             savedCommission.status,
             savedCommission.paidDate,
             savedCommission.createdAt,
+            savedCommission.currency,
           ),
         );
       } catch (error) {

@@ -58,6 +58,7 @@ export class GetPaymentCommissionsHandler {
           commission.status,
           commission.paidDate,
           commission.createdAt,
+          commission.currency,
         );
       }),
     );

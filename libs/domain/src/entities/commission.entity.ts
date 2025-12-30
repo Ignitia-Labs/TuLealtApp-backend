@@ -1,6 +1,6 @@
 /**
  * Entidad de dominio Commission
- * Representa una comisión calculada para un usuario STAFF basada en un pago
+ * Representa una comisión calculada para un usuario STAFF basada en un pago o billing cycle
  * No depende de frameworks ni librerías externas
  */
 export type CommissionStatus = 'pending' | 'paid' | 'cancelled';
@@ -10,7 +10,7 @@ export class Commission {
     public readonly id: number,
     public readonly partnerId: number,
     public readonly staffUserId: number,
-    public readonly paymentId: number,
+    public readonly paymentId: number | null,
     public readonly subscriptionId: number,
     public readonly assignmentId: number, // ID de la asignación que generó esta comisión
     public readonly paymentAmount: number, // Monto total del pago
@@ -23,16 +23,21 @@ export class Commission {
     public readonly notes: string | null,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
+    public readonly billingCycleId: number | null = null, // ID del billing cycle asociado (opcional en Fase 1)
   ) {}
 
   /**
    * Factory method para crear una nueva comisión
    * El ID es opcional porque será generado automáticamente por la base de datos
+   *
+   * FASE 3: paymentId y billingCycleId son opcionales, pero al menos uno debe estar presente
+   * - Si billingCycleId está presente, se usa como referencia principal
+   * - Si solo paymentId está presente, se mantiene compatibilidad con pagos sin billing cycle
    */
   static create(
     partnerId: number,
     staffUserId: number,
-    paymentId: number,
+    paymentId: number | null,
     subscriptionId: number,
     assignmentId: number,
     paymentAmount: number,
@@ -41,7 +46,15 @@ export class Commission {
     paymentDate: Date,
     notes: string | null = null,
     id?: number,
+    billingCycleId: number | null = null,
   ): Commission {
+    // Validar que al menos uno de paymentId o billingCycleId esté presente
+    if (!paymentId && !billingCycleId) {
+      throw new Error(
+        'Commission must have either paymentId or billingCycleId (or both)',
+      );
+    }
+
     // Validar porcentaje
     if (commissionPercent < 0 || commissionPercent > 100) {
       throw new Error(
@@ -81,6 +94,7 @@ export class Commission {
       notes,
       now,
       now,
+      billingCycleId,
     );
   }
 
@@ -109,6 +123,7 @@ export class Commission {
       notes || this.notes,
       this.createdAt,
       new Date(),
+      this.billingCycleId,
     );
   }
 
@@ -137,6 +152,7 @@ export class Commission {
       notes || this.notes,
       this.createdAt,
       new Date(),
+      this.billingCycleId,
     );
   }
 

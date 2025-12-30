@@ -17,6 +17,7 @@ import {
   PaymentMethod,
   InvoicePaymentMethod,
   PartnerSubscription,
+  BillingCycle,
 } from '@libs/domain';
 import {
   PartnerSubscriptionEntity,
@@ -258,9 +259,16 @@ export class CreatePaymentHandler {
       }
 
       // Actualizar el ciclo de facturación si existe
+      let updatedCycle: BillingCycle | null = null;
+      let wasBillingCyclePaid = false;
       if (billingCycle) {
-        const updatedCycle = billingCycle.recordPayment(request.amount, request.paymentMethod);
+        const previousStatus = billingCycle.status;
+        updatedCycle = billingCycle.recordPayment(request.amount, request.paymentMethod);
         await this.billingCycleRepository.update(updatedCycle);
+
+        // Verificar si el billing cycle pasó a 'paid'
+        wasBillingCyclePaid =
+          previousStatus !== 'paid' && updatedCycle.status === 'paid';
       }
 
       // Actualizar la suscripción con último pago
@@ -272,13 +280,26 @@ export class CreatePaymentHandler {
         PartnerMapper.subscriptionToPersistence(updatedSubscription),
       );
 
-      // Calcular comisiones para el staff asignado
+      // Calcular comisiones: Si el billing cycle se marcó como 'paid', generar comisiones basadas en el billing cycle
+      // Si no hay billing cycle o el ciclo no está pagado, generar comisiones basadas en el pago individual
       try {
-        await this.commissionCalculationService.calculateCommissionsForPayment(
-          processedPayment,
-          partner.id,
-          subscription.id,
-        );
+        if (updatedCycle && wasBillingCyclePaid) {
+          // Generar comisiones basadas en el billing cycle completo
+          await this.commissionCalculationService.calculateCommissionsForBillingCycle(
+            updatedCycle,
+          );
+          this.logger.log(
+            `Commissions calculated for billing cycle ${updatedCycle.id} (status changed to 'paid')`,
+          );
+        } else if (!billingCycle) {
+          // Solo generar comisiones para pagos sin billing cycle asociado
+          // (pagos directos a la suscripción sin facturación)
+          await this.commissionCalculationService.calculateCommissionsForPayment(
+            processedPayment,
+            partner.id,
+            subscription.id,
+          );
+        }
       } catch (error) {
         // Log error pero no fallar el proceso de pago
         this.logger.error('Error calculating commissions:', error);
@@ -437,8 +458,27 @@ export class CreatePaymentHandler {
       await this.paymentRepository.save(cyclePayment);
 
       // Actualizar billing cycle
+      const previousStatus = cycle.status;
       const updatedCycle = cycle.recordPayment(amountToApply, paymentMethod);
       await this.billingCycleRepository.update(updatedCycle);
+
+      // Si el billing cycle pasó a 'paid', generar comisiones
+      const wasBillingCyclePaid = previousStatus !== 'paid' && updatedCycle.status === 'paid';
+      if (wasBillingCyclePaid) {
+        try {
+          await this.commissionCalculationService.calculateCommissionsForBillingCycle(
+            updatedCycle,
+          );
+          this.logger.log(
+            `Commissions calculated for billing cycle ${updatedCycle.id} (status changed to 'paid' via applyPaymentToPendingBillingCycles)`,
+          );
+        } catch (error) {
+          this.logger.error(
+            `Error calculating commissions for billing cycle ${updatedCycle.id}:`,
+            error,
+          );
+        }
+      }
 
       remainingAmount = roundToTwoDecimals(remainingAmount - amountToApply);
 

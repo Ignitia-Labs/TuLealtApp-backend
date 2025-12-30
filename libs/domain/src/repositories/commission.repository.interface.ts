@@ -27,6 +27,11 @@ export interface ICommissionRepository {
   findByPaymentId(paymentId: number): Promise<Commission[]>;
 
   /**
+   * Buscar todas las comisiones de un billing cycle
+   */
+  findByBillingCycleId(billingCycleId: number): Promise<Commission[]>;
+
+  /**
    * Buscar todas las comisiones de un usuario staff
    */
   findByStaffUserId(
@@ -97,5 +102,67 @@ export interface ICommissionRepository {
     partnerId: number,
     filters?: CommissionFilters,
   ): Promise<number>;
+
+  /**
+   * Buscar todas las comisiones con filtros opcionales
+   */
+  findAll(filters?: CommissionFilters): Promise<Commission[]>;
+
+  /**
+   * Contar todas las comisiones con filtros opcionales
+   */
+  count(filters?: CommissionFilters): Promise<number>;
+
+  /**
+   * Obtener estadísticas agregadas por staff
+   */
+  getStatsByStaff(
+    startDate?: Date,
+    endDate?: Date,
+    limit?: number,
+  ): Promise<
+    Array<{
+      staffUserId: number;
+      totalCommissions: number;
+      totalAmount: number;
+      pendingAmount: number;
+      paidAmount: number;
+      currency: string;
+    }>
+  >;
+
+  /**
+   * Obtener estadísticas agregadas por partner
+   */
+  getStatsByPartner(
+    startDate?: Date,
+    endDate?: Date,
+    limit?: number,
+  ): Promise<
+    Array<{
+      partnerId: number;
+      totalCommissions: number;
+      totalAmount: number;
+      currency: string;
+    }>
+  >;
+
+  /**
+   * Obtener estadísticas por período (diario/semanal/mensual)
+   */
+  getStatsByPeriod(
+    startDate: Date,
+    endDate: Date,
+    groupBy: 'daily' | 'weekly' | 'monthly',
+  ): Promise<
+    Array<{
+      period: string;
+      totalCommissions: number;
+      totalAmount: number;
+      pendingCommissions: number;
+      paidCommissions: number;
+      currency: string;
+    }>
+  >;
 }
 

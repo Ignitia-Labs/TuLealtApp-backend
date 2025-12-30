@@ -68,6 +68,13 @@ export class CommissionDto {
   })
   createdAt: Date;
 
+  @ApiProperty({
+    description: 'Moneda de la comisión',
+    example: 'USD',
+    type: String,
+  })
+  currency: string;
+
   constructor(
     id: number,
     staffUserId: number,
@@ -78,6 +85,7 @@ export class CommissionDto {
     status: 'pending' | 'paid' | 'cancelled',
     paidDate: Date | null,
     createdAt: Date,
+    currency: string,
   ) {
     this.id = id;
     this.staffUserId = staffUserId;
@@ -88,6 +96,7 @@ export class CommissionDto {
     this.status = status;
     this.paidDate = paidDate;
     this.createdAt = createdAt;
+    this.currency = currency;
   }
 }
 

@@ -41,6 +41,15 @@ export class CommissionRepository implements ICommissionRepository {
     return entities.map((entity) => CommissionMapper.toDomain(entity));
   }
 
+  async findByBillingCycleId(billingCycleId: number): Promise<Commission[]> {
+    const entities = await this.commissionRepository.find({
+      where: { billingCycleId },
+      order: { createdAt: 'DESC' },
+    });
+
+    return entities.map((entity) => CommissionMapper.toDomain(entity));
+  }
+
   async findByStaffUserId(
     staffUserId: number,
     filters?: CommissionFilters,
@@ -261,6 +270,228 @@ export class CommissionRepository implements ICommissionRepository {
     }
 
     return queryBuilder.getCount();
+  }
+
+  async findAll(filters?: CommissionFilters): Promise<Commission[]> {
+    const queryBuilder = this.commissionRepository.createQueryBuilder('commission');
+
+    if (filters?.status) {
+      queryBuilder.andWhere('commission.status = :status', {
+        status: filters.status,
+      });
+    }
+
+    if (filters?.startDate) {
+      queryBuilder.andWhere('commission.paymentDate >= :startDate', {
+        startDate: filters.startDate,
+      });
+    }
+
+    if (filters?.endDate) {
+      queryBuilder.andWhere('commission.paymentDate <= :endDate', {
+        endDate: filters.endDate,
+      });
+    }
+
+    if (filters?.skip !== undefined) {
+      queryBuilder.skip(filters.skip);
+    }
+
+    if (filters?.take !== undefined) {
+      queryBuilder.take(filters.take);
+    }
+
+    queryBuilder.orderBy('commission.paymentDate', 'DESC');
+
+    const entities = await queryBuilder.getMany();
+
+    return entities.map((entity) => CommissionMapper.toDomain(entity));
+  }
+
+  async count(filters?: CommissionFilters): Promise<number> {
+    const queryBuilder = this.commissionRepository.createQueryBuilder('commission');
+
+    if (filters?.status) {
+      queryBuilder.andWhere('commission.status = :status', {
+        status: filters.status,
+      });
+    }
+
+    if (filters?.startDate) {
+      queryBuilder.andWhere('commission.paymentDate >= :startDate', {
+        startDate: filters.startDate,
+      });
+    }
+
+    if (filters?.endDate) {
+      queryBuilder.andWhere('commission.paymentDate <= :endDate', {
+        endDate: filters.endDate,
+      });
+    }
+
+    return queryBuilder.getCount();
+  }
+
+  async getStatsByStaff(
+    startDate?: Date,
+    endDate?: Date,
+    limit?: number,
+  ): Promise<
+    Array<{
+      staffUserId: number;
+      totalCommissions: number;
+      totalAmount: number;
+      pendingAmount: number;
+      paidAmount: number;
+      currency: string;
+    }>
+  > {
+    const queryBuilder = this.commissionRepository
+      .createQueryBuilder('commission')
+      .select('commission.staffUserId', 'staffUserId')
+      .addSelect('COUNT(commission.id)', 'totalCommissions')
+      .addSelect('SUM(commission.commissionAmount)', 'totalAmount')
+      .addSelect(
+        "SUM(CASE WHEN commission.status = 'pending' THEN commission.commissionAmount ELSE 0 END)",
+        'pendingAmount',
+      )
+      .addSelect(
+        "SUM(CASE WHEN commission.status = 'paid' THEN commission.commissionAmount ELSE 0 END)",
+        'paidAmount',
+      )
+      .addSelect('MAX(commission.currency)', 'currency')
+      .groupBy('commission.staffUserId')
+      .orderBy('totalAmount', 'DESC');
+
+    if (startDate) {
+      queryBuilder.andWhere('commission.paymentDate >= :startDate', {
+        startDate,
+      });
+    }
+
+    if (endDate) {
+      queryBuilder.andWhere('commission.paymentDate <= :endDate', { endDate });
+    }
+
+    if (limit) {
+      queryBuilder.limit(limit);
+    }
+
+    const results = await queryBuilder.getRawMany();
+
+    return results.map((r) => ({
+      staffUserId: Number(r.staffUserId),
+      totalCommissions: Number(r.totalCommissions),
+      totalAmount: Number(r.totalAmount) || 0,
+      pendingAmount: Number(r.pendingAmount) || 0,
+      paidAmount: Number(r.paidAmount) || 0,
+      currency: r.currency || 'USD',
+    }));
+  }
+
+  async getStatsByPartner(
+    startDate?: Date,
+    endDate?: Date,
+    limit?: number,
+  ): Promise<
+    Array<{
+      partnerId: number;
+      totalCommissions: number;
+      totalAmount: number;
+      currency: string;
+    }>
+  > {
+    const queryBuilder = this.commissionRepository
+      .createQueryBuilder('commission')
+      .select('commission.partnerId', 'partnerId')
+      .addSelect('COUNT(commission.id)', 'totalCommissions')
+      .addSelect('SUM(commission.commissionAmount)', 'totalAmount')
+      .addSelect('MAX(commission.currency)', 'currency')
+      .groupBy('commission.partnerId')
+      .orderBy('totalAmount', 'DESC');
+
+    if (startDate) {
+      queryBuilder.andWhere('commission.paymentDate >= :startDate', {
+        startDate,
+      });
+    }
+
+    if (endDate) {
+      queryBuilder.andWhere('commission.paymentDate <= :endDate', { endDate });
+    }
+
+    if (limit) {
+      queryBuilder.limit(limit);
+    }
+
+    const results = await queryBuilder.getRawMany();
+
+    return results.map((r) => ({
+      partnerId: Number(r.partnerId),
+      totalCommissions: Number(r.totalCommissions),
+      totalAmount: Number(r.totalAmount) || 0,
+      currency: r.currency || 'USD',
+    }));
+  }
+
+  async getStatsByPeriod(
+    startDate: Date,
+    endDate: Date,
+    groupBy: 'daily' | 'weekly' | 'monthly',
+  ): Promise<
+    Array<{
+      period: string;
+      totalCommissions: number;
+      totalAmount: number;
+      pendingCommissions: number;
+      paidCommissions: number;
+      currency: string;
+    }>
+  > {
+    let dateFormat: string;
+    switch (groupBy) {
+      case 'daily':
+        dateFormat = '%Y-%m-%d';
+        break;
+      case 'weekly':
+        dateFormat = '%Y-%u'; // Año-Semana
+        break;
+      case 'monthly':
+        dateFormat = '%Y-%m';
+        break;
+      default:
+        dateFormat = '%Y-%m-%d';
+    }
+
+    const queryBuilder = this.commissionRepository
+      .createQueryBuilder('commission')
+      .select(`DATE_FORMAT(commission.paymentDate, '${dateFormat}')`, 'period')
+      .addSelect('COUNT(commission.id)', 'totalCommissions')
+      .addSelect('SUM(commission.commissionAmount)', 'totalAmount')
+      .addSelect(
+        "SUM(CASE WHEN commission.status = 'pending' THEN 1 ELSE 0 END)",
+        'pendingCommissions',
+      )
+      .addSelect(
+        "SUM(CASE WHEN commission.status = 'paid' THEN 1 ELSE 0 END)",
+        'paidCommissions',
+      )
+      .addSelect('MAX(commission.currency)', 'currency')
+      .where('commission.paymentDate >= :startDate', { startDate })
+      .andWhere('commission.paymentDate <= :endDate', { endDate })
+      .groupBy('period')
+      .orderBy('period', 'ASC');
+
+    const results = await queryBuilder.getRawMany();
+
+    return results.map((r) => ({
+      period: String(r.period || ''),
+      totalCommissions: Number(r.totalCommissions) || 0,
+      totalAmount: Number(r.totalAmount) || 0,
+      pendingCommissions: Number(r.pendingCommissions) || 0,
+      paidCommissions: Number(r.paidCommissions) || 0,
+      currency: String(r.currency || 'USD'),
+    }));
   }
 }
 

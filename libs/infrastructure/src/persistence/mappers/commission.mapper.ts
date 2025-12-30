@@ -26,6 +26,7 @@ export class CommissionMapper {
       persistenceEntity.notes,
       persistenceEntity.createdAt,
       persistenceEntity.updatedAt,
+      persistenceEntity.billingCycleId ?? null,
     );
   }
 
@@ -41,7 +42,8 @@ export class CommissionMapper {
     }
     entity.partnerId = domainEntity.partnerId;
     entity.staffUserId = domainEntity.staffUserId;
-    entity.paymentId = domainEntity.paymentId;
+    entity.paymentId = domainEntity.paymentId ?? null;
+    entity.billingCycleId = domainEntity.billingCycleId ?? null;
     entity.subscriptionId = domainEntity.subscriptionId;
     entity.assignmentId = domainEntity.assignmentId;
     entity.paymentAmount = domainEntity.paymentAmount;
