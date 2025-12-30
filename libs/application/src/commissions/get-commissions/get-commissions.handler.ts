@@ -83,6 +83,8 @@ export class GetCommissionsHandler {
           commission.staffUserId,
           staffUser?.name || 'Unknown User',
           staffUser?.email || 'unknown@example.com',
+          commission.partnerId,
+          partner?.name || 'Unknown Partner',
           commission.commissionPercent,
           commission.commissionAmount,
           commission.status,

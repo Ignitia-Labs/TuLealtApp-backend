@@ -33,6 +33,20 @@ export class CommissionDto {
   staffUserEmail: string;
 
   @ApiProperty({
+    description: 'ID del partner',
+    example: 1,
+    type: Number,
+  })
+  partnerId: number;
+
+  @ApiProperty({
+    description: 'Nombre del partner',
+    example: 'Restaurante La Cocina',
+    type: String,
+  })
+  partnerName: string;
+
+  @ApiProperty({
     description: 'Porcentaje de comisión aplicado',
     example: 15.5,
     type: Number,
@@ -80,6 +94,8 @@ export class CommissionDto {
     staffUserId: number,
     staffUserName: string,
     staffUserEmail: string,
+    partnerId: number,
+    partnerName: string,
     commissionPercent: number,
     commissionAmount: number,
     status: 'pending' | 'paid' | 'cancelled',
@@ -91,6 +107,8 @@ export class CommissionDto {
     this.staffUserId = staffUserId;
     this.staffUserName = staffUserName;
     this.staffUserEmail = staffUserEmail;
+    this.partnerId = partnerId;
+    this.partnerName = partnerName;
     this.commissionPercent = commissionPercent;
     this.commissionAmount = commissionAmount;
     this.status = status;

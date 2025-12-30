@@ -2,6 +2,7 @@ import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import {
   ICommissionRepository,
   IPaymentRepository,
+  IPartnerRepository,
   IUserRepository,
 } from '@libs/domain';
 import { GetPaymentCommissionsRequest } from './get-payment-commissions.request';
@@ -20,6 +21,8 @@ export class GetPaymentCommissionsHandler {
     private readonly commissionRepository: ICommissionRepository,
     @Inject('IPaymentRepository')
     private readonly paymentRepository: IPaymentRepository,
+    @Inject('IPartnerRepository')
+    private readonly partnerRepository: IPartnerRepository,
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
   ) {}
@@ -41,11 +44,14 @@ export class GetPaymentCommissionsHandler {
       request.paymentId,
     );
 
-    // Enriquecer con información de usuarios staff
+    // Enriquecer con información de usuarios staff y partners
     const commissionDtos = await Promise.all(
       commissions.map(async (commission) => {
         const staffUser = await this.userRepository.findById(
           commission.staffUserId,
+        );
+        const partner = await this.partnerRepository.findById(
+          commission.partnerId,
         );
 
         return new CommissionDto(
@@ -53,6 +59,8 @@ export class GetPaymentCommissionsHandler {
           commission.staffUserId,
           staffUser?.name || 'Unknown User',
           staffUser?.email || 'unknown@example.com',
+          commission.partnerId,
+          partner?.name || 'Unknown Partner',
           commission.commissionPercent,
           commission.commissionAmount,
           commission.status,

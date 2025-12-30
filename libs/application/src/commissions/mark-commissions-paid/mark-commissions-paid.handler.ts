@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import {
   ICommissionRepository,
+  IPartnerRepository,
   IUserRepository,
 } from '@libs/domain';
 import { MarkCommissionsPaidRequest } from './mark-commissions-paid.request';
@@ -20,6 +21,8 @@ export class MarkCommissionsPaidHandler {
   constructor(
     @Inject('ICommissionRepository')
     private readonly commissionRepository: ICommissionRepository,
+    @Inject('IPartnerRepository')
+    private readonly partnerRepository: IPartnerRepository,
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
   ) {}
@@ -61,9 +64,12 @@ export class MarkCommissionsPaidHandler {
           updatedCommission,
         );
 
-        // Enriquecer con información del usuario
+        // Enriquecer con información del usuario y partner
         const staffUser = await this.userRepository.findById(
           savedCommission.staffUserId,
+        );
+        const partner = await this.partnerRepository.findById(
+          savedCommission.partnerId,
         );
 
         updatedCommissions.push(
@@ -72,6 +78,8 @@ export class MarkCommissionsPaidHandler {
             savedCommission.staffUserId,
             staffUser?.name || 'Unknown User',
             staffUser?.email || 'unknown@example.com',
+            savedCommission.partnerId,
+            partner?.name || 'Unknown Partner',
             savedCommission.commissionPercent,
             savedCommission.commissionAmount,
             savedCommission.status,
