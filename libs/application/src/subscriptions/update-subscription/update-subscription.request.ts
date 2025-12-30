@@ -88,6 +88,27 @@ export class UpdateSubscriptionRequest {
   billingAmount?: number;
 
   @ApiProperty({
+    description: 'Moneda de la suscripción',
+    example: 'USD',
+    type: String,
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  currency?: string;
+
+  @ApiProperty({
+    description: 'ID de la moneda de la suscripción (referencia a la tabla currencies)',
+    example: 1,
+    type: Number,
+    required: false,
+    nullable: true,
+  })
+  @IsNumber()
+  @IsOptional()
+  currencyId?: number | null;
+
+  @ApiProperty({
     description: 'Fecha del próximo pago',
     example: '2024-02-01T00:00:00Z',
     type: String,

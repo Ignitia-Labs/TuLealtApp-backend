@@ -118,6 +118,14 @@ export class GetSubscriptionResponse {
   currency: string;
 
   @ApiProperty({
+    description: 'ID de la moneda de la suscripción (referencia a la tabla currencies)',
+    example: 1,
+    type: Number,
+    nullable: true,
+  })
+  currencyId: number | null;
+
+  @ApiProperty({
     description: 'Fecha del próximo pago',
     example: '2024-02-01T00:00:00.000Z',
     type: Date,
@@ -275,6 +283,7 @@ export class GetSubscriptionResponse {
     taxAmount: number,
     totalPrice: number,
     currency: string,
+    currencyId: number | null,
     nextBillingDate: Date,
     nextBillingAmount: number,
     currentPeriodStart: Date,
@@ -311,6 +320,7 @@ export class GetSubscriptionResponse {
     this.taxAmount = taxAmount;
     this.totalPrice = totalPrice;
     this.currency = currency;
+    this.currencyId = currencyId;
     this.nextBillingDate = nextBillingDate;
     this.nextBillingAmount = nextBillingAmount;
     this.currentPeriodStart = currentPeriodStart;

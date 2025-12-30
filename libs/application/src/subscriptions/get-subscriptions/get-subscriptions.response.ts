@@ -27,6 +27,7 @@ export class GetSubscriptionsResponse {
         taxAmount: 0,
         totalPrice: 79.99,
         currency: 'USD',
+        currencyId: 1,
         nextBillingDate: '2024-02-01T00:00:00.000Z',
         nextBillingAmount: 79.99,
         currentPeriodStart: '2024-01-01T00:00:00.000Z',

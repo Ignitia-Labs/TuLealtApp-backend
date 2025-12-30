@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { PartnerEntity } from './partner.entity';
 import { PartnerSubscriptionUsageEntity } from './partner-subscription-usage.entity';
+import { CurrencyEntity } from './currency.entity';
 
 /**
  * Entidad de persistencia para PartnerSubscription
@@ -67,6 +68,17 @@ export class PartnerSubscriptionEntity {
 
   @Column('varchar', { length: 10, default: 'USD' })
   currency: string;
+
+  @ManyToOne(() => CurrencyEntity, {
+    onDelete: 'RESTRICT',
+    onUpdate: 'CASCADE',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'currencyId' })
+  currencyRelation: CurrencyEntity | null;
+
+  @Column('int', { nullable: true })
+  currencyId: number | null;
 
   @Column('datetime')
   nextBillingDate: Date;

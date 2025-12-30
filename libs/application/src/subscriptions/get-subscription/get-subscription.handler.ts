@@ -83,6 +83,7 @@ export class GetSubscriptionHandler {
       subscription.taxAmount,
       subscription.totalPrice,
       subscription.currency,
+      subscription.currencyId,
       subscription.nextBillingDate,
       subscription.nextBillingAmount,
       subscription.currentPeriodStart,

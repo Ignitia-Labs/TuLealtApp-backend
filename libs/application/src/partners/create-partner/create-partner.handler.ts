@@ -86,18 +86,20 @@ export class CreatePartnerHandler {
     };
     const planType = planTypeMap[savedPartner.plan] || 'conecta';
 
-    // Obtener la currency del partner
-    // currencyId es un número directamente
-    const currencyIdNumber = request.currencyId;
+    // Determinar la moneda de la suscripción
+    // Si se proporciona subscriptionCurrencyId, usarlo; de lo contrario, usar el currencyId del partner
+    const subscriptionCurrencyId = request.subscriptionCurrencyId ?? request.currencyId;
 
-    // Buscar la currency en la base de datos
-    const currency = await this.currencyRepository.findById(currencyIdNumber);
-    if (!currency) {
-      throw new NotFoundException(`Currency with ID ${currencyIdNumber} not found`);
+    // Buscar la currency de la suscripción en la base de datos
+    const subscriptionCurrency = await this.currencyRepository.findById(subscriptionCurrencyId);
+    if (!subscriptionCurrency) {
+      throw new NotFoundException(
+        `Currency with ID ${subscriptionCurrencyId} not found for subscription`,
+      );
     }
 
-    // Usar el código de la currency (ej: 'GTQ', 'USD')
-    const currencyCode = currency.code;
+    // Usar el código de la currency de la suscripción (ej: 'GTQ', 'USD')
+    const currencyCode = subscriptionCurrency.code;
 
     // Calcular fechas y montos por defecto
     const startDate = new Date(request.subscriptionStartDate);
@@ -145,6 +147,7 @@ export class CreatePartnerHandler {
       billingFrequency,
       billingAmount,
       currencyCode,
+      subscriptionCurrencyId, // currencyId de la suscripción (puede ser diferente del partner)
       renewalDate, // nextBillingDate = renewalDate por defecto
       totalPrice, // nextBillingAmount = totalPrice (incluye IVA si aplica)
       startDate, // currentPeriodStart = startDate por defecto

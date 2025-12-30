@@ -1,7 +1,7 @@
-import { Injectable, BadRequestException, Inject } from '@nestjs/common';
+import { Injectable, BadRequestException, Inject, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PartnerSubscription, IPartnerRepository, IPricingPlanRepository } from '@libs/domain';
+import { PartnerSubscription, IPartnerRepository, IPricingPlanRepository, ICurrencyRepository } from '@libs/domain';
 import { PartnerSubscriptionEntity, PartnerMapper } from '@libs/infrastructure';
 import { CreateSubscriptionRequest } from './create-subscription.request';
 import { CreateSubscriptionResponse } from './create-subscription.response';
@@ -17,6 +17,8 @@ export class CreateSubscriptionHandler {
     private readonly partnerRepository: IPartnerRepository,
     @Inject('IPricingPlanRepository')
     private readonly pricingPlanRepository: IPricingPlanRepository,
+    @Inject('ICurrencyRepository')
+    private readonly currencyRepository: ICurrencyRepository,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
     private readonly subscriptionEventHelper: SubscriptionEventHelper,
@@ -36,6 +38,28 @@ export class CreateSubscriptionHandler {
 
     if (existingSubscription) {
       throw new BadRequestException('Partner already has an active subscription');
+    }
+
+    // Validar currencyId si se proporciona
+    let currencyId: number | null = request.currencyId ?? null;
+    let currencyCode: string = request.currency;
+
+    if (request.currencyId) {
+      const currency = await this.currencyRepository.findById(request.currencyId);
+      if (!currency) {
+        throw new NotFoundException(`Currency with ID ${request.currencyId} not found`);
+      }
+      // Si se proporciona currencyId pero no currency, usar el código de la moneda encontrada
+      if (!request.currency) {
+        currencyCode = currency.code;
+      }
+      currencyId = currency.id;
+    } else if (request.currency) {
+      // Si se proporciona currency pero no currencyId, intentar buscar por código
+      const currency = await this.currencyRepository.findByCode(request.currency);
+      if (currency) {
+        currencyId = currency.id;
+      }
     }
 
     // Calcular valores de impuestos si no se proporcionan
@@ -58,7 +82,8 @@ export class CreateSubscriptionHandler {
       new Date(request.renewalDate),
       request.billingFrequency,
       request.billingAmount,
-      request.currency,
+      currencyCode,
+      currencyId,
       new Date(request.nextBillingDate),
       request.nextBillingAmount,
       new Date(request.currentPeriodStart),

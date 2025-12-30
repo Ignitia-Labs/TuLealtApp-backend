@@ -97,6 +97,7 @@ export class PartnerMapper {
       persistenceEntity.billingFrequency,
       persistenceEntity.billingAmount,
       persistenceEntity.currency,
+      persistenceEntity.currencyId ?? null,
       persistenceEntity.nextBillingDate,
       persistenceEntity.nextBillingAmount,
       persistenceEntity.currentPeriodStart,
@@ -146,6 +147,7 @@ export class PartnerMapper {
     entity.taxAmount = domainEntity.taxAmount;
     entity.totalPrice = domainEntity.totalPrice;
     entity.currency = domainEntity.currency;
+    entity.currencyId = domainEntity.currencyId ?? null;
     entity.nextBillingDate = domainEntity.nextBillingDate;
     entity.nextBillingAmount = domainEntity.nextBillingAmount;
     entity.currentPeriodStart = domainEntity.currentPeriodStart;

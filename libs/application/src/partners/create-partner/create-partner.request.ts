@@ -320,6 +320,17 @@ export class CreatePartnerRequest {
   @IsOptional()
   subscriptionTaxPercent?: number | null;
 
+  @ApiProperty({
+    description: 'ID de la moneda para la suscripción (referencia a la tabla currencies). Si no se proporciona, se usará la moneda del partner (currencyId)',
+    example: 1,
+    type: Number,
+    required: false,
+    nullable: true,
+  })
+  @IsNumber()
+  @IsOptional()
+  subscriptionCurrencyId?: number | null;
+
   // Limits data
   @ApiProperty({
     description: 'Máximo número de tenants',

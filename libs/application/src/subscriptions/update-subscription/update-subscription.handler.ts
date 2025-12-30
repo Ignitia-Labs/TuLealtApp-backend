@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PartnerSubscription } from '@libs/domain';
+import { PartnerSubscription, ICurrencyRepository } from '@libs/domain';
 import { PartnerSubscriptionEntity, PartnerMapper } from '@libs/infrastructure';
 import { UpdateSubscriptionRequest } from './update-subscription.request';
 import { UpdateSubscriptionResponse } from './update-subscription.response';
@@ -15,6 +15,8 @@ export class UpdateSubscriptionHandler {
   constructor(
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
+    @Inject('ICurrencyRepository')
+    private readonly currencyRepository: ICurrencyRepository,
     private readonly subscriptionEventHelper: SubscriptionEventHelper,
   ) {}
 
@@ -28,6 +30,32 @@ export class UpdateSubscriptionHandler {
     }
 
     const subscription = PartnerMapper.subscriptionToDomain(subscriptionEntity);
+
+    // Validar currencyId si se proporciona
+    let currencyId: number | null = request.currencyId ?? subscription.currencyId;
+    let currencyCode: string = request.currency ?? subscription.currency;
+
+    if (request.currencyId !== undefined) {
+      if (request.currencyId !== null) {
+        const currency = await this.currencyRepository.findById(request.currencyId);
+        if (!currency) {
+          throw new NotFoundException(`Currency with ID ${request.currencyId} not found`);
+        }
+        currencyId = currency.id;
+        // Si se proporciona currencyId pero no currency, usar el código de la moneda encontrada
+        if (!request.currency) {
+          currencyCode = currency.code;
+        }
+      } else {
+        currencyId = null;
+      }
+    } else if (request.currency && !request.currencyId) {
+      // Si se proporciona currency pero no currencyId, intentar buscar por código
+      const currency = await this.currencyRepository.findByCode(request.currency);
+      if (currency) {
+        currencyId = currency.id;
+      }
+    }
 
     // Actualizar campos si se proporcionan
     let updatedSubscription = subscription;
@@ -48,7 +76,8 @@ export class UpdateSubscriptionHandler {
         request.renewalDate ? new Date(request.renewalDate) : subscription.renewalDate,
         request.billingFrequency ?? subscription.billingFrequency,
         request.billingAmount ?? subscription.billingAmount,
-        subscription.currency,
+        currencyCode,
+        currencyId,
         request.nextBillingDate ? new Date(request.nextBillingDate) : subscription.nextBillingDate,
         request.nextBillingAmount ?? subscription.nextBillingAmount,
         request.currentPeriodStart
@@ -89,7 +118,8 @@ export class UpdateSubscriptionHandler {
           new Date(request.renewalDate),
           request.billingFrequency ?? subscription.billingFrequency,
           request.billingAmount ?? subscription.billingAmount,
-          subscription.currency,
+          currencyCode,
+          currencyId,
           request.nextBillingDate
             ? new Date(request.nextBillingDate)
             : subscription.nextBillingDate,
