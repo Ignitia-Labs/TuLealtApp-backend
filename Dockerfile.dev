@@ -22,8 +22,15 @@ RUN npm install
 COPY apps ./apps
 COPY libs ./libs
 
+# Copiar script de entrada
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Exponer puertos (se sobrescribirán en docker-compose)
 EXPOSE 3000 3001 3002
+
+# Usar script de entrada
+ENTRYPOINT ["sh", "/usr/local/bin/docker-entrypoint.sh"]
 
 # Comando por defecto (se sobrescribirá en docker-compose)
 CMD ["npm", "run", "start:admin"]

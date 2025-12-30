@@ -135,12 +135,18 @@ Para más detalles, consulta la [documentación completa de arquitectura](./z-do
 
 ### Prerrequisitos
 
-- Node.js >= 18.x
+- Node.js >= 18.x (recomendado 20.x LTS)
 - npm >= 9.x
-- Docker >= 20.x (recomendado)
-- MariaDB >= 10.5 (si no usas Docker)
+- Docker >= 20.x y Docker Compose >= 2.0 (para desarrollo con Docker)
+- MariaDB >= 10.5 (solo si no usas Docker)
 
-### Instalación
+---
+
+## 📦 Opción 1: Desarrollo Local (Recomendado para Desarrollo)
+
+Esta opción ejecuta las APIs localmente con Node.js y usa Docker solo para servicios de infraestructura (MariaDB, MinIO).
+
+### Pasos de Instalación
 
 1. **Clonar el repositorio**
    ```bash
@@ -154,37 +160,230 @@ Para más detalles, consulta la [documentación completa de arquitectura](./z-do
    ```
 
 3. **Configurar variables de entorno**
-   ```bash
-   cp .env.example .env
-   # Editar .env con tus configuraciones
+
+   Crea un archivo `.env` en la raíz del proyecto:
+   ```env
+   # Database
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_USER=tulealtapp
+   DB_PASSWORD=tulealtapp
+   DB_NAME=tulealtapp
+   DB_ROOT_PASSWORD=rootpassword
+
+   # JWT
+   JWT_SECRET=your-secret-key-change-in-production
+   JWT_EXPIRES_IN=24h
+
+   # AWS S3 / MinIO
+   S3_ENDPOINT=http://localhost:9000
+   S3_ACCESS_KEY_ID=minioadmin
+   S3_SECRET_ACCESS_KEY=minioadmin
+   S3_BUCKET_NAME=tulealtapp-images
+   S3_REGION=us-east-1
+   S3_FORCE_PATH_STYLE=true
+
+   # Stripe (opcional para desarrollo)
+   STRIPE_SECRET_KEY=sk_test_...
+   STRIPE_WEBHOOK_SECRET=whsec_...
+
+   # API Ports
+   ADMIN_API_PORT=3000
+   PARTNER_API_PORT=3001
+   CUSTOMER_API_PORT=3002
    ```
 
-4. **Iniciar servicios con Docker (Recomendado)**
+4. **Iniciar servicios de infraestructura con Docker**
    ```bash
-   # Iniciar MariaDB y MinIO
+   # Iniciar solo MariaDB y MinIO
    docker-compose up -d mariadb minio
 
+   # Verificar que los servicios estén corriendo
+   docker ps
+   ```
+
+5. **Inicializar la base de datos**
+   ```bash
    # Ejecutar migraciones
    npm run migration:run
 
    # Ejecutar seeds (datos iniciales)
    npm run seed:all
-
-   # Iniciar Admin API
-   npm run start:admin
    ```
 
-5. **Acceder a la documentación**
-   - Swagger UI: http://localhost:3000/admin/docs
-   - OpenAPI JSON: http://localhost:3000/admin/docs-json
+6. **Iniciar las APIs localmente**
 
-### Usuario Admin por Defecto
+   En terminales separadas:
+   ```bash
+   # Terminal 1: Admin API
+   npm run start:admin
 
-Después de ejecutar los seeds, puedes iniciar sesión con:
+   # Terminal 2: Partner API
+   npm run start:partner
+
+   # Terminal 3: Customer API
+   npm run start:customer
+   ```
+
+7. **Acceder a la documentación**
+   - **Admin API Swagger**: http://localhost:3000/admin/docs
+   - **Partner API Swagger**: http://localhost:3001/partner/docs
+   - **Customer API Swagger**: http://localhost:3002/customer/docs
+
+---
+
+## 🐳 Opción 2: Desarrollo con Docker (Recomendado para QA)
+
+Esta opción ejecuta todas las APIs dentro de contenedores Docker, ideal para entornos de QA y pruebas.
+
+### Pasos de Instalación
+
+1. **Clonar el repositorio**
+   ```bash
+   git clone <repository-url>
+   cd TuLealtApp-backend
+   ```
+
+2. **Configurar variables de entorno (opcional)**
+
+   Crea un archivo `.env` en la raíz del proyecto si necesitas personalizar valores:
+   ```env
+   # Database (valores por defecto ya están en docker-compose.yml)
+   DB_USER=tulealtapp
+   DB_PASSWORD=tulealtapp
+   DB_NAME=tulealtapp
+   DB_ROOT_PASSWORD=rootpassword
+
+   # JWT
+   JWT_SECRET=your-secret-key-change-in-production
+   JWT_EXPIRES_IN=24h
+
+   # MinIO
+   MINIO_ROOT_USER=minioadmin
+   MINIO_ROOT_PASSWORD=minioadmin
+   S3_BUCKET_NAME=tulealtapp-images
+
+   # Stripe (opcional)
+   STRIPE_SECRET_KEY=sk_test_...
+   STRIPE_WEBHOOK_SECRET=whsec_...
+   ```
+
+3. **Construir e iniciar todos los servicios**
+   ```bash
+   # Construir las imágenes Docker
+   npm run docker:build
+
+   # Iniciar todos los servicios (MariaDB, MinIO, Admin API, Partner API, Customer API)
+   npm run docker:up
+   ```
+
+   ⏱️ **Nota**: La primera vez puede tardar varios minutos mientras:
+   - Se construyen las imágenes Docker
+   - Se instalan las dependencias de Node.js en los contenedores
+   - Se inicializa la base de datos
+
+4. **Verificar que los servicios estén corriendo**
+   ```bash
+   # Ver logs de todos los servicios
+   npm run docker:logs
+
+   # O ver logs de un servicio específico
+   docker logs tulealtapp-admin-api-dev -f
+   docker logs tulealtapp-partner-api-dev -f
+   docker logs tulealtapp-customer-api-dev -f
+   ```
+
+5. **Inicializar la base de datos (solo la primera vez)**
+
+   Ejecuta los seeds dentro del contenedor de admin-api:
+   ```bash
+   # Ejecutar migraciones
+   docker exec tulealtapp-admin-api-dev npm run migration:run
+
+   # Ejecutar seeds (datos iniciales)
+   docker exec tulealtapp-admin-api-dev npm run seed:all
+   ```
+
+6. **Acceder a las APIs**
+   - **Admin API Swagger**: http://localhost:3000/admin/docs
+   - **Partner API Swagger**: http://localhost:3001/partner/docs
+   - **Customer API Swagger**: http://localhost:3002/customer/docs
+   - **MinIO Console**: http://localhost:9001 (usuario: `minioadmin`, password: `minioadmin`)
+
+### Comandos Útiles para Docker
+
+```bash
+# Ver logs en tiempo real
+npm run docker:logs
+
+# Detener todos los servicios
+npm run docker:down
+
+# Reiniciar servicios
+npm run docker:restart
+
+# Limpiar todo (contenedores, volúmenes e imágenes)
+npm run docker:clean
+
+# Acceder al shell del contenedor de admin-api
+docker exec -it tulealtapp-admin-api-dev sh
+
+# Ejecutar comandos dentro del contenedor
+docker exec tulealtapp-admin-api-dev npm run migration:run
+docker exec tulealtapp-admin-api-dev npm run seed:all
+```
+
+### Hot Reload en Docker
+
+Los cambios en el código se reflejan automáticamente gracias a:
+- Volúmenes montados que sincronizan el código local con los contenedores
+- Modo `--watch` de NestJS que detecta cambios y recompila
+- Script de entrada (`docker-entrypoint.sh`) que asegura que las dependencias estén instaladas
+
+---
+
+## 👤 Usuario Admin por Defecto
+
+Después de ejecutar los seeds (`npm run seed:all`), puedes iniciar sesión con:
 - **Email**: `admin@example.com`
 - **Password**: `Admin123!`
 
 ⚠️ **Importante**: Cambia esta contraseña inmediatamente en producción.
+
+---
+
+## 🔧 Solución de Problemas
+
+### Error: "Cannot find module '@nestjs/schedule'"
+
+Si ves este error al iniciar con Docker, asegúrate de:
+1. Reconstruir las imágenes: `npm run docker:build`
+2. Limpiar volúmenes antiguos: `npm run docker:clean` y luego `npm run docker:build`
+
+### Las dependencias no se instalan en Docker
+
+El script `docker-entrypoint.sh` se encarga de instalar las dependencias automáticamente la primera vez. Si hay problemas:
+```bash
+# Acceder al contenedor y verificar
+docker exec -it tulealtapp-admin-api-dev sh
+ls -la node_modules
+npm install
+```
+
+### La base de datos no se conecta
+
+Verifica que MariaDB esté corriendo:
+```bash
+# Verificar contenedor de MariaDB
+docker ps | grep mariadb
+
+# Ver logs de MariaDB
+docker logs tulealtapp-mariadb-dev
+
+# Verificar conexión desde el contenedor
+docker exec -it tulealtapp-admin-api-dev sh
+npm run migration:run
+```
 
 ---
 
@@ -254,13 +453,23 @@ npm run seed:catalog         # Seed de catálogos
 
 ### Docker
 ```bash
-npm run docker:build         # Construir imágenes
-npm run docker:up            # Iniciar servicios
-npm run docker:down          # Detener servicios
-npm run docker:logs          # Ver logs
-npm run docker:restart       # Reiniciar servicios
+npm run docker:build         # Construir imágenes de desarrollo
+npm run docker:up            # Iniciar todos los servicios (MariaDB, MinIO, APIs)
+npm run docker:down          # Detener todos los servicios
+npm run docker:logs          # Ver logs de todos los servicios
+npm run docker:restart       # Reiniciar todos los servicios
 npm run docker:clean         # Limpiar todo (contenedores, volúmenes, imágenes)
+
+# Producción
+npm run docker:build:prod    # Construir imágenes de producción
+npm run docker:up:prod       # Iniciar servicios en producción
+npm run docker:down:prod     # Detener servicios de producción
+npm run docker:logs:prod     # Ver logs de producción
+npm run docker:restart:prod  # Reiniciar servicios de producción
+npm run docker:clean:prod    # Limpiar servicios de producción
 ```
+
+**Nota**: Los scripts de Docker para desarrollo incluyen hot-reload automático. El script `docker-entrypoint.sh` se encarga de instalar las dependencias automáticamente la primera vez que se inicia un contenedor.
 
 ### Producción
 ```bash
@@ -359,8 +568,12 @@ TuLealtApp-backend/
 │       └── types/                 # Tipos compartidos
 ├── z-docs/                        # Documentación completa
 ├── docker/                        # Configuración Docker
+│   └── mariadb/                   # Scripts de inicialización de MariaDB
 ├── docker-compose.yml             # Docker Compose desarrollo
 ├── docker-compose.prod.yml        # Docker Compose producción
+├── Dockerfile                     # Dockerfile producción
+├── Dockerfile.dev                 # Dockerfile desarrollo
+├── docker-entrypoint.sh           # Script de entrada para contenedores
 └── package.json                   # Configuración del proyecto
 ```
 
@@ -393,7 +606,9 @@ Para más detalles, consulta [API-GUIDELINE.md](./z-docs/API-GUIDELINE.md) y [AR
 
 ### Variables de Entorno
 
-Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
+Crea un archivo `.env` en la raíz del proyecto. Las variables varían según el entorno:
+
+#### Para Desarrollo Local (sin Docker para APIs)
 
 ```env
 # Database
@@ -402,9 +617,10 @@ DB_PORT=3306
 DB_USER=tulealtapp
 DB_PASSWORD=tulealtapp
 DB_NAME=tulealtapp
+DB_ROOT_PASSWORD=rootpassword
 
 # JWT
-JWT_SECRET=your-secret-key
+JWT_SECRET=your-secret-key-change-in-production
 JWT_EXPIRES_IN=24h
 
 # AWS S3 / MinIO
@@ -413,8 +629,9 @@ S3_ACCESS_KEY_ID=minioadmin
 S3_SECRET_ACCESS_KEY=minioadmin
 S3_BUCKET_NAME=tulealtapp-images
 S3_REGION=us-east-1
+S3_FORCE_PATH_STYLE=true
 
-# Stripe (opcional)
+# Stripe (opcional para desarrollo)
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 
@@ -423,6 +640,33 @@ ADMIN_API_PORT=3000
 PARTNER_API_PORT=3001
 CUSTOMER_API_PORT=3002
 ```
+
+#### Para Desarrollo con Docker
+
+Si usas Docker Compose, muchas variables ya están configuradas en `docker-compose.yml`. Solo necesitas personalizar:
+
+```env
+# Database (opcional, valores por defecto en docker-compose.yml)
+DB_USER=tulealtapp
+DB_PASSWORD=tulealtapp
+DB_NAME=tulealtapp
+DB_ROOT_PASSWORD=rootpassword
+
+# JWT
+JWT_SECRET=your-secret-key-change-in-production
+JWT_EXPIRES_IN=24h
+
+# MinIO (opcional, valores por defecto en docker-compose.yml)
+MINIO_ROOT_USER=minioadmin
+MINIO_ROOT_PASSWORD=minioadmin
+S3_BUCKET_NAME=tulealtapp-images
+
+# Stripe (opcional)
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+**Nota**: En Docker, las variables `DB_HOST`, `S3_ENDPOINT`, etc. se configuran automáticamente según el servicio de Docker Compose.
 
 ---
 

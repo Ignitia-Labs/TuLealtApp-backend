@@ -58,9 +58,11 @@ services:
       - ./apps:/app/apps
       - ./libs:/app/libs
       - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
       - ./tsconfig.json:/app/tsconfig.json
+      - ./tsconfig.base.json:/app/tsconfig.base.json
       - ./nest-cli.json:/app/nest-cli.json
-      - /app/node_modules
+      - admin-api-node-modules:/app/node_modules
     environment:
       - NODE_ENV=development
       - PORT=3000
@@ -98,9 +100,11 @@ services:
       - ./apps:/app/apps
       - ./libs:/app/libs
       - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
       - ./tsconfig.json:/app/tsconfig.json
+      - ./tsconfig.base.json:/app/tsconfig.base.json
       - ./nest-cli.json:/app/nest-cli.json
-      - /app/node_modules
+      - partner-api-node-modules:/app/node_modules
     environment:
       - NODE_ENV=development
       - PORT=3001
@@ -129,9 +133,11 @@ services:
       - ./apps:/app/apps
       - ./libs:/app/libs
       - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
       - ./tsconfig.json:/app/tsconfig.json
+      - ./tsconfig.base.json:/app/tsconfig.base.json
       - ./nest-cli.json:/app/nest-cli.json
-      - /app/node_modules
+      - customer-api-node-modules:/app/node_modules
     environment:
       - NODE_ENV=development
       - PORT=3002
@@ -155,4 +161,7 @@ networks:
 volumes:
   mariadb_data:
   minio_data:
+  admin-api-node-modules:
+  partner-api-node-modules:
+  customer-api-node-modules:
 
