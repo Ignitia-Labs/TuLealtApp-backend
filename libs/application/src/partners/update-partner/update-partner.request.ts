@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsIn,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
@@ -64,6 +65,7 @@ export class UpdatePartnerRequest {
     required: false,
     nullable: true,
   })
+  @Type(() => Number)
   @IsNumber()
   @IsOptional()
   countryId?: number | null;
@@ -114,6 +116,7 @@ export class UpdatePartnerRequest {
     type: Number,
     required: false,
   })
+  @Type(() => Number)
   @IsNumber()
   @IsOptional()
   currencyId?: number;
@@ -195,6 +198,7 @@ export class UpdatePartnerRequest {
     type: Number,
     required: false,
   })
+  @Type(() => Number)
   @IsNumber()
   @IsOptional()
   branchesNumber?: number;
