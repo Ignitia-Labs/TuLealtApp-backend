@@ -44,6 +44,7 @@ export * from './entities/message-recipient.entity';
 export * from './entities/message-filter.entity';
 export * from './entities/profile.entity';
 export * from './entities/user-profile.entity';
+export * from './entities/user-change-history.entity';
 
 // Repository Interfaces
 export * from './repositories/user.repository.interface';
@@ -80,3 +81,4 @@ export * from './repositories/message-recipient.repository.interface';
 export * from './repositories/message-filter.repository.interface';
 export * from './repositories/profile.repository.interface';
 export * from './repositories/user-profile.repository.interface';
+export * from './repositories/user-change-history.repository.interface';

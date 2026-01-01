@@ -56,17 +56,24 @@ export interface IUserRepository {
   /**
    * Busca usuarios por partnerId y roles (array de roles)
    * Retorna usuarios que pertenezcan al partner y tengan al menos uno de los roles especificados
+   * @param includeInactive Si es true, incluye usuarios inactivos/bloqueados. Por defecto true (incluye todos).
    */
   findByPartnerIdAndRoles(
     partnerId: number,
     roles: string[],
     skip?: number,
     take?: number,
+    includeInactive?: boolean,
   ): Promise<User[]>;
 
   /**
    * Cuenta usuarios por partnerId y roles (array de roles)
    * Retorna el total de usuarios que pertenezcan al partner y tengan al menos uno de los roles especificados
+   * @param includeInactive Si es true, incluye usuarios inactivos/bloqueados. Por defecto true (incluye todos).
    */
-  countByPartnerIdAndRoles(partnerId: number, roles: string[]): Promise<number>;
+  countByPartnerIdAndRoles(
+    partnerId: number,
+    roles: string[],
+    includeInactive?: boolean,
+  ): Promise<number>;
 }

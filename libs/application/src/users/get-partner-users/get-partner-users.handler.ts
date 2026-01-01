@@ -26,6 +26,7 @@ export class GetPartnerUsersHandler {
     // Obtener usuarios con roles PARTNER y PARTNER_STAFF del partner específico
     const skip = request.skip || 0;
     const take = request.take || 50;
+    const includeInactive = request.includeInactive !== undefined ? request.includeInactive : true;
 
     // Usar método optimizado del repositorio que filtra directamente en la base de datos
     const partnerUsers = await this.userRepository.findByPartnerIdAndRoles(
@@ -33,12 +34,14 @@ export class GetPartnerUsersHandler {
       ['PARTNER', 'PARTNER_STAFF'],
       skip,
       take,
+      includeInactive,
     );
 
     // Obtener total de usuarios del partner (para paginación)
     const total = await this.userRepository.countByPartnerIdAndRoles(
       request.partnerId,
       ['PARTNER', 'PARTNER_STAFF'],
+      includeInactive,
     );
 
     // Mapear a DTOs

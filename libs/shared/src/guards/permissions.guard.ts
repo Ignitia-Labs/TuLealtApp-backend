@@ -26,6 +26,7 @@ interface IPermissionService {
  * Este guard valida permisos granulares usando el formato "module.resource.action".
  * Debe usarse después de JwtAuthGuard para asegurar que el usuario esté autenticado.
  *
+ * Los usuarios ADMIN (webmaster) tienen acceso completo automáticamente sin verificar permisos.
  * Los usuarios CUSTOMER no requieren validación de permisos (se omiten).
  *
  * @example
@@ -79,6 +80,12 @@ export class PermissionsGuard implements CanActivate {
 
     if (!user) {
       throw new ForbiddenException('User not authenticated');
+    }
+
+    // Omitir validación de permisos para usuarios ADMIN (webmaster - acceso completo)
+    // Los usuarios ADMIN tienen todos los permisos concedidos automáticamente
+    if (user.roles.includes('ADMIN')) {
+      return true;
     }
 
     // Omitir validación de permisos para usuarios CUSTOMER

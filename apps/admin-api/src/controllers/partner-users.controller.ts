@@ -284,7 +284,7 @@ export class PartnerUsersController {
   @ApiOperation({
     summary: 'Obtener usuarios de un partner',
     description:
-      'Obtiene todos los usuarios (PARTNER y PARTNER_STAFF) asociados a un partner específico. Soporta paginación.',
+      'Obtiene todos los usuarios (PARTNER y PARTNER_STAFF) asociados a un partner específico. Por defecto incluye usuarios activos e inactivos. Soporta paginación.',
   })
   @ApiParam({
     name: 'partnerId',
@@ -306,6 +306,13 @@ export class PartnerUsersController {
     type: Number,
     description: 'Número de registros a tomar (paginación)',
     example: 50,
+  })
+  @ApiQuery({
+    name: 'includeInactive',
+    required: false,
+    type: Boolean,
+    description: 'Si se incluyen usuarios inactivos/bloqueados en la respuesta. Por defecto retorna todos los usuarios.',
+    example: true,
   })
   @ApiResponse({
     status: 200,
@@ -337,8 +344,20 @@ export class PartnerUsersController {
           isActive: true,
           createdAt: '2024-01-20T14:45:00.000Z',
         },
+        {
+          id: 20,
+          email: 'blocked@example.com',
+          name: 'Blocked User',
+          firstName: 'Blocked',
+          lastName: 'User',
+          phone: '+502 3456-7890',
+          roles: ['PARTNER_STAFF'],
+          partnerId: 1,
+          isActive: false,
+          createdAt: '2024-01-10T08:00:00.000Z',
+        },
       ],
-      total: 2,
+      total: 3,
     },
   })
   @ApiResponse({
@@ -370,6 +389,7 @@ export class PartnerUsersController {
     @Param('partnerId', ParseIntPipe) partnerId: number,
     @Query('skip') skip?: number,
     @Query('take') take?: number,
+    @Query('includeInactive') includeInactive?: string,
   ): Promise<GetPartnerUsersResponse> {
     const request = new GetPartnerUsersRequest();
     request.partnerId = partnerId;
@@ -378,6 +398,9 @@ export class PartnerUsersController {
     }
     if (take !== undefined) {
       request.take = Number(take);
+    }
+    if (includeInactive !== undefined) {
+      request.includeInactive = includeInactive === 'true';
     }
     return this.getPartnerUsersHandler.execute(request);
   }

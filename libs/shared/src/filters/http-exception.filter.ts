@@ -11,6 +11,22 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
+    const exceptionResponse = exception.getResponse();
+
+    // Extraer mensaje de error
+    // Si es un objeto con mensajes de validación, usar esos mensajes
+    let message: string | string[];
+    if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
+      if ('message' in exceptionResponse) {
+        message = (exceptionResponse as any).message;
+      } else if (Array.isArray(exceptionResponse)) {
+        message = exceptionResponse;
+      } else {
+        message = exception.message;
+      }
+    } else {
+      message = exception.message;
+    }
 
     // Loggear errores HTTP para debugging (excepto 404 que son comunes)
     if (status >= 500) {
@@ -18,17 +34,25 @@ export class HttpExceptionFilter implements ExceptionFilter {
         status,
         path: request.url,
         method: request.method,
-        message: exception.message,
+        message,
         stack: exception.stack,
       });
     }
 
-    response.status(status).json({
+    // Construir respuesta de error
+    const errorResponse: any = {
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
-      message: exception.message,
-    });
+      message,
+    };
+
+    // Agregar campo 'error' si está presente en la respuesta de la excepción
+    if (typeof exceptionResponse === 'object' && exceptionResponse !== null && 'error' in exceptionResponse) {
+      errorResponse.error = (exceptionResponse as any).error;
+    }
+
+    response.status(status).json(errorResponse);
   }
 }
 

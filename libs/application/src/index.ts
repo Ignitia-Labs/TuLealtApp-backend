@@ -27,6 +27,20 @@ export * from './users/lock-user/lock-user.handler';
 export * from './users/lock-user/lock-user.request';
 export * from './users/lock-user/lock-user.response';
 
+export * from './users/unlock-user/unlock-user.handler';
+export * from './users/unlock-user/unlock-user.request';
+export * from './users/unlock-user/unlock-user.response';
+
+export * from './users/delete-user/delete-user.handler';
+export * from './users/delete-user/delete-user.request';
+export * from './users/delete-user/delete-user.response';
+
+export * from './users/get-user-change-history/get-user-change-history.handler';
+export * from './users/get-user-change-history/get-user-change-history.request';
+export * from './users/get-user-change-history/get-user-change-history.response';
+
+export * from './users/user-change-history.service';
+
 export * from './users/update-user-profile/update-user-profile.handler';
 export * from './users/update-user-profile/update-user-profile.request';
 export * from './users/update-user-profile/update-user-profile.response';

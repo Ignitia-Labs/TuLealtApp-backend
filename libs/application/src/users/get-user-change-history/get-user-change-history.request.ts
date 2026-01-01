@@ -1,18 +1,18 @@
-import { IsNumber, IsNotEmpty, IsOptional, Min, IsBoolean } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
- * DTO de request para obtener usuarios de un partner
+ * DTO de request para obtener el historial de cambios de un usuario
  */
-export class GetPartnerUsersRequest {
+export class GetUserChangeHistoryRequest {
   @ApiProperty({
-    description: 'ID del partner',
+    description: 'ID del usuario del cual obtener el historial',
     example: 1,
     type: Number,
   })
   @IsNumber()
   @IsNotEmpty()
-  partnerId: number;
+  userId: number;
 
   @ApiProperty({
     description: 'Número de registros a omitir (paginación)',
@@ -35,16 +35,5 @@ export class GetPartnerUsersRequest {
   @IsOptional()
   @Min(1)
   take?: number;
-
-  @ApiProperty({
-    description: 'Si se incluyen usuarios inactivos/bloqueados en la respuesta. Por defecto retorna todos los usuarios.',
-    example: true,
-    type: Boolean,
-    required: false,
-    default: true,
-  })
-  @IsBoolean()
-  @IsOptional()
-  includeInactive?: boolean;
 }
 

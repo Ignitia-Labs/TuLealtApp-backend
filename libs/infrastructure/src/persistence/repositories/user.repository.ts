@@ -125,12 +125,17 @@ export class UserRepository implements IUserRepository {
     roles: string[],
     skip = 0,
     take = 100,
+    includeInactive = true,
   ): Promise<User[]> {
     // Buscar usuarios que pertenezcan al partner y tengan al menos uno de los roles especificados
     const queryBuilder = this.userRepository
       .createQueryBuilder('user')
-      .where('user.partnerId = :partnerId', { partnerId })
-      .andWhere('user.isActive = :isActive', { isActive: true });
+      .where('user.partnerId = :partnerId', { partnerId });
+
+    // Solo filtrar por isActive si includeInactive es false
+    if (!includeInactive) {
+      queryBuilder.andWhere('user.isActive = :isActive', { isActive: true });
+    }
 
     // Construir condiciones OR para cada rol
     const roleConditions = roles
@@ -153,12 +158,20 @@ export class UserRepository implements IUserRepository {
     return userEntities.map((entity) => UserMapper.toDomain(entity));
   }
 
-  async countByPartnerIdAndRoles(partnerId: number, roles: string[]): Promise<number> {
+  async countByPartnerIdAndRoles(
+    partnerId: number,
+    roles: string[],
+    includeInactive = true,
+  ): Promise<number> {
     // Contar usuarios que pertenezcan al partner y tengan al menos uno de los roles especificados
     const queryBuilder = this.userRepository
       .createQueryBuilder('user')
-      .where('user.partnerId = :partnerId', { partnerId })
-      .andWhere('user.isActive = :isActive', { isActive: true });
+      .where('user.partnerId = :partnerId', { partnerId });
+
+    // Solo filtrar por isActive si includeInactive es false
+    if (!includeInactive) {
+      queryBuilder.andWhere('user.isActive = :isActive', { isActive: true });
+    }
 
     const roleConditions = roles
       .map((role, index) => `JSON_CONTAINS(user.roles, :role${index})`)
