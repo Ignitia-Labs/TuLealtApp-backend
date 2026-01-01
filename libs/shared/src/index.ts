@@ -29,11 +29,15 @@ export * from './guards/jwt-auth.guard';
 export * from './guards/roles.guard';
 export * from './guards/customer-resource.guard';
 export * from './guards/membership-ownership.guard';
+export * from './guards/permissions.guard';
+export * from './guards/partner-resource.guard';
 
 // Decorators
 export * from './decorators/roles.decorator';
 export * from './decorators/current-user.decorator';
 export * from './decorators/resource-type.decorator';
+export * from './decorators/permissions.decorator';
+export * from './decorators/require-access.decorator';
 
 // Pricing
 export * from './pricing';

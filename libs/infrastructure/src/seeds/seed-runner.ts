@@ -6,6 +6,7 @@ import { AdminUserSeed } from './shared/admin-user.seed';
 import { CurrencySeed } from './shared/currency.seed';
 import { CountrySeed } from './shared/country.seed';
 import { CatalogSeed } from './shared/catalog.seed';
+import { ProfilesSeed } from './shared/profiles.seed';
 import { AdminSeed } from './admin/admin.seed';
 import { PartnerSeed } from './partner/partner.seed';
 import { CustomerSeed } from './customer/customer.seed';
@@ -38,6 +39,7 @@ export enum SeedContext {
   COUNTRY = 'country',
   CURRENCY = 'currency',
   CATALOG = 'catalog',
+  PROFILES = 'profiles',
 }
 
 /**
@@ -73,6 +75,7 @@ async function bootstrap() {
     const currencySeed = app.get(CurrencySeed);
     const countrySeed = app.get(CountrySeed);
     const catalogSeed = app.get(CatalogSeed);
+    const profilesSeed = app.get(ProfilesSeed);
     const adminSeed = app.get(AdminSeed);
     const partnerSeed = app.get(PartnerSeed);
     const customerSeed = app.get(CustomerSeed);
@@ -101,6 +104,10 @@ async function bootstrap() {
 
       case SeedContext.CATALOG:
         await catalogSeed.run();
+        break;
+
+      case SeedContext.PROFILES:
+        await profilesSeed.run();
         break;
 
       case SeedContext.ALL:

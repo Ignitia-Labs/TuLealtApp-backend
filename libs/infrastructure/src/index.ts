@@ -50,6 +50,8 @@ export * from './persistence/entities/currency.entity';
 export * from './persistence/entities/goal.entity';
 export * from './persistence/entities/partner-staff-assignment.entity';
 export * from './persistence/entities/commission.entity';
+export * from './persistence/entities/profile.entity';
+export * from './persistence/entities/user-profile.entity';
 
 // Repositories
 export * from './persistence/repositories/user.repository';
@@ -88,6 +90,8 @@ export * from './persistence/mappers/partner-request.mapper';
 export * from './persistence/mappers/goal.mapper';
 export * from './persistence/mappers/partner-staff-assignment.mapper';
 export * from './persistence/mappers/commission.mapper';
+export * from './persistence/mappers/profile.mapper';
+export * from './persistence/mappers/user-profile.mapper';
 
 // Storage Services
 export * from './storage/s3.service';
