@@ -84,7 +84,8 @@ export class UserProfilesController {
   })
   @ApiBody({
     type: AssignProfileToUserRequest,
-    description: 'Datos de la asignación de perfil a usuario. El assignedBy se obtiene del JWT automáticamente.',
+    description:
+      'Datos de la asignación de perfil a usuario. El assignedBy se obtiene del JWT automáticamente.',
     examples: {
       asignacionBasica: {
         summary: 'Asignación básica',
@@ -300,11 +301,12 @@ export class UserProfilesController {
     description: 'Error interno del servidor',
     type: InternalServerErrorResponseDto,
   })
-  async getUserProfiles(@Param('userId', ParseIntPipe) userId: number): Promise<GetUserProfilesResponse> {
+  async getUserProfiles(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<GetUserProfilesResponse> {
     // El PartnerResourceGuard ya valida que el usuario pertenezca al partner
     const request = new GetUserProfilesRequest();
     request.userId = userId;
     return this.getUserProfilesHandler.execute(request);
   }
 }
-

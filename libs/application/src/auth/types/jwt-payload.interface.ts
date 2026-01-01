@@ -24,6 +24,12 @@ export interface JwtPayload {
   context: string;
 
   /**
+   * ID del partner (opcional, solo para usuarios de partner)
+   * Incluido cuando el usuario pertenece a un partner específico
+   */
+  partnerId?: number;
+
+  /**
    * Tipo de token (access, refresh)
    */
   type?: 'access' | 'refresh';

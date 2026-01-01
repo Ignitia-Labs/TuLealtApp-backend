@@ -137,7 +137,9 @@ export class CatalogsController {
     type: BadRequestErrorResponseDto,
     example: {
       statusCode: 400,
-      message: ['type must be one of the following values: BUSINESS_CATEGORIES, REWARD_TYPES, PAYMENT_METHODS'],
+      message: [
+        'type must be one of the following values: BUSINESS_CATEGORIES, REWARD_TYPES, PAYMENT_METHODS',
+      ],
       error: 'Bad Request',
     },
   })
@@ -283,7 +285,8 @@ export class CatalogsController {
     description: 'El elemento de catálogo ya existe (tipo y valor duplicados)',
     example: {
       statusCode: 409,
-      message: "Catalog item with type 'BUSINESS_CATEGORIES' and value 'Restaurante' already exists",
+      message:
+        "Catalog item with type 'BUSINESS_CATEGORIES' and value 'Restaurante' already exists",
       error: 'Conflict',
     },
   })
@@ -484,7 +487,8 @@ export class CatalogsController {
     description: 'Conflicto (valor duplicado para el mismo tipo)',
     example: {
       statusCode: 409,
-      message: "Catalog item with type 'BUSINESS_CATEGORIES' and value 'Restaurante' already exists",
+      message:
+        "Catalog item with type 'BUSINESS_CATEGORIES' and value 'Restaurante' already exists",
       error: 'Conflict',
     },
   })
@@ -576,4 +580,3 @@ export class CatalogsController {
     return this.deleteCatalogHandler.execute(request);
   }
 }
-

@@ -74,6 +74,9 @@ export * from './auth/authenticate-user/authenticate-user.handler';
 export * from './auth/authenticate-user/authenticate-user.request';
 export * from './auth/authenticate-user/authenticate-user.response';
 
+export * from './auth/authenticate-partner-user/authenticate-partner-user.handler';
+export * from './auth/authenticate-partner-user/authenticate-partner-user.request';
+
 export * from './auth/register-user/register-user.handler';
 export * from './auth/register-user/register-user.request';
 export * from './auth/register-user/register-user.response';

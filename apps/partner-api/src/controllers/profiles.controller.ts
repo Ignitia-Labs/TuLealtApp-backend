@@ -179,7 +179,8 @@ export class ProfilesController {
   })
   @ApiBody({
     type: CreateProfileRequest,
-    description: 'Datos del perfil a crear. El partnerId se asigna automáticamente del usuario autenticado.',
+    description:
+      'Datos del perfil a crear. El partnerId se asigna automáticamente del usuario autenticado.',
     examples: {
       perfilBasico: {
         summary: 'Perfil básico',
@@ -484,4 +485,3 @@ export class ProfilesController {
     return this.deleteProfileHandler.execute(request);
   }
 }
-

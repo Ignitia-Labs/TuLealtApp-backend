@@ -3,6 +3,7 @@ import { OrdersController } from './controllers/orders.controller';
 import { PricingController } from './controllers/pricing.controller';
 import { ProfilesController } from './controllers/profiles.controller';
 import { UserProfilesController } from './controllers/user-profiles.controller';
+import { CatalogsController } from './controllers/catalogs.controller';
 import { InfrastructureModule } from '@libs/infrastructure';
 import { HealthController } from '@libs/shared';
 import { PartnerAuthModule } from './auth/partner-auth.module';
@@ -22,6 +23,9 @@ import {
   AssignProfileToUserHandler,
   RemoveProfileFromUserHandler,
   GetUserProfilesHandler,
+  // Catalogs Handlers
+  GetCatalogsHandler,
+  GetCatalogHandler,
 } from '@libs/application';
 
 /**
@@ -35,6 +39,7 @@ import {
     PricingController,
     ProfilesController,
     UserProfilesController,
+    CatalogsController,
     HealthController,
   ],
   providers: [
@@ -59,6 +64,9 @@ import {
     AssignProfileToUserHandler,
     RemoveProfileFromUserHandler,
     GetUserProfilesHandler,
+    // Catalogs Handlers
+    GetCatalogsHandler,
+    GetCatalogHandler,
     // Aquí se agregarían los handlers específicos de partner
     // Por ejemplo: GetOrdersByPartnerHandler, CreateProductHandler, etc.
   ],

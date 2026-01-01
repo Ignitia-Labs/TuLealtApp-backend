@@ -3,14 +3,18 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { PartnerAuthController } from './partner-auth.controller';
 import { PartnerJwtStrategy } from './strategies/partner-jwt.strategy';
-import { AuthenticateUserHandler, GetUserProfileHandler, JwtAuthService } from '@libs/application';
+import {
+  AuthenticatePartnerUserHandler,
+  GetUserProfileHandler,
+  JwtAuthService,
+} from '@libs/application';
 import { InfrastructureModule } from '@libs/infrastructure';
 
 /**
  * Módulo de autenticación para Partner API
  *
  * Proporciona endpoints de autenticación específicos para partners:
- * - POST /partner/auth/login
+ * - POST /partner/auth/login - Requiere dominio del partner
  * - GET /partner/auth/me
  *
  * Reutiliza los handlers de la capa de aplicación (@libs/application)
@@ -31,8 +35,8 @@ import { InfrastructureModule } from '@libs/infrastructure';
   ],
   controllers: [PartnerAuthController],
   providers: [
-    // Handlers de aplicación reutilizados
-    AuthenticateUserHandler,
+    // Handler específico para autenticación de partner
+    AuthenticatePartnerUserHandler,
     GetUserProfileHandler,
     // Servicio JWT
     JwtAuthService,
