@@ -46,6 +46,9 @@ import { MessageTemplateEntity } from './entities/message-template.entity';
 import { PartnerMessageEntity } from './entities/partner-message.entity';
 import { MessageRecipientEntity } from './entities/message-recipient.entity';
 import { MessageFilterEntity } from './entities/message-filter.entity';
+import { ProfileEntity } from './entities/profile.entity';
+import { UserProfileEntity } from './entities/user-profile.entity';
+import { UserChangeHistoryEntity } from './entities/user-change-history.entity';
 import { UserRepository } from './repositories/user.repository';
 import { PricingPlanRepository } from './repositories/pricing-plan.repository';
 import { RateExchangeRepository } from './repositories/rate-exchange.repository';
@@ -79,6 +82,9 @@ import { MessageTemplateRepository } from './repositories/message-template.repos
 import { PartnerMessageRepository } from './repositories/partner-message.repository';
 import { MessageRecipientRepository } from './repositories/message-recipient.repository';
 import { MessageFilterRepository } from './repositories/message-filter.repository';
+import { ProfileRepository } from './repositories/profile.repository';
+import { UserProfileRepository } from './repositories/user-profile.repository';
+import { UserChangeHistoryRepository } from './repositories/user-change-history.repository';
 import {
   IUserRepository,
   IPricingPlanRepository,
@@ -112,6 +118,9 @@ import {
   IPartnerMessageRepository,
   IMessageRecipientRepository,
   IMessageFilterRepository,
+  IProfileRepository,
+  IUserProfileRepository,
+  IUserChangeHistoryRepository,
 } from '@libs/domain';
 
 /**
@@ -168,6 +177,9 @@ import {
       PartnerMessageEntity,
       MessageRecipientEntity,
       MessageFilterEntity,
+      ProfileEntity,
+      UserProfileEntity,
+      UserChangeHistoryEntity,
     ]),
   ],
   providers: [
@@ -332,6 +344,21 @@ import {
       provide: 'IMessageFilterRepository',
       useClass: MessageFilterRepository,
     },
+    ProfileRepository,
+    {
+      provide: 'IProfileRepository',
+      useClass: ProfileRepository,
+    },
+    UserProfileRepository,
+    {
+      provide: 'IUserProfileRepository',
+      useClass: UserProfileRepository,
+    },
+    UserChangeHistoryRepository,
+    {
+      provide: 'IUserChangeHistoryRepository',
+      useClass: UserChangeHistoryRepository,
+    },
   ],
   exports: [
     'IUserRepository',
@@ -366,6 +393,9 @@ import {
     'IPartnerMessageRepository',
     'IMessageRecipientRepository',
     'IMessageFilterRepository',
+    'IProfileRepository',
+    'IUserProfileRepository',
+    'IUserChangeHistoryRepository',
     UserRepository,
     PricingPlanRepository,
     RateExchangeRepository,
@@ -399,6 +429,9 @@ import {
     PartnerMessageRepository,
     MessageRecipientRepository,
     MessageFilterRepository,
+    ProfileRepository,
+    UserProfileRepository,
+    UserChangeHistoryRepository,
     TypeOrmModule,
   ],
 })

@@ -28,10 +28,17 @@ import { PartnerStaffAssignmentsController } from './controllers/partner-staff-a
 import { CommissionsController } from './controllers/commissions.controller';
 import { CommunicationController } from './controllers/communication.controller';
 import { CommunicationWebhooksController } from './controllers/communication-webhooks.controller';
+import { ProfilesController } from './controllers/profiles.controller';
+import { UserProfilesController } from './controllers/user-profiles.controller';
+import { PartnerUsersController } from './controllers/partner-users.controller';
 import {
   CreateUserHandler,
   GetUserProfileHandler,
   LockUserHandler,
+  UnlockUserHandler,
+  DeleteUserHandler,
+  GetUserChangeHistoryHandler,
+  UserChangeHistoryService,
   UpdateUserProfileHandler,
   UpdateMyProfileHandler,
   GetPricingPlansHandler,
@@ -171,6 +178,23 @@ import {
   DeleteGoalHandler,
   GetGoalProgressHandler,
   GoalProgressService,
+  // Permissions Service
+  PermissionService,
+  // Profiles Handlers
+  GetProfilesHandler,
+  GetProfileHandler,
+  CreateProfileHandler,
+  UpdateProfileHandler,
+  DeleteProfileHandler,
+  // User Profiles Handlers
+  AssignProfileToUserHandler,
+  RemoveProfileFromUserHandler,
+  GetUserProfilesHandler,
+  GetProfileUsersHandler,
+  // Partner Users Handlers
+  CreatePartnerUserHandler,
+  CreatePartnerStaffUserHandler,
+  GetPartnerUsersHandler,
 } from '@libs/application';
 import { InfrastructureModule, StorageModule } from '@libs/infrastructure';
 import { HealthController } from '@libs/shared';
@@ -216,6 +240,9 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     CommissionsController,
     CommunicationController,
     CommunicationWebhooksController,
+    ProfilesController,
+    UserProfilesController,
+    PartnerUsersController,
     HealthController,
   ],
   providers: [
@@ -223,6 +250,10 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     CreateUserHandler,
     GetUserProfileHandler,
     LockUserHandler,
+    UnlockUserHandler,
+    DeleteUserHandler,
+    GetUserChangeHistoryHandler,
+    UserChangeHistoryService,
     UpdateUserProfileHandler,
     UpdateMyProfileHandler,
     GetAdminStaffUsersHandler,
@@ -388,6 +419,27 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     UpdateRecipientStatusHandler,
     MessageSenderService,
     ScheduledMessageSenderService,
+    // Permissions Service
+    PermissionService,
+    {
+      provide: 'PermissionService',
+      useExisting: PermissionService,
+    },
+    // Profiles Handlers
+    GetProfilesHandler,
+    GetProfileHandler,
+    CreateProfileHandler,
+    UpdateProfileHandler,
+    DeleteProfileHandler,
+    // User Profiles Handlers
+    AssignProfileToUserHandler,
+    RemoveProfileFromUserHandler,
+    GetUserProfilesHandler,
+    GetProfileUsersHandler,
+    // Partner Users Handlers
+    CreatePartnerUserHandler,
+    CreatePartnerStaffUserHandler,
+    GetPartnerUsersHandler,
   ],
 })
 export class AdminApiModule {}

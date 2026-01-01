@@ -39,3 +39,8 @@ coverage/
 tmp/
 temp/
 
+# Database backups
+backups/
+*.sql
+!docker/mariadb/init.sql
+

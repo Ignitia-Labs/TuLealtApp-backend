@@ -19,7 +19,7 @@
     "noFallthroughCasesInSwitch": false,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "types": ["node"],
+    "types": ["node", "jest"],
     "paths": {
       "@libs/domain": ["libs/domain/src/index"],
       "@libs/domain/*": ["libs/domain/src/*"],

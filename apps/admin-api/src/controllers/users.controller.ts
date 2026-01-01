@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Body,
   Param,
   Query,
@@ -30,6 +31,15 @@ import {
   LockUserHandler,
   LockUserRequest,
   LockUserResponse,
+  UnlockUserHandler,
+  UnlockUserRequest,
+  UnlockUserResponse,
+  DeleteUserHandler,
+  DeleteUserRequest,
+  DeleteUserResponse,
+  GetUserChangeHistoryHandler,
+  GetUserChangeHistoryRequest,
+  GetUserChangeHistoryResponse,
   UpdateUserProfileHandler,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
@@ -44,7 +54,9 @@ import {
   ForbiddenErrorResponseDto,
   NotFoundErrorResponseDto,
   InternalServerErrorResponseDto,
+  CurrentUser,
 } from '@libs/shared';
+import { JwtPayload } from '@libs/application';
 
 /**
  * Controlador de usuarios para Admin API
@@ -57,6 +69,9 @@ export class UsersController {
     private readonly createUserHandler: CreateUserHandler,
     private readonly getUserProfileHandler: GetUserProfileHandler,
     private readonly lockUserHandler: LockUserHandler,
+    private readonly unlockUserHandler: UnlockUserHandler,
+    private readonly deleteUserHandler: DeleteUserHandler,
+    private readonly getUserChangeHistoryHandler: GetUserChangeHistoryHandler,
     private readonly updateUserProfileHandler: UpdateUserProfileHandler,
     private readonly getAdminStaffUsersHandler: GetAdminStaffUsersHandler,
   ) {}
@@ -410,10 +425,238 @@ export class UsersController {
       error: 'Internal Server Error',
     },
   })
-  async lockUser(@Param('id', ParseIntPipe) id: number): Promise<LockUserResponse> {
+  async lockUser(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<LockUserResponse> {
     const request = new LockUserRequest();
     request.userId = id;
-    return this.lockUserHandler.execute(request);
+    return this.lockUserHandler.execute(request, user.userId);
+  }
+
+  @Patch(':id/unlock')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Desbloquear un usuario',
+    description: 'Desbloquea un usuario del sistema, reactivando su cuenta. Requiere permisos de administrador.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID del usuario a desbloquear',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuario desbloqueado exitosamente',
+    type: UnlockUserResponse,
+    example: {
+      id: 1,
+      isActive: true,
+      updatedAt: '2024-01-20T14:45:00.000Z',
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'ID de usuario inválido',
+    type: BadRequestErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuario no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async unlockUser(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<UnlockUserResponse> {
+    const request = new UnlockUserRequest();
+    request.userId = id;
+    return this.unlockUserHandler.execute(request, user.userId);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Eliminar un usuario',
+    description:
+      'Elimina un usuario del sistema (soft delete - marca como inactivo). Esta acción es irreversible. Requiere permisos de administrador.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID del usuario a eliminar',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuario eliminado exitosamente',
+    type: DeleteUserResponse,
+    example: {
+      id: 1,
+      message: 'User deleted successfully',
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'ID de usuario inválido',
+    type: BadRequestErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuario no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'El usuario ya está eliminado',
+    example: {
+      statusCode: 409,
+      message: 'User with ID 1 is already deleted',
+      error: 'Conflict',
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async deleteUser(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<DeleteUserResponse> {
+    const request = new DeleteUserRequest();
+    request.userId = id;
+    return this.deleteUserHandler.execute(request, user.userId);
+  }
+
+  @Get(':id/history')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Obtener historial de cambios de un usuario',
+    description:
+      'Obtiene el historial completo de cambios realizados en un usuario específico. Incluye creación, actualizaciones, bloqueos, desbloqueos y eliminaciones.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID del usuario del cual obtener el historial',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiQuery({
+    name: 'skip',
+    required: false,
+    type: Number,
+    description: 'Número de registros a omitir (paginación)',
+    example: 0,
+  })
+  @ApiQuery({
+    name: 'take',
+    required: false,
+    type: Number,
+    description: 'Número de registros a tomar (paginación)',
+    example: 50,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Historial de cambios obtenido exitosamente',
+    type: GetUserChangeHistoryResponse,
+    example: {
+      history: [
+        {
+          id: 1,
+          userId: 1,
+          changedBy: 2,
+          action: 'updated',
+          field: 'email',
+          oldValue: 'old@example.com',
+          newValue: 'new@example.com',
+          metadata: null,
+          createdAt: '2024-01-20T14:45:00.000Z',
+        },
+        {
+          id: 2,
+          userId: 1,
+          changedBy: 2,
+          action: 'locked',
+          field: 'isActive',
+          oldValue: 'true',
+          newValue: 'false',
+          metadata: null,
+          createdAt: '2024-01-19T10:30:00.000Z',
+        },
+      ],
+      total: 2,
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuario no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async getUserChangeHistory(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('skip') skip?: number,
+    @Query('take') take?: number,
+  ): Promise<GetUserChangeHistoryResponse> {
+    const request = new GetUserChangeHistoryRequest();
+    request.userId = id;
+    if (skip !== undefined) {
+      request.skip = Number(skip);
+    }
+    if (take !== undefined) {
+      request.take = Number(take);
+    }
+    return this.getUserChangeHistoryHandler.execute(request);
   }
 
   @Patch(':id')

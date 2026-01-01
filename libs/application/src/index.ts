@@ -27,6 +27,20 @@ export * from './users/lock-user/lock-user.handler';
 export * from './users/lock-user/lock-user.request';
 export * from './users/lock-user/lock-user.response';
 
+export * from './users/unlock-user/unlock-user.handler';
+export * from './users/unlock-user/unlock-user.request';
+export * from './users/unlock-user/unlock-user.response';
+
+export * from './users/delete-user/delete-user.handler';
+export * from './users/delete-user/delete-user.request';
+export * from './users/delete-user/delete-user.response';
+
+export * from './users/get-user-change-history/get-user-change-history.handler';
+export * from './users/get-user-change-history/get-user-change-history.request';
+export * from './users/get-user-change-history/get-user-change-history.response';
+
+export * from './users/user-change-history.service';
+
 export * from './users/update-user-profile/update-user-profile.handler';
 export * from './users/update-user-profile/update-user-profile.request';
 export * from './users/update-user-profile/update-user-profile.response';
@@ -42,6 +56,18 @@ export * from './users/update-password/update-password.response';
 export * from './users/get-admin-staff-users/get-admin-staff-users.handler';
 export * from './users/get-admin-staff-users/get-admin-staff-users.request';
 export * from './users/get-admin-staff-users/get-admin-staff-users.response';
+
+export * from './users/create-partner-user/create-partner-user.handler';
+export * from './users/create-partner-user/create-partner-user.request';
+export * from './users/create-partner-user/create-partner-user.response';
+
+export * from './users/create-partner-staff-user/create-partner-staff-user.handler';
+export * from './users/create-partner-staff-user/create-partner-staff-user.request';
+export * from './users/create-partner-staff-user/create-partner-staff-user.response';
+
+export * from './users/get-partner-users/get-partner-users.handler';
+export * from './users/get-partner-users/get-partner-users.request';
+export * from './users/get-partner-users/get-partner-users.response';
 
 // Auth Handlers
 export * from './auth/authenticate-user/authenticate-user.handler';
@@ -550,3 +576,37 @@ export * from './communication/messages/update-recipient-status/update-recipient
 // Communication Services
 export * from './communication/messages/message-sender.service';
 export * from './communication/messages/scheduled-message-sender.service';
+
+// Permissions Services
+export * from './permissions/permission.service';
+
+// Profiles Handlers
+export * from './profiles/create-profile/create-profile.handler';
+export * from './profiles/create-profile/create-profile.request';
+export * from './profiles/create-profile/create-profile.response';
+export * from './profiles/update-profile/update-profile.handler';
+export * from './profiles/update-profile/update-profile.request';
+export * from './profiles/update-profile/update-profile.response';
+export * from './profiles/get-profile/get-profile.handler';
+export * from './profiles/get-profile/get-profile.request';
+export * from './profiles/get-profile/get-profile.response';
+export * from './profiles/get-profiles/get-profiles.handler';
+export * from './profiles/get-profiles/get-profiles.request';
+export * from './profiles/get-profiles/get-profiles.response';
+export * from './profiles/delete-profile/delete-profile.handler';
+export * from './profiles/delete-profile/delete-profile.request';
+export * from './profiles/delete-profile/delete-profile.response';
+
+// User Profiles Handlers
+export * from './user-profiles/assign-profile-to-user/assign-profile-to-user.handler';
+export * from './user-profiles/assign-profile-to-user/assign-profile-to-user.request';
+export * from './user-profiles/assign-profile-to-user/assign-profile-to-user.response';
+export * from './user-profiles/remove-profile-from-user/remove-profile-from-user.handler';
+export * from './user-profiles/remove-profile-from-user/remove-profile-from-user.request';
+export * from './user-profiles/remove-profile-from-user/remove-profile-from-user.response';
+export * from './user-profiles/get-user-profiles/get-user-profiles.handler';
+export * from './user-profiles/get-user-profiles/get-user-profiles.request';
+export * from './user-profiles/get-user-profiles/get-user-profiles.response';
+export * from './user-profiles/get-profile-users/get-profile-users.handler';
+export * from './user-profiles/get-profile-users/get-profile-users.request';
+export * from './user-profiles/get-profile-users/get-profile-users.response';

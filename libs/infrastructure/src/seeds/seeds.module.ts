@@ -6,6 +6,7 @@ import { CurrencySeed } from './shared/currency.seed';
 import { CountrySeed } from './shared/country.seed';
 import { CatalogSeed } from './shared/catalog.seed';
 import { MigrateUserDataToMembershipsSeed } from './shared/migrate-user-data-to-memberships.seed';
+import { ProfilesSeed } from './shared/profiles.seed';
 import { AdminSeed } from './admin/admin.seed';
 import { PartnerSeed } from './partner/partner.seed';
 import { CustomerSeed } from './customer/customer.seed';
@@ -28,6 +29,7 @@ import { CustomerSeed } from './customer/customer.seed';
     CountrySeed,
     CatalogSeed,
     MigrateUserDataToMembershipsSeed,
+    ProfilesSeed,
     // Seeds por contexto
     AdminSeed,
     PartnerSeed,
@@ -40,6 +42,7 @@ import { CustomerSeed } from './customer/customer.seed';
     CountrySeed,
     CatalogSeed,
     MigrateUserDataToMembershipsSeed,
+    ProfilesSeed,
     AdminSeed,
     PartnerSeed,
     CustomerSeed,
