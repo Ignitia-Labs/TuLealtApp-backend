@@ -23,11 +23,34 @@ export class GetProfilesHandler {
 
     // Aplicar filtros según el request
     if (request.partnerId !== undefined && request.partnerId !== null) {
-      // Filtrar por partnerId específico
-      profiles = await this.profileRepository.findByPartnerId(request.partnerId);
+      // Filtrar por partnerId específico: incluir perfiles del partner + perfiles globales
+      const partnerProfiles = await this.profileRepository.findByPartnerId(request.partnerId);
+      const globalProfiles = await this.profileRepository.findGlobalProfiles();
+
+      // Combinar ambos tipos de perfiles
+      profiles = [...partnerProfiles, ...globalProfiles];
+
+      // Filtrar inactivos si no se incluyen
+      if (!request.includeInactive) {
+        profiles = profiles.filter((profile) => profile.isActive);
+      }
+
+      // Ordenar: primero perfiles del partner, luego globales, ambos por nombre
+      profiles.sort((a, b) => {
+        // Perfiles del partner primero (partnerId !== null)
+        if (a.partnerId !== null && b.partnerId === null) return -1;
+        if (a.partnerId === null && b.partnerId !== null) return 1;
+        // Luego ordenar por nombre
+        return a.name.localeCompare(b.name);
+      });
     } else if (request.partnerId === null) {
       // Solo perfiles globales
       profiles = await this.profileRepository.findGlobalProfiles();
+
+      // Filtrar inactivos si no se incluyen
+      if (!request.includeInactive) {
+        profiles = profiles.filter((profile) => profile.isActive);
+      }
     } else {
       // Sin filtro de partnerId, obtener todos (globales + específicos)
       const where: any = {};
@@ -44,11 +67,6 @@ export class GetProfilesHandler {
       });
 
       profiles = profileEntities.map((entity) => ProfileMapper.toDomain(entity));
-    }
-
-    // Filtrar inactivos si no se incluyen (solo si no usamos query directa)
-    if (request.partnerId === undefined && !request.includeInactive) {
-      profiles = profiles.filter((profile) => profile.isActive);
     }
 
     // Convertir a DTOs, cargando permisos desde profile_permissions cuando estén disponibles
@@ -78,4 +96,3 @@ export class GetProfilesHandler {
     return new GetProfilesResponse(profileDtos, profileDtos.length);
   }
 }
-

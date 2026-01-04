@@ -33,18 +33,25 @@ export class PermissionService {
     // Obtener todos los permisos del usuario (perfiles + directos)
     const userPermissions = await this.getUserPermissions(userId);
 
+    // Logging temporal para diagnóstico
+    console.log(`[PermissionService] Checking permission for userId=${userId}, permission=${permission}`);
+    console.log(`[PermissionService] User has ${userPermissions.length} permissions:`, userPermissions);
+
     // Verificar permiso exacto
     if (userPermissions.includes(permission)) {
+      console.log(`[PermissionService] Permission ${permission} found (exact match)`);
       return true;
     }
 
     // Verificar wildcards
     for (const userPermission of userPermissions) {
       if (this.matchesWildcard(userPermission, permission)) {
+        console.log(`[PermissionService] Permission ${permission} found (wildcard match: ${userPermission})`);
         return true;
       }
     }
 
+    console.log(`[PermissionService] Permission ${permission} NOT found`);
     return false;
   }
 
@@ -73,9 +80,13 @@ export class PermissionService {
 
     // 1. Obtener permisos de perfiles asignados
     const activeAssignments = await this.userProfileRepository.findActiveByUserId(userId);
+    console.log(`[PermissionService] Found ${activeAssignments.length} active profile assignments for userId=${userId}`);
+
     for (const assignment of activeAssignments) {
+      console.log(`[PermissionService] Processing profile assignment: profileId=${assignment.profileId}, isActive=${assignment.isActive}`);
       const profile = await this.profileRepository.findById(assignment.profileId);
       if (profile && profile.isActive) {
+        console.log(`[PermissionService] Profile ${profile.id} (${profile.name}) is active, fetching permissions...`);
         // Obtener permisos desde profile_permissions
         // Después de eliminar la columna permissions, siempre se cargará desde profile_permissions
         const permissionsFromTable = await this.profileRepository.findPermissionsByProfileId(
@@ -83,23 +94,30 @@ export class PermissionService {
         );
         // Usar permisos de tabla intermedia (después de migración, profile.permissions será array vacío)
         const profilePermissions = permissionsFromTable.length > 0 ? permissionsFromTable : [];
+        console.log(`[PermissionService] Profile ${profile.id} has ${profilePermissions.length} permissions:`, profilePermissions);
 
         for (const permissionCode of profilePermissions) {
           allPermissions.add(permissionCode);
         }
+      } else {
+        console.log(`[PermissionService] Profile ${assignment.profileId} is not active or not found`);
       }
     }
 
     // 2. Obtener permisos directos asignados
     const userPermissions = await this.userPermissionRepository.findActiveByUserId(userId);
+    console.log(`[PermissionService] Found ${userPermissions.length} direct permission assignments for userId=${userId}`);
     for (const userPermission of userPermissions) {
       const permission = await this.permissionRepository.findById(userPermission.permissionId);
       if (permission && permission.isActive) {
+        console.log(`[PermissionService] Adding direct permission: ${permission.code}`);
         allPermissions.add(permission.code);
       }
     }
 
-    return Array.from(allPermissions);
+    const finalPermissions = Array.from(allPermissions);
+    console.log(`[PermissionService] Total consolidated permissions for userId=${userId}:`, finalPermissions);
+    return finalPermissions;
   }
 
   /**

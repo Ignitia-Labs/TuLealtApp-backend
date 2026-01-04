@@ -63,7 +63,23 @@ export class UserProfileRepository implements IUserProfileRepository {
 
   async save(userProfile: UserProfile): Promise<UserProfile> {
     const userProfileEntity = UserProfileMapper.toPersistence(userProfile) as UserProfileEntity;
+    console.log('[UserProfileRepository] Saving entity:', {
+      userId: userProfileEntity.userId,
+      profileId: userProfileEntity.profileId,
+      assignedBy: userProfileEntity.assignedBy,
+      isActive: userProfileEntity.isActive,
+      isActiveType: typeof userProfileEntity.isActive,
+      hasId: !!userProfileEntity.id,
+      id: userProfileEntity.id,
+    });
     const savedEntity = await this.userProfileRepository.save(userProfileEntity);
+    console.log('[UserProfileRepository] Saved entity from DB:', {
+      id: savedEntity.id,
+      userId: savedEntity.userId,
+      profileId: savedEntity.profileId,
+      isActive: savedEntity.isActive,
+      isActiveType: typeof savedEntity.isActive,
+    });
     return UserProfileMapper.toDomain(savedEntity);
   }
 
@@ -88,4 +104,3 @@ export class UserProfileRepository implements IUserProfileRepository {
     return userProfileEntities.map((entity) => UserProfileMapper.toDomain(entity));
   }
 }
-

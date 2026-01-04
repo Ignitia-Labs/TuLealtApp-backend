@@ -3,6 +3,8 @@ import { OrdersController } from './controllers/orders.controller';
 import { PricingController } from './controllers/pricing.controller';
 import { ProfilesController } from './controllers/profiles.controller';
 import { UserProfilesController } from './controllers/user-profiles.controller';
+import { PartnerUsersController } from './controllers/partner-users.controller';
+import { UserPermissionsController } from './controllers/user-permissions.controller';
 import { CatalogsController } from './controllers/catalogs.controller';
 import { PartnersController } from './controllers/partners.controller';
 import { InfrastructureModule } from '@libs/infrastructure';
@@ -24,6 +26,13 @@ import {
   AssignProfileToUserHandler,
   RemoveProfileFromUserHandler,
   GetUserProfilesHandler,
+  // Partner Users Handlers
+  CreatePartnerStaffUserHandler,
+  GetPartnerUsersHandler,
+  GetUserProfileHandler,
+  UpdatePartnerUserAssignmentHandler,
+  // User Permissions Handlers
+  GetUserPermissionsHandler,
   // Catalogs Handlers
   GetCatalogsHandler,
   GetCatalogHandler,
@@ -42,6 +51,8 @@ import {
     PricingController,
     ProfilesController,
     UserProfilesController,
+    PartnerUsersController,
+    UserPermissionsController,
     CatalogsController,
     PartnersController,
     HealthController,
@@ -68,6 +79,13 @@ import {
     AssignProfileToUserHandler,
     RemoveProfileFromUserHandler,
     GetUserProfilesHandler,
+    // Partner Users Handlers
+    CreatePartnerStaffUserHandler,
+    GetPartnerUsersHandler,
+    GetUserProfileHandler,
+    UpdatePartnerUserAssignmentHandler,
+    // User Permissions Handlers
+    GetUserPermissionsHandler,
     // Catalogs Handlers
     GetCatalogsHandler,
     GetCatalogHandler,

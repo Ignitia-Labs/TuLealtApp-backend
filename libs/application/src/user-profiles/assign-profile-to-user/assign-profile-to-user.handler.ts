@@ -75,8 +75,24 @@ export class AssignProfileToUserHandler {
       true,
     );
 
+    console.log('[AssignProfileToUserHandler] Creating userProfile:', {
+      userId: userProfile.userId,
+      profileId: userProfile.profileId,
+      assignedBy: userProfile.assignedBy,
+      isActive: userProfile.isActive,
+      isActiveType: typeof userProfile.isActive,
+    });
+
     // Guardar la asignación
     const savedAssignment = await this.userProfileRepository.save(userProfile);
+
+    console.log('[AssignProfileToUserHandler] Saved assignment:', {
+      id: savedAssignment.id,
+      userId: savedAssignment.userId,
+      profileId: savedAssignment.profileId,
+      isActive: savedAssignment.isActive,
+      isActiveType: typeof savedAssignment.isActive,
+    });
 
     // Retornar response DTO
     return new AssignProfileToUserResponse(
@@ -89,4 +105,3 @@ export class AssignProfileToUserHandler {
     );
   }
 }
-

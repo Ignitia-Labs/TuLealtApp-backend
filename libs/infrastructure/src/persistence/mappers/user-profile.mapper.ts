@@ -28,14 +28,21 @@ export class UserProfileMapper {
       profileId: domainEntity.profileId,
       assignedBy: domainEntity.assignedBy,
       assignedAt: domainEntity.assignedAt,
-      isActive: domainEntity.isActive,
+      // Asegurar que isActive siempre esté explícitamente definido como boolean
+      isActive: Boolean(domainEntity.isActive),
     };
 
     if (domainEntity.id > 0) {
       entity.id = domainEntity.id;
     }
 
+    console.log('[UserProfileMapper] Mapping to persistence:', {
+      domainIsActive: domainEntity.isActive,
+      domainIsActiveType: typeof domainEntity.isActive,
+      entityIsActive: entity.isActive,
+      entityIsActiveType: typeof entity.isActive,
+    });
+
     return entity;
   }
 }
-

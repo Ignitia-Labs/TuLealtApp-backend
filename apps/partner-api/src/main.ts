@@ -49,6 +49,8 @@ async function bootstrap() {
     .addTag('Partner Pricing', 'Consulta de planes de precios')
     .addTag('Partner Profiles', 'Gestión de perfiles del partner')
     .addTag('Partner User Profiles', 'Gestión de asignación de perfiles a usuarios')
+    .addTag('Partner Users', 'Gestión de usuarios del partner (PARTNER y PARTNER_STAFF)')
+    .addTag('Partner User Permissions', 'Consulta de permisos de usuarios del partner')
     .addTag('Partner Catalogs', 'Consulta de catálogos del sistema')
     .addTag('Orders', 'Gestión de pedidos')
     .addTag('Products', 'Gestión de productos')
