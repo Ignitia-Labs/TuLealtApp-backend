@@ -46,6 +46,9 @@ import {
   GetAdminStaffUsersHandler,
   GetAdminStaffUsersRequest,
   GetAdminStaffUsersResponse,
+  UpdatePartnerUserAssignmentHandler,
+  UpdatePartnerUserAssignmentRequest,
+  UpdatePartnerUserAssignmentResponse,
 } from '@libs/application';
 import {
   JwtAuthGuard,
@@ -74,6 +77,7 @@ export class UsersController {
     private readonly getUserChangeHistoryHandler: GetUserChangeHistoryHandler,
     private readonly updateUserProfileHandler: UpdateUserProfileHandler,
     private readonly getAdminStaffUsersHandler: GetAdminStaffUsersHandler,
+    private readonly updatePartnerUserAssignmentHandler: UpdatePartnerUserAssignmentHandler,
   ) {}
 
   @Post()
@@ -767,5 +771,103 @@ export class UsersController {
     request.phone = body.phone;
     request.profile = body.profile;
     return this.updateUserProfileHandler.execute(request);
+  }
+
+  @Patch(':id/partner-assignment')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Actualizar asignación de tenant y branch a usuario partner',
+    description:
+      'Asigna o actualiza el tenantId y branchId de un usuario PARTNER o PARTNER_STAFF. Solo usuarios con estos roles pueden tener tenant y branch asignados.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID del usuario partner',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiBody({
+    type: UpdatePartnerUserAssignmentRequest,
+    description: 'Datos de asignación de tenant y branch',
+    examples: {
+      asignarTenant: {
+        summary: 'Asignar tenant',
+        value: {
+          tenantId: 5,
+        },
+      },
+      asignarTenantYBranch: {
+        summary: 'Asignar tenant y branch',
+        value: {
+          tenantId: 5,
+          branchId: 10,
+        },
+      },
+      removerAsignacion: {
+        summary: 'Remover asignación',
+        value: {
+          tenantId: null,
+          branchId: null,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Asignación actualizada exitosamente',
+    type: UpdatePartnerUserAssignmentResponse,
+    example: {
+      id: 1,
+      email: 'partner@example.com',
+      name: 'Partner User',
+      partnerId: 1,
+      tenantId: 5,
+      branchId: 10,
+      roles: ['PARTNER'],
+      updatedAt: '2024-01-20T14:45:00.000Z',
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos inválidos o usuario no es PARTNER/PARTNER_STAFF',
+    type: BadRequestErrorResponseDto,
+    example: {
+      statusCode: 400,
+      message: 'User with ID 1 must have role PARTNER or PARTNER_STAFF',
+      error: 'Bad Request',
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuario, tenant o branch no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async updatePartnerUserAssignment(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: Partial<UpdatePartnerUserAssignmentRequest>,
+  ): Promise<UpdatePartnerUserAssignmentResponse> {
+    const request = new UpdatePartnerUserAssignmentRequest();
+    request.userId = id;
+    request.tenantId = body.tenantId;
+    request.branchId = body.branchId;
+    return this.updatePartnerUserAssignmentHandler.execute(request);
   }
 }

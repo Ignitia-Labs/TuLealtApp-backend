@@ -49,6 +49,8 @@ export class CreatePartnerUserHandler {
       ['PARTNER'], // Rol fijo para usuarios PARTNER
       request.profile || null,
       request.partnerId, // Asociar al partner
+      null, // tenantId
+      null, // branchId
       null, // avatar
       'active', // status
     );

@@ -69,6 +69,10 @@ export * from './users/get-partner-users/get-partner-users.handler';
 export * from './users/get-partner-users/get-partner-users.request';
 export * from './users/get-partner-users/get-partner-users.response';
 
+export * from './users/update-partner-user-assignment/update-partner-user-assignment.handler';
+export * from './users/update-partner-user-assignment/update-partner-user-assignment.request';
+export * from './users/update-partner-user-assignment/update-partner-user-assignment.response';
+
 // Auth Handlers
 export * from './auth/authenticate-user/authenticate-user.handler';
 export * from './auth/authenticate-user/authenticate-user.request';
@@ -76,6 +80,10 @@ export * from './auth/authenticate-user/authenticate-user.response';
 
 export * from './auth/authenticate-partner-user/authenticate-partner-user.handler';
 export * from './auth/authenticate-partner-user/authenticate-partner-user.request';
+
+export * from './auth/partner-info.dto';
+export * from './auth/tenant-info.dto';
+export * from './auth/branch-info.dto';
 
 export * from './auth/register-user/register-user.handler';
 export * from './auth/register-user/register-user.request';
@@ -167,6 +175,10 @@ export * from './partners/update-partner-limits/update-partner-limits.response';
 export * from './partners/get-partner-account-balance/get-partner-account-balance.handler';
 export * from './partners/get-partner-account-balance/get-partner-account-balance.request';
 export * from './partners/get-partner-account-balance/get-partner-account-balance.response';
+
+export * from './partners/get-partner-with-tenants-and-branches/get-partner-with-tenants-and-branches.handler';
+export * from './partners/get-partner-with-tenants-and-branches/get-partner-with-tenants-and-branches.request';
+export * from './partners/get-partner-with-tenants-and-branches/get-partner-with-tenants-and-branches.response';
 
 // Partners DTOs for Swagger
 export * from './partners/dto/partner-subscription-swagger.dto';
@@ -613,3 +625,48 @@ export * from './user-profiles/get-user-profiles/get-user-profiles.response';
 export * from './user-profiles/get-profile-users/get-profile-users.handler';
 export * from './user-profiles/get-profile-users/get-profile-users.request';
 export * from './user-profiles/get-profile-users/get-profile-users.response';
+
+// Permissions Handlers
+export * from './permissions/create-permission/create-permission.handler';
+export * from './permissions/create-permission/create-permission.request';
+export * from './permissions/create-permission/create-permission.response';
+export * from './permissions/get-permissions/get-permissions.handler';
+export * from './permissions/get-permissions/get-permissions.request';
+export * from './permissions/get-permissions/get-permissions.response';
+export * from './permissions/get-permission/get-permission.handler';
+export * from './permissions/get-permission/get-permission.request';
+export * from './permissions/get-permission/get-permission.response';
+export * from './permissions/update-permission/update-permission.handler';
+export * from './permissions/update-permission/update-permission.request';
+export * from './permissions/update-permission/update-permission.response';
+export * from './permissions/delete-permission/delete-permission.handler';
+export * from './permissions/delete-permission/delete-permission.request';
+export * from './permissions/delete-permission/delete-permission.response';
+
+// User Permissions Handlers
+export * from './user-permissions/assign-permission-to-user/assign-permission-to-user.handler';
+export * from './user-permissions/assign-permission-to-user/assign-permission-to-user.request';
+export * from './user-permissions/assign-permission-to-user/assign-permission-to-user.response';
+export * from './user-permissions/remove-permission-from-user/remove-permission-from-user.handler';
+export * from './user-permissions/remove-permission-from-user/remove-permission-from-user.request';
+export * from './user-permissions/remove-permission-from-user/remove-permission-from-user.response';
+export * from './user-permissions/get-user-permissions/get-user-permissions.handler';
+export * from './user-permissions/get-user-permissions/get-user-permissions.request';
+export * from './user-permissions/get-user-permissions/get-user-permissions.response';
+export * from './user-permissions/get-permission-users/get-permission-users.handler';
+export * from './user-permissions/get-permission-users/get-permission-users.request';
+export * from './user-permissions/get-permission-users/get-permission-users.response';
+
+// Profile Permissions Handlers
+export * from './profile-permissions/add-permission-to-profile/add-permission-to-profile.handler';
+export * from './profile-permissions/add-permission-to-profile/add-permission-to-profile.request';
+export * from './profile-permissions/add-permission-to-profile/add-permission-to-profile.response';
+export * from './profile-permissions/remove-permission-from-profile/remove-permission-from-profile.handler';
+export * from './profile-permissions/remove-permission-from-profile/remove-permission-from-profile.request';
+export * from './profile-permissions/remove-permission-from-profile/remove-permission-from-profile.response';
+export * from './profile-permissions/get-profile-permissions/get-profile-permissions.handler';
+export * from './profile-permissions/get-profile-permissions/get-profile-permissions.request';
+export * from './profile-permissions/get-profile-permissions/get-profile-permissions.response';
+export * from './profile-permissions/get-permission-profiles/get-permission-profiles.handler';
+export * from './profile-permissions/get-permission-profiles/get-permission-profiles.request';
+export * from './profile-permissions/get-permission-profiles/get-permission-profiles.response';

@@ -37,8 +37,8 @@ export class ProfileEntity {
   @Column('int', { nullable: true })
   partnerId: number | null;
 
-  @Column('json')
-  permissions: string[]; // ["module.resource.action", ...]
+  @Column('json', { nullable: true, select: false })
+  permissions?: string[]; // ["module.resource.action", ...] - DEPRECATED: Usar tabla profile_permissions (no se selecciona automáticamente)
 
   @Column('boolean', { default: true })
   isActive: boolean;

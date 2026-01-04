@@ -7,6 +7,7 @@ import { CurrencySeed } from './shared/currency.seed';
 import { CountrySeed } from './shared/country.seed';
 import { CatalogSeed } from './shared/catalog.seed';
 import { ProfilesSeed } from './shared/profiles.seed';
+import { PermissionsSeed } from './shared/permissions.seed';
 import { AdminSeed } from './admin/admin.seed';
 import { PartnerSeed } from './partner/partner.seed';
 import { CustomerSeed } from './customer/customer.seed';
@@ -40,6 +41,7 @@ export enum SeedContext {
   CURRENCY = 'currency',
   CATALOG = 'catalog',
   PROFILES = 'profiles',
+  PERMISSIONS = 'permissions',
 }
 
 /**
@@ -76,6 +78,7 @@ async function bootstrap() {
     const countrySeed = app.get(CountrySeed);
     const catalogSeed = app.get(CatalogSeed);
     const profilesSeed = app.get(ProfilesSeed);
+    const permissionsSeed = app.get(PermissionsSeed);
     const adminSeed = app.get(AdminSeed);
     const partnerSeed = app.get(PartnerSeed);
     const customerSeed = app.get(CustomerSeed);
@@ -110,9 +113,18 @@ async function bootstrap() {
         await profilesSeed.run();
         break;
 
+      case SeedContext.PERMISSIONS:
+        await permissionsSeed.run();
+        break;
+
       case SeedContext.ALL:
       default:
         console.log('Ejecutando todas las seeds...\n');
+        // Ejecutar ProfilesSeed primero, luego PermissionsSeed
+        await profilesSeed.run();
+        console.log('');
+        await permissionsSeed.run();
+        console.log('');
         await adminSeed.run();
         console.log('');
         await partnerSeed.run();

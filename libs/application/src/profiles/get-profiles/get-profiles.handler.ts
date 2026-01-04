@@ -51,19 +51,28 @@ export class GetProfilesHandler {
       profiles = profiles.filter((profile) => profile.isActive);
     }
 
-    // Convertir a DTOs
-    const profileDtos = profiles.map(
-      (profile) =>
-        new ProfileDto(
+    // Convertir a DTOs, cargando permisos desde profile_permissions cuando estén disponibles
+    const profileDtos = await Promise.all(
+      profiles.map(async (profile) => {
+        // Obtener permisos desde profile_permissions
+        // Después de eliminar la columna permissions, siempre se cargará desde profile_permissions
+        const permissionsFromTable = await this.profileRepository.findPermissionsByProfileId(
+          profile.id,
+        );
+        // Usar permisos de tabla intermedia (después de migración, profile.permissions será array vacío)
+        const finalPermissions = permissionsFromTable.length > 0 ? permissionsFromTable : [];
+
+        return new ProfileDto(
           profile.id,
           profile.name,
           profile.description,
           profile.partnerId,
-          profile.permissions,
+          finalPermissions,
           profile.isActive,
           profile.createdAt,
           profile.updatedAt,
-        ),
+        );
+      }),
     );
 
     return new GetProfilesResponse(profileDtos, profileDtos.length);

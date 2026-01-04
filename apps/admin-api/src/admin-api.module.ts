@@ -30,6 +30,9 @@ import { CommunicationController } from './controllers/communication.controller'
 import { CommunicationWebhooksController } from './controllers/communication-webhooks.controller';
 import { ProfilesController } from './controllers/profiles.controller';
 import { UserProfilesController } from './controllers/user-profiles.controller';
+import { PermissionsController } from './controllers/permissions.controller';
+import { UserPermissionsController } from './controllers/user-permissions.controller';
+import { ProfilePermissionsController } from './controllers/profile-permissions.controller';
 import { PartnerUsersController } from './controllers/partner-users.controller';
 import {
   CreateUserHandler,
@@ -41,6 +44,7 @@ import {
   UserChangeHistoryService,
   UpdateUserProfileHandler,
   UpdateMyProfileHandler,
+  UpdatePartnerUserAssignmentHandler,
   GetPricingPlansHandler,
   GetPricingPlanByIdHandler,
   GetPricingPlanBySlugHandler,
@@ -191,6 +195,22 @@ import {
   RemoveProfileFromUserHandler,
   GetUserProfilesHandler,
   GetProfileUsersHandler,
+  // Permissions Handlers
+  CreatePermissionHandler,
+  GetPermissionsHandler,
+  GetPermissionHandler,
+  UpdatePermissionHandler,
+  DeletePermissionHandler,
+  // User Permissions Handlers
+  AssignPermissionToUserHandler,
+  RemovePermissionFromUserHandler,
+  GetUserPermissionsHandler,
+  GetPermissionUsersHandler,
+  // Profile Permissions Handlers
+  AddPermissionToProfileHandler,
+  RemovePermissionFromProfileHandler,
+  GetProfilePermissionsHandler,
+  GetPermissionProfilesHandler,
   // Partner Users Handlers
   CreatePartnerUserHandler,
   CreatePartnerStaffUserHandler,
@@ -242,6 +262,9 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     CommunicationWebhooksController,
     ProfilesController,
     UserProfilesController,
+    PermissionsController,
+    UserPermissionsController,
+    ProfilePermissionsController,
     PartnerUsersController,
     HealthController,
   ],
@@ -257,6 +280,7 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     UpdateUserProfileHandler,
     UpdateMyProfileHandler,
     GetAdminStaffUsersHandler,
+    UpdatePartnerUserAssignmentHandler,
     // Handlers de aplicación - Pricing
     GetPricingPlansHandler,
     GetPricingPlanByIdHandler,
@@ -436,6 +460,22 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     RemoveProfileFromUserHandler,
     GetUserProfilesHandler,
     GetProfileUsersHandler,
+    // Permissions Handlers
+    CreatePermissionHandler,
+    GetPermissionsHandler,
+    GetPermissionHandler,
+    UpdatePermissionHandler,
+    DeletePermissionHandler,
+    // User Permissions Handlers
+    AssignPermissionToUserHandler,
+    RemovePermissionFromUserHandler,
+    GetUserPermissionsHandler,
+    GetPermissionUsersHandler,
+    // Profile Permissions Handlers
+    AddPermissionToProfileHandler,
+    RemovePermissionFromProfileHandler,
+    GetProfilePermissionsHandler,
+    GetPermissionProfilesHandler,
     // Partner Users Handlers
     CreatePartnerUserHandler,
     CreatePartnerStaffUserHandler,

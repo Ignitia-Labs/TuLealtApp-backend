@@ -1,4 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { PartnerInfoDto } from '../../auth/partner-info.dto';
+import { TenantInfoDto } from '../../auth/tenant-info.dto';
+import { BranchInfoDto } from '../../auth/branch-info.dto';
 
 /**
  * DTO de response para obtener el perfil de un usuario
@@ -61,6 +64,51 @@ export class GetUserProfileResponse {
   isActive: boolean;
 
   @ApiProperty({
+    description: 'ID del partner asociado (solo para usuarios PARTNER y PARTNER_STAFF)',
+    example: 1,
+    nullable: true,
+  })
+  partnerId: number | null;
+
+  @ApiProperty({
+    description: 'ID del tenant asociado (solo para usuarios PARTNER y PARTNER_STAFF)',
+    example: 5,
+    nullable: true,
+  })
+  tenantId: number | null;
+
+  @ApiProperty({
+    description: 'ID del branch asociado (solo para usuarios PARTNER y PARTNER_STAFF)',
+    example: 10,
+    nullable: true,
+  })
+  branchId: number | null;
+
+  @ApiProperty({
+    description: 'Información del partner asociado',
+    type: PartnerInfoDto,
+    nullable: true,
+    required: false,
+  })
+  partner?: PartnerInfoDto | null;
+
+  @ApiProperty({
+    description: 'Información del tenant asociado',
+    type: TenantInfoDto,
+    nullable: true,
+    required: false,
+  })
+  tenant?: TenantInfoDto | null;
+
+  @ApiProperty({
+    description: 'Información del branch asociado',
+    type: BranchInfoDto,
+    nullable: true,
+    required: false,
+  })
+  branch?: BranchInfoDto | null;
+
+  @ApiProperty({
     description: 'Fecha de creación del usuario',
     example: '2024-01-15T10:30:00.000Z',
     type: Date,
@@ -84,8 +132,14 @@ export class GetUserProfileResponse {
     profile: Record<string, any> | null,
     roles: string[],
     isActive: boolean,
+    partnerId: number | null,
+    tenantId: number | null,
+    branchId: number | null,
     createdAt: Date,
     updatedAt: Date,
+    partner?: PartnerInfoDto | null,
+    tenant?: TenantInfoDto | null,
+    branch?: BranchInfoDto | null,
   ) {
     this.id = id;
     this.email = email;
@@ -96,6 +150,12 @@ export class GetUserProfileResponse {
     this.profile = profile;
     this.roles = roles;
     this.isActive = isActive;
+    this.partnerId = partnerId;
+    this.tenantId = tenantId;
+    this.branchId = branchId;
+    this.partner = partner ?? null;
+    this.tenant = tenant ?? null;
+    this.branch = branch ?? null;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
   }

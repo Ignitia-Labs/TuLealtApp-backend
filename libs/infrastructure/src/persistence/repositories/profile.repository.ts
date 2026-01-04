@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IProfileRepository, Profile } from '@libs/domain';
+import { IProfileRepository, Profile, IProfilePermissionRepository, IPermissionRepository } from '@libs/domain';
 import { ProfileEntity } from '../entities/profile.entity';
 import { ProfileMapper } from '../mappers/profile.mapper';
 
@@ -13,6 +13,10 @@ export class ProfileRepository implements IProfileRepository {
   constructor(
     @InjectRepository(ProfileEntity)
     private readonly profileRepository: Repository<ProfileEntity>,
+    @Inject('IProfilePermissionRepository')
+    private readonly profilePermissionRepository: IProfilePermissionRepository,
+    @Inject('IPermissionRepository')
+    private readonly permissionRepository: IPermissionRepository,
   ) {}
 
   async findById(id: number): Promise<Profile | null> {
@@ -94,6 +98,22 @@ export class ProfileRepository implements IProfileRepository {
       .getMany();
 
     return profileEntities.map((entity) => ProfileMapper.toDomain(entity));
+  }
+
+  async findPermissionsByProfileId(profileId: number): Promise<string[]> {
+    // Obtener relaciones desde profile_permissions
+    const profilePermissions = await this.profilePermissionRepository.findByProfileId(profileId);
+
+    // Obtener códigos de permisos
+    const permissionCodes: string[] = [];
+    for (const profilePermission of profilePermissions) {
+      const permission = await this.permissionRepository.findById(profilePermission.permissionId);
+      if (permission && permission.isActive) {
+        permissionCodes.push(permission.code);
+      }
+    }
+
+    return permissionCodes;
   }
 }
 

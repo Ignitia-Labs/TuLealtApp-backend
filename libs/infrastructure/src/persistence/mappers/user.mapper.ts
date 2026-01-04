@@ -21,6 +21,8 @@ export class UserMapper {
       persistenceEntity.roles,
       persistenceEntity.isActive,
       persistenceEntity.partnerId,
+      persistenceEntity.tenantId ?? null,
+      persistenceEntity.branchId ?? null,
       persistenceEntity.avatar,
       persistenceEntity.status ?? 'active',
       persistenceEntity.createdAt,
@@ -49,6 +51,8 @@ export class UserMapper {
     entity.roles = domainEntity.roles;
     entity.isActive = domainEntity.isActive;
     entity.partnerId = domainEntity.partnerId;
+    entity.tenantId = domainEntity.tenantId;
+    entity.branchId = domainEntity.branchId;
     entity.avatar = domainEntity.avatar;
     entity.status = domainEntity.status;
     entity.createdAt = domainEntity.createdAt;

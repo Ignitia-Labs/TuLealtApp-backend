@@ -50,5 +50,12 @@ export interface IProfileRepository {
    * Retorna todos los perfiles que están asignados activamente a un usuario
    */
   findByUserId(userId: number): Promise<Profile[]>;
+
+  /**
+   * Obtiene los permisos de un perfil desde la tabla profile_permissions
+   * Retorna array de códigos de permisos (strings)
+   * Si el perfil no tiene permisos en profile_permissions, retorna array vacío
+   */
+  findPermissionsByProfileId(profileId: number): Promise<string[]>;
 }
 

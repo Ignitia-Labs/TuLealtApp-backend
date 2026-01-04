@@ -28,7 +28,7 @@ import {
  * - GET /partner/auth/me - Obtener perfil del partner autenticado (requiere autenticación)
  */
 @ApiTags('Partner Auth')
-@Controller('partner/auth')
+@Controller('auth')
 export class PartnerAuthController {
   constructor(
     private readonly authenticatePartnerUserHandler: AuthenticatePartnerUserHandler,
@@ -77,6 +77,25 @@ export class PartnerAuthController {
         email: 'owner@miempresa.gt',
         name: 'Partner Owner',
         roles: ['PARTNER'],
+      },
+      partner: {
+        id: 1,
+        name: 'Mi Empresa',
+        domain: 'miempresa.gt',
+        email: 'contacto@miempresa.gt',
+        status: 'active',
+      },
+      tenant: {
+        id: 5,
+        name: 'Tienda Principal',
+        partnerId: 1,
+        status: 'active',
+      },
+      branch: {
+        id: 10,
+        name: 'Sucursal Centro',
+        tenantId: 5,
+        status: 'active',
       },
     },
   })
@@ -127,7 +146,7 @@ export class PartnerAuthController {
   @ApiOperation({
     summary: 'Obtener perfil del usuario de partner autenticado',
     description:
-      'Obtiene el perfil del usuario autenticado. El usuario debe tener rol PARTNER o PARTNER_STAFF y pertenecer a un partner.',
+      'Obtiene el perfil del usuario autenticado incluyendo información del partner asociado, tenant y branch (si están asignados). El usuario debe tener rol PARTNER o PARTNER_STAFF y pertenecer a un partner.',
   })
   @ApiResponse({
     status: 200,
@@ -143,6 +162,28 @@ export class PartnerAuthController {
       profile: null,
       roles: ['PARTNER'],
       isActive: true,
+      partnerId: 1,
+      tenantId: 5,
+      branchId: 10,
+      partner: {
+        id: 1,
+        name: 'Mi Empresa',
+        domain: 'miempresa.gt',
+        email: 'contacto@miempresa.gt',
+        status: 'active',
+      },
+      tenant: {
+        id: 5,
+        name: 'Tienda Principal',
+        partnerId: 1,
+        status: 'active',
+      },
+      branch: {
+        id: 10,
+        name: 'Sucursal Centro',
+        tenantId: 5,
+        status: 'active',
+      },
       createdAt: '2024-01-15T10:30:00.000Z',
       updatedAt: '2024-01-20T14:45:00.000Z',
     },

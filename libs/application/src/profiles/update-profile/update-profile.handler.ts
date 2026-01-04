@@ -1,5 +1,11 @@
 import { Injectable, Inject, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
-import { IProfileRepository, Profile } from '@libs/domain';
+import {
+  IProfileRepository,
+  IPermissionRepository,
+  IProfilePermissionRepository,
+  Profile,
+  ProfilePermission,
+} from '@libs/domain';
 import { PermissionService } from '../../permissions/permission.service';
 import { UpdateProfileRequest } from './update-profile.request';
 import { UpdateProfileResponse } from './update-profile.response';
@@ -13,6 +19,10 @@ export class UpdateProfileHandler {
   constructor(
     @Inject('IProfileRepository')
     private readonly profileRepository: IProfileRepository,
+    @Inject('IPermissionRepository')
+    private readonly permissionRepository: IPermissionRepository,
+    @Inject('IProfilePermissionRepository')
+    private readonly profilePermissionRepository: IProfilePermissionRepository,
     private readonly permissionService: PermissionService,
   ) {}
 
@@ -32,6 +42,14 @@ export class UpdateProfileHandler {
             `Invalid permission format: '${permission}'. Permissions must follow the format 'module.resource.action' or 'module.*'`,
           );
         }
+      }
+
+      // Validar que todos los permisos existan en el catálogo centralizado
+      const validation = await this.permissionService.validatePermissionsExist(request.permissions);
+      if (validation.invalid.length > 0) {
+        throw new BadRequestException(
+          `The following permissions do not exist in the catalog: ${validation.invalid.join(', ')}. Please create them first or use existing permissions.`,
+        );
       }
     }
 
@@ -85,13 +103,72 @@ export class UpdateProfileHandler {
     // Guardar el perfil actualizado
     const savedProfile = await this.profileRepository.update(updatedProfile);
 
+    // Si se actualizaron los permisos, sincronizar profile_permissions
+    if (request.permissions !== undefined) {
+      // Obtener relaciones actuales
+      const currentProfilePermissions = await this.profilePermissionRepository.findByProfileId(
+        profileId,
+      );
+
+      // Obtener códigos de permisos actuales desde relaciones
+      const currentPermissionIds = new Set(
+        currentProfilePermissions.map((pp) => pp.permissionId),
+      );
+
+      // Obtener IDs de permisos nuevos desde códigos
+      const newPermissionIds = new Set<number>();
+      for (const permissionCode of request.permissions) {
+        const permission = await this.permissionRepository.findByCode(permissionCode);
+        if (permission) {
+          newPermissionIds.add(permission.id);
+        }
+      }
+
+      // Determinar qué agregar y qué eliminar
+      const toAdd: number[] = [];
+      const toRemove: number[] = [];
+
+      // Permisos a agregar (están en nuevos pero no en actuales)
+      for (const permissionId of newPermissionIds) {
+        if (!currentPermissionIds.has(permissionId)) {
+          toAdd.push(permissionId);
+        }
+      }
+
+      // Permisos a remover (están en actuales pero no en nuevos)
+      for (const permissionId of currentPermissionIds) {
+        if (!newPermissionIds.has(permissionId)) {
+          toRemove.push(permissionId);
+        }
+      }
+
+      // Eliminar relaciones que ya no están
+      for (const permissionId of toRemove) {
+        await this.profilePermissionRepository.delete(profileId, permissionId);
+      }
+
+      // Agregar nuevas relaciones
+      if (toAdd.length > 0) {
+        const newProfilePermissions = toAdd.map((permissionId) =>
+          ProfilePermission.create(profileId, permissionId),
+        );
+        await this.profilePermissionRepository.saveMany(newProfilePermissions);
+      }
+    }
+
+    // Obtener permisos desde profile_permissions para el response
+    // Después de eliminar la columna permissions, siempre se cargará desde profile_permissions
+    const permissionsFromTable = await this.profileRepository.findPermissionsByProfileId(profileId);
+    // Usar permisos de tabla intermedia (después de migración, savedProfile.permissions será array vacío)
+    const finalPermissions = permissionsFromTable.length > 0 ? permissionsFromTable : [];
+
     // Retornar response DTO
     return new UpdateProfileResponse(
       savedProfile.id,
       savedProfile.name,
       savedProfile.description,
       savedProfile.partnerId,
-      savedProfile.permissions,
+      finalPermissions,
       savedProfile.isActive,
       savedProfile.createdAt,
       savedProfile.updatedAt,

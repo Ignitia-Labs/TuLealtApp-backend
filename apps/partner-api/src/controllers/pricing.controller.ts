@@ -26,7 +26,7 @@ import {
  * - GET /partner/pricing/calculate - Calcular precio de un plan
  */
 @ApiTags('Partner Pricing')
-@Controller('partner/pricing')
+@Controller('pricing')
 export class PricingController {
   constructor(
     private readonly getPricingPlansHandler: GetPricingPlansHandler,

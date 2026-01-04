@@ -56,6 +56,8 @@ export class GetPartnerUsersHandler {
           user.phone,
           user.roles,
           user.partnerId,
+          user.tenantId ?? null,
+          user.branchId ?? null,
           user.isActive,
           user.createdAt,
         ),

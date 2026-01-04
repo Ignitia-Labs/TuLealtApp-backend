@@ -9,6 +9,8 @@ import {
   Index,
 } from 'typeorm';
 import { PartnerEntity } from './partner.entity';
+import { TenantEntity } from './tenant.entity';
+import { BranchEntity } from './branch.entity';
 
 /**
  * Entidad de persistencia para User
@@ -16,6 +18,8 @@ import { PartnerEntity } from './partner.entity';
  */
 @Entity('users')
 @Index('IDX_USERS_EMAIL', ['email'])
+@Index('IDX_users_tenantId', ['tenantId'])
+@Index('IDX_users_branchId', ['branchId'])
 export class UserEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -56,6 +60,26 @@ export class UserEntity {
 
   @Column('int', { nullable: true })
   partnerId: number | null;
+
+  @ManyToOne(() => TenantEntity, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'tenantId' })
+  tenant: TenantEntity | null;
+
+  @Column('int', { nullable: true })
+  tenantId: number | null;
+
+  @ManyToOne(() => BranchEntity, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'branchId' })
+  branch: BranchEntity | null;
+
+  @Column('int', { nullable: true })
+  branchId: number | null;
 
   @Column('text', { nullable: true })
   avatar: string | null;

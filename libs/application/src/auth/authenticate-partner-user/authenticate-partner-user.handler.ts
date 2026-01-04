@@ -1,8 +1,11 @@
 import { Injectable, UnauthorizedException, Inject, NotFoundException, Optional } from '@nestjs/common';
-import { IUserRepository, IPartnerRepository } from '@libs/domain';
+import { IUserRepository, IPartnerRepository, ITenantRepository, IBranchRepository } from '@libs/domain';
 import { AuthenticatePartnerUserRequest } from './authenticate-partner-user.request';
 import { AuthenticateUserResponse } from '../authenticate-user/authenticate-user.response';
 import { JwtAuthService } from '../services/jwt.service';
+import { PartnerInfoDto } from '../partner-info.dto';
+import { TenantInfoDto } from '../tenant-info.dto';
+import { BranchInfoDto } from '../branch-info.dto';
 import * as bcrypt from 'bcrypt';
 
 /**
@@ -17,6 +20,10 @@ export class AuthenticatePartnerUserHandler {
     private readonly userRepository: IUserRepository,
     @Inject('IPartnerRepository')
     private readonly partnerRepository: IPartnerRepository,
+    @Inject('ITenantRepository')
+    private readonly tenantRepository: ITenantRepository,
+    @Inject('IBranchRepository')
+    private readonly branchRepository: IBranchRepository,
     @Optional()
     private readonly jwtAuthService?: JwtAuthService,
   ) {}
@@ -78,12 +85,48 @@ export class AuthenticatePartnerUserHandler {
     // Generar token JWT con información del partner
     const token = this.generateJwtToken(user, partner.id, 'partner');
 
-    return new AuthenticateUserResponse(token, {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      roles: user.roles,
-    });
+    // Obtener información del partner
+    const partnerInfo = new PartnerInfoDto(
+      partner.id,
+      partner.name,
+      partner.domain,
+      partner.email,
+      partner.status,
+    );
+
+    // Obtener información del tenant si existe
+    let tenantInfo: TenantInfoDto | null = null;
+    if (user.tenantId) {
+      const tenant = await this.tenantRepository.findById(user.tenantId);
+      if (tenant && tenant.partnerId === partner.id) {
+        tenantInfo = new TenantInfoDto(tenant.id, tenant.name, tenant.partnerId, tenant.status);
+      }
+    }
+
+    // Obtener información del branch si existe
+    let branchInfo: BranchInfoDto | null = null;
+    if (user.branchId) {
+      const branch = await this.branchRepository.findById(user.branchId);
+      if (branch) {
+        // Validar que el branch pertenezca al tenant del usuario (si hay tenantId)
+        if (!user.tenantId || branch.tenantId === user.tenantId) {
+          branchInfo = new BranchInfoDto(branch.id, branch.name, branch.tenantId, branch.status);
+        }
+      }
+    }
+
+    return new AuthenticateUserResponse(
+      token,
+      {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        roles: user.roles,
+      },
+      partnerInfo,
+      tenantInfo,
+      branchInfo,
+    );
   }
 
   /**

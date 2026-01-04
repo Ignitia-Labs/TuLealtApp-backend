@@ -2,32 +2,34 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, ConflictException } from '@nestjs/common';
 import { CreateProfileHandler } from './create-profile.handler';
 import { CreateProfileRequest } from './create-profile.request';
-import { IProfileRepository, Profile } from '@libs/domain';
+import { IProfileRepository, IPermissionRepository, IProfilePermissionRepository, Profile, Permission } from '@libs/domain';
 import { PermissionService } from '../../permissions/permission.service';
 
 describe('CreateProfileHandler', () => {
   let handler: CreateProfileHandler;
   let profileRepository: jest.Mocked<IProfileRepository>;
+  let permissionRepository: jest.Mocked<IPermissionRepository>;
+  let profilePermissionRepository: jest.Mocked<IProfilePermissionRepository>;
   let permissionService: jest.Mocked<PermissionService>;
 
   beforeEach(async () => {
     const mockProfileRepository = {
-      findById: jest.fn(),
-      findByPartnerId: jest.fn(),
-      findGlobalProfiles: jest.fn(),
       findByName: jest.fn(),
       save: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      findByUserId: jest.fn(),
+      findPermissionsByProfileId: jest.fn(),
+    };
+
+    const mockPermissionRepository = {
+      findByCode: jest.fn(),
+    };
+
+    const mockProfilePermissionRepository = {
+      saveMany: jest.fn(),
     };
 
     const mockPermissionService = {
       validatePermissionFormat: jest.fn(),
-      userHasPermission: jest.fn(),
-      userCanAccess: jest.fn(),
-      getUserPermissions: jest.fn(),
-      parsePermission: jest.fn(),
+      validatePermissionsExist: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -38,6 +40,14 @@ describe('CreateProfileHandler', () => {
           useValue: mockProfileRepository,
         },
         {
+          provide: 'IPermissionRepository',
+          useValue: mockPermissionRepository,
+        },
+        {
+          provide: 'IProfilePermissionRepository',
+          useValue: mockProfilePermissionRepository,
+        },
+        {
           provide: PermissionService,
           useValue: mockPermissionService,
         },
@@ -46,6 +56,8 @@ describe('CreateProfileHandler', () => {
 
     handler = module.get<CreateProfileHandler>(CreateProfileHandler);
     profileRepository = module.get('IProfileRepository');
+    permissionRepository = module.get('IPermissionRepository');
+    profilePermissionRepository = module.get('IProfilePermissionRepository');
     permissionService = module.get(PermissionService);
   });
 
@@ -54,111 +66,142 @@ describe('CreateProfileHandler', () => {
   });
 
   describe('execute', () => {
-    it('should create a profile successfully', async () => {
-      const request = new CreateProfileRequest();
-      request.name = 'Test Profile';
-      request.description = 'Test description';
-      request.permissions = ['admin.users.view', 'admin.users.create'];
-      request.partnerId = null;
-      request.isActive = true;
+    const validRequest: CreateProfileRequest = {
+      name: 'Test Profile',
+      permissions: ['admin.users.view', 'admin.users.create'],
+      description: 'Test description',
+      partnerId: null,
+      isActive: true,
+    };
 
+    it('should create a profile successfully', async () => {
       const savedProfile = Profile.create(
-        request.name,
-        request.permissions,
-        request.description,
-        request.partnerId,
-        request.isActive,
+        validRequest.name,
+        validRequest.permissions,
+        validRequest.description,
+        validRequest.partnerId,
+        validRequest.isActive,
         1,
       );
 
+      const permission1 = { id: 1, code: 'admin.users.view' } as Permission;
+      const permission2 = { id: 2, code: 'admin.users.create' } as Permission;
+
       permissionService.validatePermissionFormat.mockReturnValue(true);
+      permissionService.validatePermissionsExist.mockResolvedValue({ valid: validRequest.permissions, invalid: [] });
       profileRepository.findByName.mockResolvedValue(null);
       profileRepository.save.mockResolvedValue(savedProfile);
+      permissionRepository.findByCode
+        .mockResolvedValueOnce(permission1)
+        .mockResolvedValueOnce(permission2);
+      profilePermissionRepository.saveMany.mockResolvedValue([]);
+      profileRepository.findPermissionsByProfileId.mockResolvedValue(validRequest.permissions);
 
-      const result = await handler.execute(request);
+      const result = await handler.execute(validRequest);
 
+      expect(result).toBeDefined();
       expect(result.id).toBe(1);
-      expect(result.name).toBe('Test Profile');
-      expect(result.permissions).toEqual(['admin.users.view', 'admin.users.create']);
-      expect(permissionService.validatePermissionFormat).toHaveBeenCalledTimes(2);
-      expect(profileRepository.findByName).toHaveBeenCalledWith('Test Profile', null);
+      expect(result.name).toBe(validRequest.name);
+      expect(result.permissions).toEqual(validRequest.permissions);
       expect(profileRepository.save).toHaveBeenCalled();
+      expect(profilePermissionRepository.saveMany).toHaveBeenCalled();
     });
 
     it('should throw BadRequestException for invalid permission format', async () => {
-      const request = new CreateProfileRequest();
-      request.name = 'Test Profile';
-      request.permissions = ['invalid.permission'];
-
       permissionService.validatePermissionFormat.mockReturnValue(false);
 
-      await expect(handler.execute(request)).rejects.toThrow(BadRequestException);
-      expect(permissionService.validatePermissionFormat).toHaveBeenCalledWith('invalid.permission');
+      await expect(handler.execute(validRequest)).rejects.toThrow(BadRequestException);
       expect(profileRepository.save).not.toHaveBeenCalled();
     });
 
-    it('should throw ConflictException when profile with same name exists', async () => {
-      const request = new CreateProfileRequest();
-      request.name = 'Test Profile';
-      request.permissions = ['admin.users.view'];
-      request.partnerId = null;
-
-      const existingProfile = Profile.create('Test Profile', ['admin.products.view']);
-
+    it('should throw BadRequestException for non-existent permissions', async () => {
       permissionService.validatePermissionFormat.mockReturnValue(true);
+      permissionService.validatePermissionsExist.mockResolvedValue({
+        valid: ['admin.users.view'],
+        invalid: ['admin.users.create'],
+      });
+
+      await expect(handler.execute(validRequest)).rejects.toThrow(BadRequestException);
+      expect(profileRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('should throw ConflictException for duplicate profile name', async () => {
+      const existingProfile = Profile.create('Test Profile', [], null, null, true, 1);
+      permissionService.validatePermissionFormat.mockReturnValue(true);
+      permissionService.validatePermissionsExist.mockResolvedValue({ valid: validRequest.permissions, invalid: [] });
       profileRepository.findByName.mockResolvedValue(existingProfile);
 
-      await expect(handler.execute(request)).rejects.toThrow(ConflictException);
+      await expect(handler.execute(validRequest)).rejects.toThrow(ConflictException);
       expect(profileRepository.save).not.toHaveBeenCalled();
     });
 
-    it('should create partner-specific profile', async () => {
-      const request = new CreateProfileRequest();
-      request.name = 'Partner Profile';
-      request.permissions = ['partner.products.view'];
-      request.partnerId = 1;
-
+    it('should create profile permissions in profile_permissions table', async () => {
       const savedProfile = Profile.create(
-        request.name,
-        request.permissions,
-        null,
-        request.partnerId,
-        true,
+        validRequest.name,
+        validRequest.permissions,
+        validRequest.description,
+        validRequest.partnerId,
+        validRequest.isActive,
         1,
       );
 
+      const permission1 = { id: 1, code: 'admin.users.view' } as Permission;
+      const permission2 = { id: 2, code: 'admin.users.create' } as Permission;
+
       permissionService.validatePermissionFormat.mockReturnValue(true);
+      permissionService.validatePermissionsExist.mockResolvedValue({ valid: validRequest.permissions, invalid: [] });
       profileRepository.findByName.mockResolvedValue(null);
       profileRepository.save.mockResolvedValue(savedProfile);
+      permissionRepository.findByCode
+        .mockResolvedValueOnce(permission1)
+        .mockResolvedValueOnce(permission2);
+      profilePermissionRepository.saveMany.mockResolvedValue([]);
+      profileRepository.findPermissionsByProfileId.mockResolvedValue(validRequest.permissions);
 
-      const result = await handler.execute(request);
+      await handler.execute(validRequest);
 
-      expect(result.partnerId).toBe(1);
-      expect(profileRepository.findByName).toHaveBeenCalledWith('Partner Profile', 1);
+      expect(profilePermissionRepository.saveMany).toHaveBeenCalled();
+      expect(profilePermissionRepository.saveMany).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            profileId: 1,
+            permissionId: 1,
+          }),
+          expect.objectContaining({
+            profileId: 1,
+            permissionId: 2,
+          }),
+        ]),
+      );
     });
 
-    it('should validate all permissions', async () => {
-      const request = new CreateProfileRequest();
-      request.name = 'Test Profile';
-      request.permissions = [
-        'admin.users.view',
-        'admin.users.create',
-        'admin.products.view',
-      ];
-
-      permissionService.validatePermissionFormat.mockReturnValue(true);
-      profileRepository.findByName.mockResolvedValue(null);
-      profileRepository.save.mockResolvedValue(
-        Profile.create(request.name, request.permissions, null, null, true, 1),
+    it('should load permissions from profile_permissions table for response', async () => {
+      const savedProfile = Profile.create(
+        validRequest.name,
+        [], // Empty array after migration
+        validRequest.description,
+        validRequest.partnerId,
+        validRequest.isActive,
+        1,
       );
 
-      await handler.execute(request);
+      const permission1 = { id: 1, code: 'admin.users.view' } as Permission;
+      const permission2 = { id: 2, code: 'admin.users.create' } as Permission;
 
-      expect(permissionService.validatePermissionFormat).toHaveBeenCalledTimes(3);
-      expect(permissionService.validatePermissionFormat).toHaveBeenCalledWith('admin.users.view');
-      expect(permissionService.validatePermissionFormat).toHaveBeenCalledWith('admin.users.create');
-      expect(permissionService.validatePermissionFormat).toHaveBeenCalledWith('admin.products.view');
+      permissionService.validatePermissionFormat.mockReturnValue(true);
+      permissionService.validatePermissionsExist.mockResolvedValue({ valid: validRequest.permissions, invalid: [] });
+      profileRepository.findByName.mockResolvedValue(null);
+      profileRepository.save.mockResolvedValue(savedProfile);
+      permissionRepository.findByCode
+        .mockResolvedValueOnce(permission1)
+        .mockResolvedValueOnce(permission2);
+      profilePermissionRepository.saveMany.mockResolvedValue([]);
+      profileRepository.findPermissionsByProfileId.mockResolvedValue(validRequest.permissions);
+
+      const result = await handler.execute(validRequest);
+
+      expect(profileRepository.findPermissionsByProfileId).toHaveBeenCalledWith(1);
+      expect(result.permissions).toEqual(validRequest.permissions);
     });
   });
 });
-

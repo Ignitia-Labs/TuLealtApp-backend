@@ -52,6 +52,7 @@ export * from './persistence/entities/partner-staff-assignment.entity';
 export * from './persistence/entities/commission.entity';
 export * from './persistence/entities/profile.entity';
 export * from './persistence/entities/user-profile.entity';
+export * from './persistence/entities/profile-permission.entity';
 
 // Repositories
 export * from './persistence/repositories/user.repository';
@@ -92,6 +93,7 @@ export * from './persistence/mappers/partner-staff-assignment.mapper';
 export * from './persistence/mappers/commission.mapper';
 export * from './persistence/mappers/profile.mapper';
 export * from './persistence/mappers/user-profile.mapper';
+export * from './persistence/mappers/profile-permission.mapper';
 
 // Storage Services
 export * from './storage/s3.service';

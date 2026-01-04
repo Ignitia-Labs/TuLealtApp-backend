@@ -14,8 +14,10 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:4000', // Angular default
+      'http://localhost:4001', // Partner frontend
       'http://localhost:8080',
       'http://127.0.0.1:4000',
+      'http://127.0.0.1:4001', // Partner frontend
       'http://127.0.0.1:8080',
       ...(process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : []),
     ],

@@ -1,9 +1,15 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { IUserProfileRepository, IProfileRepository, Profile } from '@libs/domain';
+import {
+  IUserProfileRepository,
+  IProfileRepository,
+  IUserPermissionRepository,
+  IPermissionRepository,
+  Profile,
+} from '@libs/domain';
 
 /**
  * Servicio para gestionar y validar permisos de usuarios
- * Consolida permisos de múltiples perfiles y valida acceso
+ * Consolida permisos de múltiples perfiles y permisos directos asignados
  */
 @Injectable()
 export class PermissionService {
@@ -12,15 +18,19 @@ export class PermissionService {
     private readonly userProfileRepository: IUserProfileRepository,
     @Inject('IProfileRepository')
     private readonly profileRepository: IProfileRepository,
+    @Inject('IUserPermissionRepository')
+    private readonly userPermissionRepository: IUserPermissionRepository,
+    @Inject('IPermissionRepository')
+    private readonly permissionRepository: IPermissionRepository,
   ) {}
 
   /**
    * Valida si un usuario tiene un permiso específico
-   * Consolida permisos de todos los perfiles activos del usuario
+   * Consolida permisos de perfiles activos y permisos directos asignados
    * Soporta wildcards (ej: "admin.*" coincide con "admin.users.create")
    */
   async userHasPermission(userId: number, permission: string): Promise<boolean> {
-    // Obtener todos los permisos del usuario
+    // Obtener todos los permisos del usuario (perfiles + directos)
     const userPermissions = await this.getUserPermissions(userId);
 
     // Verificar permiso exacto
@@ -53,31 +63,54 @@ export class PermissionService {
   }
 
   /**
-   * Obtiene todos los permisos de un usuario (de todos sus perfiles activos)
-   * Consolida permisos de múltiples perfiles y retorna array único
+   * Obtiene todos los permisos de un usuario:
+   * 1. Permisos de perfiles asignados (activos)
+   * 2. Permisos directos asignados (activos)
+   * Consolida todos los permisos y retorna array único
    */
   async getUserPermissions(userId: number): Promise<string[]> {
-    // Obtener asignaciones activas del usuario
-    const activeAssignments = await this.userProfileRepository.findActiveByUserId(userId);
+    const allPermissions = new Set<string>();
 
-    // Obtener todos los perfiles activos
-    const profiles: Profile[] = [];
+    // 1. Obtener permisos de perfiles asignados
+    const activeAssignments = await this.userProfileRepository.findActiveByUserId(userId);
     for (const assignment of activeAssignments) {
       const profile = await this.profileRepository.findById(assignment.profileId);
       if (profile && profile.isActive) {
-        profiles.push(profile);
+        // Obtener permisos desde profile_permissions
+        // Después de eliminar la columna permissions, siempre se cargará desde profile_permissions
+        const permissionsFromTable = await this.profileRepository.findPermissionsByProfileId(
+          assignment.profileId,
+        );
+        // Usar permisos de tabla intermedia (después de migración, profile.permissions será array vacío)
+        const profilePermissions = permissionsFromTable.length > 0 ? permissionsFromTable : [];
+
+        for (const permissionCode of profilePermissions) {
+          allPermissions.add(permissionCode);
+        }
       }
     }
 
-    // Consolidar permisos de todos los perfiles
-    const allPermissions = new Set<string>();
-    for (const profile of profiles) {
-      for (const permission of profile.permissions) {
-        allPermissions.add(permission);
+    // 2. Obtener permisos directos asignados
+    const userPermissions = await this.userPermissionRepository.findActiveByUserId(userId);
+    for (const userPermission of userPermissions) {
+      const permission = await this.permissionRepository.findById(userPermission.permissionId);
+      if (permission && permission.isActive) {
+        allPermissions.add(permission.code);
       }
     }
 
     return Array.from(allPermissions);
+  }
+
+  /**
+   * Valida que los permisos existan en el catálogo centralizado
+   * Retorna un objeto con arrays de permisos válidos e inválidos
+   */
+  async validatePermissionsExist(permissionCodes: string[]): Promise<{
+    valid: string[];
+    invalid: string[];
+  }> {
+    return this.permissionRepository.validatePermissions(permissionCodes);
   }
 
   /**

@@ -18,6 +18,8 @@ export class User {
     public readonly roles: string[],
     public readonly isActive: boolean, // Mantener para compatibilidad
     public readonly partnerId: number | null,
+    public readonly tenantId: number | null,
+    public readonly branchId: number | null,
     public readonly avatar: string | null,
     public readonly status: UserStatus,
     public readonly createdAt: Date,
@@ -38,6 +40,8 @@ export class User {
     roles: string[] = ['CUSTOMER'],
     profile: Record<string, any> | null = null,
     partnerId: number | null = null,
+    tenantId: number | null = null,
+    branchId: number | null = null,
     avatar: string | null = null,
     status: UserStatus = 'active',
     id?: number,
@@ -55,6 +59,8 @@ export class User {
       roles,
       status === 'active', // isActive basado en status
       partnerId,
+      tenantId,
+      branchId,
       avatar,
       status,
       now,
@@ -92,6 +98,8 @@ export class User {
       this.roles,
       false,
       this.partnerId,
+      this.tenantId,
+      this.branchId,
       this.avatar,
       'inactive',
       this.createdAt,
@@ -115,6 +123,8 @@ export class User {
       this.roles,
       true,
       this.partnerId,
+      this.tenantId,
+      this.branchId,
       this.avatar,
       'active',
       this.createdAt,
@@ -138,6 +148,8 @@ export class User {
       this.roles,
       false,
       this.partnerId,
+      this.tenantId,
+      this.branchId,
       this.avatar,
       'suspended',
       this.createdAt,
@@ -169,6 +181,8 @@ export class User {
       this.roles,
       this.isActive,
       this.partnerId,
+      this.tenantId,
+      this.branchId,
       avatar !== undefined ? avatar : this.avatar,
       this.status,
       this.createdAt,
@@ -192,6 +206,34 @@ export class User {
       this.roles,
       this.isActive,
       this.partnerId,
+      this.tenantId,
+      this.branchId,
+      this.avatar,
+      this.status,
+      this.createdAt,
+      new Date(),
+    );
+  }
+
+  /**
+   * Método de dominio para actualizar tenantId y branchId del usuario
+   * Solo válido para usuarios PARTNER y PARTNER_STAFF
+   */
+  updateTenantAndBranch(tenantId?: number | null, branchId?: number | null): User {
+    return new User(
+      this.id,
+      this.email,
+      this.name,
+      this.firstName,
+      this.lastName,
+      this.phone,
+      this.profile,
+      this.passwordHash,
+      this.roles,
+      this.isActive,
+      this.partnerId,
+      tenantId !== undefined ? tenantId : this.tenantId,
+      branchId !== undefined ? branchId : this.branchId,
       this.avatar,
       this.status,
       this.createdAt,

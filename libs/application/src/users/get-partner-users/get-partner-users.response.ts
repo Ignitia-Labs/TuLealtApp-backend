@@ -61,6 +61,22 @@ export class PartnerUserDto {
   partnerId: number | null;
 
   @ApiProperty({
+    description: 'ID del tenant asignado (solo para usuarios PARTNER y PARTNER_STAFF)',
+    example: 5,
+    type: Number,
+    nullable: true,
+  })
+  tenantId: number | null;
+
+  @ApiProperty({
+    description: 'ID del branch asignado (solo para usuarios PARTNER y PARTNER_STAFF)',
+    example: 10,
+    type: Number,
+    nullable: true,
+  })
+  branchId: number | null;
+
+  @ApiProperty({
     description: 'Indica si el usuario está activo',
     example: true,
     type: Boolean,
@@ -83,6 +99,8 @@ export class PartnerUserDto {
     phone: string,
     roles: string[],
     partnerId: number | null,
+    tenantId: number | null,
+    branchId: number | null,
     isActive: boolean,
     createdAt: Date,
   ) {
@@ -94,6 +112,8 @@ export class PartnerUserDto {
     this.phone = phone;
     this.roles = roles;
     this.partnerId = partnerId;
+    this.tenantId = tenantId;
+    this.branchId = branchId;
     this.isActive = isActive;
     this.createdAt = createdAt;
   }

@@ -48,6 +48,9 @@ import { MessageRecipientEntity } from './entities/message-recipient.entity';
 import { MessageFilterEntity } from './entities/message-filter.entity';
 import { ProfileEntity } from './entities/profile.entity';
 import { UserProfileEntity } from './entities/user-profile.entity';
+import { PermissionEntity } from './entities/permission.entity';
+import { UserPermissionEntity } from './entities/user-permission.entity';
+import { ProfilePermissionEntity } from './entities/profile-permission.entity';
 import { UserChangeHistoryEntity } from './entities/user-change-history.entity';
 import { UserRepository } from './repositories/user.repository';
 import { PricingPlanRepository } from './repositories/pricing-plan.repository';
@@ -84,6 +87,9 @@ import { MessageRecipientRepository } from './repositories/message-recipient.rep
 import { MessageFilterRepository } from './repositories/message-filter.repository';
 import { ProfileRepository } from './repositories/profile.repository';
 import { UserProfileRepository } from './repositories/user-profile.repository';
+import { PermissionRepository } from './repositories/permission.repository';
+import { UserPermissionRepository } from './repositories/user-permission.repository';
+import { ProfilePermissionRepository } from './repositories/profile-permission.repository';
 import { UserChangeHistoryRepository } from './repositories/user-change-history.repository';
 import {
   IUserRepository,
@@ -120,6 +126,9 @@ import {
   IMessageFilterRepository,
   IProfileRepository,
   IUserProfileRepository,
+  IPermissionRepository,
+  IUserPermissionRepository,
+  IProfilePermissionRepository,
   IUserChangeHistoryRepository,
 } from '@libs/domain';
 
@@ -179,6 +188,9 @@ import {
       MessageFilterEntity,
       ProfileEntity,
       UserProfileEntity,
+      PermissionEntity,
+      UserPermissionEntity,
+      ProfilePermissionEntity,
       UserChangeHistoryEntity,
     ]),
   ],
@@ -354,6 +366,21 @@ import {
       provide: 'IUserProfileRepository',
       useClass: UserProfileRepository,
     },
+    PermissionRepository,
+    {
+      provide: 'IPermissionRepository',
+      useClass: PermissionRepository,
+    },
+    UserPermissionRepository,
+    {
+      provide: 'IUserPermissionRepository',
+      useClass: UserPermissionRepository,
+    },
+    ProfilePermissionRepository,
+    {
+      provide: 'IProfilePermissionRepository',
+      useClass: ProfilePermissionRepository,
+    },
     UserChangeHistoryRepository,
     {
       provide: 'IUserChangeHistoryRepository',
@@ -395,6 +422,9 @@ import {
     'IMessageFilterRepository',
     'IProfileRepository',
     'IUserProfileRepository',
+    'IPermissionRepository',
+    'IUserPermissionRepository',
+    'IProfilePermissionRepository',
     'IUserChangeHistoryRepository',
     UserRepository,
     PricingPlanRepository,
@@ -431,6 +461,9 @@ import {
     MessageFilterRepository,
     ProfileRepository,
     UserProfileRepository,
+    PermissionRepository,
+    UserPermissionRepository,
+    ProfilePermissionRepository,
     UserChangeHistoryRepository,
     TypeOrmModule,
   ],
