@@ -110,4 +110,47 @@ export class Reward {
       new Date(),
     );
   }
+
+  /**
+   * Método de dominio para actualizar los datos de la recompensa
+   */
+  update(
+    name?: string,
+    description?: string,
+    pointsRequired?: number,
+    stock?: number,
+    category?: string,
+    image?: string | null,
+    maxRedemptionsPerUser?: number | null,
+    status?: 'active' | 'inactive' | 'out_of_stock',
+    terms?: string | null,
+    validUntil?: Date | null,
+  ): Reward {
+    // Calcular nuevo status basado en stock si se actualiza
+    let newStatus = status ?? this.status;
+    if (stock !== undefined) {
+      if (stock === 0) {
+        newStatus = 'out_of_stock';
+      } else if (newStatus === 'out_of_stock' && stock > 0) {
+        newStatus = 'active';
+      }
+    }
+
+    return new Reward(
+      this.id,
+      this.tenantId,
+      name ?? this.name,
+      description ?? this.description,
+      image !== undefined ? image : this.image,
+      pointsRequired ?? this.pointsRequired,
+      stock !== undefined ? stock : this.stock,
+      maxRedemptionsPerUser !== undefined ? maxRedemptionsPerUser : this.maxRedemptionsPerUser,
+      newStatus,
+      category ?? this.category,
+      terms !== undefined ? terms : this.terms,
+      validUntil !== undefined ? validUntil : this.validUntil,
+      this.createdAt,
+      new Date(),
+    );
+  }
 }

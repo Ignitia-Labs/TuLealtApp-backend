@@ -55,6 +55,7 @@ async function bootstrap() {
     .addTag('Partner User Permissions', 'Consulta de permisos de usuarios del partner')
     .addTag('Partner Catalogs', 'Consulta de catálogos del sistema')
     .addTag('Products', 'Gestión de productos')
+    .addTag('Partner Rewards', 'Gestión de recompensas de los tenants del partner')
     .addBearerAuth(
       {
         type: 'http',

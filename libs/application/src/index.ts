@@ -17,6 +17,12 @@ export * from './rewards/get-rewards/get-rewards.response';
 export * from './rewards/get-reward/get-reward.handler';
 export * from './rewards/get-reward/get-reward.request';
 export * from './rewards/get-reward/get-reward.response';
+export * from './rewards/update-reward/update-reward.handler';
+export * from './rewards/update-reward/update-reward.request';
+export * from './rewards/update-reward/update-reward.response';
+export * from './rewards/delete-reward/delete-reward.handler';
+export * from './rewards/delete-reward/delete-reward.request';
+export * from './rewards/delete-reward/delete-reward.response';
 export * from './users/create-user/create-user.response';
 
 export * from './users/get-user-profile/get-user-profile.handler';

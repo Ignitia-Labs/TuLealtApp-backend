@@ -11,6 +11,9 @@ import { TenantsController } from './controllers/tenants.controller';
 import { BranchesController } from './controllers/branches.controller';
 import { CurrenciesController } from './controllers/currencies.controller';
 import { RateExchangeController } from './controllers/rate-exchange.controller';
+import { PointsRulesController } from './controllers/points-rules.controller';
+import { RewardsController } from './controllers/rewards.controller';
+import { CustomerTiersController } from './controllers/customer-tiers.controller';
 import { InfrastructureModule } from '@libs/infrastructure';
 import { HealthController } from '@libs/shared';
 import { PartnerAuthModule } from './auth/partner-auth.module';
@@ -63,6 +66,23 @@ import {
     GetCountriesHandler,
     // Rate Exchange Handlers
     GetRateExchangeHandler,
+    // Points Rules Handlers
+    GetPointsRulesHandler,
+    CreatePointsRuleHandler,
+    UpdatePointsRuleHandler,
+    DeletePointsRuleHandler,
+    // Rewards Handlers
+    GetRewardsHandler,
+    GetRewardHandler,
+    CreateRewardHandler,
+    UpdateRewardHandler,
+    DeleteRewardHandler,
+    // Customer Tiers Handlers
+    GetCustomerTiersHandler,
+    GetCustomerTierHandler,
+    CreateCustomerTierHandler,
+    UpdateCustomerTierHandler,
+    DeleteCustomerTierHandler,
 } from '@libs/application';
 
 /**
@@ -84,6 +104,9 @@ import {
     BranchesController,
     CurrenciesController,
     RateExchangeController,
+    PointsRulesController,
+    RewardsController,
+    CustomerTiersController,
     HealthController,
   ],
   providers: [
@@ -141,6 +164,23 @@ import {
     GetCountriesHandler,
     // Rate Exchange Handlers
     GetRateExchangeHandler,
+    // Points Rules Handlers
+    GetPointsRulesHandler,
+    CreatePointsRuleHandler,
+    UpdatePointsRuleHandler,
+    DeletePointsRuleHandler,
+    // Rewards Handlers
+    GetRewardsHandler,
+    GetRewardHandler,
+    CreateRewardHandler,
+    UpdateRewardHandler,
+    DeleteRewardHandler,
+    // Customer Tiers Handlers
+    GetCustomerTiersHandler,
+    GetCustomerTierHandler,
+    CreateCustomerTierHandler,
+    UpdateCustomerTierHandler,
+    DeleteCustomerTierHandler,
   ],
 })
 export class PartnerApiModule {}
