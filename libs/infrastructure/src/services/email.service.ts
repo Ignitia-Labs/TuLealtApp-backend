@@ -133,6 +133,18 @@ export class EmailService {
   }
 
   /**
+   * Envía un email genérico (método público)
+   */
+  async sendGenericEmail(options: {
+    to: string;
+    subject: string;
+    html: string;
+    from?: string;
+  }): Promise<void> {
+    await this.sendEmail(options);
+  }
+
+  /**
    * Genera el template HTML para email de factura generada
    */
   private generateInvoiceEmailTemplate(invoice: Invoice, pdfUrl?: string): string {

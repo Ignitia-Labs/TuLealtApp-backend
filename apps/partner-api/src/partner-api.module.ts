@@ -14,6 +14,7 @@ import { RateExchangeController } from './controllers/rate-exchange.controller';
 import { PointsRulesController } from './controllers/points-rules.controller';
 import { RewardsController } from './controllers/rewards.controller';
 import { CustomerTiersController } from './controllers/customer-tiers.controller';
+import { ContactInquiryController } from './controllers/contact-inquiry.controller';
 import { InfrastructureModule } from '@libs/infrastructure';
 import { HealthController } from '@libs/shared';
 import { PartnerAuthModule } from './auth/partner-auth.module';
@@ -83,6 +84,8 @@ import {
     CreateCustomerTierHandler,
     UpdateCustomerTierHandler,
     DeleteCustomerTierHandler,
+    // Contact Inquiries Handlers
+    CreateContactInquiryHandler,
 } from '@libs/application';
 
 /**
@@ -107,6 +110,7 @@ import {
     PointsRulesController,
     RewardsController,
     CustomerTiersController,
+    ContactInquiryController,
     HealthController,
   ],
   providers: [
@@ -181,6 +185,8 @@ import {
     CreateCustomerTierHandler,
     UpdateCustomerTierHandler,
     DeleteCustomerTierHandler,
+    // Contact Inquiries Handlers
+    CreateContactInquiryHandler,
   ],
 })
 export class PartnerApiModule {}

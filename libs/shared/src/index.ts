@@ -31,6 +31,7 @@ export * from './guards/customer-resource.guard';
 export * from './guards/membership-ownership.guard';
 export * from './guards/permissions.guard';
 export * from './guards/partner-resource.guard';
+export * from './guards/rate-limit.guard';
 
 // Decorators
 export * from './decorators/roles.decorator';

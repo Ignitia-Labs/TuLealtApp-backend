@@ -693,3 +693,8 @@ export * from './profile-permissions/get-profile-permissions/get-profile-permiss
 export * from './profile-permissions/get-permission-profiles/get-permission-profiles.handler';
 export * from './profile-permissions/get-permission-profiles/get-permission-profiles.request';
 export * from './profile-permissions/get-permission-profiles/get-permission-profiles.response';
+
+// Contact Inquiries Handlers
+export * from './contact-inquiries/create-contact-inquiry/create-contact-inquiry.handler';
+export * from './contact-inquiries/create-contact-inquiry/create-contact-inquiry.request';
+export * from './contact-inquiries/create-contact-inquiry/create-contact-inquiry.response';
