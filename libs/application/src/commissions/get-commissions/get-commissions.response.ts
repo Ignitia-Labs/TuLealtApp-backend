@@ -93,4 +93,3 @@ export class GetCommissionsResponse {
     this.partnerName = partnerName;
   }
 }
-

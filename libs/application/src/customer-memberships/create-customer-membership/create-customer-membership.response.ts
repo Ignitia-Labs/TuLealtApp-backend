@@ -15,4 +15,3 @@ export class CreateCustomerMembershipResponse {
     this.membership = membership;
   }
 }
-

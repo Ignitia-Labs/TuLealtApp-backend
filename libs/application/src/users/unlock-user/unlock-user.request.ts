@@ -14,4 +14,3 @@ export class UnlockUserRequest {
   @IsNotEmpty()
   userId: number;
 }
-

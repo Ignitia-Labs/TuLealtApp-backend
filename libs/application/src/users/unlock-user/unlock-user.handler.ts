@@ -40,4 +40,3 @@ export class UnlockUserHandler {
     return new UnlockUserResponse(updatedUser.id, updatedUser.isActive, updatedUser.updatedAt);
   }
 }
-

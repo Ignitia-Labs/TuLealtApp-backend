@@ -24,4 +24,3 @@ export class DeleteTemplateHandler {
     return new DeleteTemplateResponse(true, 'Plantilla eliminada exitosamente');
   }
 }
-

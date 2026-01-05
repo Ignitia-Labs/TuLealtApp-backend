@@ -1,8 +1,5 @@
 import { Injectable, Inject, BadRequestException } from '@nestjs/common';
-import {
-  IPartnerStaffAssignmentRepository,
-  PartnerStaffAssignment,
-} from '@libs/domain';
+import { IPartnerStaffAssignmentRepository, PartnerStaffAssignment } from '@libs/domain';
 
 /**
  * Servicio para validaciones y lógica de negocio de asignaciones staff-partner
@@ -47,8 +44,10 @@ export class PartnerStaffAssignmentService {
     excludeId?: number,
   ): Promise<void> {
     // Obtener todas las asignaciones activas del mismo partner-staff
-    const existingAssignments =
-      await this.assignmentRepository.findByStaffUserId(staffUserId, true);
+    const existingAssignments = await this.assignmentRepository.findByStaffUserId(
+      staffUserId,
+      true,
+    );
 
     // Filtrar solo las del mismo partner y que estén activas
     const relevantAssignments = existingAssignments.filter(
@@ -87,10 +86,6 @@ export class PartnerStaffAssignmentService {
     partnerId: number,
     date: Date,
   ): Promise<PartnerStaffAssignment[]> {
-    return this.assignmentRepository.findActiveAssignmentsByDate(
-      partnerId,
-      date,
-    );
+    return this.assignmentRepository.findActiveAssignmentsByDate(partnerId, date);
   }
 }
-

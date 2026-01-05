@@ -1,8 +1,5 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import {
-  IBillingCycleRepository,
-  IPaymentRepository,
-} from '@libs/domain';
+import { IBillingCycleRepository, IPaymentRepository } from '@libs/domain';
 import { GetBillingCyclePaymentsRequest } from './get-billing-cycle-payments.request';
 import {
   GetBillingCyclePaymentsResponse,
@@ -21,24 +18,16 @@ export class GetBillingCyclePaymentsHandler {
     private readonly paymentRepository: IPaymentRepository,
   ) {}
 
-  async execute(
-    request: GetBillingCyclePaymentsRequest,
-  ): Promise<GetBillingCyclePaymentsResponse> {
+  async execute(request: GetBillingCyclePaymentsRequest): Promise<GetBillingCyclePaymentsResponse> {
     // Obtener el billing cycle
-    const billingCycle = await this.billingCycleRepository.findById(
-      request.billingCycleId,
-    );
+    const billingCycle = await this.billingCycleRepository.findById(request.billingCycleId);
 
     if (!billingCycle) {
-      throw new NotFoundException(
-        `Billing cycle with ID ${request.billingCycleId} not found`,
-      );
+      throw new NotFoundException(`Billing cycle with ID ${request.billingCycleId} not found`);
     }
 
     // Obtener todos los payments aplicados a este billing cycle
-    const payments = await this.paymentRepository.findByBillingCycleId(
-      request.billingCycleId,
-    );
+    const payments = await this.paymentRepository.findByBillingCycleId(request.billingCycleId);
 
     // Convertir a DTOs
     const paymentDtos: BillingCyclePaymentDto[] = payments.map((payment) => ({
@@ -68,4 +57,3 @@ export class GetBillingCyclePaymentsHandler {
     );
   }
 }
-

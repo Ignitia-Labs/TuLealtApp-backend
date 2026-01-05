@@ -185,9 +185,7 @@ export class CustomerMembershipsController {
   ): Promise<GetCustomerMembershipResponse> {
     const membership = await this.membershipRepository.findByUserIdAndTenantId(userId, tenantId);
     if (!membership) {
-      throw new NotFoundException(
-        `Membership not found for user ${userId} and tenant ${tenantId}`,
-      );
+      throw new NotFoundException(`Membership not found for user ${userId} and tenant ${tenantId}`);
     }
     const request = new GetCustomerMembershipRequest();
     request.membershipId = membership.id;
@@ -217,7 +215,9 @@ export class CustomerMembershipsController {
     description: 'Membership no encontrada',
     type: NotFoundErrorResponseDto,
   })
-  async getCustomerMembership(@Param('id', ParseIntPipe) id: number): Promise<GetCustomerMembershipResponse> {
+  async getCustomerMembership(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<GetCustomerMembershipResponse> {
     const request = new GetCustomerMembershipRequest();
     request.membershipId = id;
     return this.getCustomerMembershipHandler.execute(request);
@@ -353,10 +353,11 @@ export class CustomerMembershipsController {
     description: 'Membership no encontrada',
     type: NotFoundErrorResponseDto,
   })
-  async deleteCustomerMembership(@Param('id', ParseIntPipe) id: number): Promise<DeleteCustomerMembershipResponse> {
+  async deleteCustomerMembership(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<DeleteCustomerMembershipResponse> {
     const request = new DeleteCustomerMembershipRequest();
     request.membershipId = id;
     return this.deleteCustomerMembershipHandler.execute(request);
   }
 }
-

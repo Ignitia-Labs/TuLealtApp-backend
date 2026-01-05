@@ -133,7 +133,9 @@ export class BillingCycle {
       newPaidAmount,
       this.currency,
       isFullyPaid ? 'paid' : this.status,
-      isFullyPaid ? ('paid' as BillingCyclePaymentStatus) : ('pending' as BillingCyclePaymentStatus),
+      isFullyPaid
+        ? ('paid' as BillingCyclePaymentStatus)
+        : ('pending' as BillingCyclePaymentStatus),
       new Date(),
       paymentMethod,
       this.invoiceId,
@@ -178,7 +180,9 @@ export class BillingCycle {
       newPaidAmount,
       this.currency,
       isFullyPaid ? 'paid' : 'pending',
-      isFullyPaid ? ('paid' as BillingCyclePaymentStatus) : ('pending' as BillingCyclePaymentStatus),
+      isFullyPaid
+        ? ('paid' as BillingCyclePaymentStatus)
+        : ('pending' as BillingCyclePaymentStatus),
       newPaidAmount > 0 ? this.paymentDate : null,
       newPaidAmount > 0 ? this.paymentMethod : null,
       this.invoiceId,
@@ -191,4 +195,3 @@ export class BillingCycle {
     );
   }
 }
-

@@ -156,27 +156,27 @@ import {
   GetCommissionSummaryHandler,
   MarkCommissionsPaidHandler,
   GetPendingDisbursementsHandler,
-    GetCommissionsDashboardHandler,
-    CreateGoalHandler,
-    // Communication Handlers - Templates
-    CreateTemplateHandler,
-    GetTemplatesHandler,
-    GetTemplateHandler,
-    UpdateTemplateHandler,
-    DeleteTemplateHandler,
-    // Communication Handlers - Messages
-    CreateMessageHandler,
-    GetMessagesHandler,
-    GetMessageHandler,
-    GetStatsHandler,
-    UpdateMessageHandler,
-    DeleteMessageHandler,
-    GetRecipientsHandler,
-    UpdateRecipientStatusHandler,
-    MessageSenderService,
-    ScheduledMessageSenderService,
-    // Handlers de aplicación - Goals
-    GetGoalHandler,
+  GetCommissionsDashboardHandler,
+  CreateGoalHandler,
+  // Communication Handlers - Templates
+  CreateTemplateHandler,
+  GetTemplatesHandler,
+  GetTemplateHandler,
+  UpdateTemplateHandler,
+  DeleteTemplateHandler,
+  // Communication Handlers - Messages
+  CreateMessageHandler,
+  GetMessagesHandler,
+  GetMessageHandler,
+  GetStatsHandler,
+  UpdateMessageHandler,
+  DeleteMessageHandler,
+  GetRecipientsHandler,
+  UpdateRecipientStatusHandler,
+  MessageSenderService,
+  ScheduledMessageSenderService,
+  // Handlers de aplicación - Goals
+  GetGoalHandler,
   GetGoalsHandler,
   UpdateGoalHandler,
   DeleteGoalHandler,
@@ -225,12 +225,7 @@ import { AdminAuthModule } from './auth/admin-auth.module';
  * Configura todos los controladores y servicios necesarios
  */
 @Module({
-  imports: [
-    ScheduleModule.forRoot(),
-    InfrastructureModule,
-    StorageModule,
-    AdminAuthModule,
-  ],
+  imports: [ScheduleModule.forRoot(), InfrastructureModule, StorageModule, AdminAuthModule],
   controllers: [
     UsersController,
     PricingController,

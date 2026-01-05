@@ -64,4 +64,3 @@ export class UpdateTemplateResponse {
     this.isActive = isActive;
   }
 }
-

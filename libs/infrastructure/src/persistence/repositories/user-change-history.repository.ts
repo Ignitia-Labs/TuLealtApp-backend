@@ -40,4 +40,3 @@ export class UserChangeHistoryRepository implements IUserChangeHistoryRepository
     });
   }
 }
-

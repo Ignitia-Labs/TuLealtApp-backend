@@ -58,4 +58,3 @@ export class GetTenantsByPartnerResponse {
     this.tenants = tenants;
   }
 }
-

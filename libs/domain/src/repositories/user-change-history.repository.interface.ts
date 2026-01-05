@@ -24,4 +24,3 @@ export interface IUserChangeHistoryRepository {
    */
   countByUserId(userId: number): Promise<number>;
 }
-

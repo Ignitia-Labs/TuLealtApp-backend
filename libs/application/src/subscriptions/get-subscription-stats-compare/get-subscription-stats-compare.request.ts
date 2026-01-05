@@ -34,4 +34,3 @@ export class GetSubscriptionStatsCompareRequest {
   @IsString()
   previousEndDate: string;
 }
-

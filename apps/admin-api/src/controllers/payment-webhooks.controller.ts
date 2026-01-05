@@ -1,18 +1,5 @@
-import {
-  Controller,
-  Post,
-  Body,
-  Headers,
-  HttpCode,
-  HttpStatus,
-  Logger,
-} from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiHeader,
-} from '@nestjs/swagger';
+import { Controller, Post, Body, Headers, HttpCode, HttpStatus, Logger } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiHeader } from '@nestjs/swagger';
 import { PaymentGatewayService } from '@libs/infrastructure';
 import { CreatePaymentHandler } from '@libs/application';
 
@@ -111,12 +98,8 @@ export class PaymentWebhooksController {
     // Extraer metadata para obtener invoiceId y otros datos
     const metadata = paymentIntent.metadata || {};
     const invoiceId = metadata.invoiceId ? parseInt(metadata.invoiceId, 10) : null;
-    const subscriptionId = metadata.subscriptionId
-      ? parseInt(metadata.subscriptionId, 10)
-      : null;
-    const billingCycleId = metadata.billingCycleId
-      ? parseInt(metadata.billingCycleId, 10)
-      : null;
+    const subscriptionId = metadata.subscriptionId ? parseInt(metadata.subscriptionId, 10) : null;
+    const billingCycleId = metadata.billingCycleId ? parseInt(metadata.billingCycleId, 10) : null;
 
     if (!subscriptionId) {
       this.logger.warn('PaymentIntent sin subscriptionId en metadata');
@@ -174,4 +157,3 @@ export class PaymentWebhooksController {
     // - Enviar notificación al partner
   }
 }
-

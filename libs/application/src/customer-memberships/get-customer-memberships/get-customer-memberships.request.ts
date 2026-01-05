@@ -6,7 +6,8 @@ import { IsNumber, IsOptional, Min } from 'class-validator';
  */
 export class GetCustomerMembershipsRequest {
   @ApiProperty({
-    description: 'ID del usuario para filtrar las memberships. Si no se proporciona, se usa el userId del token JWT',
+    description:
+      'ID del usuario para filtrar las memberships. Si no se proporciona, se usa el userId del token JWT',
     example: 1,
     type: Number,
     minimum: 1,
@@ -39,4 +40,3 @@ export class GetCustomerMembershipsRequest {
   @IsOptional()
   activeOnly?: boolean;
 }
-

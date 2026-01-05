@@ -7,21 +7,13 @@ import {
   Headers,
   BadRequestException,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiHeader,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiHeader } from '@nestjs/swagger';
 import {
   UpdateRecipientStatusHandler,
   UpdateRecipientStatusRequest,
   UpdateRecipientStatusResponse,
 } from '@libs/application';
-import {
-  BadRequestErrorResponseDto,
-  NotFoundErrorResponseDto,
-} from '@libs/shared';
+import { BadRequestErrorResponseDto, NotFoundErrorResponseDto } from '@libs/shared';
 
 /**
  * Controlador de Webhooks para servicios externos de comunicación
@@ -31,9 +23,7 @@ import {
 @ApiTags('Communication Webhooks')
 @Controller('communication/webhooks')
 export class CommunicationWebhooksController {
-  constructor(
-    private readonly updateRecipientStatusHandler: UpdateRecipientStatusHandler,
-  ) {}
+  constructor(private readonly updateRecipientStatusHandler: UpdateRecipientStatusHandler) {}
 
   /**
    * Webhook para servicios de email (SendGrid, AWS SES, etc.)
@@ -42,8 +32,7 @@ export class CommunicationWebhooksController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Webhook para actualizaciones de estado de email',
-    description:
-      'Endpoint para recibir actualizaciones de estado de servicios de email externos',
+    description: 'Endpoint para recibir actualizaciones de estado de servicios de email externos',
   })
   @ApiHeader({
     name: 'X-Webhook-Signature',
@@ -72,9 +61,7 @@ export class CommunicationWebhooksController {
     const { messageId, partnerId, event, timestamp, reason } = payload;
 
     if (!messageId || !partnerId || !event) {
-      throw new BadRequestException(
-        'Missing required fields: messageId, partnerId, event',
-      );
+      throw new BadRequestException('Missing required fields: messageId, partnerId, event');
     }
 
     // Mapear eventos del proveedor a estados del sistema
@@ -130,8 +117,7 @@ export class CommunicationWebhooksController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Webhook para actualizaciones de estado de WhatsApp',
-    description:
-      'Endpoint para recibir actualizaciones de estado de WhatsApp Business API',
+    description: 'Endpoint para recibir actualizaciones de estado de WhatsApp Business API',
   })
   @ApiHeader({
     name: 'X-Hub-Signature-256',
@@ -179,7 +165,6 @@ export class CommunicationWebhooksController {
       // Necesitarías mapear el recipient_id de WhatsApp al partnerId
       // y el id del mensaje al messageId
       // Esto requiere almacenar el mapeo cuando se envía el mensaje
-
       // Por ahora, retornamos éxito sin procesar
       // TODO: Implementar mapeo de WhatsApp message ID a messageId/partnerId
     }
@@ -194,8 +179,7 @@ export class CommunicationWebhooksController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Webhook para actualizaciones de estado de SMS',
-    description:
-      'Endpoint para recibir actualizaciones de estado de servicios de SMS externos',
+    description: 'Endpoint para recibir actualizaciones de estado de servicios de SMS externos',
   })
   @ApiHeader({
     name: 'X-Twilio-Signature',
@@ -236,4 +220,3 @@ export class CommunicationWebhooksController {
     return { success: true };
   }
 }
-

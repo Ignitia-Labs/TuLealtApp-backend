@@ -53,9 +53,7 @@ export class ScheduledMessageSenderService {
       // Buscar mensajes programados que deben ser enviados
       const scheduledMessages = await this.messageRepository.findScheduledMessages(now);
 
-      this.logger.log(
-        `Encontrados ${scheduledMessages.length} mensajes programados para enviar`,
-      );
+      this.logger.log(`Encontrados ${scheduledMessages.length} mensajes programados para enviar`);
 
       if (scheduledMessages.length === 0) {
         return;
@@ -89,9 +87,7 @@ export class ScheduledMessageSenderService {
         }
       }
 
-      this.logger.log(
-        `Procesamiento completado: ${successCount} exitosos, ${errorCount} errores`,
-      );
+      this.logger.log(`Procesamiento completado: ${successCount} exitosos, ${errorCount} errores`);
     } catch (error) {
       this.logger.error('Error en verificación de mensajes programados:', error);
     }
@@ -161,9 +157,7 @@ export class ScheduledMessageSenderService {
   /**
    * Obtiene los partner IDs según el tipo de destinatario del mensaje
    */
-  private async getPartnerIdsForMessage(
-    message: PartnerMessage,
-  ): Promise<number[]> {
+  private async getPartnerIdsForMessage(message: PartnerMessage): Promise<number[]> {
     if (message.recipientType === 'broadcast') {
       const partners = await this.partnerRepository.findAll();
       return partners.filter((p) => p.status === 'active').map((p) => p.id);
@@ -268,4 +262,3 @@ export class ScheduledMessageSenderService {
     };
   }
 }
-

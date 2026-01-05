@@ -123,4 +123,3 @@ export class CreateProfilePermissions1774000000000 implements MigrationInterface
     }
   }
 }
-

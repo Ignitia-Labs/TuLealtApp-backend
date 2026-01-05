@@ -199,9 +199,7 @@ export class PaymentsController {
       error: 'Internal Server Error',
     },
   })
-  async createPayment(
-    @Body() request: CreatePaymentRequest,
-  ): Promise<CreatePaymentResponse> {
+  async createPayment(@Body() request: CreatePaymentRequest): Promise<CreatePaymentResponse> {
     return this.createPaymentHandler.execute(request);
   }
 
@@ -312,7 +310,8 @@ export class PaymentsController {
     name: 'includeDerived',
     required: false,
     type: Boolean,
-    description: 'Incluir payments derivados en los resultados (por defecto false, solo muestra payments originales)',
+    description:
+      'Incluir payments derivados en los resultados (por defecto false, solo muestra payments originales)',
     example: false,
   })
   @ApiResponse({
@@ -325,8 +324,7 @@ export class PaymentsController {
     description: 'Parámetros de consulta inválidos',
     example: {
       statusCode: 400,
-      message:
-        'At least one filter (subscriptionId, partnerId, or invoiceId) must be provided',
+      message: 'At least one filter (subscriptionId, partnerId, or invoiceId) must be provided',
       error: 'Bad Request',
     },
   })
@@ -378,7 +376,8 @@ export class PaymentsController {
     }
     if (includeDerived !== undefined) {
       // Convertir string 'true' a boolean, o mantener boolean si ya lo es
-      request.includeDerived = includeDerived === true || includeDerived === 'true' || includeDerived === '1';
+      request.includeDerived =
+        includeDerived === true || includeDerived === 'true' || includeDerived === '1';
     }
     return this.getPaymentsHandler.execute(request);
   }
@@ -450,4 +449,3 @@ export class PaymentsController {
     return this.deletePaymentHandler.execute(request);
   }
 }
-

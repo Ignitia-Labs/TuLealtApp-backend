@@ -23,4 +23,3 @@ export class DeleteCustomerMembershipResponse {
     this.message = 'Membership deleted successfully';
   }
 }
-

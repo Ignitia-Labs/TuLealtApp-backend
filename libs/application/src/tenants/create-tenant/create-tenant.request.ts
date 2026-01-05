@@ -84,6 +84,17 @@ export class CreateTenantRequest {
   logo?: string | null;
 
   @ApiProperty({
+    description: 'URL del banner del tenant',
+    example: 'http://localhost:9000/tulealtapp-images/tenants/abc123-banner.png',
+    type: String,
+    required: false,
+    nullable: true,
+  })
+  @IsString()
+  @IsOptional()
+  banner?: string | null;
+
+  @ApiProperty({
     description: 'Días hasta que expiren los puntos',
     example: 365,
     type: Number,

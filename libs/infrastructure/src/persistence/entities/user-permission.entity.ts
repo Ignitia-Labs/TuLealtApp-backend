@@ -57,4 +57,3 @@ export class UserPermissionEntity {
   @Column('boolean', { default: true })
   isActive: boolean;
 }
-

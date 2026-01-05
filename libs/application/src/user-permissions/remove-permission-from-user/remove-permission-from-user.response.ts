@@ -23,4 +23,3 @@ export class RemovePermissionFromUserResponse {
     this.message = message;
   }
 }
-

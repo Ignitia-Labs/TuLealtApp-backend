@@ -266,4 +266,3 @@ export class PartnerLimitsController {
     return this.updatePartnerLimitsHandler.execute(partnerId, request);
   }
 }
-

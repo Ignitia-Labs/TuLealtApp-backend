@@ -41,4 +41,3 @@ export class MessageRecipientMapper {
     return entity;
   }
 }
-

@@ -103,7 +103,11 @@ export class GetInvoicesHandler {
       );
     });
 
-    return new GetInvoicesResponse(invoiceDtos, invoiceDtos.length, request.page || null, request.limit || null);
+    return new GetInvoicesResponse(
+      invoiceDtos,
+      invoiceDtos.length,
+      request.page || null,
+      request.limit || null,
+    );
   }
 }
-

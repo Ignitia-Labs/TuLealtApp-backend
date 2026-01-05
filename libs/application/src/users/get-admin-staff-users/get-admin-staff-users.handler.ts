@@ -1,10 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { IUserRepository } from '@libs/domain';
 import { GetAdminStaffUsersRequest } from './get-admin-staff-users.request';
-import {
-  GetAdminStaffUsersResponse,
-  AdminStaffUserDto,
-} from './get-admin-staff-users.response';
+import { GetAdminStaffUsersResponse, AdminStaffUserDto } from './get-admin-staff-users.response';
 
 /**
  * Handler para el caso de uso de obtener usuarios con roles ADMIN o STAFF
@@ -16,18 +13,12 @@ export class GetAdminStaffUsersHandler {
     private readonly userRepository: IUserRepository,
   ) {}
 
-  async execute(
-    request: GetAdminStaffUsersRequest,
-  ): Promise<GetAdminStaffUsersResponse> {
+  async execute(request: GetAdminStaffUsersRequest): Promise<GetAdminStaffUsersResponse> {
     const skip = request.skip || 0;
     const take = request.take || 50;
 
     // Buscar usuarios con roles ADMIN o STAFF
-    const users = await this.userRepository.findByRoles(
-      ['ADMIN', 'STAFF'],
-      skip,
-      take,
-    );
+    const users = await this.userRepository.findByRoles(['ADMIN', 'STAFF'], skip, take);
 
     // Mapear a DTOs
     const userDtos = users.map(

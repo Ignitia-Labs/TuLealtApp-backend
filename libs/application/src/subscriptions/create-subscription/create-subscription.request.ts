@@ -184,7 +184,7 @@ export class CreateSubscriptionRequest {
 
   @ApiProperty({
     description: 'Monto de impuesto',
-    example: 9.60,
+    example: 9.6,
     type: Number,
     required: false,
   })
@@ -282,4 +282,3 @@ export class CreateSubscriptionRequest {
   @IsOptional()
   autoRenew?: boolean;
 }
-

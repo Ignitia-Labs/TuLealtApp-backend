@@ -27,4 +27,3 @@ export class DeleteBranchHandler {
     return new DeleteBranchResponse('Branch deleted successfully', request.branchId);
   }
 }
-

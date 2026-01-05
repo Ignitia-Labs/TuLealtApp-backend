@@ -45,4 +45,3 @@ export class MessageTemplateMapper {
     return entity;
   }
 }
-

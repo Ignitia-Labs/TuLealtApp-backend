@@ -14,4 +14,3 @@ import { StorageModule } from '../storage/storage.module';
   exports: [InvoicePdfService, EmailService, PaymentGatewayService],
 })
 export class ServicesModule {}
-

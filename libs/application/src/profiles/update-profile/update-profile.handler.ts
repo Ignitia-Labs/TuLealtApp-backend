@@ -1,4 +1,10 @@
-import { Injectable, Inject, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import {
   IProfileRepository,
   IPermissionRepository,
@@ -106,14 +112,11 @@ export class UpdateProfileHandler {
     // Si se actualizaron los permisos, sincronizar profile_permissions
     if (request.permissions !== undefined) {
       // Obtener relaciones actuales
-      const currentProfilePermissions = await this.profilePermissionRepository.findByProfileId(
-        profileId,
-      );
+      const currentProfilePermissions =
+        await this.profilePermissionRepository.findByProfileId(profileId);
 
       // Obtener códigos de permisos actuales desde relaciones
-      const currentPermissionIds = new Set(
-        currentProfilePermissions.map((pp) => pp.permissionId),
-      );
+      const currentPermissionIds = new Set(currentProfilePermissions.map((pp) => pp.permissionId));
 
       // Obtener IDs de permisos nuevos desde códigos
       const newPermissionIds = new Set<number>();
@@ -175,4 +178,3 @@ export class UpdateProfileHandler {
     );
   }
 }
-

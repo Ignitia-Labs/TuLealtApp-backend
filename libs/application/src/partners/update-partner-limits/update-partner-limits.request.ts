@@ -54,4 +54,3 @@ export class UpdatePartnerLimitsRequest {
   @Min(0)
   maxRewards?: number;
 }
-

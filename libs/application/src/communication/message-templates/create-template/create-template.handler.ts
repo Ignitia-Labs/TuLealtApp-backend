@@ -1,8 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import {
-  IMessageTemplateRepository,
-  MessageTemplate,
-} from '@libs/domain';
+import { IMessageTemplateRepository, MessageTemplate } from '@libs/domain';
 import { CreateTemplateRequest } from './create-template.request';
 import { CreateTemplateResponse } from './create-template.response';
 
@@ -47,4 +44,3 @@ export class CreateTemplateHandler {
     );
   }
 }
-

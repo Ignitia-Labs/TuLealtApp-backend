@@ -22,9 +22,7 @@ export class CreateSubscriptionUsageHandler {
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
   ) {}
 
-  async execute(
-    request: CreateSubscriptionUsageRequest,
-  ): Promise<CreateSubscriptionUsageResponse> {
+  async execute(request: CreateSubscriptionUsageRequest): Promise<CreateSubscriptionUsageResponse> {
     // Validar que la suscripción existe
     const subscription = await this.subscriptionRepository.findOne({
       where: { id: request.partnerSubscriptionId },
@@ -71,4 +69,3 @@ export class CreateSubscriptionUsageHandler {
     );
   }
 }
-

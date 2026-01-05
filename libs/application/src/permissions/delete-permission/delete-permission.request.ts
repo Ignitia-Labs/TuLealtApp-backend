@@ -14,4 +14,3 @@ export class DeletePermissionRequest {
   @IsNotEmpty()
   permissionId: number;
 }
-

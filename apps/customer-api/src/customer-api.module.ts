@@ -4,6 +4,7 @@ import { HealthController } from '@libs/shared';
 import { CustomerAuthModule } from './auth/customer-auth.module';
 import { PricingController } from './controllers/pricing.controller';
 import { CustomerMembershipsController } from './controllers/customer-memberships.controller';
+import { CustomerPartnersController } from './controllers/customer-partners.controller';
 import {
   GetPricingPlansHandler,
   GetPricingPlanByIdHandler,
@@ -11,6 +12,10 @@ import {
   CalculatePriceHandler,
   GetCustomerMembershipsHandler,
   GetCustomerMembershipHandler,
+  GetCustomerPartnersHandler,
+  AssociateCustomerToPartnerHandler,
+  UpdateCustomerPartnerStatusHandler,
+  DissociateCustomerFromPartnerHandler,
 } from '@libs/application';
 
 /**
@@ -19,7 +24,12 @@ import {
  */
 @Module({
   imports: [InfrastructureModule, CustomerAuthModule],
-  controllers: [PricingController, CustomerMembershipsController, HealthController],
+  controllers: [
+    PricingController,
+    CustomerMembershipsController,
+    CustomerPartnersController,
+    HealthController,
+  ],
   providers: [
     // Handlers de aplicación - Pricing
     GetPricingPlansHandler,
@@ -29,6 +39,11 @@ import {
     // Handlers de aplicación - Customer Memberships
     GetCustomerMembershipsHandler,
     GetCustomerMembershipHandler,
+    // Handlers de aplicación - Customer Partners
+    GetCustomerPartnersHandler,
+    AssociateCustomerToPartnerHandler,
+    UpdateCustomerPartnerStatusHandler,
+    DissociateCustomerFromPartnerHandler,
   ],
 })
 export class CustomerApiModule {}

@@ -16,4 +16,3 @@ export class GetPointsRuleRequest {
   @Min(1)
   pointsRuleId: number;
 }
-

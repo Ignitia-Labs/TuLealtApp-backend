@@ -13,4 +13,3 @@ export class GetPartnerWithTenantsAndBranchesRequest {
   @IsNumber()
   partnerId: number;
 }
-

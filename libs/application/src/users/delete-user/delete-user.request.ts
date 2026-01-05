@@ -14,4 +14,3 @@ export class DeleteUserRequest {
   @IsNotEmpty()
   userId: number;
 }
-

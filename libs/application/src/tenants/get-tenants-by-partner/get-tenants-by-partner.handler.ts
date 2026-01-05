@@ -34,11 +34,12 @@ export class GetTenantsByPartnerHandler {
 
     // Obtener todas las características de los tenants en una sola consulta
     const tenantIds = tenants.map((t) => t.id);
-    const featuresEntities = tenantIds.length > 0
-      ? await this.featuresRepository.find({
-          where: tenantIds.map((id) => ({ tenantId: id })),
-        })
-      : [];
+    const featuresEntities =
+      tenantIds.length > 0
+        ? await this.featuresRepository.find({
+            where: tenantIds.map((id) => ({ tenantId: id })),
+          })
+        : [];
 
     // Crear un mapa de features por tenantId para acceso rápido
     const featuresMap = new Map<number, TenantFeaturesEntity>();
@@ -62,6 +63,7 @@ export class GetTenantsByPartnerHandler {
         tenant.name,
         tenant.description,
         tenant.logo,
+        tenant.banner,
         tenant.category,
         tenant.currencyId,
         tenant.primaryColor,
@@ -81,4 +83,3 @@ export class GetTenantsByPartnerHandler {
     return new GetTenantsByPartnerResponse(tenantResponses);
   }
 }
-

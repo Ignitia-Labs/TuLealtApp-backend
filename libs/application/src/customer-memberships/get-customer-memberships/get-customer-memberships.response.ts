@@ -24,4 +24,3 @@ export class GetCustomerMembershipsResponse {
     this.total = total;
   }
 }
-

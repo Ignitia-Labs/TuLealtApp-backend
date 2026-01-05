@@ -17,7 +17,10 @@ export class CreatePermissionHandler {
 
   async execute(request: CreatePermissionRequest): Promise<CreatePermissionResponse> {
     // Validar formato del código
-    const expectedCode = request.action === '*' ? `${request.module}.*` : `${request.module}.${request.resource}.${request.action}`;
+    const expectedCode =
+      request.action === '*'
+        ? `${request.module}.*`
+        : `${request.module}.${request.resource}.${request.action}`;
 
     if (request.code !== expectedCode) {
       throw new BadRequestException(
@@ -65,4 +68,3 @@ export class CreatePermissionHandler {
     );
   }
 }
-

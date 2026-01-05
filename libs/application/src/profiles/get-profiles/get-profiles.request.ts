@@ -26,4 +26,3 @@ export class GetProfilesRequest {
   @IsOptional()
   includeInactive?: boolean;
 }
-

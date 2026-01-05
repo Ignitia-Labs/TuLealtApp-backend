@@ -33,7 +33,9 @@ export class MigrateUserDataToMembershipsSeed extends BaseSeed {
         "SHOW TABLES LIKE 'customer_memberships'",
       );
       if (customerMembershipsTable.length === 0) {
-        this.log('⚠️  La tabla customer_memberships no existe. Ejecuta primero la migración CreateCustomerMemberships.');
+        this.log(
+          '⚠️  La tabla customer_memberships no existe. Ejecuta primero la migración CreateCustomerMemberships.',
+        );
         return;
       }
 
@@ -91,14 +93,11 @@ export class MigrateUserDataToMembershipsSeed extends BaseSeed {
       for (const user of usersToMigrate) {
         try {
           // Validar que el tenant existe
-          const tenantExists = await this.dataSource.query(
-            'SELECT id FROM tenants WHERE id = ?',
-            [user.tenantId],
-          );
+          const tenantExists = await this.dataSource.query('SELECT id FROM tenants WHERE id = ?', [
+            user.tenantId,
+          ]);
           if (tenantExists.length === 0) {
-            this.log(
-              `⚠️  Usuario ${user.userId}: Tenant ${user.tenantId} no existe. Saltando...`,
-            );
+            this.log(`⚠️  Usuario ${user.userId}: Tenant ${user.tenantId} no existe. Saltando...`);
             errorCount++;
             continue;
           }
@@ -226,4 +225,3 @@ export class MigrateUserDataToMembershipsSeed extends BaseSeed {
     }
   }
 }
-

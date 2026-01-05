@@ -34,4 +34,3 @@ export class GetCommissionSummaryRequest {
   @IsOptional()
   endDate?: string;
 }
-

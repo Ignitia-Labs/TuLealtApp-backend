@@ -77,7 +77,9 @@ export class GetPaymentsHandler {
         }
 
         // Para payments originales, buscar derivados y calcular aplicaciones
-        const derivedPayments = await this.paymentRepository.findDerivedByOriginalPaymentId(payment.id);
+        const derivedPayments = await this.paymentRepository.findDerivedByOriginalPaymentId(
+          payment.id,
+        );
 
         // Filtrar solo payments derivados que están realmente aplicados a un billing cycle o invoice válido
         // Los payments derivados con billingCycleId e invoiceId en null son "huérfanos" y no deberían contar
@@ -95,7 +97,10 @@ export class GetPaymentsHandler {
           return sum + amount;
         }, 0);
         const paymentAmount = Number(payment.amount);
-        const remainingAmount = Math.max(0, isNaN(paymentAmount) ? 0 : paymentAmount - appliedAmount);
+        const remainingAmount = Math.max(
+          0,
+          isNaN(paymentAmount) ? 0 : paymentAmount - appliedAmount,
+        );
         const isFullyApplied = remainingAmount <= 0.01; // Tolerancia para decimales
 
         const applications = validDerivedPayments.map((p) => ({
@@ -161,7 +166,11 @@ export class GetPaymentsHandler {
       }),
     );
 
-    return new GetPaymentsResponse(paymentDtos, paymentDtos.length, request.page || null, request.limit || null);
+    return new GetPaymentsResponse(
+      paymentDtos,
+      paymentDtos.length,
+      request.page || null,
+      request.limit || null,
+    );
   }
 }
-

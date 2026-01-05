@@ -46,4 +46,3 @@ export class UpdateTemplateRequest {
   @IsOptional()
   isActive?: boolean;
 }
-

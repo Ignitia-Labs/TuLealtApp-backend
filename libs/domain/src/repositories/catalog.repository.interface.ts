@@ -50,4 +50,3 @@ export interface ICatalogRepository {
    */
   delete(id: number): Promise<void>;
 }
-

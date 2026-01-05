@@ -16,4 +16,3 @@ export class GetBranchesByTenantRequest {
   @Min(1)
   tenantId: number;
 }
-

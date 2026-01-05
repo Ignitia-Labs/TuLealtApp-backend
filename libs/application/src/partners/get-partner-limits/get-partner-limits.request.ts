@@ -16,4 +16,3 @@ export class GetPartnerLimitsRequest {
   @Min(1)
   partnerId: number;
 }
-

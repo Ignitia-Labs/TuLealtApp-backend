@@ -1,10 +1,4 @@
-import {
-  MigrationInterface,
-  QueryRunner,
-  Table,
-  TableForeignKey,
-  TableIndex,
-} from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex } from 'typeorm';
 
 export class CreatePartnerStaffAssignmentsAndCommissions1770000000000
   implements MigrationInterface
@@ -358,18 +352,9 @@ export class CreatePartnerStaffAssignmentsAndCommissions1770000000000
     }
 
     // Eliminar índices de commissions
-    await queryRunner.dropIndex(
-      'commissions',
-      'idx_commissions_unique_payment_staff',
-    );
-    await queryRunner.dropIndex(
-      'commissions',
-      'idx_commissions_staff_status_date',
-    );
-    await queryRunner.dropIndex(
-      'commissions',
-      'idx_commissions_partner_payment',
-    );
+    await queryRunner.dropIndex('commissions', 'idx_commissions_unique_payment_staff');
+    await queryRunner.dropIndex('commissions', 'idx_commissions_staff_status_date');
+    await queryRunner.dropIndex('commissions', 'idx_commissions_partner_payment');
     await queryRunner.dropIndex('commissions', 'idx_commissions_payment_date');
     await queryRunner.dropIndex('commissions', 'idx_commissions_status');
     await queryRunner.dropIndex('commissions', 'idx_commissions_payment');
@@ -380,9 +365,7 @@ export class CreatePartnerStaffAssignmentsAndCommissions1770000000000
     await queryRunner.dropTable('commissions', true);
 
     // Eliminar foreign keys de partner_staff_assignments
-    const assignmentsTable = await queryRunner.getTable(
-      'partner_staff_assignments',
-    );
+    const assignmentsTable = await queryRunner.getTable('partner_staff_assignments');
     if (assignmentsTable) {
       const foreignKeys = assignmentsTable.foreignKeys;
       for (const fk of foreignKeys) {
@@ -391,18 +374,12 @@ export class CreatePartnerStaffAssignmentsAndCommissions1770000000000
     }
 
     // Eliminar índices de partner_staff_assignments
-    await queryRunner.dropIndex(
-      'partner_staff_assignments',
-      'idx_partner_staff_assignments_dates',
-    );
+    await queryRunner.dropIndex('partner_staff_assignments', 'idx_partner_staff_assignments_dates');
     await queryRunner.dropIndex(
       'partner_staff_assignments',
       'idx_partner_staff_assignments_active',
     );
-    await queryRunner.dropIndex(
-      'partner_staff_assignments',
-      'idx_partner_staff_assignments_staff',
-    );
+    await queryRunner.dropIndex('partner_staff_assignments', 'idx_partner_staff_assignments_staff');
     await queryRunner.dropIndex(
       'partner_staff_assignments',
       'idx_partner_staff_assignments_partner',
@@ -412,4 +389,3 @@ export class CreatePartnerStaffAssignmentsAndCommissions1770000000000
     await queryRunner.dropTable('partner_staff_assignments', true);
   }
 }
-

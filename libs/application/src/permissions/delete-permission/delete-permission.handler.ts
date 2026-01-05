@@ -50,9 +50,8 @@ export class DeletePermissionHandler {
 
     // Validar que no esté en uso en perfiles activos
     // Primero verificar en profile_permissions (tabla intermedia)
-    const profilePermissionsUsingPermission = await this.profilePermissionRepository.findByPermissionId(
-      request.permissionId,
-    );
+    const profilePermissionsUsingPermission =
+      await this.profilePermissionRepository.findByPermissionId(request.permissionId);
 
     if (profilePermissionsUsingPermission.length > 0) {
       // Verificar que los perfiles estén activos
@@ -102,4 +101,3 @@ export class DeletePermissionHandler {
     return new DeletePermissionResponse(request.permissionId, 'Permission deleted successfully');
   }
 }
-

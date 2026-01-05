@@ -16,4 +16,3 @@ export class GetCustomerMembershipRequest {
   @Min(1)
   membershipId: number;
 }
-

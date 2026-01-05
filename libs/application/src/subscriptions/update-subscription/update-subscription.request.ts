@@ -185,4 +185,3 @@ export class UpdateSubscriptionRequest {
   @IsOptional()
   discountCode?: string | null;
 }
-

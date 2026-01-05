@@ -23,4 +23,3 @@ export class MarkNotificationReadResponse {
     this.read = read;
   }
 }
-

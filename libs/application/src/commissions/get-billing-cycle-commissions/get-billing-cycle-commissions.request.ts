@@ -14,4 +14,3 @@ export class GetBillingCycleCommissionsRequest {
   @IsNotEmpty()
   billingCycleId: number;
 }
-

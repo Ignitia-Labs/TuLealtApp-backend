@@ -42,7 +42,9 @@ export class Permission {
 
     // Validar formato básico
     if (action !== '*' && (!module || !resource || !action)) {
-      throw new Error('Permission module, resource, and action are required (unless action is "*")');
+      throw new Error(
+        'Permission module, resource, and action are required (unless action is "*")',
+      );
     }
 
     if (action === '*' && !module) {
@@ -145,4 +147,3 @@ export class Permission {
     return this.isActive;
   }
 }
-

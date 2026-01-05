@@ -28,16 +28,7 @@ export class Profile {
     id?: number,
   ): Profile {
     const now = new Date();
-    return new Profile(
-      id || 0,
-      name,
-      description,
-      partnerId,
-      permissions,
-      isActive,
-      now,
-      now,
-    );
+    return new Profile(id || 0, name, description, partnerId, permissions, isActive, now, now);
   }
 
   /**
@@ -179,4 +170,3 @@ export class Profile {
     return permission.startsWith(prefix);
   }
 }
-

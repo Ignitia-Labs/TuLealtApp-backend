@@ -27,4 +27,3 @@ export function amountsEqual(amount1: number, amount2: number, tolerance = 0.01)
 export function amountGreaterOrEqual(amount1: number, amount2: number, tolerance = 0.01): boolean {
   return amount1 >= amount2 - tolerance;
 }
-

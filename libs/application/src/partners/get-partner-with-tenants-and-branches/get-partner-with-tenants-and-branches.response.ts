@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { GetTenantResponse } from '../../tenants/get-tenant/get-tenant.response';
 import { GetBranchResponse } from '../../branches/get-branch/get-branch.response';
+import { PartnerLimitsSwaggerDto } from '../dto/partner-limits-swagger.dto';
 
 /**
  * DTO de respuesta para un tenant con sus branches
@@ -93,6 +94,14 @@ export class GetPartnerWithTenantsAndBranchesResponse {
     nullable: true,
   })
   logo: string | null;
+
+  @ApiProperty({
+    description: 'Banner del partner',
+    example: 'https://example.com/banners/partner-banner.jpg',
+    type: String,
+    nullable: true,
+  })
+  banner: string | null;
 
   @ApiProperty({
     description: 'Categoría del negocio',
@@ -208,6 +217,13 @@ export class GetPartnerWithTenantsAndBranchesResponse {
   })
   tenants: TenantWithBranchesDto[];
 
+  @ApiProperty({
+    description: 'Límites del partner',
+    type: PartnerLimitsSwaggerDto,
+    nullable: true,
+  })
+  limits: PartnerLimitsSwaggerDto | null;
+
   constructor(
     id: number,
     name: string,
@@ -218,6 +234,7 @@ export class GetPartnerWithTenantsAndBranchesResponse {
     city: string,
     plan: string,
     logo: string | null,
+    banner: string | null,
     category: string,
     branchesNumber: number,
     website: string | null,
@@ -234,6 +251,7 @@ export class GetPartnerWithTenantsAndBranchesResponse {
     createdAt: Date,
     updatedAt: Date,
     tenants: TenantWithBranchesDto[],
+    limits: PartnerLimitsSwaggerDto | null = null,
   ) {
     this.id = id;
     this.name = name;
@@ -244,6 +262,7 @@ export class GetPartnerWithTenantsAndBranchesResponse {
     this.city = city;
     this.plan = plan;
     this.logo = logo;
+    this.banner = banner;
     this.category = category;
     this.branchesNumber = branchesNumber;
     this.website = website;
@@ -260,6 +279,6 @@ export class GetPartnerWithTenantsAndBranchesResponse {
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.tenants = tenants;
+    this.limits = limits;
   }
 }
-

@@ -115,4 +115,3 @@ export class SubscriptionStatsResponse {
     this.byCurrency = byCurrency;
   }
 }
-

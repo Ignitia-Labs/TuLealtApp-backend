@@ -26,7 +26,9 @@ export class UpdateCustomerMembershipHandler {
     private readonly tierRepository: ICustomerTierRepository,
   ) {}
 
-  async execute(request: UpdateCustomerMembershipRequest): Promise<UpdateCustomerMembershipResponse> {
+  async execute(
+    request: UpdateCustomerMembershipRequest,
+  ): Promise<UpdateCustomerMembershipResponse> {
     // Obtener la membership existente
     const membership = await this.membershipRepository.findById(request.membershipId);
 
@@ -54,12 +56,17 @@ export class UpdateCustomerMembershipHandler {
     }
 
     if (request.status !== undefined) {
-      updatedMembership = request.status === 'active' ? updatedMembership.activate() : updatedMembership.deactivate();
+      updatedMembership =
+        request.status === 'active' ? updatedMembership.activate() : updatedMembership.deactivate();
     }
 
     // Actualizar campos que no tienen métodos de dominio
     // Usar los métodos de dominio cuando sea posible, o crear nueva instancia
-    if (request.totalSpent !== undefined || request.totalVisits !== undefined || request.lastVisit !== undefined) {
+    if (
+      request.totalSpent !== undefined ||
+      request.totalVisits !== undefined ||
+      request.lastVisit !== undefined
+    ) {
       // Para actualizar totalSpent, usar recordPurchase con la diferencia
       if (request.totalSpent !== undefined && request.totalSpent !== updatedMembership.totalSpent) {
         const difference = request.totalSpent - updatedMembership.totalSpent;
@@ -67,7 +74,10 @@ export class UpdateCustomerMembershipHandler {
       }
 
       // Para actualizar totalVisits, usar recordVisit con la diferencia
-      if (request.totalVisits !== undefined && request.totalVisits > updatedMembership.totalVisits) {
+      if (
+        request.totalVisits !== undefined &&
+        request.totalVisits > updatedMembership.totalVisits
+      ) {
         const visitsToAdd = request.totalVisits - updatedMembership.totalVisits;
         for (let i = 0; i < visitsToAdd; i++) {
           updatedMembership = updatedMembership.recordVisit();
@@ -161,4 +171,3 @@ export class UpdateCustomerMembershipHandler {
     );
   }
 }
-

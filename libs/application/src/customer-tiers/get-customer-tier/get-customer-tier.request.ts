@@ -16,4 +16,3 @@ export class GetCustomerTierRequest {
   @Min(1)
   customerTierId: number;
 }
-

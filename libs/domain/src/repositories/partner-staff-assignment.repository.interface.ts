@@ -13,18 +13,12 @@ export interface IPartnerStaffAssignmentRepository {
   /**
    * Buscar todas las asignaciones de un partner
    */
-  findByPartnerId(
-    partnerId: number,
-    activeOnly?: boolean,
-  ): Promise<PartnerStaffAssignment[]>;
+  findByPartnerId(partnerId: number, activeOnly?: boolean): Promise<PartnerStaffAssignment[]>;
 
   /**
    * Buscar todas las asignaciones de un usuario staff
    */
-  findByStaffUserId(
-    staffUserId: number,
-    activeOnly?: boolean,
-  ): Promise<PartnerStaffAssignment[]>;
+  findByStaffUserId(staffUserId: number, activeOnly?: boolean): Promise<PartnerStaffAssignment[]>;
 
   /**
    * Buscar una asignación específica por partner y staff
@@ -42,16 +36,12 @@ export interface IPartnerStaffAssignmentRepository {
   /**
    * Guardar una nueva asignación
    */
-  save(
-    assignment: PartnerStaffAssignment,
-  ): Promise<PartnerStaffAssignment>;
+  save(assignment: PartnerStaffAssignment): Promise<PartnerStaffAssignment>;
 
   /**
    * Actualizar una asignación existente
    */
-  update(
-    assignment: PartnerStaffAssignment,
-  ): Promise<PartnerStaffAssignment>;
+  update(assignment: PartnerStaffAssignment): Promise<PartnerStaffAssignment>;
 
   /**
    * Eliminar una asignación
@@ -62,18 +52,11 @@ export interface IPartnerStaffAssignmentRepository {
    * Obtener la suma total de porcentajes de comisión para un partner
    * Útil para validar que no se exceda el 100%
    */
-  getTotalCommissionPercent(
-    partnerId: number,
-    excludeId?: number,
-  ): Promise<number>;
+  getTotalCommissionPercent(partnerId: number, excludeId?: number): Promise<number>;
 
   /**
    * Buscar asignaciones activas para un partner en una fecha específica
    * Útil para calcular comisiones basadas en el estado de las asignaciones al momento del pago
    */
-  findActiveAssignmentsByDate(
-    partnerId: number,
-    date: Date,
-  ): Promise<PartnerStaffAssignment[]>;
+  findActiveAssignmentsByDate(partnerId: number, date: Date): Promise<PartnerStaffAssignment[]>;
 }
-

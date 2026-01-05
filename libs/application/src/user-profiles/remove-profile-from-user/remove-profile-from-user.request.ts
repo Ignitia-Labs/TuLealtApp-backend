@@ -14,4 +14,3 @@ export class RemoveProfileFromUserRequest {
   @IsNotEmpty()
   userProfileId: number;
 }
-

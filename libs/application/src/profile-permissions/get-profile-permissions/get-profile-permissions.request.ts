@@ -14,4 +14,3 @@ export class GetProfilePermissionsRequest {
   @IsNotEmpty()
   profileId: number;
 }
-

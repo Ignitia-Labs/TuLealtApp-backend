@@ -197,6 +197,7 @@ export class GetPartnerHandler {
           partner.city || '',
           partner.plan || '',
           partner.logo || null,
+          partner.banner || null,
           partner.category || '',
           partner.branchesNumber || 0,
           partner.website || null,

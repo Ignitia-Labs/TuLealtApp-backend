@@ -1,4 +1,12 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, IsNumber, IsOptional, Min } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  IsNumber,
+  IsOptional,
+  Min,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
@@ -75,7 +83,8 @@ export class RegisterUserRequest {
   tenantId?: number;
 
   @ApiProperty({
-    description: 'ID de la branch donde se registra el customer (opcional, requerido si se proporciona tenantId)',
+    description:
+      'ID de la branch donde se registra el customer (opcional, requerido si se proporciona tenantId)',
     example: 5,
     type: Number,
     minimum: 1,

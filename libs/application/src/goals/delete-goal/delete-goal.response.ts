@@ -12,4 +12,3 @@ export class DeleteGoalResponse {
     this.message = message;
   }
 }
-

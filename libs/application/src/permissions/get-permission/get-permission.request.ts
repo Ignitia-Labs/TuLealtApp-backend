@@ -25,4 +25,3 @@ export class GetPermissionRequest {
   @IsOptional()
   code?: string;
 }
-

@@ -53,4 +53,3 @@ export interface IPartnerMessageRepository {
    */
   delete(id: number): Promise<void>;
 }
-

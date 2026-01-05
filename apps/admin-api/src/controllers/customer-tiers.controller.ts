@@ -193,7 +193,9 @@ export class CustomerTiersController {
       error: 'Internal Server Error',
     },
   })
-  async getCustomerTiers(@Query('tenantId', ParseIntPipe) tenantId: number): Promise<GetCustomerTiersResponse> {
+  async getCustomerTiers(
+    @Query('tenantId', ParseIntPipe) tenantId: number,
+  ): Promise<GetCustomerTiersResponse> {
     const request = new GetCustomerTiersRequest();
     request.tenantId = tenantId;
     return this.getCustomerTiersHandler.execute(request);
@@ -205,7 +207,8 @@ export class CustomerTiersController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Crear un nuevo nivel de cliente',
-    description: 'Crea un nuevo nivel/tier de cliente asociado a un tenant con su configuración completa.',
+    description:
+      'Crea un nuevo nivel/tier de cliente asociado a un tenant con su configuración completa.',
   })
   @ApiBody({
     type: CreateCustomerTierRequest,
@@ -320,7 +323,9 @@ export class CustomerTiersController {
       error: 'Internal Server Error',
     },
   })
-  async createCustomerTier(@Body() request: CreateCustomerTierRequest): Promise<CreateCustomerTierResponse> {
+  async createCustomerTier(
+    @Body() request: CreateCustomerTierRequest,
+  ): Promise<CreateCustomerTierResponse> {
     return this.createCustomerTierHandler.execute(request);
   }
 
@@ -601,10 +606,11 @@ export class CustomerTiersController {
       error: 'Internal Server Error',
     },
   })
-  async deleteCustomerTier(@Param('id', ParseIntPipe) id: number): Promise<DeleteCustomerTierResponse> {
+  async deleteCustomerTier(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<DeleteCustomerTierResponse> {
     const request = new DeleteCustomerTierRequest();
     request.customerTierId = id;
     return this.deleteCustomerTierHandler.execute(request);
   }
 }
-

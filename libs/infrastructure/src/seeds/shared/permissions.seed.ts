@@ -83,7 +83,9 @@ export class PermissionsSeed extends BaseSeed {
         }
       }
 
-      this.log(`✓ Seed de permisos completado: ${createdCount} creados, ${skippedCount} ya existían`);
+      this.log(
+        `✓ Seed de permisos completado: ${createdCount} creados, ${skippedCount} ya existían`,
+      );
     } catch (error) {
       this.error(`Error en seed de permisos: ${error.message}`, error);
       throw error;
@@ -109,7 +111,9 @@ export class PermissionsSeed extends BaseSeed {
    * Parsea un código de permiso en sus componentes
    * Soporta formato: "module.resource.action" o "module.*"
    */
-  private parsePermissionCode(code: string): { module: string; resource: string; action: string } | null {
+  private parsePermissionCode(
+    code: string,
+  ): { module: string; resource: string; action: string } | null {
     if (!code || typeof code !== 'string') {
       return null;
     }
@@ -201,4 +205,3 @@ export class PermissionsSeed extends BaseSeed {
     return `${actionText} ${resourceText} en ${moduleText}`;
   }
 }
-

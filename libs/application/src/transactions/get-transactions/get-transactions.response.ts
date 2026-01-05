@@ -127,4 +127,3 @@ export class GetTransactionsResponse {
     this.total = total;
   }
 }
-

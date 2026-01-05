@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Goal, GoalStatus } from '@libs/domain';
-import { ProgressInfo, ProjectionInfo, TrendInfo } from './get-goal-progress/get-goal-progress.response';
+import {
+  ProgressInfo,
+  ProjectionInfo,
+  TrendInfo,
+} from './get-goal-progress/get-goal-progress.response';
 
 /**
  * Servicio para calcular el progreso de metas
@@ -93,4 +97,3 @@ export class GoalProgressService {
     };
   }
 }
-

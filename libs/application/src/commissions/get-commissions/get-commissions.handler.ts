@@ -23,9 +23,7 @@ export class GetCommissionsHandler {
     private readonly userRepository: IUserRepository,
   ) {}
 
-  async execute(
-    request: GetCommissionsRequest,
-  ): Promise<GetCommissionsResponse> {
+  async execute(request: GetCommissionsRequest): Promise<GetCommissionsResponse> {
     // Preparar filtros
     const filters: CommissionFilters = {
       status: request.status,
@@ -45,23 +43,11 @@ export class GetCommissionsHandler {
     let total: number;
 
     if (request.staffUserId) {
-      commissions = await this.commissionRepository.findByStaffUserId(
-        request.staffUserId,
-        filters,
-      );
-      total = await this.commissionRepository.countByStaffUserId(
-        request.staffUserId,
-        filters,
-      );
+      commissions = await this.commissionRepository.findByStaffUserId(request.staffUserId, filters);
+      total = await this.commissionRepository.countByStaffUserId(request.staffUserId, filters);
     } else if (request.partnerId) {
-      commissions = await this.commissionRepository.findByPartnerId(
-        request.partnerId,
-        filters,
-      );
-      total = await this.commissionRepository.countByPartnerId(
-        request.partnerId,
-        filters,
-      );
+      commissions = await this.commissionRepository.findByPartnerId(request.partnerId, filters);
+      total = await this.commissionRepository.countByPartnerId(request.partnerId, filters);
     } else {
       // Si no hay filtros específicos, obtener todas las comisiones
       commissions = await this.commissionRepository.findAll(filters);
@@ -71,12 +57,8 @@ export class GetCommissionsHandler {
     // Enriquecer con información de usuarios y partners
     const commissionDtos = await Promise.all(
       commissions.map(async (commission) => {
-        const staffUser = await this.userRepository.findById(
-          commission.staffUserId,
-        );
-        const partner = await this.partnerRepository.findById(
-          commission.partnerId,
-        );
+        const staffUser = await this.userRepository.findById(commission.staffUserId);
+        const partner = await this.partnerRepository.findById(commission.partnerId);
 
         return new CommissionDto(
           commission.id,
@@ -101,8 +83,7 @@ export class GetCommissionsHandler {
     const summary = {
       totalPending: commissionDtos.filter((c) => c.status === 'pending').length,
       totalPaid: commissionDtos.filter((c) => c.status === 'paid').length,
-      totalCancelled: commissionDtos.filter((c) => c.status === 'cancelled')
-        .length,
+      totalCancelled: commissionDtos.filter((c) => c.status === 'cancelled').length,
       totalAmount: commissionDtos.reduce((sum, c) => sum + c.commissionAmount, 0),
       currency: commissionDtos.length > 0 ? commissionDtos[0].currency : 'USD',
     };
@@ -137,4 +118,3 @@ export class GetCommissionsHandler {
     );
   }
 }
-

@@ -115,4 +115,3 @@ export class UserPermissionRepository implements IUserPermissionRepository {
     return userPermissionEntities.map((entity) => UserPermissionMapper.toDomain(entity));
   }
 }
-

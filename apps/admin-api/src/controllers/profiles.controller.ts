@@ -112,7 +112,8 @@ export class ProfilesController {
         {
           id: 1,
           name: 'Super Admin',
-          description: 'Acceso completo al sistema. Puede gestionar todo, incluyendo configuración crítica.',
+          description:
+            'Acceso completo al sistema. Puede gestionar todo, incluyendo configuración crítica.',
           partnerId: null,
           permissions: ['admin.*'],
           isActive: true,
@@ -302,7 +303,8 @@ export class ProfilesController {
     example: {
       id: 1,
       name: 'Super Admin',
-      description: 'Acceso completo al sistema. Puede gestionar todo, incluyendo configuración crítica.',
+      description:
+        'Acceso completo al sistema. Puede gestionar todo, incluyendo configuración crítica.',
       partnerId: null,
       permissions: ['admin.*'],
       isActive: true,
@@ -572,4 +574,3 @@ export class ProfilesController {
     return this.getProfileUsersHandler.execute(request);
   }
 }
-

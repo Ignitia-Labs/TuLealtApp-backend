@@ -72,4 +72,3 @@ export class RewardEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

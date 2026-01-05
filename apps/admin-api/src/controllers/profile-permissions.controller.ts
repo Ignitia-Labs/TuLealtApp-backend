@@ -28,6 +28,9 @@ import {
   GetProfilePermissionsHandler,
   GetProfilePermissionsRequest,
   GetProfilePermissionsResponse,
+  GetPermissionProfilesHandler,
+  GetPermissionProfilesRequest,
+  GetPermissionProfilesResponse,
 } from '@libs/application';
 import {
   UnauthorizedErrorResponseDto,
@@ -43,16 +46,17 @@ import {
 } from '@libs/shared';
 
 /**
- * Controlador de relaciones perfil-permiso para Admin API
+ * Controlador de asignaciones de permisos a perfiles para Admin API
  * Permite gestionar qué permisos están asignados a qué perfiles
  *
  * Endpoints:
- * - POST /admin/profiles/:profileId/permissions - Agregar un permiso a un perfil
- * - DELETE /admin/profiles/:profileId/permissions/:permissionId - Remover un permiso de un perfil
- * - GET /admin/profiles/:profileId/permissions - Obtener permisos de un perfil
+ * - POST /admin/profile-permissions/:profileId/permissions - Asignar un permiso a un perfil
+ * - DELETE /admin/profile-permissions/:profileId/permissions/:permissionId - Remover permiso de un perfil
+ * - GET /admin/profile-permissions/:profileId/permissions - Obtener permisos de un perfil
+ * - GET /admin/profile-permissions/permission/:permissionId/profiles - Obtener perfiles con un permiso específico
  */
 @ApiTags('Profile Permissions')
-@Controller('profiles')
+@Controller('profile-permissions')
 @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Roles('ADMIN', 'STAFF')
 @ApiBearerAuth('JWT-auth')
@@ -61,15 +65,16 @@ export class ProfilePermissionsController {
     private readonly addPermissionToProfileHandler: AddPermissionToProfileHandler,
     private readonly removePermissionFromProfileHandler: RemovePermissionFromProfileHandler,
     private readonly getProfilePermissionsHandler: GetProfilePermissionsHandler,
+    private readonly getPermissionProfilesHandler: GetPermissionProfilesHandler,
   ) {}
 
   @Post(':profileId/permissions')
   @HttpCode(HttpStatus.CREATED)
-  @Permissions('admin.profiles.update')
+  @Permissions('admin.profile-permissions.assign')
   @ApiOperation({
-    summary: 'Agregar un permiso a un perfil',
+    summary: 'Asignar un permiso a un perfil',
     description:
-      'Agrega un permiso específico a un perfil. El permiso debe existir en el catálogo y estar activo. No se pueden agregar permisos duplicados.',
+      'Asigna un permiso a un perfil. Si el permiso ya está asignado, se lanza un error de conflicto.',
   })
   @ApiParam({
     name: 'profileId',
@@ -80,38 +85,17 @@ export class ProfilePermissionsController {
   })
   @ApiBody({
     type: AddPermissionToProfileRequest,
-    description: 'Datos del permiso a agregar al perfil',
-    examples: {
-      agregarPermiso: {
-        summary: 'Agregar permiso a perfil',
-        description: 'Ejemplo de agregar un permiso a un perfil',
-        value: {
-          permissionId: 5,
-        },
-      },
-    },
+    description: 'Datos del permiso a asignar',
   })
   @ApiResponse({
     status: 201,
-    description: 'Permiso agregado al perfil exitosamente',
+    description: 'Permiso asignado exitosamente',
     type: AddPermissionToProfileResponse,
-    example: {
-      id: 1,
-      profileId: 1,
-      permissionId: 5,
-      permissionCode: 'admin.users.create',
-      createdAt: '2024-01-15T10:30:00.000Z',
-    },
   })
   @ApiResponse({
     status: 400,
     description: 'Datos de entrada inválidos',
     type: BadRequestErrorResponseDto,
-    example: {
-      statusCode: 400,
-      message: ['permissionId must be a number', 'permissionId should not be empty'],
-      error: 'Bad Request',
-    },
   })
   @ApiResponse({
     status: 401,
@@ -127,20 +111,11 @@ export class ProfilePermissionsController {
     status: 404,
     description: 'Perfil o permiso no encontrado',
     type: NotFoundErrorResponseDto,
-    example: {
-      statusCode: 404,
-      message: 'Profile with ID 1 not found',
-      error: 'Not Found',
-    },
   })
   @ApiResponse({
     status: 409,
     description: 'El perfil ya tiene el permiso asignado',
-    example: {
-      statusCode: 409,
-      message: 'Profile 1 already has permission 5 assigned',
-      error: 'Conflict',
-    },
+    type: InternalServerErrorResponseDto,
   })
   @ApiResponse({
     status: 500,
@@ -156,11 +131,10 @@ export class ProfilePermissionsController {
 
   @Delete(':profileId/permissions/:permissionId')
   @HttpCode(HttpStatus.OK)
-  @Permissions('admin.profiles.update')
+  @Permissions('admin.profile-permissions.remove')
   @ApiOperation({
-    summary: 'Remover un permiso de un perfil',
-    description:
-      'Remueve un permiso específico de un perfil. Esta acción elimina la relación entre el perfil y el permiso.',
+    summary: 'Remover permiso de un perfil',
+    description: 'Remueve un permiso de un perfil específico.',
   })
   @ApiParam({
     name: 'profileId',
@@ -171,20 +145,15 @@ export class ProfilePermissionsController {
   })
   @ApiParam({
     name: 'permissionId',
-    description: 'ID único del permiso a remover',
+    description: 'ID único del permiso',
     type: Number,
     example: 5,
     required: true,
   })
   @ApiResponse({
     status: 200,
-    description: 'Permiso removido del perfil exitosamente',
+    description: 'Permiso removido exitosamente',
     type: RemovePermissionFromProfileResponse,
-    example: {
-      profileId: 1,
-      permissionId: 5,
-      message: 'Permission removed from profile successfully',
-    },
   })
   @ApiResponse({
     status: 401,
@@ -200,11 +169,6 @@ export class ProfilePermissionsController {
     status: 404,
     description: 'Perfil, permiso o relación no encontrada',
     type: NotFoundErrorResponseDto,
-    example: {
-      statusCode: 404,
-      message: 'Profile 1 does not have permission 5 assigned',
-      error: 'Not Found',
-    },
   })
   @ApiResponse({
     status: 500,
@@ -222,11 +186,10 @@ export class ProfilePermissionsController {
 
   @Get(':profileId/permissions')
   @HttpCode(HttpStatus.OK)
-  @Permissions('admin.profiles.view')
+  @Permissions('admin.profile-permissions.view')
   @ApiOperation({
     summary: 'Obtener permisos de un perfil',
-    description:
-      'Obtiene todos los permisos asignados a un perfil específico, incluyendo información detallada de cada permiso.',
+    description: 'Obtiene todos los permisos asignados a un perfil específico',
   })
   @ApiParam({
     name: 'profileId',
@@ -239,33 +202,6 @@ export class ProfilePermissionsController {
     status: 200,
     description: 'Permisos del perfil obtenidos exitosamente',
     type: GetProfilePermissionsResponse,
-    example: {
-      profileId: 1,
-      profileName: 'Super Admin',
-      permissions: [
-        {
-          id: 1,
-          permissionId: 5,
-          permissionCode: 'admin.users.create',
-          module: 'admin',
-          resource: 'users',
-          action: 'create',
-          description: 'Permite crear usuarios',
-          createdAt: '2024-01-15T10:30:00.000Z',
-        },
-        {
-          id: 2,
-          permissionId: 6,
-          permissionCode: 'admin.users.view',
-          module: 'admin',
-          resource: 'users',
-          action: 'view',
-          description: 'Permite ver usuarios',
-          createdAt: '2024-01-15T10:30:00.000Z',
-        },
-      ],
-      total: 2,
-    },
   })
   @ApiResponse({
     status: 401,
@@ -281,11 +217,6 @@ export class ProfilePermissionsController {
     status: 404,
     description: 'Perfil no encontrado',
     type: NotFoundErrorResponseDto,
-    example: {
-      statusCode: 404,
-      message: 'Profile with ID 1 not found',
-      error: 'Not Found',
-    },
   })
   @ApiResponse({
     status: 500,
@@ -300,5 +231,50 @@ export class ProfilePermissionsController {
     return this.getProfilePermissionsHandler.execute(request);
   }
 
+  @Get('permission/:permissionId/profiles')
+  @HttpCode(HttpStatus.OK)
+  @Permissions('admin.profile-permissions.view')
+  @ApiOperation({
+    summary: 'Obtener perfiles con un permiso específico',
+    description: 'Obtiene todos los perfiles que tienen asignado un permiso específico',
+  })
+  @ApiParam({
+    name: 'permissionId',
+    description: 'ID único del permiso',
+    type: Number,
+    example: 5,
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Perfiles con el permiso obtenidos exitosamente',
+    type: GetPermissionProfilesResponse,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos suficientes',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Permiso no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async getPermissionProfiles(
+    @Param('permissionId', ParseIntPipe) permissionId: number,
+  ): Promise<GetPermissionProfilesResponse> {
+    const request = new GetPermissionProfilesRequest();
+    request.permissionId = permissionId;
+    return this.getPermissionProfilesHandler.execute(request);
+  }
 }
-

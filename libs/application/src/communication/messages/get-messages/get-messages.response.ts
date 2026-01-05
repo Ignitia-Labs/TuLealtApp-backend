@@ -133,14 +133,8 @@ export class GetMessagesResponse {
   @ApiProperty({ type: PaginationDto })
   pagination: PaginationDto;
 
-  constructor(
-    messages: MessageDto[],
-    page: number,
-    limit: number,
-    total: number,
-  ) {
+  constructor(messages: MessageDto[], page: number, limit: number, total: number) {
     this.messages = messages;
     this.pagination = new PaginationDto(page, limit, total);
   }
 }
-

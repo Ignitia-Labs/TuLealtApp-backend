@@ -39,4 +39,3 @@ export class DeleteProfileHandler {
     return new DeleteProfileResponse('Profile deleted successfully', request.profileId);
   }
 }
-

@@ -59,4 +59,3 @@ export class CreateCustomerMembershipRequest {
   @IsOptional()
   status?: 'active' | 'inactive';
 }
-

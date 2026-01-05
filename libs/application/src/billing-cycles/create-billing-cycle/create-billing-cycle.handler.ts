@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  Inject,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -69,15 +64,16 @@ export class CreateBillingCycleHandler {
     }
 
     // Calcular duración en días
-    const durationDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    const durationDays = Math.ceil(
+      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
+    );
 
     // Obtener el último ciclo para calcular el número de ciclo
     const existingCycles = await this.billingCycleRepository.findBySubscriptionId(
       request.subscriptionId,
     );
-    const cycleNumber = existingCycles.length > 0
-      ? Math.max(...existingCycles.map(c => c.cycleNumber)) + 1
-      : 1;
+    const cycleNumber =
+      existingCycles.length > 0 ? Math.max(...existingCycles.map((c) => c.cycleNumber)) + 1 : 1;
 
     // Calcular montos
     const amount = request.amount;
@@ -179,4 +175,3 @@ export class CreateBillingCycleHandler {
     );
   }
 }
-

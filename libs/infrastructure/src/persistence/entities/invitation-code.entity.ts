@@ -76,4 +76,3 @@ export class InvitationCodeEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

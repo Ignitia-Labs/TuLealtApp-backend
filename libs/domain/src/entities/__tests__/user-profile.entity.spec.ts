@@ -1,4 +1,4 @@
-import { UserProfile } from './user-profile.entity';
+import { UserProfile } from '../user-profile.entity';
 
 describe('UserProfile Entity', () => {
   describe('create', () => {
@@ -101,4 +101,3 @@ describe('UserProfile Entity', () => {
     });
   });
 });
-

@@ -23,4 +23,3 @@ export class DeleteCatalogResponse {
     this.id = id;
   }
 }
-

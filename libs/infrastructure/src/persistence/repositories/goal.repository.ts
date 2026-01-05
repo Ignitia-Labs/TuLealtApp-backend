@@ -53,4 +53,3 @@ export class GoalRepository implements IGoalRepository {
     await this.goalRepository.delete(id);
   }
 }
-

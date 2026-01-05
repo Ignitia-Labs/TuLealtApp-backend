@@ -14,7 +14,9 @@ export class PaymentGatewayService {
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
     if (!stripeSecretKey) {
-      this.logger.warn('STRIPE_SECRET_KEY no configurado. El servicio de pagos no estará disponible.');
+      this.logger.warn(
+        'STRIPE_SECRET_KEY no configurado. El servicio de pagos no estará disponible.',
+      );
       // Crear instancia dummy para evitar errores
       this.stripe = null as any;
     } else {
@@ -104,10 +106,7 @@ export class PaymentGatewayService {
    * @param signature Firma del webhook
    * @returns Evento de Stripe
    */
-  async handleWebhook(
-    payload: string | Buffer,
-    signature: string,
-  ): Promise<Stripe.Event> {
+  async handleWebhook(payload: string | Buffer, signature: string): Promise<Stripe.Event> {
     if (!this.stripe) {
       throw new Error('Stripe no está configurado.');
     }
@@ -118,11 +117,7 @@ export class PaymentGatewayService {
     }
 
     try {
-      const event = this.stripe.webhooks.constructEvent(
-        payload,
-        signature,
-        webhookSecret,
-      );
+      const event = this.stripe.webhooks.constructEvent(payload, signature, webhookSecret);
 
       this.logger.log(`Webhook recibido: ${event.type} (${event.id})`);
       return event;
@@ -170,4 +165,3 @@ export class PaymentGatewayService {
     return !!this.stripe && !!process.env.STRIPE_SECRET_KEY;
   }
 }
-

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, ConflictException } from '@nestjs/common';
-import { CreatePermissionHandler } from './create-permission.handler';
-import { CreatePermissionRequest } from './create-permission.request';
+import { CreatePermissionHandler } from '../create-permission/create-permission.handler';
+import { CreatePermissionRequest } from '../create-permission/create-permission.request';
 import { IPermissionRepository, Permission } from '@libs/domain';
 import { PermissionService } from '../permission.service';
 
@@ -201,4 +201,3 @@ describe('CreatePermissionHandler', () => {
     });
   });
 });
-

@@ -45,4 +45,3 @@ export class GoalMapper {
     return entity;
   }
 }
-

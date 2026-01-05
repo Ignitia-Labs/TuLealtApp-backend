@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsNotEmpty, Min, IsOptional, IsDateString, IsString, IsEnum } from 'class-validator';
+import {
+  IsNumber,
+  IsNotEmpty,
+  Min,
+  IsOptional,
+  IsDateString,
+  IsString,
+  IsEnum,
+} from 'class-validator';
 
 /**
  * DTO de request para crear un ciclo de facturación
@@ -86,4 +94,3 @@ export class CreateBillingCycleRequest {
   @Min(0)
   discountApplied?: number;
 }
-

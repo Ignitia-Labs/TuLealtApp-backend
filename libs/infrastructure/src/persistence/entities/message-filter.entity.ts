@@ -37,4 +37,3 @@ export class MessageFilterEntity {
   @CreateDateColumn()
   createdAt: Date;
 }
-

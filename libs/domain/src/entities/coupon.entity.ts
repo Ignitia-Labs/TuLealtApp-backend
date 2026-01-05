@@ -128,8 +128,7 @@ export class Coupon {
    */
   incrementUses(): Coupon {
     const newUses = this.currentUses + 1;
-    const newStatus =
-      this.maxUses !== null && newUses >= this.maxUses ? 'expired' : this.status;
+    const newStatus = this.maxUses !== null && newUses >= this.maxUses ? 'expired' : this.status;
     return new Coupon(
       this.id,
       this.code,
@@ -151,4 +150,3 @@ export class Coupon {
     );
   }
 }
-

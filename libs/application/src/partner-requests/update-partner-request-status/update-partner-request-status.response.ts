@@ -33,12 +33,7 @@ export class UpdatePartnerRequestStatusResponse {
   })
   lastUpdated: string;
 
-  constructor(
-    id: number,
-    status: string,
-    assignedTo: number | null,
-    lastUpdated: Date,
-  ) {
+  constructor(id: number, status: string, assignedTo: number | null, lastUpdated: Date) {
     this.id = id;
     this.status = status;
     this.assignedTo = assignedTo;

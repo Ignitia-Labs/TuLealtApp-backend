@@ -241,4 +241,3 @@ export class GetBillingCycleResponse {
     this.updatedAt = updatedAt;
   }
 }
-

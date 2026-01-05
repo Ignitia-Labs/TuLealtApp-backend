@@ -90,4 +90,3 @@ export class UpdatePermissionResponse {
     this.updatedAt = updatedAt;
   }
 }
-

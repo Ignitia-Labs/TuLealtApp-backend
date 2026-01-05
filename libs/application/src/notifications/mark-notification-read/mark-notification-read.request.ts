@@ -15,4 +15,3 @@ export class MarkNotificationReadRequest {
   @Min(1)
   notificationId: number;
 }
-

@@ -63,4 +63,3 @@ export class GetTransactionsHandler {
     return new GetTransactionsResponse(transactionDtos, total);
   }
 }
-

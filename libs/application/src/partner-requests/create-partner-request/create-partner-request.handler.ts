@@ -17,9 +17,7 @@ export class CreatePartnerRequestHandler {
     // Validar que el email no exista en otra solicitud pendiente o en progreso
     const existingRequests = await this.partnerRequestRepository.findAll();
     const existingRequestByEmail = existingRequests.find(
-      (r) =>
-        r.email === request.email &&
-        (r.status === 'pending' || r.status === 'in-progress'),
+      (r) => r.email === request.email && (r.status === 'pending' || r.status === 'in-progress'),
     );
 
     if (existingRequestByEmail) {

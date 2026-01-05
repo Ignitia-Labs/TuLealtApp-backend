@@ -91,4 +91,3 @@ export class CustomerMembershipEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

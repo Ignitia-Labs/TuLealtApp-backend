@@ -168,4 +168,3 @@ export class CreateSubscriptionAlertRequest {
   @IsOptional()
   notifyPush?: boolean;
 }
-

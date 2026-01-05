@@ -37,7 +37,8 @@ export class GetSubscriptionsRequest {
   planType?: 'esencia' | 'conecta' | 'inspira';
 
   @ApiProperty({
-    description: 'Número de página. Si no se proporciona, retorna todos los resultados sin paginación',
+    description:
+      'Número de página. Si no se proporciona, retorna todos los resultados sin paginación',
     example: 1,
     type: Number,
     required: false,
@@ -48,7 +49,8 @@ export class GetSubscriptionsRequest {
   page?: number;
 
   @ApiProperty({
-    description: 'Cantidad de elementos por página. Si no se proporciona junto con page, retorna todos los resultados sin paginación',
+    description:
+      'Cantidad de elementos por página. Si no se proporciona junto con page, retorna todos los resultados sin paginación',
     example: 10,
     type: Number,
     required: false,
@@ -58,4 +60,3 @@ export class GetSubscriptionsRequest {
   @Min(1)
   limit?: number;
 }
-

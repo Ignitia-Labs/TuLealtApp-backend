@@ -110,7 +110,7 @@ export class CustomerMembershipDto {
 
   @ApiProperty({
     description: 'Total gastado en este tenant',
-    example: 2500.50,
+    example: 2500.5,
     type: Number,
   })
   totalSpent: number;
@@ -224,4 +224,3 @@ export class CustomerMembershipDto {
     this.updatedAt = updatedAt;
   }
 }
-

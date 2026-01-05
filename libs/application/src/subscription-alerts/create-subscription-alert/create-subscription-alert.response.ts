@@ -71,4 +71,3 @@ export class CreateSubscriptionAlertResponse {
     this.createdAt = createdAt;
   }
 }
-

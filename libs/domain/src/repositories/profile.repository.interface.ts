@@ -58,4 +58,3 @@ export interface IProfileRepository {
    */
   findPermissionsByProfileId(profileId: number): Promise<string[]>;
 }
-

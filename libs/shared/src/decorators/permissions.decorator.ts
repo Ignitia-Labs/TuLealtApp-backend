@@ -27,4 +27,3 @@ export const PERMISSIONS_KEY = 'permissions';
  * async adminOnly() { ... }
  */
 export const Permissions = (...permissions: string[]) => SetMetadata(PERMISSIONS_KEY, permissions);
-

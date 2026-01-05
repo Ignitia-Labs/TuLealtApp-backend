@@ -32,4 +32,3 @@ export class AssignProfileToUserRequest {
   @IsNotEmpty()
   assignedBy: number;
 }
-

@@ -27,4 +27,3 @@ export class DeleteCatalogHandler {
     return new DeleteCatalogResponse('Catalog deleted successfully', request.catalogId);
   }
 }
-

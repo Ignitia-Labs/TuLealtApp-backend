@@ -1,11 +1,4 @@
-import {
-  IsNotEmpty,
-  IsString,
-  IsEnum,
-  IsOptional,
-  IsArray,
-  IsBoolean,
-} from 'class-validator';
+import { IsNotEmpty, IsString, IsEnum, IsOptional, IsArray, IsBoolean } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { MessageTemplateType } from '@libs/domain';
 
@@ -69,4 +62,3 @@ export class CreateTemplateRequest {
   @IsOptional()
   isActive?: boolean;
 }
-

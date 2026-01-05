@@ -105,8 +105,7 @@ export class PartnerStaffAssignmentsController {
   @Get()
   @ApiOperation({
     summary: 'Obtener asignaciones staff-partner',
-    description:
-      'Obtiene la lista de asignaciones con filtros opcionales por partner o staff',
+    description: 'Obtiene la lista de asignaciones con filtros opcionales por partner o staff',
   })
   @ApiQuery({
     name: 'partnerId',
@@ -141,9 +140,7 @@ export class PartnerStaffAssignmentsController {
     description: 'No tiene permisos',
     type: ForbiddenErrorResponseDto,
   })
-  async get(
-    @Query() query: any,
-  ): Promise<GetPartnerStaffAssignmentsResponse> {
+  async get(@Query() query: any): Promise<GetPartnerStaffAssignmentsResponse> {
     const request = new GetPartnerStaffAssignmentsRequest();
     if (query.partnerId) {
       request.partnerId = Number(query.partnerId);
@@ -165,8 +162,7 @@ export class PartnerStaffAssignmentsController {
   @Patch(':id')
   @ApiOperation({
     summary: 'Actualizar una asignación staff-partner',
-    description:
-      'Actualiza una asignación existente (porcentaje, fechas, estado activo)',
+    description: 'Actualiza una asignación existente (porcentaje, fechas, estado activo)',
   })
   @ApiParam({
     name: 'id',
@@ -316,4 +312,3 @@ export class PartnerStaffAssignmentsController {
     return this.getHandler.execute(request);
   }
 }
-

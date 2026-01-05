@@ -76,4 +76,3 @@ export class PricingPlanLimits {
     return this.maxCustomers === -1 || currentCustomersCount < this.maxCustomers;
   }
 }
-

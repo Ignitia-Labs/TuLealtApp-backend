@@ -21,10 +21,7 @@ export class GetRecipientsHandler {
     private readonly partnerRepository: IPartnerRepository,
   ) {}
 
-  async execute(
-    messageId: number,
-    request: GetRecipientsRequest,
-  ): Promise<GetRecipientsResponse> {
+  async execute(messageId: number, request: GetRecipientsRequest): Promise<GetRecipientsResponse> {
     // Verificar que el mensaje exista
     const message = await this.messageRepository.findById(messageId);
     if (!message) {
@@ -32,10 +29,7 @@ export class GetRecipientsHandler {
     }
 
     // Obtener destinatarios
-    const recipients = await this.recipientRepository.findByMessageId(
-      messageId,
-      request.status,
-    );
+    const recipients = await this.recipientRepository.findByMessageId(messageId, request.status);
 
     // Enriquecer con información del partner
     const recipientDtos = await Promise.all(
@@ -58,4 +52,3 @@ export class GetRecipientsHandler {
     return new GetRecipientsResponse(recipientDtos, recipientDtos.length);
   }
 }
-

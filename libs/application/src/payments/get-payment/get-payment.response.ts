@@ -366,4 +366,3 @@ export class GetPaymentResponse {
     this.updatedAt = updatedAt;
   }
 }
-

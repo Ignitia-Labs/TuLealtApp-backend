@@ -15,7 +15,10 @@ export class UpdatePermissionHandler {
     private readonly permissionRepository: IPermissionRepository,
   ) {}
 
-  async execute(permissionId: number, request: UpdatePermissionRequest): Promise<UpdatePermissionResponse> {
+  async execute(
+    permissionId: number,
+    request: UpdatePermissionRequest,
+  ): Promise<UpdatePermissionResponse> {
     // Buscar el permiso existente
     const existingPermission = await this.permissionRepository.findById(permissionId);
 
@@ -53,4 +56,3 @@ export class UpdatePermissionHandler {
     );
   }
 }
-

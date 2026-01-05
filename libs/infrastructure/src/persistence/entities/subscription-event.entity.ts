@@ -87,4 +87,3 @@ export class SubscriptionEventEntity {
   @CreateDateColumn()
   createdAt: Date;
 }
-

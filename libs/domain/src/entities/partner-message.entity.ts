@@ -3,12 +3,7 @@
  * Representa un mensaje enviado a partners
  * No depende de frameworks ni librerías externas
  */
-export type MessageType =
-  | 'urgent'
-  | 'informative'
-  | 'promotional'
-  | 'payment_reminder'
-  | 'general';
+export type MessageType = 'urgent' | 'informative' | 'promotional' | 'payment_reminder' | 'general';
 
 export type MessageChannel = 'notification' | 'email' | 'whatsapp' | 'sms';
 
@@ -179,4 +174,3 @@ export class PartnerMessage {
     return this.status === 'draft';
   }
 }
-

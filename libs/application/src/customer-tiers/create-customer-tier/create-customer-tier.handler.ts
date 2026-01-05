@@ -69,4 +69,3 @@ export class CreateCustomerTierHandler {
     return new CreateCustomerTierResponse(tierDto);
   }
 }
-

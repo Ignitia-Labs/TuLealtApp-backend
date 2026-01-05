@@ -91,4 +91,3 @@ export class CreatePartnerStaffAssignmentResponse {
     this.createdAt = createdAt;
   }
 }
-

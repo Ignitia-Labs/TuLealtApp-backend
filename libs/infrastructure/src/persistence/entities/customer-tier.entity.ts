@@ -72,4 +72,3 @@ export class CustomerTierEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

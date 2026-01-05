@@ -1,7 +1,4 @@
-import {
-  MessageRecipient,
-  RecipientStatus,
-} from '../entities/message-recipient.entity';
+import { MessageRecipient, RecipientStatus } from '../entities/message-recipient.entity';
 
 /**
  * Interfaz del repositorio de MessageRecipient
@@ -16,10 +13,7 @@ export interface IMessageRecipientRepository {
   /**
    * Busca destinatarios de un mensaje específico
    */
-  findByMessageId(
-    messageId: number,
-    status?: RecipientStatus,
-  ): Promise<MessageRecipient[]>;
+  findByMessageId(messageId: number, status?: RecipientStatus): Promise<MessageRecipient[]>;
 
   /**
    * Busca destinatarios de un partner específico
@@ -29,10 +23,7 @@ export interface IMessageRecipientRepository {
   /**
    * Busca un destinatario específico por mensaje y partner
    */
-  findByMessageAndPartner(
-    messageId: number,
-    partnerId: number,
-  ): Promise<MessageRecipient | null>;
+  findByMessageAndPartner(messageId: number, partnerId: number): Promise<MessageRecipient | null>;
 
   /**
    * Guarda múltiples destinatarios
@@ -59,4 +50,3 @@ export interface IMessageRecipientRepository {
     failed: number;
   }>;
 }
-

@@ -1,10 +1,4 @@
-import {
-  MigrationInterface,
-  QueryRunner,
-  TableColumn,
-  TableForeignKey,
-  TableIndex,
-} from 'typeorm';
+import { MigrationInterface, QueryRunner, TableColumn, TableForeignKey, TableIndex } from 'typeorm';
 
 /**
  * Migración para eliminar campos obsoletos de la tabla users
@@ -178,8 +172,3 @@ export class RemoveCustomerFieldsFromUsers1768200000000 implements MigrationInte
     }
   }
 }
-
-
-
-
-

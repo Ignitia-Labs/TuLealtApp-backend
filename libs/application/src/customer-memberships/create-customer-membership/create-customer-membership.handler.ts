@@ -36,7 +36,9 @@ export class CreateCustomerMembershipHandler {
     private readonly tierRepository: ICustomerTierRepository,
   ) {}
 
-  async execute(request: CreateCustomerMembershipRequest): Promise<CreateCustomerMembershipResponse> {
+  async execute(
+    request: CreateCustomerMembershipRequest,
+  ): Promise<CreateCustomerMembershipResponse> {
     // Validar que el usuario existe
     const user = await this.userRepository.findById(request.userId);
     if (!user) {
@@ -186,4 +188,3 @@ export class CreateCustomerMembershipHandler {
     );
   }
 }
-

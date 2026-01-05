@@ -1,10 +1,4 @@
-import {
-  MigrationInterface,
-  QueryRunner,
-  TableColumn,
-  TableForeignKey,
-  TableIndex,
-} from 'typeorm';
+import { MigrationInterface, QueryRunner, TableColumn, TableForeignKey, TableIndex } from 'typeorm';
 
 /**
  * Migración para agregar tenantId y branchId a la tabla users
@@ -159,4 +153,3 @@ export class AddTenantAndBranchToPartnerUsers1772000000000 implements MigrationI
     }
   }
 }
-

@@ -80,4 +80,3 @@ export class GetTemplatesResponse {
     this.total = total;
   }
 }
-

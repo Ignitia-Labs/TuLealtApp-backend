@@ -45,4 +45,3 @@ export class RewardTierEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

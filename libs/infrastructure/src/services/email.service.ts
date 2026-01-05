@@ -50,7 +50,9 @@ export class EmailService {
         html,
       });
 
-      this.logger.log(`Email de factura enviado a ${partnerEmail} para factura ${invoice.invoiceNumber}`);
+      this.logger.log(
+        `Email de factura enviado a ${partnerEmail} para factura ${invoice.invoiceNumber}`,
+      );
     } catch (error) {
       this.logger.error(`Error al enviar email de factura:`, error);
       // No lanzar error para no interrumpir el flujo principal
@@ -75,7 +77,9 @@ export class EmailService {
         html,
       });
 
-      this.logger.log(`Email de recordatorio enviado a ${partnerEmail} para factura ${invoice.invoiceNumber}`);
+      this.logger.log(
+        `Email de recordatorio enviado a ${partnerEmail} para factura ${invoice.invoiceNumber}`,
+      );
     } catch (error) {
       this.logger.error(`Error al enviar email de recordatorio:`, error);
     }
@@ -92,11 +96,7 @@ export class EmailService {
   ): Promise<void> {
     try {
       const subject = `Pago recibido: Factura ${invoice.invoiceNumber}`;
-      const html = this.generatePaymentReceivedEmailTemplate(
-        invoice,
-        paymentAmount,
-        paymentMethod,
-      );
+      const html = this.generatePaymentReceivedEmailTemplate(invoice, paymentAmount, paymentMethod);
 
       await this.sendEmail({
         to: partnerEmail,
@@ -104,7 +104,9 @@ export class EmailService {
         html,
       });
 
-      this.logger.log(`Email de pago recibido enviado a ${partnerEmail} para factura ${invoice.invoiceNumber}`);
+      this.logger.log(
+        `Email de pago recibido enviado a ${partnerEmail} para factura ${invoice.invoiceNumber}`,
+      );
     } catch (error) {
       this.logger.error(`Error al enviar email de pago recibido:`, error);
     }
@@ -298,4 +300,3 @@ export class EmailService {
     return translations[method] || method;
   }
 }
-

@@ -23,4 +23,3 @@ export class DeleteCustomerTierResponse {
     this.id = id;
   }
 }
-

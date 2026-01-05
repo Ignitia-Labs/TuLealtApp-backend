@@ -14,4 +14,3 @@ export class GetRecipientsRequest {
   @IsOptional()
   status?: RecipientStatus;
 }
-

@@ -33,9 +33,7 @@ export class PartnerStaffAssignment {
   ): PartnerStaffAssignment {
     // Validar porcentaje
     if (commissionPercent < 0 || commissionPercent > 100) {
-      throw new Error(
-        `Commission percent must be between 0 and 100, got ${commissionPercent}`,
-      );
+      throw new Error(`Commission percent must be between 0 and 100, got ${commissionPercent}`);
     }
 
     // Validar fechas
@@ -116,14 +114,9 @@ export class PartnerStaffAssignment {
   /**
    * Método de dominio para actualizar el porcentaje de comisión
    */
-  updateCommissionPercent(
-    newPercent: number,
-    notes: string | null = null,
-  ): PartnerStaffAssignment {
+  updateCommissionPercent(newPercent: number, notes: string | null = null): PartnerStaffAssignment {
     if (newPercent < 0 || newPercent > 100) {
-      throw new Error(
-        `Commission percent must be between 0 and 100, got ${newPercent}`,
-      );
+      throw new Error(`Commission percent must be between 0 and 100, got ${newPercent}`);
     }
 
     return new PartnerStaffAssignment(
@@ -176,10 +169,7 @@ export class PartnerStaffAssignment {
     }
 
     // Si son diferentes partners o staff, no hay solapamiento
-    if (
-      this.partnerId !== other.partnerId ||
-      this.staffUserId !== other.staffUserId
-    ) {
+    if (this.partnerId !== other.partnerId || this.staffUserId !== other.staffUserId) {
       return false;
     }
 
@@ -198,4 +188,3 @@ export class PartnerStaffAssignment {
     return thisStart < otherEnd && otherStart < thisEnd;
   }
 }
-

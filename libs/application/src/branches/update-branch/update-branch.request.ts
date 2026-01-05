@@ -81,4 +81,3 @@ export class UpdateBranchRequest {
   @IsIn(['active', 'inactive', 'closed'])
   status?: 'active' | 'inactive' | 'closed';
 }
-

@@ -48,4 +48,3 @@ export class GetBranchesByTenantHandler {
     return new GetBranchesByTenantResponse(branchResponses);
   }
 }
-

@@ -31,4 +31,3 @@ export class CreateCustomerTierResponse {
     this.tier = tier;
   }
 }
-

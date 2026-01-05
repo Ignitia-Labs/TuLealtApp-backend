@@ -82,7 +82,8 @@ export class CreatePartnerRequestRequest {
   plan: string;
 
   @ApiProperty({
-    description: 'ID del plan de precios (referencia a pricing_plans.id). Este es el campo principal que se usará para la suscripción.',
+    description:
+      'ID del plan de precios (referencia a pricing_plans.id). Este es el campo principal que se usará para la suscripción.',
     example: 1,
     type: Number,
     required: false,

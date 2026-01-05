@@ -33,10 +33,7 @@ export class UpdateRecipientStatusHandler {
     }
 
     // Buscar el destinatario
-    const recipient = await this.recipientRepository.findByMessageAndPartner(
-      messageId,
-      partnerId,
-    );
+    const recipient = await this.recipientRepository.findByMessageAndPartner(messageId, partnerId);
 
     if (!recipient) {
       throw new NotFoundException(
@@ -45,9 +42,7 @@ export class UpdateRecipientStatusHandler {
     }
 
     // Parsear fechas si están presentes
-    const deliveredAt = request.deliveredAt
-      ? new Date(request.deliveredAt)
-      : undefined;
+    const deliveredAt = request.deliveredAt ? new Date(request.deliveredAt) : undefined;
     const readAt = request.readAt ? new Date(request.readAt) : undefined;
 
     // Validar fechas
@@ -108,4 +103,3 @@ export class UpdateRecipientStatusHandler {
     );
   }
 }
-

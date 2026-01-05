@@ -57,4 +57,3 @@ export class NotificationEntity {
   @CreateDateColumn()
   createdAt: Date;
 }
-

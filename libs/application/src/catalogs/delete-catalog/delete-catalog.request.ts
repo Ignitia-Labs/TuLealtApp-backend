@@ -4,4 +4,3 @@
 export class DeleteCatalogRequest {
   catalogId: number;
 }
-

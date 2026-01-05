@@ -148,4 +148,3 @@ export class CreateMessageRequest {
   @IsOptional()
   filters?: Record<string, any>;
 }
-

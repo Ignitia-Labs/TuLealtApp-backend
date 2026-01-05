@@ -1,10 +1,4 @@
-import {
-  MigrationInterface,
-  QueryRunner,
-  Table,
-  TableForeignKey,
-  TableIndex,
-} from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex } from 'typeorm';
 
 export class CreateCommunicationTables1770600000000 implements MigrationInterface {
   name = 'CreateCommunicationTables1770600000000';
@@ -505,10 +499,7 @@ export class CreateCommunicationTables1770600000000 implements MigrationInterfac
     }
 
     // Eliminar índices de message_recipients
-    await queryRunner.dropIndex(
-      'message_recipients',
-      'idx_message_recipients_partner_status',
-    );
+    await queryRunner.dropIndex('message_recipients', 'idx_message_recipients_partner_status');
     await queryRunner.dropIndex('message_recipients', 'idx_message_recipients_read');
     await queryRunner.dropIndex('message_recipients', 'idx_message_recipients_status');
     await queryRunner.dropIndex('message_recipients', 'idx_message_recipients_partner');
@@ -556,4 +547,3 @@ export class CreateCommunicationTables1770600000000 implements MigrationInterfac
     await queryRunner.dropTable('message_templates', true);
   }
 }
-

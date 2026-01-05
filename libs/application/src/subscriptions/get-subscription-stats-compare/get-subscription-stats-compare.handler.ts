@@ -1,6 +1,10 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { GetSubscriptionStatsCompareRequest } from './get-subscription-stats-compare.request';
-import { GetSubscriptionStatsCompareResponse, SubscriptionStatsComparison, ComparisonMetrics } from './get-subscription-stats-compare.response';
+import {
+  GetSubscriptionStatsCompareResponse,
+  SubscriptionStatsComparison,
+  ComparisonMetrics,
+} from './get-subscription-stats-compare.response';
 import { GetSubscriptionStatsHandler } from '../get-subscription-stats/get-subscription-stats.handler';
 import { GetSubscriptionStatsRequest } from '../get-subscription-stats/get-subscription-stats.request';
 
@@ -58,11 +62,11 @@ export class GetSubscriptionStatsCompareHandler {
   /**
    * Calcula las comparaciones entre dos períodos
    */
-  private calculateComparison(
-    current: any,
-    previous: any,
-  ): SubscriptionStatsComparison {
-    const calculateComparison = (currentValue: number, previousValue: number): ComparisonMetrics => {
+  private calculateComparison(current: any, previous: any): SubscriptionStatsComparison {
+    const calculateComparison = (
+      currentValue: number,
+      previousValue: number,
+    ): ComparisonMetrics => {
       const absolute = currentValue - previousValue;
       const percentage =
         previousValue !== 0 ? ((currentValue - previousValue) / previousValue) * 100 : 0;
@@ -87,4 +91,3 @@ export class GetSubscriptionStatsCompareHandler {
     );
   }
 }
-

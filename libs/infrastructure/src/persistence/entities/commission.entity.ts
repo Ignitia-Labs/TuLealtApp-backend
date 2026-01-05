@@ -117,4 +117,3 @@ export class CommissionEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

@@ -1,9 +1,5 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import {
-  IUserProfileRepository,
-  IProfileRepository,
-  IUserRepository,
-} from '@libs/domain';
+import { IUserProfileRepository, IProfileRepository, IUserRepository } from '@libs/domain';
 import { GetUserProfilesRequest } from './get-user-profiles.request';
 import { GetUserProfilesResponse, UserProfileDto } from './get-user-profiles.response';
 
@@ -54,4 +50,3 @@ export class GetUserProfilesHandler {
     return new GetUserProfilesResponse(profileDtos, profileDtos.length);
   }
 }
-

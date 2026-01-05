@@ -26,9 +26,7 @@ export class GetPendingDisbursementsHandler {
     private readonly partnerRepository: IPartnerRepository,
   ) {}
 
-  async execute(
-    request: GetPendingDisbursementsRequest,
-  ): Promise<GetPendingDisbursementsResponse> {
+  async execute(request: GetPendingDisbursementsRequest): Promise<GetPendingDisbursementsResponse> {
     const page = request.page || 1;
     const limit = request.limit || 50;
 
@@ -62,10 +60,7 @@ export class GetPendingDisbursementsHandler {
     }
 
     // Agrupar por staffUserId
-    const staffMap = new Map<
-      number,
-      { commissions: any[]; staffUserId: number }
-    >();
+    const staffMap = new Map<number, { commissions: any[]; staffUserId: number }>();
 
     for (const commission of allPendingCommissions) {
       if (!staffMap.has(commission.staffUserId)) {
@@ -101,10 +96,7 @@ export class GetPendingDisbursementsHandler {
       const partnerDtos: PartnerDisbursementDto[] = await Promise.all(
         Array.from(partnerMap.entries()).map(async ([partnerId, partnerCommissions]) => {
           const partner = await this.partnerRepository.findById(partnerId);
-          const totalAmount = partnerCommissions.reduce(
-            (sum, c) => sum + c.commissionAmount,
-            0,
-          );
+          const totalAmount = partnerCommissions.reduce((sum, c) => sum + c.commissionAmount, 0);
 
           return new PartnerDisbursementDto(
             partnerId,
@@ -114,12 +106,8 @@ export class GetPendingDisbursementsHandler {
         }),
       );
 
-      const totalPendingAmount = commissions.reduce(
-        (sum, c) => sum + c.commissionAmount,
-        0,
-      );
-      const currency =
-        commissions.length > 0 ? commissions[0].currency : 'USD';
+      const totalPendingAmount = commissions.reduce((sum, c) => sum + c.commissionAmount, 0);
+      const currency = commissions.length > 0 ? commissions[0].currency : 'USD';
 
       disbursements.push(
         new PendingDisbursementDto(
@@ -141,12 +129,8 @@ export class GetPendingDisbursementsHandler {
     const paginatedDisbursements = disbursements.slice(startIndex, endIndex);
 
     // Calcular resumen
-    const totalPendingAmount = disbursements.reduce(
-      (sum, d) => sum + d.totalPendingAmount,
-      0,
-    );
-    const currency =
-      disbursements.length > 0 ? disbursements[0].currency : 'USD';
+    const totalPendingAmount = disbursements.reduce((sum, d) => sum + d.totalPendingAmount, 0);
+    const currency = disbursements.length > 0 ? disbursements[0].currency : 'USD';
 
     return new GetPendingDisbursementsResponse(
       paginatedDisbursements,
@@ -164,4 +148,3 @@ export class GetPendingDisbursementsHandler {
     );
   }
 }
-

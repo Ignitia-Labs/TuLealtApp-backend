@@ -26,4 +26,3 @@ export class GetSubscriptionTimeseriesRequest {
   @IsEnum(['day', 'week', 'month', 'quarter'])
   groupBy: 'day' | 'week' | 'month' | 'quarter';
 }
-

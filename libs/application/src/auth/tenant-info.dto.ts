@@ -29,11 +29,15 @@ export class TenantInfoDto {
   })
   status: 'active' | 'inactive' | 'suspended';
 
-  constructor(id: number, name: string, partnerId: number, status: 'active' | 'inactive' | 'suspended') {
+  constructor(
+    id: number,
+    name: string,
+    partnerId: number,
+    status: 'active' | 'inactive' | 'suspended',
+  ) {
     this.id = id;
     this.name = name;
     this.partnerId = partnerId;
     this.status = status;
   }
 }
-

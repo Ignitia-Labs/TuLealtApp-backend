@@ -50,10 +50,7 @@ export class CommissionRepository implements ICommissionRepository {
     return entities.map((entity) => CommissionMapper.toDomain(entity));
   }
 
-  async findByStaffUserId(
-    staffUserId: number,
-    filters?: CommissionFilters,
-  ): Promise<Commission[]> {
+  async findByStaffUserId(staffUserId: number, filters?: CommissionFilters): Promise<Commission[]> {
     const queryBuilder = this.commissionRepository
       .createQueryBuilder('commission')
       .where('commission.staffUserId = :staffUserId', { staffUserId });
@@ -91,10 +88,7 @@ export class CommissionRepository implements ICommissionRepository {
     return entities.map((entity) => CommissionMapper.toDomain(entity));
   }
 
-  async findByPartnerId(
-    partnerId: number,
-    filters?: CommissionFilters,
-  ): Promise<Commission[]> {
+  async findByPartnerId(partnerId: number, filters?: CommissionFilters): Promise<Commission[]> {
     const queryBuilder = this.commissionRepository
       .createQueryBuilder('commission')
       .where('commission.partnerId = :partnerId', { partnerId });
@@ -214,10 +208,7 @@ export class CommissionRepository implements ICommissionRepository {
     return result?.total ? Number(result.total) : 0;
   }
 
-  async countByStaffUserId(
-    staffUserId: number,
-    filters?: CommissionFilters,
-  ): Promise<number> {
+  async countByStaffUserId(staffUserId: number, filters?: CommissionFilters): Promise<number> {
     const queryBuilder = this.commissionRepository
       .createQueryBuilder('commission')
       .where('commission.staffUserId = :staffUserId', { staffUserId });
@@ -243,10 +234,7 @@ export class CommissionRepository implements ICommissionRepository {
     return queryBuilder.getCount();
   }
 
-  async countByPartnerId(
-    partnerId: number,
-    filters?: CommissionFilters,
-  ): Promise<number> {
+  async countByPartnerId(partnerId: number, filters?: CommissionFilters): Promise<number> {
     const queryBuilder = this.commissionRepository
       .createQueryBuilder('commission')
       .where('commission.partnerId = :partnerId', { partnerId });
@@ -472,10 +460,7 @@ export class CommissionRepository implements ICommissionRepository {
         "SUM(CASE WHEN commission.status = 'pending' THEN 1 ELSE 0 END)",
         'pendingCommissions',
       )
-      .addSelect(
-        "SUM(CASE WHEN commission.status = 'paid' THEN 1 ELSE 0 END)",
-        'paidCommissions',
-      )
+      .addSelect("SUM(CASE WHEN commission.status = 'paid' THEN 1 ELSE 0 END)", 'paidCommissions')
       .addSelect('MAX(commission.currency)', 'currency')
       .where('commission.paymentDate >= :startDate', { startDate })
       .andWhere('commission.paymentDate <= :endDate', { endDate })
@@ -494,4 +479,3 @@ export class CommissionRepository implements ICommissionRepository {
     }));
   }
 }
-

@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsNotEmpty, Min, IsOptional, IsDateString, IsArray, ValidateNested } from 'class-validator';
+import {
+  IsNumber,
+  IsNotEmpty,
+  Min,
+  IsOptional,
+  IsDateString,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 /**
@@ -200,4 +208,3 @@ export class CreateInvoiceRequest {
   @IsOptional()
   notes?: string;
 }
-

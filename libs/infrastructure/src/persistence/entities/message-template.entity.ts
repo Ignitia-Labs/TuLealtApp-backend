@@ -58,4 +58,3 @@ export class MessageTemplateEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

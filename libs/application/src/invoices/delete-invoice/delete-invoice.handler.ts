@@ -64,10 +64,6 @@ export class DeleteInvoiceHandler {
       }
     }
 
-    return new DeleteInvoiceResponse(
-      request.invoiceId,
-      'Invoice deleted successfully',
-    );
+    return new DeleteInvoiceResponse(request.invoiceId, 'Invoice deleted successfully');
   }
 }
-

@@ -153,7 +153,7 @@ export class DeleteBillingCycleHandler {
         const subscription = PartnerMapper.subscriptionToDomain(subscriptionEntity);
         this.logger.log(
           `Crédito de ${creditApplied} ${subscription.currency} revertido al eliminar billing cycle ${request.billingCycleId}. ` +
-          `El crédito disponible se recalculará dinámicamente la próxima vez que se consulte la suscripción ${subscription.id}.`,
+            `El crédito disponible se recalculará dinámicamente la próxima vez que se consulte la suscripción ${subscription.id}.`,
         );
       } else {
         this.logger.warn(
@@ -165,7 +165,9 @@ export class DeleteBillingCycleHandler {
     // 6. Eliminar la factura asociada si existe
     if (invoice) {
       await this.invoiceRepository.delete(invoice.id);
-      this.logger.log(`Factura ${invoice.id} eliminada (asociada al billing cycle ${request.billingCycleId})`);
+      this.logger.log(
+        `Factura ${invoice.id} eliminada (asociada al billing cycle ${request.billingCycleId})`,
+      );
     }
 
     // 7. Obtener la suscripción para registrar el evento antes de eliminar
@@ -218,4 +220,3 @@ export class DeleteBillingCycleHandler {
     );
   }
 }
-

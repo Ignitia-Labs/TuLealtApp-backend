@@ -19,7 +19,9 @@ export class MakeSlugNotNullAndUnique1766873100000 implements MigrationInterface
     }
 
     // Verificar que todos los registros tengan slug (no debería haber NULLs si la seed se ejecutó)
-    const nullSlugs = await queryRunner.query(`SELECT COUNT(*) as count FROM catalogs WHERE slug IS NULL`);
+    const nullSlugs = await queryRunner.query(
+      `SELECT COUNT(*) as count FROM catalogs WHERE slug IS NULL`,
+    );
     if (nullSlugs[0]?.count > 0) {
       throw new Error(
         `Cannot make slug NOT NULL: ${nullSlugs[0].count} catalog(s) have NULL slug. Please run the catalog seed first.`,
@@ -91,4 +93,3 @@ export class MakeSlugNotNullAndUnique1766873100000 implements MigrationInterface
     );
   }
 }
-

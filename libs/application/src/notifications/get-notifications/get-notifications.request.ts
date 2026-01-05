@@ -48,4 +48,3 @@ export class GetNotificationsRequest {
   @IsOptional()
   unreadOnly?: boolean;
 }
-

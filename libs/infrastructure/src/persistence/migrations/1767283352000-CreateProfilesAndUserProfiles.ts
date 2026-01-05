@@ -261,4 +261,3 @@ export class CreateProfilesAndUserProfiles1767283352000 implements MigrationInte
     }
   }
 }
-

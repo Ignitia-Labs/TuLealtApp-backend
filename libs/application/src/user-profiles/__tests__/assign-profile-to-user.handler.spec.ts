@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, ConflictException } from '@nestjs/common';
-import { AssignProfileToUserHandler } from './assign-profile-to-user.handler';
-import { AssignProfileToUserRequest } from './assign-profile-to-user.request';
+import { AssignProfileToUserHandler } from '../assign-profile-to-user/assign-profile-to-user.handler';
+import { AssignProfileToUserRequest } from '../assign-profile-to-user/assign-profile-to-user.request';
 import {
   IUserProfileRepository,
   IProfileRepository,
@@ -174,7 +174,14 @@ describe('AssignProfileToUserHandler', () => {
         1,
       );
 
-      const inactiveProfile = Profile.create('Inactive Profile', ['admin.users.view'], null, null, false, 2);
+      const inactiveProfile = Profile.create(
+        'Inactive Profile',
+        ['admin.users.view'],
+        null,
+        null,
+        false,
+        2,
+      );
 
       userRepository.findById.mockResolvedValue(user);
       profileRepository.findById.mockResolvedValue(inactiveProfile);
@@ -248,4 +255,3 @@ describe('AssignProfileToUserHandler', () => {
     });
   });
 });
-

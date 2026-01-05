@@ -19,9 +19,7 @@ export class UpdateSubscriptionUsageHandler {
     private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
   ) {}
 
-  async execute(
-    request: UpdateSubscriptionUsageRequest,
-  ): Promise<UpdateSubscriptionUsageResponse> {
+  async execute(request: UpdateSubscriptionUsageRequest): Promise<UpdateSubscriptionUsageResponse> {
     const usageEntity = await this.usageRepository.findOne({
       where: { partnerSubscriptionId: request.partnerSubscriptionId },
     });
@@ -51,4 +49,3 @@ export class UpdateSubscriptionUsageHandler {
     return new UpdateSubscriptionUsageResponse(savedEntity.id, savedEntity.updatedAt);
   }
 }
-

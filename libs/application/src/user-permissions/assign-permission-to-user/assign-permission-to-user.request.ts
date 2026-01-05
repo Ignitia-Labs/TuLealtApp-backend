@@ -23,4 +23,3 @@ export class AssignPermissionToUserRequest {
   @IsNotEmpty()
   permissionId: number;
 }
-

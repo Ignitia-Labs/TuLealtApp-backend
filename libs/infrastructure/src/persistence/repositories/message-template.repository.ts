@@ -1,11 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
-import {
-  IMessageTemplateRepository,
-  MessageTemplate,
-  MessageTemplateType,
-} from '@libs/domain';
+import { IMessageTemplateRepository, MessageTemplate, MessageTemplateType } from '@libs/domain';
 import { MessageTemplateEntity } from '../entities/message-template.entity';
 import { MessageTemplateMapper } from '../mappers/message-template.mapper';
 
@@ -76,4 +72,3 @@ export class MessageTemplateRepository implements IMessageTemplateRepository {
     await this.templateRepository.delete(id);
   }
 }
-

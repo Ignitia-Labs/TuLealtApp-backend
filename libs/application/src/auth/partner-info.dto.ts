@@ -35,7 +35,13 @@ export class PartnerInfoDto {
   })
   status: 'active' | 'suspended' | 'inactive';
 
-  constructor(id: number, name: string, domain: string, email: string, status: 'active' | 'suspended' | 'inactive') {
+  constructor(
+    id: number,
+    name: string,
+    domain: string,
+    email: string,
+    status: 'active' | 'suspended' | 'inactive',
+  ) {
     this.id = id;
     this.name = name;
     this.domain = domain;
@@ -43,4 +49,3 @@ export class PartnerInfoDto {
     this.status = status;
   }
 }
-

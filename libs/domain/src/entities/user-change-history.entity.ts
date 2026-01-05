@@ -57,4 +57,3 @@ export type UserChangeAction =
   | 'status_changed'
   | 'partner_assigned'
   | 'partner_removed';
-

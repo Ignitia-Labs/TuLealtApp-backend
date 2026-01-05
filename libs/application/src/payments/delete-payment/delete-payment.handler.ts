@@ -50,7 +50,9 @@ export class DeletePaymentHandler {
 
     if (isOriginalPayment) {
       // Buscar todos los payments derivados asociados a este payment original
-      const derivedPayments = await this.paymentRepository.findDerivedByOriginalPaymentId(payment.id);
+      const derivedPayments = await this.paymentRepository.findDerivedByOriginalPaymentId(
+        payment.id,
+      );
 
       // Eliminar cada payment derivado, revirtiendo sus impactos
       for (const derivedPayment of derivedPayments) {
@@ -98,10 +100,7 @@ export class DeletePaymentHandler {
       }
     }
 
-    return new DeletePaymentResponse(
-      request.paymentId,
-      'Payment deleted successfully',
-    );
+    return new DeletePaymentResponse(request.paymentId, 'Payment deleted successfully');
   }
 
   /**
@@ -124,7 +123,9 @@ export class DeletePaymentHandler {
       if (invoice) {
         // Buscar otros pagos asociados a esta factura
         const otherPayments = await this.paymentRepository.findByInvoiceId(payment.invoiceId);
-        const hasOtherPayments = otherPayments.some(p => p.id !== payment.id && p.status === 'paid');
+        const hasOtherPayments = otherPayments.some(
+          (p) => p.id !== payment.id && p.status === 'paid',
+        );
 
         // Solo revertir el estado si no hay otros pagos pagados
         if (!hasOtherPayments && invoice.status === 'paid') {
@@ -135,4 +136,3 @@ export class DeletePaymentHandler {
     }
   }
 }
-

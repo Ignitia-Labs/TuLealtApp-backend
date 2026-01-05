@@ -49,4 +49,3 @@ export class ProfilePermissionEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

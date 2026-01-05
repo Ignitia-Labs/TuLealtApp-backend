@@ -1,5 +1,16 @@
-import { Injectable, UnauthorizedException, Inject, NotFoundException, Optional } from '@nestjs/common';
-import { IUserRepository, IPartnerRepository, ITenantRepository, IBranchRepository } from '@libs/domain';
+import {
+  Injectable,
+  UnauthorizedException,
+  Inject,
+  NotFoundException,
+  Optional,
+} from '@nestjs/common';
+import {
+  IUserRepository,
+  IPartnerRepository,
+  ITenantRepository,
+  IBranchRepository,
+} from '@libs/domain';
 import { AuthenticatePartnerUserRequest } from './authenticate-partner-user.request';
 import { AuthenticateUserResponse } from '../authenticate-user/authenticate-user.response';
 import { JwtAuthService } from '../services/jwt.service';
@@ -147,4 +158,3 @@ export class AuthenticatePartnerUserHandler {
     throw new Error('JWT service is not available');
   }
 }
-

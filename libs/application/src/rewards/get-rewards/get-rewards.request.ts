@@ -33,4 +33,3 @@ export class GetRewardsRequest {
   @IsOptional()
   availableOnly?: boolean;
 }
-

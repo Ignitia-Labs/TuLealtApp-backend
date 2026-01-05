@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PermissionService } from './permission.service';
+import { PermissionService } from '../permission.service';
 import { IUserProfileRepository, IProfileRepository, Profile, UserProfile } from '@libs/domain';
 
 describe('PermissionService', () => {
@@ -113,18 +113,13 @@ describe('PermissionService', () => {
 
   describe('getUserPermissions', () => {
     it('should return consolidated permissions from active profiles', async () => {
-      const userProfiles = [
-        UserProfile.create(1, 1, 1, true),
-        UserProfile.create(1, 2, 1, true),
-      ];
+      const userProfiles = [UserProfile.create(1, 1, 1, true), UserProfile.create(1, 2, 1, true)];
 
       const profile1 = Profile.create('Profile 1', ['admin.users.view', 'admin.users.create']);
       const profile2 = Profile.create('Profile 2', ['admin.products.view', 'partner.orders.view']);
 
       userProfileRepository.findActiveByUserId.mockResolvedValue(userProfiles);
-      profileRepository.findById
-        .mockResolvedValueOnce(profile1)
-        .mockResolvedValueOnce(profile2);
+      profileRepository.findById.mockResolvedValueOnce(profile1).mockResolvedValueOnce(profile2);
 
       const permissions = await service.getUserPermissions(1);
 
@@ -136,18 +131,13 @@ describe('PermissionService', () => {
     });
 
     it('should remove duplicate permissions', async () => {
-      const userProfiles = [
-        UserProfile.create(1, 1, 1, true),
-        UserProfile.create(1, 2, 1, true),
-      ];
+      const userProfiles = [UserProfile.create(1, 1, 1, true), UserProfile.create(1, 2, 1, true)];
 
       const profile1 = Profile.create('Profile 1', ['admin.users.view']);
       const profile2 = Profile.create('Profile 2', ['admin.users.view', 'admin.products.view']);
 
       userProfileRepository.findActiveByUserId.mockResolvedValue(userProfiles);
-      profileRepository.findById
-        .mockResolvedValueOnce(profile1)
-        .mockResolvedValueOnce(profile2);
+      profileRepository.findById.mockResolvedValueOnce(profile1).mockResolvedValueOnce(profile2);
 
       const permissions = await service.getUserPermissions(1);
 
@@ -157,13 +147,16 @@ describe('PermissionService', () => {
     });
 
     it('should only include permissions from active profiles', async () => {
-      const userProfiles = [
-        UserProfile.create(1, 1, 1, true),
-        UserProfile.create(1, 2, 1, true),
-      ];
+      const userProfiles = [UserProfile.create(1, 1, 1, true), UserProfile.create(1, 2, 1, true)];
 
       const activeProfile = Profile.create('Active Profile', ['admin.users.view']);
-      const inactiveProfile = Profile.create('Inactive Profile', ['admin.products.view'], null, null, false);
+      const inactiveProfile = Profile.create(
+        'Inactive Profile',
+        ['admin.products.view'],
+        null,
+        null,
+        false,
+      );
 
       userProfileRepository.findActiveByUserId.mockResolvedValue(userProfiles);
       profileRepository.findById
@@ -236,18 +229,13 @@ describe('PermissionService', () => {
     });
 
     it('should consolidate permissions from multiple profiles', async () => {
-      const userProfiles = [
-        UserProfile.create(1, 1, 1, true),
-        UserProfile.create(1, 2, 1, true),
-      ];
+      const userProfiles = [UserProfile.create(1, 1, 1, true), UserProfile.create(1, 2, 1, true)];
 
       const profile1 = Profile.create('Profile 1', ['admin.users.view']);
       const profile2 = Profile.create('Profile 2', ['admin.users.create']);
 
       userProfileRepository.findActiveByUserId.mockResolvedValue(userProfiles);
-      profileRepository.findById
-        .mockResolvedValueOnce(profile1)
-        .mockResolvedValueOnce(profile2);
+      profileRepository.findById.mockResolvedValueOnce(profile1).mockResolvedValueOnce(profile2);
 
       const result1 = await service.userHasPermission(1, 'admin.users.view');
       const result2 = await service.userHasPermission(1, 'admin.users.create');
@@ -307,4 +295,3 @@ describe('PermissionService', () => {
     });
   });
 });
-

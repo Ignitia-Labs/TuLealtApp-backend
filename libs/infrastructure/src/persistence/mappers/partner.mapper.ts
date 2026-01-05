@@ -35,6 +35,7 @@ export class PartnerMapper {
       persistenceEntity.billingEmail || '',
       persistenceEntity.domain || '',
       persistenceEntity.logo || null,
+      persistenceEntity.banner || null,
       persistenceEntity.branchesNumber || 0,
       persistenceEntity.website || null,
       persistenceEntity.socialMedia || null,
@@ -59,6 +60,7 @@ export class PartnerMapper {
     entity.city = domainEntity.city;
     entity.plan = domainEntity.plan;
     entity.logo = domainEntity.logo;
+    entity.banner = domainEntity.banner;
     entity.category = domainEntity.category;
     entity.branchesNumber = domainEntity.branchesNumber;
     entity.website = domainEntity.website;

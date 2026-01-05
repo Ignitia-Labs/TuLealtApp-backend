@@ -150,8 +150,7 @@ export class SubscriptionStatsService {
    */
   calculatePaymentSuccessRate(payments: Payment[], period: Period): number {
     const periodPayments = payments.filter(
-      (payment) =>
-        payment.paymentDate >= period.startDate && payment.paymentDate <= period.endDate,
+      (payment) => payment.paymentDate >= period.startDate && payment.paymentDate <= period.endDate,
     );
 
     if (periodPayments.length === 0) {
@@ -293,4 +292,3 @@ export class SubscriptionStatsService {
     };
   }
 }
-

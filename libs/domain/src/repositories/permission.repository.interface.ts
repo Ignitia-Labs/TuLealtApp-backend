@@ -67,4 +67,3 @@ export interface IPermissionRepository {
    */
   countByModule(module: string): Promise<number>;
 }
-

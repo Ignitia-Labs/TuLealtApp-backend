@@ -50,16 +50,12 @@ export class Commission {
   ): Commission {
     // Validar que al menos uno de paymentId o billingCycleId esté presente
     if (!paymentId && !billingCycleId) {
-      throw new Error(
-        'Commission must have either paymentId or billingCycleId (or both)',
-      );
+      throw new Error('Commission must have either paymentId or billingCycleId (or both)');
     }
 
     // Validar porcentaje
     if (commissionPercent < 0 || commissionPercent > 100) {
-      throw new Error(
-        `Commission percent must be between 0 and 100, got ${commissionPercent}`,
-      );
+      throw new Error(`Commission percent must be between 0 and 100, got ${commissionPercent}`);
     }
 
     // Validar montos
@@ -71,9 +67,7 @@ export class Commission {
     const commissionAmount = (paymentAmount * commissionPercent) / 100;
 
     if (commissionAmount < 0) {
-      throw new Error(
-        `Commission amount must be >= 0, got ${commissionAmount}`,
-      );
+      throw new Error(`Commission amount must be >= 0, got ${commissionAmount}`);
     }
 
     const now = new Date();
@@ -177,4 +171,3 @@ export class Commission {
     return this.status === 'cancelled';
   }
 }
-

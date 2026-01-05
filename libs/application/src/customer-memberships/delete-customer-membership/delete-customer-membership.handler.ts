@@ -13,7 +13,9 @@ export class DeleteCustomerMembershipHandler {
     private readonly membershipRepository: ICustomerMembershipRepository,
   ) {}
 
-  async execute(request: DeleteCustomerMembershipRequest): Promise<DeleteCustomerMembershipResponse> {
+  async execute(
+    request: DeleteCustomerMembershipRequest,
+  ): Promise<DeleteCustomerMembershipResponse> {
     // Verificar que la membership existe
     const membership = await this.membershipRepository.findById(request.membershipId);
 
@@ -27,4 +29,3 @@ export class DeleteCustomerMembershipHandler {
     return new DeleteCustomerMembershipResponse(request.membershipId);
   }
 }
-

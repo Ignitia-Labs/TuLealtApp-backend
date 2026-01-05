@@ -13,4 +13,3 @@ export class DeleteProfileRequest {
   @IsNumber()
   profileId: number;
 }
-

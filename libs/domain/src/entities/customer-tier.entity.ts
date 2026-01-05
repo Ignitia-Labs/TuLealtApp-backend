@@ -97,4 +97,3 @@ export class CustomerTier {
     return this.maxPoints === null;
   }
 }
-

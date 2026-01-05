@@ -164,7 +164,8 @@ export function createSubscriptionEvent(
   } = options;
 
   const eventTitle = title || getSubscriptionEventTitle(type);
-  const eventDescription = description || getSubscriptionEventDescription(type, subscription, metadata);
+  const eventDescription =
+    description || getSubscriptionEventDescription(type, subscription, metadata);
 
   return SubscriptionEvent.create(
     subscription.id,
@@ -221,4 +222,3 @@ export async function registerSubscriptionEvent(
   const event = createSubscriptionEvent(options);
   return await repository.save(event);
 }
-

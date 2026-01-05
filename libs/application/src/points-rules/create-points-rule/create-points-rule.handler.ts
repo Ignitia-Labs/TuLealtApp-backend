@@ -45,7 +45,9 @@ export class CreatePointsRuleHandler {
     if (request.applicableDays) {
       const invalidDays = request.applicableDays.filter((day) => day < 0 || day > 6);
       if (invalidDays.length > 0) {
-        throw new BadRequestException('applicableDays must contain values between 0 (Sunday) and 6 (Saturday)');
+        throw new BadRequestException(
+          'applicableDays must contain values between 0 (Sunday) and 6 (Saturday)',
+        );
       }
     }
 
@@ -104,4 +106,3 @@ export class CreatePointsRuleHandler {
     return hours * 60 + minutes;
   }
 }
-

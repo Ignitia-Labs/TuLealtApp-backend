@@ -33,4 +33,3 @@ export class CreatePointsRuleResponse {
     this.rule = rule;
   }
 }
-

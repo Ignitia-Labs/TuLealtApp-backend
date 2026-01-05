@@ -128,4 +128,3 @@ export class GetSubscriptionStatsCompareResponse {
     this.comparison = comparison;
   }
 }
-

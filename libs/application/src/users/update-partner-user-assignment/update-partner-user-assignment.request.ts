@@ -35,4 +35,3 @@ export class UpdatePartnerUserAssignmentRequest {
   @IsOptional()
   branchId?: number | null;
 }
-

@@ -60,4 +60,3 @@ export class GetTransactionsRequest {
   @Min(1)
   membershipId?: number;
 }
-

@@ -60,6 +60,9 @@ export class PartnerEntity {
   @Column('text', { nullable: true })
   logo: string | null;
 
+  @Column('text', { nullable: true })
+  banner: string | null;
+
   @Column('varchar', { length: 100 })
   category: string;
 

@@ -119,14 +119,16 @@ export class SubscriptionsController {
     name: 'page',
     required: false,
     type: Number,
-    description: 'Número de página. Si no se proporciona junto con limit, retorna todos los resultados sin paginación',
+    description:
+      'Número de página. Si no se proporciona junto con limit, retorna todos los resultados sin paginación',
     example: 1,
   })
   @ApiQuery({
     name: 'limit',
     required: false,
     type: Number,
-    description: 'Cantidad de elementos por página. Si no se proporciona junto con page, retorna todos los resultados sin paginación',
+    description:
+      'Cantidad de elementos por página. Si no se proporciona junto con page, retorna todos los resultados sin paginación',
     example: 10,
   })
   @ApiResponse({
@@ -317,7 +319,8 @@ export class SubscriptionsController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Obtener eventos de una suscripción específica',
-    description: 'Obtiene una lista paginada de eventos de una suscripción específica con filtros opcionales. Las fechas deben estar en formato YYYY-MM-DD (ej: 2024-01-01)',
+    description:
+      'Obtiene una lista paginada de eventos de una suscripción específica con filtros opcionales. Las fechas deben estar en formato YYYY-MM-DD (ej: 2024-01-01)',
   })
   @ApiParam({
     name: 'id',
@@ -470,9 +473,7 @@ export class SubscriptionsController {
       error: 'Internal Server Error',
     },
   })
-  async getSubscription(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<GetSubscriptionResponse> {
+  async getSubscription(@Param('id', ParseIntPipe) id: number): Promise<GetSubscriptionResponse> {
     const request = new GetSubscriptionRequest();
     request.subscriptionId = id;
     return this.getSubscriptionHandler.execute(request);
@@ -699,7 +700,8 @@ export class SubscriptionsController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Obtener eventos de suscripciones',
-    description: 'Obtiene una lista paginada de eventos de suscripciones con filtros opcionales. Las fechas deben estar en formato YYYY-MM-DD (ej: 2024-01-01)',
+    description:
+      'Obtiene una lista paginada de eventos de suscripciones con filtros opcionales. Las fechas deben estar en formato YYYY-MM-DD (ej: 2024-01-01)',
   })
   @ApiBody({
     type: GetSubscriptionEventsRequest,
@@ -742,7 +744,8 @@ export class SubscriptionsController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Comparar estadísticas de suscripciones entre períodos',
-    description: 'Compara estadísticas de suscripciones entre el período actual y un período anterior',
+    description:
+      'Compara estadísticas de suscripciones entre el período actual y un período anterior',
   })
   @ApiQuery({
     name: 'currentStartDate',
@@ -863,4 +866,3 @@ export class SubscriptionsController {
     return this.getSubscriptionTimeseriesHandler.execute(query);
   }
 }
-

@@ -1,11 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  IMessageRecipientRepository,
-  MessageRecipient,
-  RecipientStatus,
-} from '@libs/domain';
+import { IMessageRecipientRepository, MessageRecipient, RecipientStatus } from '@libs/domain';
 import { MessageRecipientEntity } from '../entities/message-recipient.entity';
 import { MessageRecipientMapper } from '../mappers/message-recipient.mapper';
 
@@ -31,10 +27,7 @@ export class MessageRecipientRepository implements IMessageRecipientRepository {
     return MessageRecipientMapper.toDomain(entity);
   }
 
-  async findByMessageId(
-    messageId: number,
-    status?: RecipientStatus,
-  ): Promise<MessageRecipient[]> {
+  async findByMessageId(messageId: number, status?: RecipientStatus): Promise<MessageRecipient[]> {
     const where: any = { messageId };
     if (status) {
       where.status = status;
@@ -73,9 +66,7 @@ export class MessageRecipientRepository implements IMessageRecipientRepository {
   }
 
   async saveMany(recipients: MessageRecipient[]): Promise<MessageRecipient[]> {
-    const entities = recipients.map((recipient) =>
-      MessageRecipientMapper.toPersistence(recipient),
-    );
+    const entities = recipients.map((recipient) => MessageRecipientMapper.toPersistence(recipient));
     const savedEntities = await this.recipientRepository.save(entities);
     return savedEntities.map((entity) => MessageRecipientMapper.toDomain(entity));
   }
@@ -139,4 +130,3 @@ export class MessageRecipientRepository implements IMessageRecipientRepository {
     return result;
   }
 }
-

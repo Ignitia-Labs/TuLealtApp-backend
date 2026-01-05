@@ -1,9 +1,5 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import {
-  IUserPermissionRepository,
-  IPermissionRepository,
-  IUserRepository,
-} from '@libs/domain';
+import { IUserPermissionRepository, IPermissionRepository, IUserRepository } from '@libs/domain';
 import { GetPermissionUsersRequest } from './get-permission-users.request';
 import { GetPermissionUsersResponse, PermissionUserDto } from './get-permission-users.response';
 
@@ -55,4 +51,3 @@ export class GetPermissionUsersHandler {
     return new GetPermissionUsersResponse(userDtos, userDtos.length);
   }
 }
-

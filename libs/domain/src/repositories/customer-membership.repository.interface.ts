@@ -56,4 +56,3 @@ export interface ICustomerMembershipRepository {
    */
   countByTenantId(tenantId: number): Promise<number>;
 }
-

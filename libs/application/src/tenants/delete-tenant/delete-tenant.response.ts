@@ -23,4 +23,3 @@ export class DeleteTenantResponse {
     this.id = id;
   }
 }
-

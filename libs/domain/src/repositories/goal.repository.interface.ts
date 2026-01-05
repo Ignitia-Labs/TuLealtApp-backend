@@ -30,4 +30,3 @@ export interface IGoalRepository {
    */
   delete(id: number): Promise<void>;
 }
-

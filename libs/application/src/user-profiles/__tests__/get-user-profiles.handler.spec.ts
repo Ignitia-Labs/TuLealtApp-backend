@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { GetUserProfilesHandler } from './get-user-profiles.handler';
-import { GetUserProfilesRequest } from './get-user-profiles.request';
+import { GetUserProfilesHandler } from '../get-user-profiles/get-user-profiles.handler';
+import { GetUserProfilesRequest } from '../get-user-profiles/get-user-profiles.request';
 import {
   IUserProfileRepository,
   IProfileRepository,
@@ -104,14 +104,26 @@ describe('GetUserProfilesHandler', () => {
         UserProfile.create(1, 2, 2, false, 2),
       ];
 
-      const profile1 = Profile.create('Profile 1', ['admin.users.view'], 'Description 1', null, true, 1);
-      const profile2 = Profile.create('Profile 2', ['admin.products.view'], 'Description 2', null, true, 2);
+      const profile1 = Profile.create(
+        'Profile 1',
+        ['admin.users.view'],
+        'Description 1',
+        null,
+        true,
+        1,
+      );
+      const profile2 = Profile.create(
+        'Profile 2',
+        ['admin.products.view'],
+        'Description 2',
+        null,
+        true,
+        2,
+      );
 
       userRepository.findById.mockResolvedValue(user);
       userProfileRepository.findByUserId.mockResolvedValue(assignments);
-      profileRepository.findById
-        .mockResolvedValueOnce(profile1)
-        .mockResolvedValueOnce(profile2);
+      profileRepository.findById.mockResolvedValueOnce(profile1).mockResolvedValueOnce(profile2);
 
       const result = await handler.execute(request);
 
@@ -182,13 +194,18 @@ describe('GetUserProfilesHandler', () => {
       ];
 
       const profile1 = Profile.create('Active Profile', ['admin.users.view'], null, null, true, 1);
-      const profile2 = Profile.create('Inactive Profile', ['admin.products.view'], null, null, true, 2);
+      const profile2 = Profile.create(
+        'Inactive Profile',
+        ['admin.products.view'],
+        null,
+        null,
+        true,
+        2,
+      );
 
       userRepository.findById.mockResolvedValue(user);
       userProfileRepository.findByUserId.mockResolvedValue(assignments);
-      profileRepository.findById
-        .mockResolvedValueOnce(profile1)
-        .mockResolvedValueOnce(profile2);
+      profileRepository.findById.mockResolvedValueOnce(profile1).mockResolvedValueOnce(profile2);
 
       const result = await handler.execute(request);
 
@@ -198,4 +215,3 @@ describe('GetUserProfilesHandler', () => {
     });
   });
 });
-

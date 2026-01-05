@@ -68,4 +68,3 @@ export class GetStatsResponse {
     this.messagesByChannel = messagesByChannel;
   }
 }
-

@@ -54,8 +54,7 @@ export class GetStatsHandler {
       messagesByType[message.type] = (messagesByType[message.type] || 0) + 1;
 
       // Contar por canal
-      messagesByChannel[message.channel] =
-        (messagesByChannel[message.channel] || 0) + 1;
+      messagesByChannel[message.channel] = (messagesByChannel[message.channel] || 0) + 1;
 
       // Obtener estadísticas de entrega
       const stats = await this.recipientRepository.getDeliveryStats(message.id);
@@ -66,15 +65,11 @@ export class GetStatsHandler {
 
       // Calcular tiempo promedio de lectura
       if (stats.read > 0) {
-        const recipients = await this.recipientRepository.findByMessageId(
-          message.id,
-          'read',
-        );
+        const recipients = await this.recipientRepository.findByMessageId(message.id, 'read');
         for (const recipient of recipients) {
           if (recipient.deliveredAt && recipient.readAt) {
             const readTime =
-              (recipient.readAt.getTime() - recipient.deliveredAt.getTime()) /
-              (1000 * 60 * 60); // Convertir a horas
+              (recipient.readAt.getTime() - recipient.deliveredAt.getTime()) / (1000 * 60 * 60); // Convertir a horas
             totalReadTime += readTime;
             readCount++;
           }
@@ -82,10 +77,8 @@ export class GetStatsHandler {
       }
     }
 
-    const deliveryRate =
-      totalSent > 0 ? (totalDelivered / totalSent) * 100 : 0;
-    const readRate =
-      totalDelivered > 0 ? (totalRead / totalDelivered) * 100 : 0;
+    const deliveryRate = totalSent > 0 ? (totalDelivered / totalSent) * 100 : 0;
+    const readRate = totalDelivered > 0 ? (totalRead / totalDelivered) * 100 : 0;
     const averageReadTime = readCount > 0 ? totalReadTime / readCount : 0;
 
     return new GetStatsResponse(
@@ -101,4 +94,3 @@ export class GetStatsHandler {
     );
   }
 }
-

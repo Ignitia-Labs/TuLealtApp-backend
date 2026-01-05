@@ -46,4 +46,3 @@ export class GetCatalogsHandler {
     return new GetCatalogsResponse(catalogDtos);
   }
 }
-

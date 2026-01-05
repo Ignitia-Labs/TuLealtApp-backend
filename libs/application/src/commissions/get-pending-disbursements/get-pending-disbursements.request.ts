@@ -30,7 +30,7 @@ export class GetPendingDisbursementsRequest {
 
   @ApiProperty({
     description: 'Monto mínimo de comisiones pendientes',
-    example: 100.00,
+    example: 100.0,
     type: Number,
     required: false,
   })
@@ -61,4 +61,3 @@ export class GetPendingDisbursementsRequest {
   @Type(() => Number)
   limit?: number;
 }
-

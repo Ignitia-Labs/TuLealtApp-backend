@@ -13,9 +13,7 @@ export class CreateSubscriptionAlertHandler {
     private readonly alertRepository: ISubscriptionAlertRepository,
   ) {}
 
-  async execute(
-    request: CreateSubscriptionAlertRequest,
-  ): Promise<CreateSubscriptionAlertResponse> {
+  async execute(request: CreateSubscriptionAlertRequest): Promise<CreateSubscriptionAlertResponse> {
     const alert = SubscriptionAlert.create(
       request.subscriptionId,
       request.partnerId,
@@ -44,4 +42,3 @@ export class CreateSubscriptionAlertHandler {
     );
   }
 }
-

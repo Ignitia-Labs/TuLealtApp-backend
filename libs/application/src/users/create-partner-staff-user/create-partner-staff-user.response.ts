@@ -39,4 +39,3 @@ export class CreatePartnerStaffUserResponse extends CreateUserResponse {
     this.assignedProfileIds = assignedProfileIds;
   }
 }
-

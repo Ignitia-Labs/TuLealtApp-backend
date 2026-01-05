@@ -15,4 +15,3 @@ export class GetStatsRequest {
   @IsOptional()
   dateTo?: string;
 }
-

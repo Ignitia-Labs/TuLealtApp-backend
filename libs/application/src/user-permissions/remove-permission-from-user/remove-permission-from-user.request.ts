@@ -14,4 +14,3 @@ export class RemovePermissionFromUserRequest {
   @IsNotEmpty()
   userPermissionId: number;
 }
-

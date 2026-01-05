@@ -224,7 +224,8 @@ export class UserPermissionsController {
   @Permissions('admin.user-permissions.view')
   @ApiOperation({
     summary: 'Obtener usuarios con un permiso específico',
-    description: 'Obtiene todos los usuarios que tienen asignado directamente un permiso específico',
+    description:
+      'Obtiene todos los usuarios que tienen asignado directamente un permiso específico',
   })
   @ApiParam({
     name: 'permissionId',
@@ -266,4 +267,3 @@ export class UserPermissionsController {
     return this.getPermissionUsersHandler.execute(request);
   }
 }
-

@@ -23,4 +23,3 @@ export class UpdateSubscriptionUsageResponse {
     this.updatedAt = updatedAt;
   }
 }
-

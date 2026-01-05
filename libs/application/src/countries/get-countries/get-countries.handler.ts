@@ -21,4 +21,3 @@ export class GetCountriesHandler {
     return new GetCountriesResponse(countries);
   }
 }
-

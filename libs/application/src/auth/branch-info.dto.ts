@@ -29,11 +29,15 @@ export class BranchInfoDto {
   })
   status: 'active' | 'inactive' | 'closed';
 
-  constructor(id: number, name: string, tenantId: number, status: 'active' | 'inactive' | 'closed') {
+  constructor(
+    id: number,
+    name: string,
+    tenantId: number,
+    status: 'active' | 'inactive' | 'closed',
+  ) {
     this.id = id;
     this.name = name;
     this.tenantId = tenantId;
     this.status = status;
   }
 }
-

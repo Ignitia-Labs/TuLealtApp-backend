@@ -1,11 +1,4 @@
-import {
-  IsNotEmpty,
-  IsString,
-  IsNumber,
-  IsOptional,
-  MinLength,
-  Min,
-} from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, IsOptional, MinLength, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
@@ -120,4 +113,3 @@ export class CreateRewardRequest {
   @IsOptional()
   validUntil?: string | null;
 }
-

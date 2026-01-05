@@ -20,7 +20,9 @@ export class GetBillingCyclesHandler {
     let billingCycles;
 
     if (request.subscriptionId) {
-      billingCycles = await this.billingCycleRepository.findBySubscriptionId(request.subscriptionId);
+      billingCycles = await this.billingCycleRepository.findBySubscriptionId(
+        request.subscriptionId,
+      );
     } else if (request.partnerId) {
       billingCycles = await this.billingCycleRepository.findPendingByPartnerId(request.partnerId);
     } else {
@@ -30,7 +32,7 @@ export class GetBillingCyclesHandler {
     }
 
     // Obtener todas las monedas únicas para evitar múltiples consultas
-    const uniqueCurrencyCodes = [...new Set(billingCycles.map(c => c.currency))] as string[];
+    const uniqueCurrencyCodes = [...new Set(billingCycles.map((c) => c.currency))] as string[];
     const currencyMap = new Map<string, { id: number; name: string }>();
 
     await Promise.all(
@@ -39,43 +41,40 @@ export class GetBillingCyclesHandler {
         if (currency) {
           currencyMap.set(code, { id: currency.id, name: currency.name });
         }
-      })
+      }),
     );
 
-    const billingCycleDtos: GetBillingCycleResponse[] = billingCycles.map(
-      (cycle) => {
-        const currencyInfo = currencyMap.get(cycle.currency);
-        return new GetBillingCycleResponse(
-          cycle.id,
-          cycle.subscriptionId,
-          cycle.partnerId,
-          cycle.cycleNumber,
-          cycle.startDate,
-          cycle.endDate,
-          cycle.durationDays,
-          cycle.billingDate,
-          cycle.dueDate,
-          cycle.amount,
-          cycle.paidAmount,
-          cycle.totalAmount,
-          cycle.currency,
-          currencyInfo?.id ?? null,
-          currencyInfo?.name ?? null,
-          cycle.status,
-          cycle.paymentStatus,
-          cycle.paymentDate,
-          cycle.paymentMethod,
-          cycle.invoiceId,
-          cycle.invoiceNumber,
-          cycle.invoiceStatus,
-          cycle.discountApplied,
-          cycle.createdAt,
-          cycle.updatedAt,
-        );
-      }
-    );
+    const billingCycleDtos: GetBillingCycleResponse[] = billingCycles.map((cycle) => {
+      const currencyInfo = currencyMap.get(cycle.currency);
+      return new GetBillingCycleResponse(
+        cycle.id,
+        cycle.subscriptionId,
+        cycle.partnerId,
+        cycle.cycleNumber,
+        cycle.startDate,
+        cycle.endDate,
+        cycle.durationDays,
+        cycle.billingDate,
+        cycle.dueDate,
+        cycle.amount,
+        cycle.paidAmount,
+        cycle.totalAmount,
+        cycle.currency,
+        currencyInfo?.id ?? null,
+        currencyInfo?.name ?? null,
+        cycle.status,
+        cycle.paymentStatus,
+        cycle.paymentDate,
+        cycle.paymentMethod,
+        cycle.invoiceId,
+        cycle.invoiceNumber,
+        cycle.invoiceStatus,
+        cycle.discountApplied,
+        cycle.createdAt,
+        cycle.updatedAt,
+      );
+    });
 
     return new GetBillingCyclesResponse(billingCycleDtos, billingCycleDtos.length);
   }
 }
-

@@ -141,10 +141,7 @@ export class BillingCyclesController {
     description: 'Datos de entrada inválidos',
     example: {
       statusCode: 400,
-      message: [
-        'startDate must be before endDate',
-        'amount must be a positive number',
-      ],
+      message: ['startDate must be before endDate', 'amount must be a positive number'],
       error: 'Bad Request',
     },
   })
@@ -334,9 +331,7 @@ export class BillingCyclesController {
       error: 'Forbidden',
     },
   })
-  async getBillingCycle(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<GetBillingCycleResponse> {
+  async getBillingCycle(@Param('id', ParseIntPipe) id: number): Promise<GetBillingCycleResponse> {
     const request = new GetBillingCycleRequest();
     request.billingCycleId = id;
     return this.getBillingCycleHandler.execute(request);
@@ -642,10 +637,11 @@ export class BillingCyclesController {
       error: 'Internal Server Error',
     },
   })
-  async deleteBillingCycle(@Param('id', ParseIntPipe) id: number): Promise<DeleteBillingCycleResponse> {
+  async deleteBillingCycle(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<DeleteBillingCycleResponse> {
     const request = new DeleteBillingCycleRequest();
     request.billingCycleId = id;
     return this.deleteBillingCycleHandler.execute(request);
   }
 }
-

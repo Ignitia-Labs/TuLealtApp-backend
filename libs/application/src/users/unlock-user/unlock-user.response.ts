@@ -31,4 +31,3 @@ export class UnlockUserResponse {
     this.updatedAt = updatedAt;
   }
 }
-

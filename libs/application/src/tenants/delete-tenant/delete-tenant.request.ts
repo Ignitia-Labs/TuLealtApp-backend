@@ -11,4 +11,3 @@ export class DeleteTenantRequest {
   })
   tenantId: number;
 }
-

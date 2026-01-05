@@ -1,13 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsNumber,
-  IsOptional,
-  Min,
-  Max,
-  IsDateString,
-  IsString,
-  IsBoolean,
-} from 'class-validator';
+import { IsNumber, IsOptional, Min, Max, IsDateString, IsString, IsBoolean } from 'class-validator';
 
 /**
  * Request DTO para actualizar una asignación staff-partner
@@ -69,4 +61,3 @@ export class UpdatePartnerStaffAssignmentRequest {
   @IsOptional()
   notes?: string | null;
 }
-

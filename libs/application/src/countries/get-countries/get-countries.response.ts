@@ -37,4 +37,3 @@ export class GetCountriesResponse {
     this.countries = countries;
   }
 }
-

@@ -1,4 +1,12 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, IsNumber, IsOptional, IsObject } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  IsNumber,
+  IsOptional,
+  IsObject,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { CreateUserRequest } from '../create-user/create-user.request';
 
@@ -16,4 +24,3 @@ export class CreatePartnerUserRequest extends CreateUserRequest {
   @IsNotEmpty()
   partnerId: number;
 }
-

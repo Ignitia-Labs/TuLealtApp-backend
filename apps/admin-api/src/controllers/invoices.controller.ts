@@ -210,9 +210,7 @@ export class InvoicesController {
       error: 'Internal Server Error',
     },
   })
-  async createInvoice(
-    @Body() request: CreateInvoiceRequest,
-  ): Promise<CreateInvoiceResponse> {
+  async createInvoice(@Body() request: CreateInvoiceRequest): Promise<CreateInvoiceResponse> {
     return this.createInvoiceHandler.execute(request);
   }
 
@@ -427,4 +425,3 @@ export class InvoicesController {
     return this.deleteInvoiceHandler.execute(request);
   }
 }
-

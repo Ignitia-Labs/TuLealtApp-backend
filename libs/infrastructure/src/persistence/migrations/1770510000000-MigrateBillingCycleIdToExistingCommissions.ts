@@ -14,9 +14,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  * Las comisiones de pagos sin billing cycle quedarán con billingCycleId = NULL
  * (esto es correcto para pagos directos sin facturación)
  */
-export class MigrateBillingCycleIdToExistingCommissions1770510000000
-  implements MigrationInterface
-{
+export class MigrateBillingCycleIdToExistingCommissions1770510000000 implements MigrationInterface {
   name = 'MigrateBillingCycleIdToExistingCommissions1770510000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -141,4 +139,3 @@ export class MigrateBillingCycleIdToExistingCommissions1770510000000
     console.log(`✅ ${affectedRows} comisiones revertidas (billingCycleId establecido a NULL).`);
   }
 }
-

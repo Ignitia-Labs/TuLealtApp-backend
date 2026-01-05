@@ -76,4 +76,3 @@ export class CreateCountries1766753859000 implements MigrationInterface {
     await queryRunner.dropTable('countries');
   }
 }
-

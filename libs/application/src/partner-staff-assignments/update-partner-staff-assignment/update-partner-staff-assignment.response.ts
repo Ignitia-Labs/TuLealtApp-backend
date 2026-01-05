@@ -91,4 +91,3 @@ export class UpdatePartnerStaffAssignmentResponse {
     this.updatedAt = updatedAt;
   }
 }
-

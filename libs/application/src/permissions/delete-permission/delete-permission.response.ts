@@ -23,4 +23,3 @@ export class DeletePermissionResponse {
     this.message = message;
   }
 }
-

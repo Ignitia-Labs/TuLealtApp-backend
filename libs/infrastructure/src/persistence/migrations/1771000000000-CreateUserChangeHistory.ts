@@ -36,7 +36,8 @@ export class CreateUserChangeHistory1771000000000 implements MigrationInterface 
               type: 'varchar',
               length: '50',
               isNullable: false,
-              comment: 'Tipo de acción realizada (created, updated, locked, unlocked, deleted, etc.)',
+              comment:
+                'Tipo de acción realizada (created, updated, locked, unlocked, deleted, etc.)',
             },
             {
               name: 'field',
@@ -152,4 +153,3 @@ export class CreateUserChangeHistory1771000000000 implements MigrationInterface 
     }
   }
 }
-

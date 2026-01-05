@@ -311,7 +311,8 @@ export class PartnerUsersController {
     name: 'includeInactive',
     required: false,
     type: Boolean,
-    description: 'Si se incluyen usuarios inactivos/bloqueados en la respuesta. Por defecto retorna todos los usuarios.',
+    description:
+      'Si se incluyen usuarios inactivos/bloqueados en la respuesta. Por defecto retorna todos los usuarios.',
     example: true,
   })
   @ApiResponse({
@@ -411,4 +412,3 @@ export class PartnerUsersController {
     return this.getPartnerUsersHandler.execute(request);
   }
 }
-

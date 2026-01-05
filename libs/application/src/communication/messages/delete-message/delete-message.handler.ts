@@ -31,4 +31,3 @@ export class DeleteMessageHandler {
     return new DeleteMessageResponse(true, 'Mensaje eliminado exitosamente');
   }
 }
-

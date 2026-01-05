@@ -16,4 +16,3 @@ export class GetTenantsByPartnerRequest {
   @Min(1)
   partnerId: number;
 }
-

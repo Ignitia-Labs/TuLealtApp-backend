@@ -105,4 +105,3 @@ export class GetUserProfilesResponse {
     this.total = total;
   }
 }
-

@@ -1,8 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, ConflictException } from '@nestjs/common';
-import { CreateProfileHandler } from './create-profile.handler';
-import { CreateProfileRequest } from './create-profile.request';
-import { IProfileRepository, IPermissionRepository, IProfilePermissionRepository, Profile, Permission } from '@libs/domain';
+import { CreateProfileHandler } from '../create-profile/create-profile.handler';
+import { CreateProfileRequest } from '../create-profile/create-profile.request';
+import {
+  IProfileRepository,
+  IPermissionRepository,
+  IProfilePermissionRepository,
+  Profile,
+  Permission,
+} from '@libs/domain';
 import { PermissionService } from '../../permissions/permission.service';
 
 describe('CreateProfileHandler', () => {
@@ -88,7 +94,10 @@ describe('CreateProfileHandler', () => {
       const permission2 = { id: 2, code: 'admin.users.create' } as Permission;
 
       permissionService.validatePermissionFormat.mockReturnValue(true);
-      permissionService.validatePermissionsExist.mockResolvedValue({ valid: validRequest.permissions, invalid: [] });
+      permissionService.validatePermissionsExist.mockResolvedValue({
+        valid: validRequest.permissions,
+        invalid: [],
+      });
       profileRepository.findByName.mockResolvedValue(null);
       profileRepository.save.mockResolvedValue(savedProfile);
       permissionRepository.findByCode
@@ -128,7 +137,10 @@ describe('CreateProfileHandler', () => {
     it('should throw ConflictException for duplicate profile name', async () => {
       const existingProfile = Profile.create('Test Profile', [], null, null, true, 1);
       permissionService.validatePermissionFormat.mockReturnValue(true);
-      permissionService.validatePermissionsExist.mockResolvedValue({ valid: validRequest.permissions, invalid: [] });
+      permissionService.validatePermissionsExist.mockResolvedValue({
+        valid: validRequest.permissions,
+        invalid: [],
+      });
       profileRepository.findByName.mockResolvedValue(existingProfile);
 
       await expect(handler.execute(validRequest)).rejects.toThrow(ConflictException);
@@ -149,7 +161,10 @@ describe('CreateProfileHandler', () => {
       const permission2 = { id: 2, code: 'admin.users.create' } as Permission;
 
       permissionService.validatePermissionFormat.mockReturnValue(true);
-      permissionService.validatePermissionsExist.mockResolvedValue({ valid: validRequest.permissions, invalid: [] });
+      permissionService.validatePermissionsExist.mockResolvedValue({
+        valid: validRequest.permissions,
+        invalid: [],
+      });
       profileRepository.findByName.mockResolvedValue(null);
       profileRepository.save.mockResolvedValue(savedProfile);
       permissionRepository.findByCode
@@ -189,7 +204,10 @@ describe('CreateProfileHandler', () => {
       const permission2 = { id: 2, code: 'admin.users.create' } as Permission;
 
       permissionService.validatePermissionFormat.mockReturnValue(true);
-      permissionService.validatePermissionsExist.mockResolvedValue({ valid: validRequest.permissions, invalid: [] });
+      permissionService.validatePermissionsExist.mockResolvedValue({
+        valid: validRequest.permissions,
+        invalid: [],
+      });
       profileRepository.findByName.mockResolvedValue(null);
       profileRepository.save.mockResolvedValue(savedProfile);
       permissionRepository.findByCode

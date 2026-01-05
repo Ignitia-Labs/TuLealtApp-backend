@@ -1,10 +1,4 @@
-import {
-  MigrationInterface,
-  QueryRunner,
-  TableColumn,
-  TableForeignKey,
-  TableIndex,
-} from 'typeorm';
+import { MigrationInterface, QueryRunner, TableColumn, TableForeignKey, TableIndex } from 'typeorm';
 
 /**
  * Migración para agregar el campo billingCycleId a la tabla commissions
@@ -17,9 +11,7 @@ import {
  *
  * FASE 1: Agregar campo opcional sin romper funcionalidad existente
  */
-export class AddBillingCycleIdToCommissions1770500000000
-  implements MigrationInterface
-{
+export class AddBillingCycleIdToCommissions1770500000000 implements MigrationInterface {
   name = 'AddBillingCycleIdToCommissions1770500000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -82,9 +74,7 @@ export class AddBillingCycleIdToCommissions1770500000000
           console.log('⚠️ Foreign key FK_commissions_billingCycleId ya existe.');
         }
       } else {
-        console.log(
-          '⚠️ Tabla billing_cycles no encontrada. No se puede crear la foreign key.',
-        );
+        console.log('⚠️ Tabla billing_cycles no encontrada. No se puede crear la foreign key.');
       }
     } else {
       console.log('⚠️ Columna billingCycleId ya existe en commissions.');
@@ -110,9 +100,7 @@ export class AddBillingCycleIdToCommissions1770500000000
     }
 
     // Eliminar el índice si existe
-    const index = table.indices.find(
-      (idx) => idx.name === 'idx_commissions_billingCycleId',
-    );
+    const index = table.indices.find((idx) => idx.name === 'idx_commissions_billingCycleId');
 
     if (index) {
       await queryRunner.dropIndex('commissions', 'idx_commissions_billingCycleId');
@@ -129,4 +117,3 @@ export class AddBillingCycleIdToCommissions1770500000000
     }
   }
 }
-

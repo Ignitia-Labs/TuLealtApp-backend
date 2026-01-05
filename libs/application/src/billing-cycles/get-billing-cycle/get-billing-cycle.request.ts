@@ -15,4 +15,3 @@ export class GetBillingCycleRequest {
   @Min(1)
   billingCycleId: number;
 }
-

@@ -98,6 +98,7 @@ export class GetPartnersHandler {
         partner.city,
         partner.plan,
         partner.logo,
+        partner.banner,
         partner.category,
         partner.branchesNumber,
         partner.website,

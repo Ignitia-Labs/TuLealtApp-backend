@@ -27,7 +27,8 @@ export class CreateCatalogs1766872709000 implements MigrationInterface {
             type: 'varchar',
             length: '50',
             isNullable: false,
-            comment: 'Tipo de catálogo: BUSINESS_CATEGORIES, REWARD_TYPES, PAYMENT_METHODS, PAYMENT_CATEGORIES',
+            comment:
+              'Tipo de catálogo: BUSINESS_CATEGORIES, REWARD_TYPES, PAYMENT_METHODS, PAYMENT_CATEGORIES',
           },
           {
             name: 'value',

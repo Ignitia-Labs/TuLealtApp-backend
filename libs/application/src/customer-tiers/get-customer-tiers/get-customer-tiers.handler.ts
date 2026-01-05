@@ -59,4 +59,3 @@ export class GetCustomerTiersHandler {
     return new GetCustomerTiersResponse(tierDtos);
   }
 }
-

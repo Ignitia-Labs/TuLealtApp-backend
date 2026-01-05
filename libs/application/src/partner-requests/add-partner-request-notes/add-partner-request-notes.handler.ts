@@ -13,9 +13,7 @@ export class AddPartnerRequestNotesHandler {
     private readonly partnerRequestRepository: IPartnerRequestRepository,
   ) {}
 
-  async execute(
-    request: AddPartnerRequestNotesRequest,
-  ): Promise<AddPartnerRequestNotesResponse> {
+  async execute(request: AddPartnerRequestNotesRequest): Promise<AddPartnerRequestNotesResponse> {
     const partnerRequest = await this.partnerRequestRepository.findById(request.requestId);
 
     if (!partnerRequest) {

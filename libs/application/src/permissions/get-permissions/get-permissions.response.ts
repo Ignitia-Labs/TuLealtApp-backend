@@ -114,4 +114,3 @@ export class GetPermissionsResponse {
     this.total = total;
   }
 }
-

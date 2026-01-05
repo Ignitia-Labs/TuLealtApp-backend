@@ -73,6 +73,7 @@ export class CreatePartnerHandler {
       request.billingEmail,
       request.domain,
       request.logo || null,
+      request.banner || null,
       request.branchesNumber || 0,
       request.website || null,
       request.socialMedia || null,
@@ -112,7 +113,10 @@ export class CreatePartnerHandler {
 
     // Obtener el precio del plan si no se proporciona subscriptionLastPaymentAmount
     let billingAmount: number;
-    if (request.subscriptionLastPaymentAmount !== undefined && request.subscriptionLastPaymentAmount !== null) {
+    if (
+      request.subscriptionLastPaymentAmount !== undefined &&
+      request.subscriptionLastPaymentAmount !== null
+    ) {
       // Usar el valor proporcionado
       billingAmount = request.subscriptionLastPaymentAmount;
     } else {

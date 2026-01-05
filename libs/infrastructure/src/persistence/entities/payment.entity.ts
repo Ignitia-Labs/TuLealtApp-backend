@@ -128,4 +128,3 @@ export class PaymentEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

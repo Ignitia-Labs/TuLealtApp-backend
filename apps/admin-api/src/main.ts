@@ -43,7 +43,8 @@ async function bootstrap() {
   // Configuración de Swagger
   const config = new DocumentBuilder()
     .setTitle('Admin API')
-    .setDescription(`
+    .setDescription(
+      `
       API para administración del sistema. Permite gestionar usuarios, roles y configuraciones del sistema.
 
       ## Información para Frontend
@@ -70,7 +71,8 @@ async function bootstrap() {
       - \`404\` - No encontrado
       - \`409\` - Conflicto (recurso duplicado)
       - \`500\` - Error del servidor
-    `)
+    `,
+    )
     .setVersion('1.0')
     .addTag('Users', 'Gestión de usuarios')
     .addTag('Auth', 'Autenticación y autorización')

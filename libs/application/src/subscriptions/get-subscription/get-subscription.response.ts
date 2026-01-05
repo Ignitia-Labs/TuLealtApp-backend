@@ -98,7 +98,7 @@ export class GetSubscriptionResponse {
 
   @ApiProperty({
     description: 'Monto de impuesto',
-    example: 9.60,
+    example: 9.6,
     type: Number,
   })
   taxAmount: number;
@@ -342,4 +342,3 @@ export class GetSubscriptionResponse {
     this.updatedAt = updatedAt;
   }
 }
-

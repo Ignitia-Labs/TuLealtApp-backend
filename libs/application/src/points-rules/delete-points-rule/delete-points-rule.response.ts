@@ -23,4 +23,3 @@ export class DeletePointsRuleResponse {
     this.id = id;
   }
 }
-

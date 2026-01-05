@@ -4,4 +4,3 @@
 export class GetCountriesRequest {
   includeInactive?: boolean = false;
 }
-

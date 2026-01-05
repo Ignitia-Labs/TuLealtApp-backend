@@ -20,7 +20,7 @@ export class PartnerDisbursementDto {
 
   @ApiProperty({
     description: 'Monto pendiente de este partner',
-    example: 500.00,
+    example: 500.0,
     type: Number,
   })
   amount: number;
@@ -59,7 +59,7 @@ export class PendingDisbursementDto {
 
   @ApiProperty({
     description: 'Monto total pendiente',
-    example: 1550.00,
+    example: 1550.0,
     type: Number,
   })
   totalPendingAmount: number;
@@ -151,4 +151,3 @@ export class GetPendingDisbursementsResponse {
     this.pagination = pagination;
   }
 }
-

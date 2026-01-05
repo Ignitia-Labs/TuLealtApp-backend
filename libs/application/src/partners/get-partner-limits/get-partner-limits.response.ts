@@ -53,4 +53,3 @@ export class GetPartnerLimitsResponse {
     this.updatedAt = updatedAt;
   }
 }
-

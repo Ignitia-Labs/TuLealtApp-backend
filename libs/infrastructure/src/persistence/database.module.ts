@@ -52,6 +52,7 @@ import { PermissionEntity } from './entities/permission.entity';
 import { UserPermissionEntity } from './entities/user-permission.entity';
 import { ProfilePermissionEntity } from './entities/profile-permission.entity';
 import { UserChangeHistoryEntity } from './entities/user-change-history.entity';
+import { CustomerPartnerEntity } from './entities/customer-partner.entity';
 import { UserRepository } from './repositories/user.repository';
 import { PricingPlanRepository } from './repositories/pricing-plan.repository';
 import { RateExchangeRepository } from './repositories/rate-exchange.repository';
@@ -91,6 +92,7 @@ import { PermissionRepository } from './repositories/permission.repository';
 import { UserPermissionRepository } from './repositories/user-permission.repository';
 import { ProfilePermissionRepository } from './repositories/profile-permission.repository';
 import { UserChangeHistoryRepository } from './repositories/user-change-history.repository';
+import { CustomerPartnerRepository } from './repositories/customer-partner.repository';
 import {
   IUserRepository,
   IPricingPlanRepository,
@@ -130,6 +132,7 @@ import {
   IUserPermissionRepository,
   IProfilePermissionRepository,
   IUserChangeHistoryRepository,
+  ICustomerPartnerRepository,
 } from '@libs/domain';
 
 /**
@@ -192,6 +195,7 @@ import {
       UserPermissionEntity,
       ProfilePermissionEntity,
       UserChangeHistoryEntity,
+      CustomerPartnerEntity,
     ]),
   ],
   providers: [
@@ -386,6 +390,11 @@ import {
       provide: 'IUserChangeHistoryRepository',
       useClass: UserChangeHistoryRepository,
     },
+    CustomerPartnerRepository,
+    {
+      provide: 'ICustomerPartnerRepository',
+      useClass: CustomerPartnerRepository,
+    },
   ],
   exports: [
     'IUserRepository',
@@ -426,6 +435,7 @@ import {
     'IUserPermissionRepository',
     'IProfilePermissionRepository',
     'IUserChangeHistoryRepository',
+    'ICustomerPartnerRepository',
     UserRepository,
     PricingPlanRepository,
     RateExchangeRepository,
@@ -465,6 +475,7 @@ import {
     UserPermissionRepository,
     ProfilePermissionRepository,
     UserChangeHistoryRepository,
+    CustomerPartnerRepository,
     TypeOrmModule,
   ],
 })

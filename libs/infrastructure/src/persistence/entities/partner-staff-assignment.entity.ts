@@ -65,4 +65,3 @@ export class PartnerStaffAssignmentEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

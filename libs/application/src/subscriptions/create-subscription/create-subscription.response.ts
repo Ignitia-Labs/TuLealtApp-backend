@@ -89,4 +89,3 @@ export class CreateSubscriptionResponse {
     this.createdAt = createdAt;
   }
 }
-

@@ -11,9 +11,7 @@ import { MigrationInterface, QueryRunner, TableColumn, TableForeignKey } from 't
  * Si una suscripción tiene un código de moneda (currency), se intentará encontrar
  * el currencyId correspondiente automáticamente.
  */
-export class AddCurrencyIdToPartnerSubscriptions1770400000000
-  implements MigrationInterface
-{
+export class AddCurrencyIdToPartnerSubscriptions1770400000000 implements MigrationInterface {
   name = 'AddCurrencyIdToPartnerSubscriptions1770400000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -126,9 +124,7 @@ export class AddCurrencyIdToPartnerSubscriptions1770400000000
     }
 
     // Eliminar la foreign key si existe
-    const existingFK = table.foreignKeys.find(
-      (fk) => fk.columnNames.indexOf('currencyId') !== -1,
-    );
+    const existingFK = table.foreignKeys.find((fk) => fk.columnNames.indexOf('currencyId') !== -1);
 
     if (existingFK) {
       await queryRunner.dropForeignKey('partner_subscriptions', existingFK);
@@ -145,4 +141,3 @@ export class AddCurrencyIdToPartnerSubscriptions1770400000000
     }
   }
 }
-

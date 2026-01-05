@@ -95,4 +95,3 @@ export class GetPermissionUsersResponse {
     this.total = total;
   }
 }
-

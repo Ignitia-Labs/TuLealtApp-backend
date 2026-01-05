@@ -67,14 +67,9 @@ export class GetSubscriptionTimeseriesResponse {
   @ApiProperty({ description: 'Total de períodos', example: 12 })
   totalPeriods: number;
 
-  constructor(
-    series: PeriodMetrics[],
-    summary: SubscriptionStatsResponse,
-    totalPeriods: number,
-  ) {
+  constructor(series: PeriodMetrics[], summary: SubscriptionStatsResponse, totalPeriods: number) {
     this.series = series;
     this.summary = summary;
     this.totalPeriods = totalPeriods;
   }
 }
-

@@ -109,4 +109,3 @@ export class UpdateBranchResponse {
     this.updatedAt = updatedAt;
   }
 }
-

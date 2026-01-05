@@ -1,4 +1,4 @@
-import { ProfilePermission } from './profile-permission.entity';
+import { ProfilePermission } from '../profile-permission.entity';
 
 describe('ProfilePermission Entity', () => {
   describe('create', () => {
@@ -21,14 +21,21 @@ describe('ProfilePermission Entity', () => {
     });
 
     it('should throw error if profileId is invalid', () => {
-      expect(() => ProfilePermission.create(0, 2)).toThrow('Profile ID is required and must be greater than 0');
-      expect(() => ProfilePermission.create(-1, 2)).toThrow('Profile ID is required and must be greater than 0');
+      expect(() => ProfilePermission.create(0, 2)).toThrow(
+        'Profile ID is required and must be greater than 0',
+      );
+      expect(() => ProfilePermission.create(-1, 2)).toThrow(
+        'Profile ID is required and must be greater than 0',
+      );
     });
 
     it('should throw error if permissionId is invalid', () => {
-      expect(() => ProfilePermission.create(1, 0)).toThrow('Permission ID is required and must be greater than 0');
-      expect(() => ProfilePermission.create(1, -1)).toThrow('Permission ID is required and must be greater than 0');
+      expect(() => ProfilePermission.create(1, 0)).toThrow(
+        'Permission ID is required and must be greater than 0',
+      );
+      expect(() => ProfilePermission.create(1, -1)).toThrow(
+        'Permission ID is required and must be greater than 0',
+      );
     });
   });
 });
-

@@ -1,17 +1,14 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  IPartnerRepository,
-  ITenantRepository,
-  IBranchRepository,
-} from '@libs/domain';
+import { IPartnerRepository, ITenantRepository, IBranchRepository } from '@libs/domain';
 import { GetPartnerWithTenantsAndBranchesRequest } from './get-partner-with-tenants-and-branches.request';
 import { GetPartnerWithTenantsAndBranchesResponse } from './get-partner-with-tenants-and-branches.response';
 import { TenantWithBranchesDto } from './get-partner-with-tenants-and-branches.response';
 import { GetTenantResponse } from '../../tenants/get-tenant/get-tenant.response';
 import { GetBranchResponse } from '../../branches/get-branch/get-branch.response';
-import { TenantFeaturesEntity } from '@libs/infrastructure';
+import { TenantFeaturesEntity, PartnerLimitsEntity } from '@libs/infrastructure';
+import { PartnerLimitsSwaggerDto } from '../dto/partner-limits-swagger.dto';
 
 /**
  * Handler para el caso de uso de obtener un partner con sus tenants y branches
@@ -27,6 +24,8 @@ export class GetPartnerWithTenantsAndBranchesHandler {
     private readonly branchRepository: IBranchRepository,
     @InjectRepository(TenantFeaturesEntity)
     private readonly featuresRepository: Repository<TenantFeaturesEntity>,
+    @InjectRepository(PartnerLimitsEntity)
+    private readonly limitsRepository: Repository<PartnerLimitsEntity>,
   ) {}
 
   async execute(
@@ -108,6 +107,7 @@ export class GetPartnerWithTenantsAndBranchesHandler {
         tenant.name,
         tenant.description,
         tenant.logo,
+        tenant.banner,
         tenant.category,
         tenant.currencyId,
         tenant.primaryColor,
@@ -128,6 +128,27 @@ export class GetPartnerWithTenantsAndBranchesHandler {
       return new TenantWithBranchesDto(tenantResponse, branches);
     });
 
+    // Obtener los límites del partner
+    let limitsDto: PartnerLimitsSwaggerDto | null = null;
+    try {
+      const limitsEntity = await this.limitsRepository.findOne({
+        where: { partnerId: partner.id },
+      });
+
+      if (limitsEntity) {
+        limitsDto = {
+          maxTenants: Number(limitsEntity.maxTenants) || 0,
+          maxBranches: Number(limitsEntity.maxBranches) || 0,
+          maxCustomers: Number(limitsEntity.maxCustomers) || 0,
+          maxRewards: Number(limitsEntity.maxRewards) || 0,
+        };
+      }
+    } catch (error) {
+      // Si hay error al obtener límites, continuar sin ellos (no crítico)
+      console.error('Error al obtener límites del partner:', error);
+      limitsDto = null;
+    }
+
     return new GetPartnerWithTenantsAndBranchesResponse(
       partner.id,
       partner.name,
@@ -138,6 +159,7 @@ export class GetPartnerWithTenantsAndBranchesHandler {
       partner.city,
       partner.plan,
       partner.logo,
+      partner.banner,
       partner.category,
       partner.branchesNumber,
       partner.website,
@@ -154,7 +176,7 @@ export class GetPartnerWithTenantsAndBranchesHandler {
       partner.createdAt,
       partner.updatedAt,
       tenantsWithBranches,
+      limitsDto,
     );
   }
 }
-

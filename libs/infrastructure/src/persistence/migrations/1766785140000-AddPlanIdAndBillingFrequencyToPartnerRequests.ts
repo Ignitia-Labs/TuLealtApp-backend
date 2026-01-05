@@ -1,6 +1,8 @@
 import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
-export class AddPlanIdAndBillingFrequencyToPartnerRequests1766785140000 implements MigrationInterface {
+export class AddPlanIdAndBillingFrequencyToPartnerRequests1766785140000
+  implements MigrationInterface
+{
   name = 'AddPlanIdAndBillingFrequencyToPartnerRequests1766785140000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -57,4 +59,3 @@ export class AddPlanIdAndBillingFrequencyToPartnerRequests1766785140000 implemen
     }
   }
 }
-

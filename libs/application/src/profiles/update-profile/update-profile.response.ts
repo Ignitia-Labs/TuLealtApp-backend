@@ -82,4 +82,3 @@ export class UpdateProfileResponse {
     this.updatedAt = updatedAt;
   }
 }
-

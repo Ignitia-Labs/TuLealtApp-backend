@@ -150,4 +150,3 @@ export class GetPartnerStaffAssignmentsResponse {
     this.total = total;
   }
 }
-

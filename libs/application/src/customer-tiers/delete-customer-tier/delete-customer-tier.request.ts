@@ -11,4 +11,3 @@ export class DeleteCustomerTierRequest {
   })
   customerTierId: number;
 }
-

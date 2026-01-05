@@ -1,11 +1,4 @@
-import {
-  IsEmail,
-  IsString,
-  MinLength,
-  IsOptional,
-  IsNumber,
-  IsIn,
-} from 'class-validator';
+import { IsEmail, IsString, MinLength, IsOptional, IsNumber, IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -191,6 +184,17 @@ export class UpdatePartnerRequest {
   @IsString()
   @IsOptional()
   logo?: string | null;
+
+  @ApiProperty({
+    description: 'URL del banner del partner',
+    example: 'https://example.com/banners/partner-banner.jpg',
+    type: String,
+    required: false,
+    nullable: true,
+  })
+  @IsString()
+  @IsOptional()
+  banner?: string | null;
 
   @ApiProperty({
     description: 'Número de sucursales',

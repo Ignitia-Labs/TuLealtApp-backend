@@ -15,4 +15,3 @@ export class GetPaymentRequest {
   @Min(1)
   paymentId: number;
 }
-

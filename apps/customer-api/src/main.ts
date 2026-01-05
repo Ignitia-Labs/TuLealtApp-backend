@@ -46,7 +46,6 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('Auth', 'Autenticación y registro')
     .addTag('Users', 'Gestión de perfil de usuario')
-    .addTag('Orders', 'Gestión de pedidos del cliente')
     .addBearerAuth()
     .build();
 

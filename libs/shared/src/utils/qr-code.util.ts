@@ -78,4 +78,3 @@ export function extractMembershipInfo(qrCode: string): { userId: number; tenantI
     tenantId: parseInt(match[2], 10),
   };
 }
-

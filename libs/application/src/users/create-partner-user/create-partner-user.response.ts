@@ -30,4 +30,3 @@ export class CreatePartnerUserResponse extends CreateUserResponse {
     this.partnerId = partnerId;
   }
 }
-

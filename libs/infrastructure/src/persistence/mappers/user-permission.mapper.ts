@@ -38,4 +38,3 @@ export class UserPermissionMapper {
     return entity;
   }
 }
-

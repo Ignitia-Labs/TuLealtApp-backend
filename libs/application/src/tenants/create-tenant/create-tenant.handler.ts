@@ -39,6 +39,7 @@ export class CreateTenantHandler {
       request.minPointsToRedeem || 100,
       request.description || null,
       request.logo || null,
+      request.banner || null,
       'active',
     );
 

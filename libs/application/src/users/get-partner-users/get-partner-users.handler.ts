@@ -66,4 +66,3 @@ export class GetPartnerUsersHandler {
     return new GetPartnerUsersResponse(userDtos, total);
   }
 }
-

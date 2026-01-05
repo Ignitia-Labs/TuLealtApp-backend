@@ -42,6 +42,7 @@ export class GetTenantHandler {
       tenant.name,
       tenant.description,
       tenant.logo,
+      tenant.banner,
       tenant.category,
       tenant.currencyId,
       tenant.primaryColor,

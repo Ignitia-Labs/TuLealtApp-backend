@@ -348,4 +348,3 @@ export class CreateInvoiceResponse {
     this.updatedAt = updatedAt;
   }
 }
-

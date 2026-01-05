@@ -27,4 +27,3 @@ export class GetInvoiceRequest {
   @IsOptional()
   invoiceNumber?: string;
 }
-

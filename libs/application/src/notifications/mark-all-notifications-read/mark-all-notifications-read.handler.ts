@@ -13,9 +13,10 @@ export class MarkAllNotificationsReadHandler {
     private readonly notificationRepository: INotificationRepository,
   ) {}
 
-  async execute(request: MarkAllNotificationsReadRequest): Promise<MarkAllNotificationsReadResponse> {
+  async execute(
+    request: MarkAllNotificationsReadRequest,
+  ): Promise<MarkAllNotificationsReadResponse> {
     await this.notificationRepository.markAllAsRead(request.userId);
     return new MarkAllNotificationsReadResponse(request.userId);
   }
 }
-

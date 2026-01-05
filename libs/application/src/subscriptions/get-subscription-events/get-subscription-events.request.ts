@@ -101,4 +101,3 @@ export class GetSubscriptionEventsRequest {
   @Min(1)
   limit?: number;
 }
-

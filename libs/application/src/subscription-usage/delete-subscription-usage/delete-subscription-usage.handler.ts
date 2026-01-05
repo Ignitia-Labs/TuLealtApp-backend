@@ -15,9 +15,7 @@ export class DeleteSubscriptionUsageHandler {
     private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
   ) {}
 
-  async execute(
-    request: DeleteSubscriptionUsageRequest,
-  ): Promise<DeleteSubscriptionUsageResponse> {
+  async execute(request: DeleteSubscriptionUsageRequest): Promise<DeleteSubscriptionUsageResponse> {
     const usageEntity = await this.usageRepository.findOne({
       where: { partnerSubscriptionId: request.partnerSubscriptionId },
     });
@@ -36,4 +34,3 @@ export class DeleteSubscriptionUsageHandler {
     );
   }
 }
-

@@ -1,5 +1,10 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
-import { IUserRepository, IPartnerRepository, ITenantRepository, IBranchRepository } from '@libs/domain';
+import {
+  IUserRepository,
+  IPartnerRepository,
+  ITenantRepository,
+  IBranchRepository,
+} from '@libs/domain';
 import { GetUserProfileRequest } from './get-user-profile.request';
 import { GetUserProfileResponse } from './get-user-profile.response';
 import { PartnerInfoDto } from '../../auth/partner-info.dto';

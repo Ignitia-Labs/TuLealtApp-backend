@@ -42,4 +42,3 @@ export class GetGoalsRequest {
   @Min(1)
   limit?: number;
 }
-

@@ -89,4 +89,3 @@ export class GetSubscriptionsResponse {
     this.limit = limit;
   }
 }
-

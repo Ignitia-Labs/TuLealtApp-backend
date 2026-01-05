@@ -56,4 +56,3 @@ export class GetPermissionsRequest {
   @IsOptional()
   includeInactive?: boolean;
 }
-

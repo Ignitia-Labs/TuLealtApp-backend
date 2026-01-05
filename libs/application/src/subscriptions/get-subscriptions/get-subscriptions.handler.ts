@@ -62,10 +62,11 @@ export class GetSubscriptionsHandler {
         const subscription = PartnerMapper.subscriptionToDomain(entity);
 
         // Calcular crédito disponible dinámicamente desde los pagos reales
-        const calculatedCreditBalance = await this.creditBalanceService.calculateAvailableCreditBalance(
-          subscription.id,
-          subscription.currency,
-        );
+        const calculatedCreditBalance =
+          await this.creditBalanceService.calculateAvailableCreditBalance(
+            subscription.id,
+            subscription.currency,
+          );
 
         // Buscar el plan de precios para obtener el ID numérico y el slug
         let planId: number = 0;
@@ -140,4 +141,3 @@ export class GetSubscriptionsHandler {
     return new GetSubscriptionsResponse(subscriptions, total, page, limit);
   }
 }
-

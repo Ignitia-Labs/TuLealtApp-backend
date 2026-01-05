@@ -17,16 +17,10 @@ export class GetGoalsResponse {
   @ApiProperty({ description: 'Límite de elementos por página', example: 10, nullable: true })
   limit: number | null;
 
-  constructor(
-    goals: GetGoalResponse[],
-    total: number,
-    page: number | null,
-    limit: number | null,
-  ) {
+  constructor(goals: GetGoalResponse[], total: number, page: number | null, limit: number | null) {
     this.goals = goals;
     this.total = total;
     this.page = page;
     this.limit = limit;
   }
 }
-

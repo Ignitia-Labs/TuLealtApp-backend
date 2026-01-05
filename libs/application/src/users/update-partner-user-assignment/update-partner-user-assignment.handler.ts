@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  Inject,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
 import {
   IUserRepository,
   IPartnerRepository,
@@ -138,4 +133,3 @@ export class UpdatePartnerUserAssignmentHandler {
     );
   }
 }
-

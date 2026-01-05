@@ -1,10 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ProfilePermissionRepository } from './profile-permission.repository';
-import { ProfilePermissionEntity } from '../entities/profile-permission.entity';
+import { ProfilePermissionRepository } from '../profile-permission.repository';
+import { ProfilePermissionEntity } from '../../entities/profile-permission.entity';
 import { ProfilePermission } from '@libs/domain';
-import { ProfilePermissionMapper } from '../mappers/profile-permission.mapper';
 
 describe('ProfilePermissionRepository', () => {
   let repository: ProfilePermissionRepository;
@@ -146,11 +145,11 @@ describe('ProfilePermissionRepository', () => {
 
   describe('saveMany', () => {
     it('should save multiple profile permissions', async () => {
-      const profilePermissions = [
-        ProfilePermission.create(1, 2),
-        ProfilePermission.create(1, 4),
+      const profilePermissions = [ProfilePermission.create(1, 2), ProfilePermission.create(1, 4)];
+      const entities = [
+        mockProfilePermissionEntity,
+        { ...mockProfilePermissionEntity, id: 2, permissionId: 4 },
       ];
-      const entities = [mockProfilePermissionEntity, { ...mockProfilePermissionEntity, id: 2, permissionId: 4 }];
       jest.spyOn(typeOrmRepository, 'save').mockResolvedValue(entities as any);
 
       const result = await repository.saveMany(profilePermissions);
@@ -197,4 +196,3 @@ describe('ProfilePermissionRepository', () => {
     });
   });
 });
-

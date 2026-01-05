@@ -34,4 +34,3 @@ export interface IMessageTemplateRepository {
    */
   delete(id: number): Promise<void>;
 }
-

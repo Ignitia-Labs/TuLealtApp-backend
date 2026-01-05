@@ -14,4 +14,3 @@ export class GetPermissionUsersRequest {
   @IsNotEmpty()
   permissionId: number;
 }
-

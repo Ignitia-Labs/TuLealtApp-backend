@@ -142,4 +142,3 @@ export class GetPartnerUsersResponse {
     this.total = total;
   }
 }
-

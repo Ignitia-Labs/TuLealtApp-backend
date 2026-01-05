@@ -36,4 +36,3 @@ export interface ICountryRepository {
    */
   findAll(): Promise<Country[]>;
 }
-

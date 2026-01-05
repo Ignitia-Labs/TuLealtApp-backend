@@ -14,4 +14,3 @@ export class AddPermissionToProfileRequest {
   @IsNotEmpty()
   permissionId: number;
 }
-

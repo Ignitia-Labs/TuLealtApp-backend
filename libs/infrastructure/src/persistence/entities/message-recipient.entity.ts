@@ -61,4 +61,3 @@ export class MessageRecipientEntity {
   @CreateDateColumn()
   createdAt: Date;
 }
-

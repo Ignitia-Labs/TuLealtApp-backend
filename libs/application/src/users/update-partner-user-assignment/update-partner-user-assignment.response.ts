@@ -77,4 +77,3 @@ export class UpdatePartnerUserAssignmentResponse {
     this.updatedAt = updatedAt;
   }
 }
-

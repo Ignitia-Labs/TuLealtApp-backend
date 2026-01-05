@@ -26,4 +26,3 @@ export class UpdatePermissionRequest {
   @IsOptional()
   isActive?: boolean;
 }
-

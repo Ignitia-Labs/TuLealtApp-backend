@@ -1,10 +1,4 @@
-import {
-  MigrationInterface,
-  QueryRunner,
-  Table,
-  TableForeignKey,
-  TableIndex,
-} from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex } from 'typeorm';
 
 export class CreateCustomerMemberships1768100000000 implements MigrationInterface {
   name = 'CreateCustomerMemberships1768100000000';
@@ -244,4 +238,3 @@ export class CreateCustomerMemberships1768100000000 implements MigrationInterfac
     await queryRunner.dropTable('customer_memberships');
   }
 }
-

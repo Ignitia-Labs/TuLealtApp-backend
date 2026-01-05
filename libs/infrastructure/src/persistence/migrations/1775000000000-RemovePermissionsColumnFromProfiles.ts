@@ -48,7 +48,9 @@ export class RemovePermissionsColumnFromProfiles1775000000000 implements Migrati
     `);
 
     if (profilesWithoutPermissions.length > 0) {
-      const profileNames = profilesWithoutPermissions.map((p: any) => `${p.name} (ID: ${p.id})`).join(', ');
+      const profileNames = profilesWithoutPermissions
+        .map((p: any) => `${p.name} (ID: ${p.id})`)
+        .join(', ');
       throw new Error(
         `Cannot remove permissions column: The following profiles do not have permissions in profile_permissions: ${profileNames}. Please migrate them first.`,
       );
@@ -62,7 +64,9 @@ export class RemovePermissionsColumnFromProfiles1775000000000 implements Migrati
         await queryRunner.dropColumn('profiles', 'permissions');
         console.log('✅ Successfully removed permissions column from profiles table');
       } else {
-        console.log('⚠️  permissions column does not exist in profiles table (may have been removed already)');
+        console.log(
+          '⚠️  permissions column does not exist in profiles table (may have been removed already)',
+        );
       }
     }
   }
@@ -107,4 +111,3 @@ export class RemovePermissionsColumnFromProfiles1775000000000 implements Migrati
     }
   }
 }
-

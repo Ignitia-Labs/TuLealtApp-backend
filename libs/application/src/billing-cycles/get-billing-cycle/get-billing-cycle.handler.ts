@@ -1,9 +1,5 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import {
-  IBillingCycleRepository,
-  ICurrencyRepository,
-  IPaymentRepository,
-} from '@libs/domain';
+import { IBillingCycleRepository, ICurrencyRepository, IPaymentRepository } from '@libs/domain';
 import { GetBillingCycleRequest } from './get-billing-cycle.request';
 import { GetBillingCycleResponse } from './get-billing-cycle.response';
 
@@ -62,4 +58,3 @@ export class GetBillingCycleHandler {
     );
   }
 }
-

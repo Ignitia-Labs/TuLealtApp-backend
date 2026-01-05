@@ -1,7 +1,12 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IProfileRepository, Profile, IProfilePermissionRepository, IPermissionRepository } from '@libs/domain';
+import {
+  IProfileRepository,
+  Profile,
+  IProfilePermissionRepository,
+  IPermissionRepository,
+} from '@libs/domain';
 import { ProfileEntity } from '../entities/profile.entity';
 import { ProfileMapper } from '../mappers/profile.mapper';
 
@@ -116,4 +121,3 @@ export class ProfileRepository implements IProfileRepository {
     return permissionCodes;
   }
 }
-

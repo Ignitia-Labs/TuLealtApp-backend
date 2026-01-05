@@ -38,9 +38,7 @@ export class GetPartnerLimitsHandler {
       });
 
       if (!limitsEntity) {
-        throw new NotFoundException(
-          `Limits for partner with ID ${request.partnerId} not found`,
-        );
+        throw new NotFoundException(`Limits for partner with ID ${request.partnerId} not found`);
       }
 
       // Mapear a DTO de Swagger
@@ -68,4 +66,3 @@ export class GetPartnerLimitsHandler {
     }
   }
 }
-

@@ -46,10 +46,7 @@ export interface IPaymentRepository {
   /**
    * Busca pagos sin billingCycleId asignado de una suscripción
    */
-  findUnassignedBySubscriptionId(
-    subscriptionId: number,
-    currency?: string,
-  ): Promise<Payment[]>;
+  findUnassignedBySubscriptionId(subscriptionId: number, currency?: string): Promise<Payment[]>;
 
   /**
    * Busca pagos asociados a un billing cycle

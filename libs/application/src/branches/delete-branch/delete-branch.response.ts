@@ -23,4 +23,3 @@ export class DeleteBranchResponse {
     this.id = id;
   }
 }
-

@@ -44,4 +44,3 @@ export class PermissionEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

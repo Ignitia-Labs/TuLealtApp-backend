@@ -196,4 +196,3 @@ export class CustomerMembershipsController {
     return this.getCustomerMembershipHandler.execute(request, user.userId, user.roles);
   }
 }
-

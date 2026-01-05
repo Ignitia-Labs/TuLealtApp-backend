@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PartnerSubscription, SubscriptionEvent, Payment } from '@libs/domain';
-import { SubscriptionStatsService, Period } from '../get-subscription-stats/subscription-stats.service';
+import {
+  SubscriptionStatsService,
+  Period,
+} from '../get-subscription-stats/subscription-stats.service';
 
 export type GroupByPeriod = 'day' | 'week' | 'month' | 'quarter';
 
@@ -52,7 +55,8 @@ export class SubscriptionTimeseriesService {
       // Filtrar datos para este período
       const periodSubscriptions = subscriptions.filter(
         (sub) =>
-          (sub.createdAt <= period.endDate && (sub.renewalDate >= period.startDate || !sub.renewalDate)) ||
+          (sub.createdAt <= period.endDate &&
+            (sub.renewalDate >= period.startDate || !sub.renewalDate)) ||
           (sub.createdAt >= period.startDate && sub.createdAt <= period.endDate),
       );
 
@@ -62,8 +66,7 @@ export class SubscriptionTimeseriesService {
       );
 
       const periodEvents = events.filter(
-        (event) =>
-          event.occurredAt >= period.startDate && event.occurredAt <= period.endDate,
+        (event) => event.occurredAt >= period.startDate && event.occurredAt <= period.endDate,
       );
 
       // Calcular métricas para este período
@@ -190,4 +193,3 @@ export class SubscriptionTimeseriesService {
     return `${startYear}-${startMonth}-${startDay} to ${endYear}-${endMonth}-${endDay}`;
   }
 }
-

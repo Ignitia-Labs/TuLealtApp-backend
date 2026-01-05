@@ -15,4 +15,3 @@ export class DeleteMessageResponse {
     this.message = message;
   }
 }
-

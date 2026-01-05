@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { OrdersController } from './controllers/orders.controller';
 import { PricingController } from './controllers/pricing.controller';
 import { ProfilesController } from './controllers/profiles.controller';
 import { UserProfilesController } from './controllers/user-profiles.controller';
@@ -7,6 +6,11 @@ import { PartnerUsersController } from './controllers/partner-users.controller';
 import { UserPermissionsController } from './controllers/user-permissions.controller';
 import { CatalogsController } from './controllers/catalogs.controller';
 import { PartnersController } from './controllers/partners.controller';
+import { PartnerCustomersController } from './controllers/partner-customers.controller';
+import { TenantsController } from './controllers/tenants.controller';
+import { BranchesController } from './controllers/branches.controller';
+import { CurrenciesController } from './controllers/currencies.controller';
+import { RateExchangeController } from './controllers/rate-exchange.controller';
 import { InfrastructureModule } from '@libs/infrastructure';
 import { HealthController } from '@libs/shared';
 import { PartnerAuthModule } from './auth/partner-auth.module';
@@ -36,8 +40,29 @@ import {
   // Catalogs Handlers
   GetCatalogsHandler,
   GetCatalogHandler,
-  // Partners Handlers
-  GetPartnerWithTenantsAndBranchesHandler,
+    // Partners Handlers
+    GetPartnerWithTenantsAndBranchesHandler,
+    UpdatePartnerHandler,
+    // Partner Customers Handlers
+  GetPartnerCustomersHandler,
+  // Tenants Handlers
+  CreateTenantHandler,
+  GetTenantHandler,
+  GetTenantsByPartnerHandler,
+  UpdateTenantHandler,
+  DeleteTenantHandler,
+  // Branches Handlers
+    CreateBranchHandler,
+    GetBranchHandler,
+    GetBranchesByTenantHandler,
+    UpdateBranchHandler,
+    DeleteBranchHandler,
+    // Currencies Handlers
+    GetCurrenciesHandler,
+    // Countries Handlers
+    GetCountriesHandler,
+    // Rate Exchange Handlers
+    GetRateExchangeHandler,
 } from '@libs/application';
 
 /**
@@ -47,7 +72,6 @@ import {
 @Module({
   imports: [InfrastructureModule, PartnerAuthModule],
   controllers: [
-    OrdersController,
     PricingController,
     ProfilesController,
     UserProfilesController,
@@ -55,6 +79,11 @@ import {
     UserPermissionsController,
     CatalogsController,
     PartnersController,
+    PartnerCustomersController,
+    TenantsController,
+    BranchesController,
+    CurrenciesController,
+    RateExchangeController,
     HealthController,
   ],
   providers: [
@@ -91,8 +120,27 @@ import {
     GetCatalogHandler,
     // Partners Handlers
     GetPartnerWithTenantsAndBranchesHandler,
-    // Aquí se agregarían los handlers específicos de partner
-    // Por ejemplo: GetOrdersByPartnerHandler, CreateProductHandler, etc.
+    UpdatePartnerHandler,
+    // Partner Customers Handlers
+    GetPartnerCustomersHandler,
+    // Tenants Handlers
+    CreateTenantHandler,
+    GetTenantHandler,
+    GetTenantsByPartnerHandler,
+    UpdateTenantHandler,
+    DeleteTenantHandler,
+    // Branches Handlers
+    CreateBranchHandler,
+    GetBranchHandler,
+    GetBranchesByTenantHandler,
+    UpdateBranchHandler,
+    DeleteBranchHandler,
+    // Currencies Handlers
+    GetCurrenciesHandler,
+    // Countries Handlers
+    GetCountriesHandler,
+    // Rate Exchange Handlers
+    GetRateExchangeHandler,
   ],
 })
 export class PartnerApiModule {}

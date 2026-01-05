@@ -123,4 +123,3 @@ export class InvoiceEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

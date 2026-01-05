@@ -16,4 +16,3 @@ export class DeleteCustomerMembershipRequest {
   @Min(1)
   membershipId: number;
 }
-

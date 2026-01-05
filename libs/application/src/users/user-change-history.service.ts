@@ -40,7 +40,11 @@ export class UserChangeHistoryService {
   /**
    * Registra la creación de un usuario
    */
-  async recordUserCreated(userId: number, changedBy: number, metadata?: Record<string, any>): Promise<void> {
+  async recordUserCreated(
+    userId: number,
+    changedBy: number,
+    metadata?: Record<string, any>,
+  ): Promise<void> {
     await this.recordChange(userId, changedBy, 'created', null, null, null, metadata);
   }
 
@@ -79,4 +83,3 @@ export class UserChangeHistoryService {
     await this.recordChange(userId, changedBy, 'updated', field, oldValue, newValue, metadata);
   }
 }
-

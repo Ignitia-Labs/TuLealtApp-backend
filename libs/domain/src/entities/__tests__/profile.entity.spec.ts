@@ -1,4 +1,4 @@
-import { Profile } from './profile.entity';
+import { Profile } from '../profile.entity';
 
 describe('Profile Entity', () => {
   describe('create', () => {
@@ -292,4 +292,3 @@ describe('Profile Entity', () => {
     });
   });
 });
-

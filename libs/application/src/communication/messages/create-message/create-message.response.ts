@@ -83,4 +83,3 @@ export class CreateMessageResponse {
     this.tags = message.tags;
   }
 }
-

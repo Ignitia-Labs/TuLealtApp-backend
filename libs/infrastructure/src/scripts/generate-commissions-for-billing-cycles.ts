@@ -4,11 +4,7 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { Logger } from '@nestjs/common';
 import { InfrastructureModule } from '../infrastructure.module';
-import {
-  IBillingCycleRepository,
-  IPaymentRepository,
-  ICommissionRepository,
-} from '@libs/domain';
+import { IBillingCycleRepository, IPaymentRepository, ICommissionRepository } from '@libs/domain';
 import { CommissionCalculationService } from '@libs/application';
 import { BillingCycleEntity } from '../persistence/entities/billing-cycle.entity';
 import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
@@ -20,10 +16,7 @@ import { BillingCycleMapper } from '../persistence/mappers/billing-cycle.mapper'
  * Incluye todos los servicios y repositorios necesarios
  */
 @Module({
-  imports: [
-    InfrastructureModule,
-    TypeOrmModule.forFeature([BillingCycleEntity]),
-  ],
+  imports: [InfrastructureModule, TypeOrmModule.forFeature([BillingCycleEntity])],
   providers: [CommissionCalculationService],
   exports: [CommissionCalculationService],
 })
@@ -68,21 +61,15 @@ async function bootstrap() {
     });
 
     // Obtener repositorios y servicios del contenedor de dependencias
-    const billingCycleRepository = app.get<IBillingCycleRepository>(
-      'IBillingCycleRepository',
-    );
+    const billingCycleRepository = app.get<IBillingCycleRepository>('IBillingCycleRepository');
     const paymentRepository = app.get<IPaymentRepository>('IPaymentRepository');
-    const commissionRepository = app.get<ICommissionRepository>(
-      'ICommissionRepository',
-    );
+    const commissionRepository = app.get<ICommissionRepository>('ICommissionRepository');
     const commissionCalculationService = app.get(CommissionCalculationService);
 
     // Obtener el repositorio de TypeORM directamente para hacer queries más específicas
     let billingCycleEntityRepository: Repository<BillingCycleEntity>;
     try {
-      billingCycleEntityRepository = app.get(
-        getRepositoryToken(BillingCycleEntity),
-      );
+      billingCycleEntityRepository = app.get(getRepositoryToken(BillingCycleEntity));
     } catch (error) {
       // Si no se puede obtener con el token, intentar obtenerlo del DataSource
       const dataSource = app.get(DataSource);
@@ -104,9 +91,7 @@ async function bootstrap() {
       .orderBy('bc.id', 'ASC')
       .getMany();
 
-    logger.log(
-      `Encontrados ${paidBillingCycles.length} billing cycles pagados\n`,
-    );
+    logger.log(`Encontrados ${paidBillingCycles.length} billing cycles pagados\n`);
 
     if (paidBillingCycles.length === 0) {
       console.log('✅ No hay billing cycles pagados para procesar.');
@@ -131,10 +116,7 @@ async function bootstrap() {
         );
 
         // Verificar que el billing cycle esté realmente pagado
-        if (
-          billingCycle.status !== 'paid' &&
-          billingCycle.paymentStatus !== 'paid'
-        ) {
+        if (billingCycle.status !== 'paid' && billingCycle.paymentStatus !== 'paid') {
           logger.warn(
             `  ⚠️  Billing Cycle #${cycleId} no está marcado como pagado. Status: ${billingCycle.status}, PaymentStatus: ${billingCycle.paymentStatus}. Saltando...`,
           );
@@ -143,22 +125,17 @@ async function bootstrap() {
         }
 
         // Verificar que tenga pagos asociados
-        const cyclePayments = await paymentRepository.findByBillingCycleId(
-          cycleId,
-        );
+        const cyclePayments = await paymentRepository.findByBillingCycleId(cycleId);
 
         if (cyclePayments.length === 0) {
-          logger.warn(
-            `  ⚠️  Billing Cycle #${cycleId} no tiene pagos asociados. Saltando...`,
-          );
+          logger.warn(`  ⚠️  Billing Cycle #${cycleId} no tiene pagos asociados. Saltando...`);
           skippedCount++;
           continue;
         }
 
         // Verificar si ya existen comisiones para este billing cycle
         // Usar findByBillingCycleId para verificación directa (más eficiente)
-        const existingCommissions =
-          await commissionRepository.findByBillingCycleId(cycleId);
+        const existingCommissions = await commissionRepository.findByBillingCycleId(cycleId);
 
         if (existingCommissions.length > 0) {
           logger.log(
@@ -174,9 +151,7 @@ async function bootstrap() {
         );
 
         const commissions =
-          await commissionCalculationService.calculateCommissionsForBillingCycle(
-            billingCycle,
-          );
+          await commissionCalculationService.calculateCommissionsForBillingCycle(billingCycle);
 
         if (commissions.length > 0) {
           logger.log(
@@ -191,11 +166,8 @@ async function bootstrap() {
         }
       } catch (error) {
         errorCount++;
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        logger.error(
-          `  ❌ Error procesando Billing Cycle #${cycleId}: ${errorMessage}`,
-        );
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error(`  ❌ Error procesando Billing Cycle #${cycleId}: ${errorMessage}`);
         errors.push({ cycleId, error: errorMessage });
       }
     }
@@ -234,4 +206,3 @@ async function bootstrap() {
 if (require.main === module) {
   bootstrap();
 }
-

@@ -142,4 +142,3 @@ export class UpdateCustomerTierRequest {
   @IsOptional()
   status?: 'active' | 'inactive';
 }
-

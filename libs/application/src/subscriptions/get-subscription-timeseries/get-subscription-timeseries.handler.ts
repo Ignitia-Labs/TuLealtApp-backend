@@ -13,7 +13,10 @@ import {
   PaymentMapper,
 } from '@libs/infrastructure';
 import { GetSubscriptionTimeseriesRequest } from './get-subscription-timeseries.request';
-import { GetSubscriptionTimeseriesResponse, PeriodMetrics } from './get-subscription-timeseries.response';
+import {
+  GetSubscriptionTimeseriesResponse,
+  PeriodMetrics,
+} from './get-subscription-timeseries.response';
 import { SubscriptionTimeseriesService } from './subscription-timeseries.service';
 import { GetSubscriptionStatsHandler } from '../get-subscription-stats/get-subscription-stats.handler';
 import { GetSubscriptionStatsRequest } from '../get-subscription-stats/get-subscription-stats.request';
@@ -152,4 +155,3 @@ export class GetSubscriptionTimeseriesHandler {
     return new GetSubscriptionTimeseriesResponse(seriesMetrics, summary, series.length);
   }
 }
-

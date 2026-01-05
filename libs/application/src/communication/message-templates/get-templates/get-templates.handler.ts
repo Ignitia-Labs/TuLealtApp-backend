@@ -40,4 +40,3 @@ export class GetTemplatesHandler {
     return new GetTemplatesResponse(templateDtos, templateDtos.length);
   }
 }
-

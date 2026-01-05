@@ -17,4 +17,3 @@ export const RESOURCE_TYPE_KEY = 'resourceType';
  * @param type Tipo de recurso (ej: 'membership', 'transaction', etc.)
  */
 export const ResourceType = (type: string) => SetMetadata(RESOURCE_TYPE_KEY, type);
-

@@ -82,4 +82,3 @@ export class Notification {
     return this.read;
   }
 }
-

@@ -47,8 +47,8 @@ export class CustomerTierMapper {
     entity.priority = domainEntity.priority;
     entity.status = domainEntity.status;
     if (domainEntity.id > 0) {
-    entity.createdAt = domainEntity.createdAt;
-    entity.updatedAt = domainEntity.updatedAt;
+      entity.createdAt = domainEntity.createdAt;
+      entity.updatedAt = domainEntity.updatedAt;
     }
     return entity;
   }

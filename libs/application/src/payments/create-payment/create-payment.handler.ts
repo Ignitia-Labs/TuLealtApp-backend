@@ -1,10 +1,4 @@
-import {
-  Injectable,
-  Inject,
-  NotFoundException,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -19,11 +13,7 @@ import {
   PartnerSubscription,
   BillingCycle,
 } from '@libs/domain';
-import {
-  PartnerSubscriptionEntity,
-  PartnerMapper,
-  EmailService,
-} from '@libs/infrastructure';
+import { PartnerSubscriptionEntity, PartnerMapper, EmailService } from '@libs/infrastructure';
 import { roundToTwoDecimals, registerSubscriptionEvent } from '@libs/shared';
 import { CreatePaymentRequest } from './create-payment.request';
 import { CreatePaymentResponse } from './create-payment.response';
@@ -97,7 +87,9 @@ export class CreatePaymentHandler {
       const dueDate = new Date(invoice.dueDate);
       dueDate.setHours(0, 0, 0, 0);
       if (dueDate < today && invoice.status === 'pending') {
-        const daysOverdue = Math.ceil((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+        const daysOverdue = Math.ceil(
+          (today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24),
+        );
         this.logger.warn(
           `Payment being created for overdue invoice ${request.invoiceId}. Invoice is ${daysOverdue} days overdue.`,
         );
@@ -253,7 +245,7 @@ export class CreatePaymentHandler {
           const excessAmount = request.amount - invoice.total;
           this.logger.log(
             `Exceso de pago ${excessAmount} ${savedPayment.currency} disponible como crédito para suscripción ${subscription.id}. ` +
-            `El crédito se calculará dinámicamente desde los pagos.`,
+              `El crédito se calculará dinámicamente desde los pagos.`,
           );
         }
       }
@@ -267,8 +259,7 @@ export class CreatePaymentHandler {
         await this.billingCycleRepository.update(updatedCycle);
 
         // Verificar si el billing cycle pasó a 'paid'
-        wasBillingCyclePaid =
-          previousStatus !== 'paid' && updatedCycle.status === 'paid';
+        wasBillingCyclePaid = previousStatus !== 'paid' && updatedCycle.status === 'paid';
       }
 
       // Actualizar la suscripción con último pago
@@ -285,9 +276,7 @@ export class CreatePaymentHandler {
       try {
         if (updatedCycle && wasBillingCyclePaid) {
           // Generar comisiones basadas en el billing cycle completo
-          await this.commissionCalculationService.calculateCommissionsForBillingCycle(
-            updatedCycle,
-          );
+          await this.commissionCalculationService.calculateCommissionsForBillingCycle(updatedCycle);
           this.logger.log(
             `Commissions calculated for billing cycle ${updatedCycle.id} (status changed to 'paid')`,
           );
@@ -394,10 +383,7 @@ export class CreatePaymentHandler {
 
     // Filtrar por moneda y ordenar por dueDate
     const cyclesToApply = pendingCycles
-      .filter(
-        (cycle) =>
-          cycle.currency === currency && cycle.paidAmount < cycle.totalAmount,
-      )
+      .filter((cycle) => cycle.currency === currency && cycle.paidAmount < cycle.totalAmount)
       .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
 
     if (cyclesToApply.length === 0) {
@@ -419,12 +405,8 @@ export class CreatePaymentHandler {
     for (const cycle of cyclesToApply) {
       if (remainingAmount <= 0) break;
 
-      const cycleRemaining = roundToTwoDecimals(
-        cycle.totalAmount - cycle.paidAmount,
-      );
-      const amountToApply = roundToTwoDecimals(
-        Math.min(remainingAmount, cycleRemaining),
-      );
+      const cycleRemaining = roundToTwoDecimals(cycle.totalAmount - cycle.paidAmount);
+      const amountToApply = roundToTwoDecimals(Math.min(remainingAmount, cycleRemaining));
 
       // Obtener el payment original para heredar reference
       const originalPayment = await this.paymentRepository.findById(originalPaymentId);
@@ -466,9 +448,7 @@ export class CreatePaymentHandler {
       const wasBillingCyclePaid = previousStatus !== 'paid' && updatedCycle.status === 'paid';
       if (wasBillingCyclePaid) {
         try {
-          await this.commissionCalculationService.calculateCommissionsForBillingCycle(
-            updatedCycle,
-          );
+          await this.commissionCalculationService.calculateCommissionsForBillingCycle(updatedCycle);
           this.logger.log(
             `Commissions calculated for billing cycle ${updatedCycle.id} (status changed to 'paid' via applyPaymentToPendingBillingCycles)`,
           );
@@ -528,7 +508,7 @@ export class CreatePaymentHandler {
       // NOTA: El crédito se calcula dinámicamente desde los pagos, no se almacena
       this.logger.log(
         `Pago de ${paymentAmount} ${currency} sin factura asociada disponible como crédito para suscripción ${subscription.id}. ` +
-        `El crédito se calculará dinámicamente desde los pagos.`,
+          `El crédito se calculará dinámicamente desde los pagos.`,
       );
       return;
     }
@@ -539,9 +519,7 @@ export class CreatePaymentHandler {
       if (remainingAmount <= 0) break;
 
       // Calcular cuánto aplicar a esta factura
-      const amountToApply = roundToTwoDecimals(
-        Math.min(remainingAmount, pendingInvoice.total),
-      );
+      const amountToApply = roundToTwoDecimals(Math.min(remainingAmount, pendingInvoice.total));
 
       // Obtener el payment original para heredar reference
       const originalPayment = await this.paymentRepository.findById(originalPaymentId);
@@ -575,7 +553,10 @@ export class CreatePaymentHandler {
       await this.paymentRepository.save(invoicePayment);
 
       // Actualizar factura
-      const paidInvoice = pendingInvoice.markAsPaid(paymentMethod as InvoicePaymentMethod, paymentDate);
+      const paidInvoice = pendingInvoice.markAsPaid(
+        paymentMethod as InvoicePaymentMethod,
+        paymentDate,
+      );
       await this.invoiceRepository.update(paidInvoice);
 
       // Actualizar billing cycle si existe
@@ -601,9 +582,8 @@ export class CreatePaymentHandler {
     if (remainingAmount > 0) {
       this.logger.log(
         `Exceso de pago ${remainingAmount} ${currency} disponible como crédito para suscripción ${subscription.id}. ` +
-        `El crédito se calculará dinámicamente desde los pagos.`,
+          `El crédito se calculará dinámicamente desde los pagos.`,
       );
     }
   }
 }
-

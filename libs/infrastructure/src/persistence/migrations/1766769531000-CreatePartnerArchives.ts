@@ -24,7 +24,8 @@ export class CreatePartnerArchives1766769531000 implements MigrationInterface {
           {
             name: 'archivedData',
             type: 'json',
-            comment: 'Datos completos del partner y todas sus relaciones en formato JSON (partner, subscription, limits, stats, tenants con features y branches)',
+            comment:
+              'Datos completos del partner y todas sus relaciones en formato JSON (partner, subscription, limits, stats, tenants con features y branches)',
           },
           {
             name: 'deletedBy',

@@ -24,9 +24,7 @@ export class GetProfilePermissionsHandler {
     private readonly permissionRepository: IPermissionRepository,
   ) {}
 
-  async execute(
-    request: GetProfilePermissionsRequest,
-  ): Promise<GetProfilePermissionsResponse> {
+  async execute(request: GetProfilePermissionsRequest): Promise<GetProfilePermissionsResponse> {
     // Validar que el perfil exista
     const profile = await this.profileRepository.findById(request.profileId);
     if (!profile) {
@@ -71,4 +69,3 @@ export class GetProfilePermissionsHandler {
     );
   }
 }
-

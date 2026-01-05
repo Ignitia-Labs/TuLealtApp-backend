@@ -74,4 +74,3 @@ export class GetCustomerTiersResponse {
     this.total = tiers.length;
   }
 }
-

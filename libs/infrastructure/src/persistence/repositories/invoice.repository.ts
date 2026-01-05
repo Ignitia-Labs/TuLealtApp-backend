@@ -114,9 +114,7 @@ export class InvoiceRepository implements IInvoiceRepository {
     if (existingEntity.items && existingEntity.items.length > 0 && entity.items) {
       entity.items = entity.items.map((newItem) => {
         // Buscar el item existente por itemId
-        const existingItem = existingEntity.items.find(
-          (item) => item.itemId === newItem.itemId,
-        );
+        const existingItem = existingEntity.items.find((item) => item.itemId === newItem.itemId);
         if (existingItem) {
           // Preservar el ID y el invoiceId del item existente
           newItem.id = existingItem.id;

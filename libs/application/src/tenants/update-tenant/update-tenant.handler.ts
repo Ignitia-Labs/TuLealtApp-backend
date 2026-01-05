@@ -35,6 +35,7 @@ export class UpdateTenantHandler {
       request.name ?? existingTenant.name,
       request.description !== undefined ? request.description : existingTenant.description,
       request.logo !== undefined ? request.logo : existingTenant.logo,
+      request.banner !== undefined ? request.banner : existingTenant.banner,
       request.category ?? existingTenant.category,
       request.currencyId ?? existingTenant.currencyId,
       request.primaryColor ?? existingTenant.primaryColor,
@@ -103,6 +104,7 @@ export class UpdateTenantHandler {
       finalTenant.name,
       finalTenant.description,
       finalTenant.logo,
+      finalTenant.banner,
       finalTenant.category,
       finalTenant.currencyId,
       finalTenant.primaryColor,
@@ -115,4 +117,3 @@ export class UpdateTenantHandler {
     );
   }
 }
-

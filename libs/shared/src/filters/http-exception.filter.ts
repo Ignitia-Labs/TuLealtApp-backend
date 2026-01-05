@@ -48,7 +48,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
     };
 
     // Agregar campo 'error' si está presente en la respuesta de la excepción
-    if (typeof exceptionResponse === 'object' && exceptionResponse !== null && 'error' in exceptionResponse) {
+    if (
+      typeof exceptionResponse === 'object' &&
+      exceptionResponse !== null &&
+      'error' in exceptionResponse
+    ) {
       errorResponse.error = (exceptionResponse as any).error;
     }
 

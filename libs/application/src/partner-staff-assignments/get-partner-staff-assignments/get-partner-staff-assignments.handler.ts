@@ -41,20 +41,14 @@ export class GetPartnerStaffAssignmentsHandler {
         request.activeOnly,
       );
     } else {
-      assignments = await this.assignmentRepository.findAll(
-        request.activeOnly,
-      );
+      assignments = await this.assignmentRepository.findAll(request.activeOnly);
     }
 
     // Enriquecer con información de partners y usuarios
     const assignmentDtos = await Promise.all(
       assignments.map(async (assignment) => {
-        const partner = await this.partnerRepository.findById(
-          assignment.partnerId,
-        );
-        const staffUser = await this.userRepository.findById(
-          assignment.staffUserId,
-        );
+        const partner = await this.partnerRepository.findById(assignment.partnerId);
+        const staffUser = await this.userRepository.findById(assignment.staffUserId);
 
         return new PartnerStaffAssignmentDto(
           assignment.id,
@@ -74,10 +68,6 @@ export class GetPartnerStaffAssignmentsHandler {
       }),
     );
 
-    return new GetPartnerStaffAssignmentsResponse(
-      assignmentDtos,
-      assignmentDtos.length,
-    );
+    return new GetPartnerStaffAssignmentsResponse(assignmentDtos, assignmentDtos.length);
   }
 }
-

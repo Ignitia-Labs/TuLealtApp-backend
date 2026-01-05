@@ -1,4 +1,12 @@
-import { IsOptional, IsString, MinLength, IsBoolean, IsArray, ArrayMinSize, IsNumber } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  MinLength,
+  IsBoolean,
+  IsArray,
+  ArrayMinSize,
+  IsNumber,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
@@ -51,4 +59,3 @@ export class UpdateProfileRequest {
   @IsOptional()
   isActive?: boolean;
 }
-

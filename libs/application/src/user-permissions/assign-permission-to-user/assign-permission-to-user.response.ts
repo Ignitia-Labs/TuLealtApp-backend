@@ -62,4 +62,3 @@ export class AssignPermissionToUserResponse {
     this.isActive = isActive;
   }
 }
-

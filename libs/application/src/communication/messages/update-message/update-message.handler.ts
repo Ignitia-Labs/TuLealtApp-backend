@@ -15,10 +15,7 @@ export class UpdateMessageHandler {
     private readonly messageSenderService: MessageSenderService,
   ) {}
 
-  async execute(
-    messageId: number,
-    request: UpdateMessageRequest,
-  ): Promise<UpdateMessageResponse> {
+  async execute(messageId: number, request: UpdateMessageRequest): Promise<UpdateMessageResponse> {
     const message = await this.messageRepository.findById(messageId);
 
     if (!message) {
@@ -35,10 +32,7 @@ export class UpdateMessageHandler {
     // Convertir attachments DTO a Attachment si están presentes
     const attachments = request.attachments
       ? request.attachments
-          .filter(
-            (att) =>
-              att.id && att.name && att.type && att.size !== undefined && att.url,
-          )
+          .filter((att) => att.id && att.name && att.type && att.size !== undefined && att.url)
           .map((att) => ({
             id: att.id!,
             name: att.name!,
@@ -60,11 +54,8 @@ export class UpdateMessageHandler {
     const savedMessage = await this.messageRepository.update(updatedMessage);
 
     // Obtener estadísticas de entrega
-    const deliveryStats = await this.messageSenderService.getDeliveryStats(
-      savedMessage.id,
-    );
+    const deliveryStats = await this.messageSenderService.getDeliveryStats(savedMessage.id);
 
     return new UpdateMessageResponse(savedMessage, deliveryStats);
   }
 }
-

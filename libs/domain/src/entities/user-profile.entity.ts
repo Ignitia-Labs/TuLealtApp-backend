@@ -65,4 +65,3 @@ export class UserProfile {
     return this.isActive;
   }
 }
-

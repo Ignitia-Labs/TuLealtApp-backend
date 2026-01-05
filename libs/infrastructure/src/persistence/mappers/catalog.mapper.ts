@@ -42,4 +42,3 @@ export class CatalogMapper {
     return entity;
   }
 }
-

@@ -51,9 +51,7 @@ export class GetMessagesHandler {
     const messageDtos = await Promise.all(
       result.messages.map(async (message) => {
         // Obtener destinatarios
-        const recipients = await this.recipientRepository.findByMessageId(
-          message.id,
-        );
+        const recipients = await this.recipientRepository.findByMessageId(message.id);
 
         const partnerIds = recipients.map((r) => r.partnerId);
         const partnerNames: string[] = [];
@@ -73,16 +71,12 @@ export class GetMessagesHandler {
         // Obtener nombre del template si existe
         let templateName: string | null = null;
         if (message.templateId) {
-          const template = await this.templateRepository.findById(
-            message.templateId,
-          );
+          const template = await this.templateRepository.findById(message.templateId);
           templateName = template?.name || null;
         }
 
         // Obtener estadísticas de entrega
-        const deliveryStats = await this.messageSenderService.getDeliveryStats(
-          message.id,
-        );
+        const deliveryStats = await this.messageSenderService.getDeliveryStats(message.id);
 
         return new MessageDto(
           message,
@@ -104,4 +98,3 @@ export class GetMessagesHandler {
     );
   }
 }
-

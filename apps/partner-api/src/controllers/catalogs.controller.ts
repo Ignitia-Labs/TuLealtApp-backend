@@ -160,7 +160,11 @@ export class CatalogsController {
   ): Promise<GetCatalogsResponse> {
     const request = new GetCatalogsRequest();
     if (type) {
-      request.type = type as 'BUSINESS_CATEGORIES' | 'REWARD_TYPES' | 'PAYMENT_METHODS' | 'PAYMENT_CATEGORIES';
+      request.type = type as
+        | 'BUSINESS_CATEGORIES'
+        | 'REWARD_TYPES'
+        | 'PAYMENT_METHODS'
+        | 'PAYMENT_CATEGORIES';
     }
     request.includeInactive = includeInactive === 'true';
     return this.getCatalogsHandler.execute(request);
@@ -240,4 +244,3 @@ export class CatalogsController {
     return this.getCatalogHandler.execute(request);
   }
 }
-

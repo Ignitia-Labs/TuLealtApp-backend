@@ -92,4 +92,3 @@ export class PlanChangeEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

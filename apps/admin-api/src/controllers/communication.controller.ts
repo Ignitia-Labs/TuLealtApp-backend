@@ -117,8 +117,7 @@ export class CommunicationController {
   ): Promise<GetTemplatesResponse> {
     const request = new GetTemplatesRequest();
     if (type) request.type = type as any;
-    if (isActive !== undefined)
-      request.isActive = isActive === 'true' || isActive === '1';
+    if (isActive !== undefined) request.isActive = isActive === 'true' || isActive === '1';
     if (search) request.search = search;
     return this.getTemplatesHandler.execute(request);
   }
@@ -131,9 +130,7 @@ export class CommunicationController {
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, type: GetTemplateResponse })
   @ApiResponse({ status: 404, type: NotFoundErrorResponseDto })
-  async getTemplate(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<GetTemplateResponse> {
+  async getTemplate(@Param('id', ParseIntPipe) id: number): Promise<GetTemplateResponse> {
     return this.getTemplateHandler.execute(id);
   }
 
@@ -175,9 +172,7 @@ export class CommunicationController {
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, type: DeleteTemplateResponse })
   @ApiResponse({ status: 404, type: NotFoundErrorResponseDto })
-  async deleteTemplate(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<DeleteTemplateResponse> {
+  async deleteTemplate(@Param('id', ParseIntPipe) id: number): Promise<DeleteTemplateResponse> {
     return this.deleteTemplateHandler.execute(id);
   }
 
@@ -191,9 +186,7 @@ export class CommunicationController {
     summary: 'Obtener lista de mensajes',
   })
   @ApiResponse({ status: 200, type: GetMessagesResponse })
-  async getMessages(
-    @Query() query: any,
-  ): Promise<GetMessagesResponse> {
+  async getMessages(@Query() query: any): Promise<GetMessagesResponse> {
     const request = new GetMessagesRequest();
     if (query.page) request.page = parseInt(query.page, 10);
     if (query.limit) request.limit = parseInt(query.limit, 10);
@@ -217,9 +210,7 @@ export class CommunicationController {
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, type: GetMessageResponse })
   @ApiResponse({ status: 404, type: NotFoundErrorResponseDto })
-  async getMessage(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<GetMessageResponse> {
+  async getMessage(@Param('id', ParseIntPipe) id: number): Promise<GetMessageResponse> {
     return this.getMessageHandler.execute(id);
   }
 
@@ -266,9 +257,7 @@ export class CommunicationController {
   @ApiResponse({ status: 200, type: DeleteMessageResponse })
   @ApiResponse({ status: 404, type: NotFoundErrorResponseDto })
   @ApiResponse({ status: 400, type: BadRequestErrorResponseDto })
-  async deleteMessage(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<DeleteMessageResponse> {
+  async deleteMessage(@Param('id', ParseIntPipe) id: number): Promise<DeleteMessageResponse> {
     return this.deleteMessageHandler.execute(id);
   }
 
@@ -329,4 +318,3 @@ export class CommunicationController {
     return this.getStatsHandler.execute(request);
   }
 }
-

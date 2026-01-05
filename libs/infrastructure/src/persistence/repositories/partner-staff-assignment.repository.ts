@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
-import {
-  IPartnerStaffAssignmentRepository,
-  PartnerStaffAssignment,
-} from '@libs/domain';
+import { IPartnerStaffAssignmentRepository, PartnerStaffAssignment } from '@libs/domain';
 import { PartnerStaffAssignmentEntity } from '../entities/partner-staff-assignment.entity';
 import { PartnerStaffAssignmentMapper } from '../mappers/partner-staff-assignment.mapper';
 
@@ -12,9 +9,7 @@ import { PartnerStaffAssignmentMapper } from '../mappers/partner-staff-assignmen
  * Implementación del repositorio de asignaciones staff-partner usando TypeORM
  */
 @Injectable()
-export class PartnerStaffAssignmentRepository
-  implements IPartnerStaffAssignmentRepository
-{
+export class PartnerStaffAssignmentRepository implements IPartnerStaffAssignmentRepository {
   constructor(
     @InjectRepository(PartnerStaffAssignmentEntity)
     private readonly assignmentRepository: Repository<PartnerStaffAssignmentEntity>,
@@ -46,9 +41,7 @@ export class PartnerStaffAssignmentRepository
       order: { createdAt: 'DESC' },
     });
 
-    return entities.map((entity) =>
-      PartnerStaffAssignmentMapper.toDomain(entity),
-    );
+    return entities.map((entity) => PartnerStaffAssignmentMapper.toDomain(entity));
   }
 
   async findByStaffUserId(
@@ -65,9 +58,7 @@ export class PartnerStaffAssignmentRepository
       order: { createdAt: 'DESC' },
     });
 
-    return entities.map((entity) =>
-      PartnerStaffAssignmentMapper.toDomain(entity),
-    );
+    return entities.map((entity) => PartnerStaffAssignmentMapper.toDomain(entity));
   }
 
   async findByPartnerAndStaff(
@@ -96,22 +87,16 @@ export class PartnerStaffAssignmentRepository
       order: { createdAt: 'DESC' },
     });
 
-    return entities.map((entity) =>
-      PartnerStaffAssignmentMapper.toDomain(entity),
-    );
+    return entities.map((entity) => PartnerStaffAssignmentMapper.toDomain(entity));
   }
 
-  async save(
-    assignment: PartnerStaffAssignment,
-  ): Promise<PartnerStaffAssignment> {
+  async save(assignment: PartnerStaffAssignment): Promise<PartnerStaffAssignment> {
     const entity = PartnerStaffAssignmentMapper.toPersistence(assignment);
     const savedEntity = await this.assignmentRepository.save(entity);
     return PartnerStaffAssignmentMapper.toDomain(savedEntity);
   }
 
-  async update(
-    assignment: PartnerStaffAssignment,
-  ): Promise<PartnerStaffAssignment> {
+  async update(assignment: PartnerStaffAssignment): Promise<PartnerStaffAssignment> {
     const entity = PartnerStaffAssignmentMapper.toPersistence(assignment);
     const updatedEntity = await this.assignmentRepository.save(entity);
     return PartnerStaffAssignmentMapper.toDomain(updatedEntity);
@@ -121,10 +106,7 @@ export class PartnerStaffAssignmentRepository
     await this.assignmentRepository.delete(id);
   }
 
-  async getTotalCommissionPercent(
-    partnerId: number,
-    excludeId?: number,
-  ): Promise<number> {
+  async getTotalCommissionPercent(partnerId: number, excludeId?: number): Promise<number> {
     const queryBuilder = this.assignmentRepository
       .createQueryBuilder('assignment')
       .where('assignment.partnerId = :partnerId', { partnerId })
@@ -156,16 +138,10 @@ export class PartnerStaffAssignmentRepository
       .where('assignment.partnerId = :partnerId', { partnerId })
       .andWhere('assignment.isActive = :isActive', { isActive: true })
       .andWhere('assignment.startDate <= :date', { date })
-      .andWhere(
-        '(assignment.endDate IS NULL OR assignment.endDate >= :date)',
-        { date },
-      )
+      .andWhere('(assignment.endDate IS NULL OR assignment.endDate >= :date)', { date })
       .orderBy('assignment.createdAt', 'DESC')
       .getMany();
 
-    return entities.map((entity) =>
-      PartnerStaffAssignmentMapper.toDomain(entity),
-    );
+    return entities.map((entity) => PartnerStaffAssignmentMapper.toDomain(entity));
   }
 }
-

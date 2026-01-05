@@ -63,7 +63,10 @@ export class UpdateCatalogHandler {
       updatedCatalog = updatedCatalog.updateValue(request.value, newSlug);
     }
 
-    if (request.displayOrder !== undefined && request.displayOrder !== existingCatalog.displayOrder) {
+    if (
+      request.displayOrder !== undefined &&
+      request.displayOrder !== existingCatalog.displayOrder
+    ) {
       updatedCatalog = updatedCatalog.updateDisplayOrder(request.displayOrder);
     }
 
@@ -87,4 +90,3 @@ export class UpdateCatalogHandler {
     );
   }
 }
-

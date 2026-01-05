@@ -46,4 +46,3 @@ export class DeleteUserHandler {
     return new DeleteUserResponse(request.userId, 'User deleted successfully');
   }
 }
-

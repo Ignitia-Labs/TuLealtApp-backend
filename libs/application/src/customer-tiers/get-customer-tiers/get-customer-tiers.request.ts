@@ -16,4 +16,3 @@ export class GetCustomerTiersRequest {
   @Min(1)
   tenantId: number;
 }
-

@@ -100,7 +100,9 @@ export class PermissionRepository implements IPermissionRepository {
     await this.permissionRepository.delete(id);
   }
 
-  async validatePermissions(permissionCodes: string[]): Promise<{ valid: string[]; invalid: string[] }> {
+  async validatePermissions(
+    permissionCodes: string[],
+  ): Promise<{ valid: string[]; invalid: string[] }> {
     const valid: string[] = [];
     const invalid: string[] = [];
 
@@ -149,4 +151,3 @@ export class PermissionRepository implements IPermissionRepository {
     });
   }
 }
-

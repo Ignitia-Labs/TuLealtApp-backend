@@ -87,7 +87,8 @@ export class PartnerUsersController {
   })
   @ApiBody({
     type: CreatePartnerStaffUserRequest,
-    description: 'Datos del usuario PARTNER_STAFF a crear. El partnerId se obtiene del usuario autenticado.',
+    description:
+      'Datos del usuario PARTNER_STAFF a crear. El partnerId se obtiene del usuario autenticado.',
     examples: {
       staffBasico: {
         summary: 'Staff básico',
@@ -229,7 +230,8 @@ export class PartnerUsersController {
     name: 'includeInactive',
     required: false,
     type: Boolean,
-    description: 'Si se incluyen usuarios inactivos/bloqueados en la respuesta. Por defecto retorna todos los usuarios.',
+    description:
+      'Si se incluyen usuarios inactivos/bloqueados en la respuesta. Por defecto retorna todos los usuarios.',
     example: true,
   })
   @ApiResponse({
@@ -506,7 +508,8 @@ export class PartnerUsersController {
   })
   @ApiResponse({
     status: 400,
-    description: 'Datos inválidos, usuario no es PARTNER/PARTNER_STAFF, o validación de tenant/branch falló',
+    description:
+      'Datos inválidos, usuario no es PARTNER/PARTNER_STAFF, o validación de tenant/branch falló',
     type: BadRequestErrorResponseDto,
     example: {
       statusCode: 400,
@@ -550,8 +553,7 @@ export class PartnerUsersController {
     @CurrentUser() user: JwtPayload,
   ): Promise<UpdatePartnerUserAssignmentResponse> {
     // Validar que el usuario autenticado tenga rol PARTNER o ADMIN
-    const hasPartnerOrAdminRole =
-      user.roles.includes('PARTNER') || user.roles.includes('ADMIN');
+    const hasPartnerOrAdminRole = user.roles.includes('PARTNER') || user.roles.includes('ADMIN');
     if (!hasPartnerOrAdminRole) {
       throw new ForbiddenException(
         'Only users with PARTNER or ADMIN role can assign tenants and branches',
@@ -587,4 +589,3 @@ export class PartnerUsersController {
     return this.updatePartnerUserAssignmentHandler.execute(request);
   }
 }
-

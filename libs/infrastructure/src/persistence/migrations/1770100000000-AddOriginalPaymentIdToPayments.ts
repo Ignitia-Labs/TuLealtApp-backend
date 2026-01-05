@@ -36,16 +36,20 @@ export class AddOriginalPaymentIdToPayments1770100000000 implements MigrationInt
       // Crear foreign key constraint (opcional, pero recomendado para integridad referencial)
       // Nota: No agregamos ON DELETE CASCADE porque queremos mantener los derivados
       // aunque se elimine el original (para auditoría)
-      await queryRunner.query(`
+      await queryRunner
+        .query(
+          `
         ALTER TABLE payments
         ADD CONSTRAINT fk_payments_original_payment
         FOREIGN KEY (originalPaymentId) REFERENCES payments(id)
         ON DELETE SET NULL
         ON UPDATE CASCADE
-      `).catch((error) => {
-        // Si la foreign key ya existe o hay un error, continuar
-        console.log('Foreign key constraint may already exist or error occurred:', error.message);
-      });
+      `,
+        )
+        .catch((error) => {
+          // Si la foreign key ya existe o hay un error, continuar
+          console.log('Foreign key constraint may already exist or error occurred:', error.message);
+        });
     }
   }
 
@@ -79,4 +83,3 @@ export class AddOriginalPaymentIdToPayments1770100000000 implements MigrationInt
     }
   }
 }
-

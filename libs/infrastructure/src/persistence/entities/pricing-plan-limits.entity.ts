@@ -55,4 +55,3 @@ export class PricingPlanLimitsEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

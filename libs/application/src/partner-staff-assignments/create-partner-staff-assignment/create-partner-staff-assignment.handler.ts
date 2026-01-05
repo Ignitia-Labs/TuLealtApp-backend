@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  Inject,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
 import {
   IPartnerStaffAssignmentRepository,
   IPartnerRepository,
@@ -35,29 +30,22 @@ export class CreatePartnerStaffAssignmentHandler {
     // Validar que el partner existe
     const partner = await this.partnerRepository.findById(request.partnerId);
     if (!partner) {
-      throw new NotFoundException(
-        `Partner with ID ${request.partnerId} not found`,
-      );
+      throw new NotFoundException(`Partner with ID ${request.partnerId} not found`);
     }
 
     // Validar que el partner está activo
     if (!partner.isActive()) {
-      throw new BadRequestException(
-        `Partner with ID ${request.partnerId} is not active`,
-      );
+      throw new BadRequestException(`Partner with ID ${request.partnerId} is not active`);
     }
 
     // Validar que el usuario existe
     const user = await this.userRepository.findById(request.staffUserId);
     if (!user) {
-      throw new NotFoundException(
-        `User with ID ${request.staffUserId} not found`,
-      );
+      throw new NotFoundException(`User with ID ${request.staffUserId} not found`);
     }
 
     // Validar que el usuario tiene rol STAFF o ADMIN
-    const hasAdminOrStaffRole =
-      user.hasRole('ADMIN') || user.hasRole('STAFF');
+    const hasAdminOrStaffRole = user.hasRole('ADMIN') || user.hasRole('STAFF');
 
     if (!hasAdminOrStaffRole) {
       throw new BadRequestException(
@@ -67,9 +55,7 @@ export class CreatePartnerStaffAssignmentHandler {
 
     // Validar que el usuario está activo
     if (!user.isActiveUser()) {
-      throw new BadRequestException(
-        `User with ID ${request.staffUserId} is not active`,
-      );
+      throw new BadRequestException(`User with ID ${request.staffUserId} is not active`);
     }
 
     // Validar que la suma de porcentajes no exceda 100%
@@ -105,8 +91,7 @@ export class CreatePartnerStaffAssignmentHandler {
     );
 
     // Guardar la asignación
-    const savedAssignment =
-      await this.assignmentRepository.save(assignment);
+    const savedAssignment = await this.assignmentRepository.save(assignment);
 
     return new CreatePartnerStaffAssignmentResponse(
       savedAssignment.id,
@@ -121,4 +106,3 @@ export class CreatePartnerStaffAssignmentHandler {
     );
   }
 }
-

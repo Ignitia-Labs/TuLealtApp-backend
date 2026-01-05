@@ -240,5 +240,4 @@ export class User {
       new Date(),
     );
   }
-
 }

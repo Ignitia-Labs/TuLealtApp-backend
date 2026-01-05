@@ -15,4 +15,3 @@ export class GetRewardRequest {
   @Min(1)
   rewardId: number;
 }
-

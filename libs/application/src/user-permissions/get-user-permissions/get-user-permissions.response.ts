@@ -123,4 +123,3 @@ export class GetUserPermissionsResponse {
     this.total = total;
   }
 }
-

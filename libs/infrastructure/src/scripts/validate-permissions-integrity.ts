@@ -4,11 +4,7 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { Logger } from '@nestjs/common';
 import { InfrastructureModule } from '../infrastructure.module';
-import {
-  IProfileRepository,
-  IPermissionRepository,
-  IUserPermissionRepository,
-} from '@libs/domain';
+import { IProfileRepository, IPermissionRepository, IUserPermissionRepository } from '@libs/domain';
 import { ProfileEntity } from '../persistence/entities/profile.entity';
 import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
@@ -19,10 +15,7 @@ import { ProfileMapper } from '../persistence/mappers/profile.mapper';
  * Incluye todos los repositorios necesarios
  */
 @Module({
-  imports: [
-    InfrastructureModule,
-    TypeOrmModule.forFeature([ProfileEntity]),
-  ],
+  imports: [InfrastructureModule, TypeOrmModule.forFeature([ProfileEntity])],
 })
 class ValidationScriptModule {}
 
@@ -96,9 +89,7 @@ async function bootstrap() {
       if (dataSource) {
         profileEntityRepository = dataSource.getRepository(ProfileEntity);
       } else {
-        throw new Error(
-          'No se pudo obtener el repositorio de ProfileEntity ni el DataSource.',
-        );
+        throw new Error('No se pudo obtener el repositorio de ProfileEntity ni el DataSource.');
       }
     }
 
@@ -287,4 +278,3 @@ async function bootstrap() {
 if (require.main === module) {
   bootstrap();
 }
-

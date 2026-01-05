@@ -1,4 +1,10 @@
-import { Injectable, Inject, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import {
   IUserRepository,
   IPartnerRepository,
@@ -124,4 +130,3 @@ export class CreatePartnerStaffUserHandler {
     );
   }
 }
-

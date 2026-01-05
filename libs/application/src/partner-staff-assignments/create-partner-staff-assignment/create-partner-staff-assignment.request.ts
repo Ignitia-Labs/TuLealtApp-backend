@@ -75,4 +75,3 @@ export class CreatePartnerStaffAssignmentRequest {
   @IsOptional()
   notes?: string | null;
 }
-

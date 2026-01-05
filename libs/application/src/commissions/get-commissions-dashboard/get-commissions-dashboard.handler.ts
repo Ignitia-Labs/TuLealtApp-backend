@@ -1,9 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import {
-  ICommissionRepository,
-  IUserRepository,
-  IPartnerRepository,
-} from '@libs/domain';
+import { ICommissionRepository, IUserRepository, IPartnerRepository } from '@libs/domain';
 import { GetCommissionsDashboardRequest } from './get-commissions-dashboard.request';
 import {
   GetCommissionsDashboardResponse,
@@ -26,13 +22,9 @@ export class GetCommissionsDashboardHandler {
     private readonly partnerRepository: IPartnerRepository,
   ) {}
 
-  async execute(
-    request: GetCommissionsDashboardRequest,
-  ): Promise<GetCommissionsDashboardResponse> {
+  async execute(request: GetCommissionsDashboardRequest): Promise<GetCommissionsDashboardResponse> {
     // Preparar fechas del período
-    const endDate = request.endDate
-      ? new Date(request.endDate)
-      : new Date();
+    const endDate = request.endDate ? new Date(request.endDate) : new Date();
     const startDate = request.startDate
       ? new Date(request.startDate)
       : new Date(new Date().getFullYear(), 0, 1); // Inicio del año actual
@@ -51,29 +43,14 @@ export class GetCommissionsDashboardHandler {
     // Calcular resumen general
     const pendingCommissions = allCommissions.filter((c) => c.status === 'pending');
     const paidCommissions = allCommissions.filter((c) => c.status === 'paid');
-    const cancelledCommissions = allCommissions.filter(
-      (c) => c.status === 'cancelled',
-    );
+    const cancelledCommissions = allCommissions.filter((c) => c.status === 'cancelled');
 
-    const pendingAmount = pendingCommissions.reduce(
-      (sum, c) => sum + c.commissionAmount,
-      0,
-    );
-    const paidAmount = paidCommissions.reduce(
-      (sum, c) => sum + c.commissionAmount,
-      0,
-    );
-    const cancelledAmount = cancelledCommissions.reduce(
-      (sum, c) => sum + c.commissionAmount,
-      0,
-    );
-    const totalAmount = allCommissions.reduce(
-      (sum, c) => sum + c.commissionAmount,
-      0,
-    );
+    const pendingAmount = pendingCommissions.reduce((sum, c) => sum + c.commissionAmount, 0);
+    const paidAmount = paidCommissions.reduce((sum, c) => sum + c.commissionAmount, 0);
+    const cancelledAmount = cancelledCommissions.reduce((sum, c) => sum + c.commissionAmount, 0);
+    const totalAmount = allCommissions.reduce((sum, c) => sum + c.commissionAmount, 0);
 
-    const currency =
-      allCommissions.length > 0 ? allCommissions[0].currency : 'USD';
+    const currency = allCommissions.length > 0 ? allCommissions[0].currency : 'USD';
     const averageCommissionAmount =
       allCommissions.length > 0 ? totalAmount / allCommissions.length : 0;
 
@@ -147,18 +124,12 @@ export class GetCommissionsDashboardHandler {
       endDate: previousEndDate,
     });
 
-    const previousTotalAmount = previousCommissions.reduce(
-      (sum, c) => sum + c.commissionAmount,
-      0,
-    );
+    const previousTotalAmount = previousCommissions.reduce((sum, c) => sum + c.commissionAmount, 0);
 
-    const totalCommissionsChange =
-      allCommissions.length - previousCommissions.length;
+    const totalCommissionsChange = allCommissions.length - previousCommissions.length;
     const totalAmountChange = totalAmount - previousTotalAmount;
     const percentageChange =
-      previousTotalAmount > 0
-        ? (totalAmountChange / previousTotalAmount) * 100
-        : 0;
+      previousTotalAmount > 0 ? (totalAmountChange / previousTotalAmount) * 100 : 0;
 
     return new GetCommissionsDashboardResponse(
       { startDate, endDate },
@@ -185,8 +156,3 @@ export class GetCommissionsDashboardHandler {
     );
   }
 }
-
-
-
-
-

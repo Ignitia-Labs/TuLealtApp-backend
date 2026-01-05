@@ -56,11 +56,7 @@ export class InvoicePdfService {
         buffer: pdfBuffer,
       };
 
-      const pdfUrl = await this.s3Service.uploadFile(
-        uploadedFile,
-        folder,
-        fileName,
-      );
+      const pdfUrl = await this.s3Service.uploadFile(uploadedFile, folder, fileName);
 
       this.logger.log(`PDF generado y subido para factura ${invoice.invoiceNumber}: ${pdfUrl}`);
       return pdfUrl;
@@ -75,10 +71,7 @@ export class InvoicePdfService {
    */
   private generateInvoiceContent(doc: InstanceType<typeof PDFDocument>, invoice: Invoice): void {
     // Encabezado
-    doc
-      .fontSize(20)
-      .text('FACTURA', { align: 'right' })
-      .moveDown();
+    doc.fontSize(20).text('FACTURA', { align: 'right' }).moveDown();
 
     doc
       .fontSize(10)
@@ -144,10 +137,7 @@ export class InvoicePdfService {
 
     // Totales
     yPosition += 10;
-    doc
-      .moveTo(50, yPosition)
-      .lineTo(550, yPosition)
-      .stroke();
+    doc.moveTo(50, yPosition).lineTo(550, yPosition).stroke();
 
     yPosition += 15;
 
@@ -192,10 +182,7 @@ export class InvoicePdfService {
 
     // Total
     yPosition += 5;
-    doc
-      .moveTo(50, yPosition)
-      .lineTo(550, yPosition)
-      .stroke();
+    doc.moveTo(50, yPosition).lineTo(550, yPosition).stroke();
 
     yPosition += 15;
     doc
@@ -211,7 +198,11 @@ export class InvoicePdfService {
       .font('Helvetica-Bold')
       .text(`Estado: ${this.translateStatus(invoice.status)}`, 50, yPosition)
       .font('Helvetica')
-      .text(`Estado de pago: ${this.translatePaymentStatus(invoice.paymentStatus)}`, 50, yPosition + 15);
+      .text(
+        `Estado de pago: ${this.translatePaymentStatus(invoice.paymentStatus)}`,
+        50,
+        yPosition + 15,
+      );
 
     // Notas
     if (invoice.notes) {
@@ -229,12 +220,9 @@ export class InvoicePdfService {
     doc
       .fontSize(8)
       .font('Helvetica')
-      .text(
-        `Factura generada el ${this.formatDate(new Date())}`,
-        50,
-        pageHeight - 50,
-        { align: 'center' },
-      );
+      .text(`Factura generada el ${this.formatDate(new Date())}`, 50, pageHeight - 50, {
+        align: 'center',
+      });
   }
 
   /**
@@ -284,4 +272,3 @@ export class InvoicePdfService {
     return translations[status] || status;
   }
 }
-

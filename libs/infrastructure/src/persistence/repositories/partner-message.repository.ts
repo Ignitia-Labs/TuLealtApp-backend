@@ -94,10 +94,9 @@ export class PartnerMessageRepository implements IPartnerMessageRepository {
     }
 
     if (options?.search) {
-      queryBuilder.andWhere(
-        '(message.subject LIKE :search OR message.body LIKE :search)',
-        { search: `%${options.search}%` },
-      );
+      queryBuilder.andWhere('(message.subject LIKE :search OR message.body LIKE :search)', {
+        search: `%${options.search}%`,
+      });
     }
 
     if (options?.senderId) {
@@ -114,14 +113,9 @@ export class PartnerMessageRepository implements IPartnerMessageRepository {
 
     queryBuilder.orderBy('message.createdAt', 'DESC');
 
-    const [entities, total] = await queryBuilder
-      .skip(skip)
-      .take(limit)
-      .getManyAndCount();
+    const [entities, total] = await queryBuilder.skip(skip).take(limit).getManyAndCount();
 
-    const messages = entities.map((entity) =>
-      PartnerMessageMapper.toDomain(entity),
-    );
+    const messages = entities.map((entity) => PartnerMessageMapper.toDomain(entity));
 
     return { messages, total };
   }
@@ -154,4 +148,3 @@ export class PartnerMessageRepository implements IPartnerMessageRepository {
     await this.messageRepository.delete(id);
   }
 }
-

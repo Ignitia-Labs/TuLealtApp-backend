@@ -46,4 +46,3 @@ export class PartnerSubscriptionUsageEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

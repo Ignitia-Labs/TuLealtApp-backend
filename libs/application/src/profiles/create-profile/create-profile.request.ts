@@ -71,4 +71,3 @@ export class CreateProfileRequest {
   @IsOptional()
   isActive?: boolean;
 }
-

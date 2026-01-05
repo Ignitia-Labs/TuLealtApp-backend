@@ -19,7 +19,9 @@ export class RemoveProfileFromUserHandler {
     const existingAssignment = await this.userProfileRepository.findById(request.userProfileId);
 
     if (!existingAssignment) {
-      throw new NotFoundException(`User profile assignment with ID ${request.userProfileId} not found`);
+      throw new NotFoundException(
+        `User profile assignment with ID ${request.userProfileId} not found`,
+      );
     }
 
     // Desactivar la asignación (soft delete)
@@ -32,4 +34,3 @@ export class RemoveProfileFromUserHandler {
     );
   }
 }
-

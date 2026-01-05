@@ -4,4 +4,3 @@
 export class GetCatalogRequest {
   catalogId: number;
 }
-

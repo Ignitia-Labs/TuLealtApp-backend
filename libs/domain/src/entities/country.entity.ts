@@ -26,15 +26,7 @@ export class Country {
     id?: number,
   ): Country {
     const now = new Date();
-    return new Country(
-      id || 0,
-      name,
-      code,
-      currencyCode,
-      status,
-      now,
-      now,
-    );
+    return new Country(id || 0, name, code, currencyCode, status, now, now);
   }
 
   /**
@@ -74,4 +66,3 @@ export class Country {
     );
   }
 }
-

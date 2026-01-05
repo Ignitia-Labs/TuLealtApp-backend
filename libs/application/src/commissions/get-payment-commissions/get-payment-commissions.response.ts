@@ -55,7 +55,7 @@ export class CommissionDto {
 
   @ApiProperty({
     description: 'Monto de la comisión',
-    example: 155.50,
+    example: 155.5,
     type: Number,
   })
   commissionAmount: number;
@@ -131,7 +131,7 @@ export class GetPaymentCommissionsResponse {
 
   @ApiProperty({
     description: 'Monto total del pago',
-    example: 1000.00,
+    example: 1000.0,
     type: Number,
   })
   paymentAmount: number;
@@ -158,7 +158,7 @@ export class GetPaymentCommissionsResponse {
 
   @ApiProperty({
     description: 'Total de comisiones calculadas',
-    example: 155.50,
+    example: 155.5,
     type: Number,
   })
   totalCommissions: number;
@@ -175,10 +175,6 @@ export class GetPaymentCommissionsResponse {
     this.currency = currency;
     this.paymentDate = paymentDate;
     this.commissions = commissions;
-    this.totalCommissions = commissions.reduce(
-      (sum, c) => sum + c.commissionAmount,
-      0,
-    );
+    this.totalCommissions = commissions.reduce((sum, c) => sum + c.commissionAmount, 0);
   }
 }
-

@@ -15,7 +15,10 @@ export class UpdatePointsRuleHandler {
     private readonly pointsRuleRepository: IPointsRuleRepository,
   ) {}
 
-  async execute(pointsRuleId: number, request: UpdatePointsRuleRequest): Promise<UpdatePointsRuleResponse> {
+  async execute(
+    pointsRuleId: number,
+    request: UpdatePointsRuleRequest,
+  ): Promise<UpdatePointsRuleResponse> {
     // Buscar la regla existente
     const existingRule = await this.pointsRuleRepository.findById(pointsRuleId);
 
@@ -24,15 +27,28 @@ export class UpdatePointsRuleHandler {
     }
 
     // Validar fechas si se proporcionan ambas
-    const validFrom = request.validFrom !== undefined ? (request.validFrom ? new Date(request.validFrom) : null) : existingRule.validFrom;
-    const validUntil = request.validUntil !== undefined ? (request.validUntil ? new Date(request.validUntil) : null) : existingRule.validUntil;
+    const validFrom =
+      request.validFrom !== undefined
+        ? request.validFrom
+          ? new Date(request.validFrom)
+          : null
+        : existingRule.validFrom;
+    const validUntil =
+      request.validUntil !== undefined
+        ? request.validUntil
+          ? new Date(request.validUntil)
+          : null
+        : existingRule.validUntil;
 
     if (validFrom && validUntil && validFrom >= validUntil) {
       throw new BadRequestException('validFrom must be before validUntil');
     }
 
     // Validar horario aplicable si se proporciona
-    const applicableHours = request.applicableHours !== undefined ? request.applicableHours : existingRule.applicableHours;
+    const applicableHours =
+      request.applicableHours !== undefined
+        ? request.applicableHours
+        : existingRule.applicableHours;
     if (applicableHours) {
       const startTime = this.parseTime(applicableHours.start);
       const endTime = this.parseTime(applicableHours.end);
@@ -42,11 +58,14 @@ export class UpdatePointsRuleHandler {
     }
 
     // Validar días aplicables si se proporcionan
-    const applicableDays = request.applicableDays !== undefined ? request.applicableDays : existingRule.applicableDays;
+    const applicableDays =
+      request.applicableDays !== undefined ? request.applicableDays : existingRule.applicableDays;
     if (applicableDays) {
       const invalidDays = applicableDays.filter((day) => day < 0 || day > 6);
       if (invalidDays.length > 0) {
-        throw new BadRequestException('applicableDays must contain values between 0 (Sunday) and 6 (Saturday)');
+        throw new BadRequestException(
+          'applicableDays must contain values between 0 (Sunday) and 6 (Saturday)',
+        );
       }
     }
 
@@ -105,4 +124,3 @@ export class UpdatePointsRuleHandler {
     return hours * 60 + minutes;
   }
 }
-

@@ -33,4 +33,3 @@ export class GetPointsRuleResponse {
     this.rule = rule;
   }
 }
-

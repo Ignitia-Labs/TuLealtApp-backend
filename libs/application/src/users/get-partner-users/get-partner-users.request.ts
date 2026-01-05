@@ -37,7 +37,8 @@ export class GetPartnerUsersRequest {
   take?: number;
 
   @ApiProperty({
-    description: 'Si se incluyen usuarios inactivos/bloqueados en la respuesta. Por defecto retorna todos los usuarios.',
+    description:
+      'Si se incluyen usuarios inactivos/bloqueados en la respuesta. Por defecto retorna todos los usuarios.',
     example: true,
     type: Boolean,
     required: false,
@@ -47,4 +48,3 @@ export class GetPartnerUsersRequest {
   @IsOptional()
   includeInactive?: boolean;
 }
-

@@ -14,4 +14,3 @@ export class GetPaymentCommissionsRequest {
   @IsNotEmpty()
   paymentId: number;
 }
-

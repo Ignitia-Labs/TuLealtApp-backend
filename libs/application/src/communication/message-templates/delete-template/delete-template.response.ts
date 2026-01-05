@@ -15,4 +15,3 @@ export class DeleteTemplateResponse {
     this.message = message;
   }
 }
-

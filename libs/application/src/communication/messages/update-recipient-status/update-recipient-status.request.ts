@@ -35,4 +35,3 @@ export class UpdateRecipientStatusRequest {
   @IsOptional()
   failureReason?: string | null;
 }
-

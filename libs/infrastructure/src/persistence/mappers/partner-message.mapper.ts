@@ -55,4 +55,3 @@ export class PartnerMessageMapper {
     return entity;
   }
 }
-

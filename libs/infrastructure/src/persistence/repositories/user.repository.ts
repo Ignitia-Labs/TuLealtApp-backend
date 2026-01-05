@@ -84,10 +84,13 @@ export class UserRepository implements IUserRepository {
       .map((role, index) => `JSON_CONTAINS(user.roles, :role${index})`)
       .join(' OR ');
 
-    const roleParams = roles.reduce((acc, role, index) => {
-      acc[`role${index}`] = JSON.stringify(role);
-      return acc;
-    }, {} as Record<string, string>);
+    const roleParams = roles.reduce(
+      (acc, role, index) => {
+        acc[`role${index}`] = JSON.stringify(role);
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
 
     queryBuilder.andWhere(`(${roleConditions})`, roleParams);
 
@@ -110,10 +113,13 @@ export class UserRepository implements IUserRepository {
       .map((role, index) => `JSON_CONTAINS(user.roles, :role${index})`)
       .join(' OR ');
 
-    const roleParams = roles.reduce((acc, role, index) => {
-      acc[`role${index}`] = JSON.stringify(role);
-      return acc;
-    }, {} as Record<string, string>);
+    const roleParams = roles.reduce(
+      (acc, role, index) => {
+        acc[`role${index}`] = JSON.stringify(role);
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
 
     queryBuilder.andWhere(`(${roleConditions})`, roleParams);
 
@@ -142,10 +148,13 @@ export class UserRepository implements IUserRepository {
       .map((role, index) => `JSON_CONTAINS(user.roles, :role${index})`)
       .join(' OR ');
 
-    const roleParams = roles.reduce((acc, role, index) => {
-      acc[`role${index}`] = JSON.stringify(role);
-      return acc;
-    }, {} as Record<string, string>);
+    const roleParams = roles.reduce(
+      (acc, role, index) => {
+        acc[`role${index}`] = JSON.stringify(role);
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
 
     queryBuilder.andWhere(`(${roleConditions})`, roleParams);
 
@@ -177,10 +186,13 @@ export class UserRepository implements IUserRepository {
       .map((role, index) => `JSON_CONTAINS(user.roles, :role${index})`)
       .join(' OR ');
 
-    const roleParams = roles.reduce((acc, role, index) => {
-      acc[`role${index}`] = JSON.stringify(role);
-      return acc;
-    }, {} as Record<string, string>);
+    const roleParams = roles.reduce(
+      (acc, role, index) => {
+        acc[`role${index}`] = JSON.stringify(role);
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
 
     queryBuilder.andWhere(`(${roleConditions})`, roleParams);
 

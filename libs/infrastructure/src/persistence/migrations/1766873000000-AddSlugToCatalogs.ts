@@ -57,4 +57,3 @@ export class AddSlugToCatalogs1766873000000 implements MigrationInterface {
     await queryRunner.dropColumn('catalogs', 'slug');
   }
 }
-

@@ -27,12 +27,12 @@ export class RemoveCreditBalanceFromPartnerSubscriptions1770300000000
 
         console.log(
           '✅ Campo creditBalance eliminado de partner_subscriptions. ' +
-          'El crédito ahora se calcula dinámicamente desde los pagos.',
+            'El crédito ahora se calcula dinámicamente desde los pagos.',
         );
       } else {
         console.log(
           '⚠️ Campo creditBalance no encontrado en partner_subscriptions. ' +
-          'Puede que ya haya sido eliminado.',
+            'Puede que ya haya sido eliminado.',
         );
       }
     } else {
@@ -64,13 +64,10 @@ export class RemoveCreditBalanceFromPartnerSubscriptions1770300000000
           '✅ Campo creditBalance restaurado en partner_subscriptions con valor por defecto 0.',
         );
       } else {
-        console.log(
-          '⚠️ Campo creditBalance ya existe en partner_subscriptions.',
-        );
+        console.log('⚠️ Campo creditBalance ya existe en partner_subscriptions.');
       }
     } else {
       console.log('⚠️ Tabla partner_subscriptions no encontrada.');
     }
   }
 }
-

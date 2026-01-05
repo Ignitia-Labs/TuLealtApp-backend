@@ -173,4 +173,3 @@ export class GetRewardsResponse {
     this.rewards = rewards;
   }
 }
-

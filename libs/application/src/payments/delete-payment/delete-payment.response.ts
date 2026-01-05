@@ -23,4 +23,3 @@ export class DeletePaymentResponse {
     this.message = message;
   }
 }
-

@@ -31,4 +31,3 @@ export class UpdateCustomerTierResponse {
     this.tier = tier;
   }
 }
-

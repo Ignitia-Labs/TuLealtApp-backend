@@ -315,12 +315,9 @@ export class GoalsController {
     description: 'Sin permisos',
     type: ForbiddenErrorResponseDto,
   })
-  async getGoalProgress(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<GetGoalProgressResponse> {
+  async getGoalProgress(@Param('id', ParseIntPipe) id: number): Promise<GetGoalProgressResponse> {
     const request = new GetGoalProgressRequest();
     request.goalId = id;
     return this.getGoalProgressHandler.execute(request);
   }
 }
-

@@ -98,7 +98,11 @@ export class PartnerSubscription {
     let calculatedTaxAmount = taxAmount;
     let calculatedTotalPrice = totalPrice;
 
-    if (calculatedBasePrice === undefined || calculatedTaxAmount === undefined || calculatedTotalPrice === undefined) {
+    if (
+      calculatedBasePrice === undefined ||
+      calculatedTaxAmount === undefined ||
+      calculatedTotalPrice === undefined
+    ) {
       calculatedBasePrice = billingAmount;
 
       if (includeTax && taxPercent !== null && taxPercent > 0) {

@@ -24,16 +24,11 @@ export class CreateMessageHandler {
     private readonly messageSenderService: MessageSenderService,
   ) {}
 
-  async execute(
-    request: CreateMessageRequest,
-    senderId: number,
-  ): Promise<CreateMessageResponse> {
+  async execute(request: CreateMessageRequest, senderId: number): Promise<CreateMessageResponse> {
     // Validar que los partnerIds existan si recipientType = 'single'
     if (request.recipientType === 'single') {
       if (!request.partnerIds || request.partnerIds.length === 0) {
-        throw new BadRequestException(
-          'partnerIds is required when recipientType is "single"',
-        );
+        throw new BadRequestException('partnerIds is required when recipientType is "single"');
       }
 
       // Validar que todos los partners existan
@@ -48,9 +43,7 @@ export class CreateMessageHandler {
     // Validar filtros si recipientType = 'filtered'
     if (request.recipientType === 'filtered') {
       if (!request.filters || Object.keys(request.filters).length === 0) {
-        throw new BadRequestException(
-          'filters is required when recipientType is "filtered"',
-        );
+        throw new BadRequestException('filters is required when recipientType is "filtered"');
       }
     }
 
@@ -65,22 +58,16 @@ export class CreateMessageHandler {
       if (request.variables) {
         for (const variable of template.variables) {
           if (!(variable in request.variables)) {
-            throw new BadRequestException(
-              `Missing required variable: ${variable}`,
-            );
+            throw new BadRequestException(`Missing required variable: ${variable}`);
           }
         }
       } else if (template.variables.length > 0) {
-        throw new BadRequestException(
-          'Variables are required when using a template',
-        );
+        throw new BadRequestException('Variables are required when using a template');
       }
     }
 
     // Parsear scheduledAt si existe
-    const scheduledAt = request.scheduledAt
-      ? new Date(request.scheduledAt)
-      : null;
+    const scheduledAt = request.scheduledAt ? new Date(request.scheduledAt) : null;
 
     if (request.scheduledAt && isNaN(scheduledAt!.getTime())) {
       throw new BadRequestException('Invalid scheduledAt format. Use ISO 8601 format.');
@@ -129,9 +116,7 @@ export class CreateMessageHandler {
     }
 
     // Obtener estadísticas de entrega
-    const deliveryStats = await this.messageSenderService.getDeliveryStats(
-      message.id,
-    );
+    const deliveryStats = await this.messageSenderService.getDeliveryStats(message.id);
 
     // Obtener nombres de partners
     const partnerNames: string[] = [];
@@ -152,4 +137,3 @@ export class CreateMessageHandler {
     );
   }
 }
-

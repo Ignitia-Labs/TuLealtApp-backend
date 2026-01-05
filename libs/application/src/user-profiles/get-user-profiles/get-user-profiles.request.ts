@@ -14,4 +14,3 @@ export class GetUserProfilesRequest {
   @IsNotEmpty()
   userId: number;
 }
-

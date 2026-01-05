@@ -21,6 +21,7 @@ export class TenantMapper {
       persistenceEntity.minPointsToRedeem,
       persistenceEntity.description,
       persistenceEntity.logo,
+      persistenceEntity.banner,
       persistenceEntity.status,
       persistenceEntity.id,
     );
@@ -38,6 +39,7 @@ export class TenantMapper {
     entity.name = domainEntity.name;
     entity.description = domainEntity.description;
     entity.logo = domainEntity.logo;
+    entity.banner = domainEntity.banner;
     entity.category = domainEntity.category;
     entity.currencyId = parseInt(domainEntity.currencyId, 10) || 0;
     entity.primaryColor = domainEntity.primaryColor;

@@ -126,4 +126,3 @@ export class GetProfilePermissionsResponse {
     this.total = total;
   }
 }
-

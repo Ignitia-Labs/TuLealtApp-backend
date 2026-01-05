@@ -13,4 +13,3 @@ export class GetPartnerAccountBalanceRequest {
   @IsNumber()
   partnerId: number;
 }
-

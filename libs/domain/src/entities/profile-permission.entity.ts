@@ -16,11 +16,7 @@ export class ProfilePermission {
    * Factory method para crear una nueva relación perfil-permiso
    * El ID es opcional porque será generado automáticamente por la base de datos
    */
-  static create(
-    profileId: number,
-    permissionId: number,
-    id?: number,
-  ): ProfilePermission {
+  static create(profileId: number, permissionId: number, id?: number): ProfilePermission {
     if (!profileId || profileId <= 0) {
       throw new Error('Profile ID is required and must be greater than 0');
     }
@@ -33,4 +29,3 @@ export class ProfilePermission {
     return new ProfilePermission(id || 0, profileId, permissionId, now, now);
   }
 }
-

@@ -181,7 +181,9 @@ export class PointsRulesController {
       error: 'Internal Server Error',
     },
   })
-  async getPointsRules(@Query('tenantId', ParseIntPipe) tenantId: number): Promise<GetPointsRulesResponse> {
+  async getPointsRules(
+    @Query('tenantId', ParseIntPipe) tenantId: number,
+  ): Promise<GetPointsRulesResponse> {
     const request = new GetPointsRulesRequest();
     request.tenantId = tenantId;
     return this.getPointsRulesHandler.execute(request);
@@ -193,7 +195,8 @@ export class PointsRulesController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Crear una nueva regla de puntos',
-    description: 'Crea una nueva regla de puntos asociada a un tenant con su configuración completa.',
+    description:
+      'Crea una nueva regla de puntos asociada a un tenant con su configuración completa.',
   })
   @ApiBody({
     type: CreatePointsRuleRequest,
@@ -311,7 +314,9 @@ export class PointsRulesController {
       error: 'Internal Server Error',
     },
   })
-  async createPointsRule(@Body() request: CreatePointsRuleRequest): Promise<CreatePointsRuleResponse> {
+  async createPointsRule(
+    @Body() request: CreatePointsRuleRequest,
+  ): Promise<CreatePointsRuleResponse> {
     return this.createPointsRuleHandler.execute(request);
   }
 
@@ -602,4 +607,3 @@ export class PointsRulesController {
     return this.deletePointsRuleHandler.execute(request);
   }
 }
-

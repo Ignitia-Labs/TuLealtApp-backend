@@ -23,4 +23,3 @@ export class DeleteProfileResponse {
     this.id = id;
   }
 }
-

@@ -23,4 +23,3 @@ export class MarkCommissionsPaidResponse {
     this.commissions = commissions;
   }
 }
-

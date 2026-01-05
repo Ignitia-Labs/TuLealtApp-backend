@@ -36,4 +36,3 @@ export class GetUserChangeHistoryRequest {
   @Min(1)
   take?: number;
 }
-

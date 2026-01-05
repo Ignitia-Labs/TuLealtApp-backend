@@ -1,12 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsNumber,
-  IsNotEmpty,
-  IsOptional,
-  IsDateString,
-  IsString,
-} from 'class-validator';
+import { IsArray, IsNumber, IsNotEmpty, IsOptional, IsDateString, IsString } from 'class-validator';
 
 /**
  * Request DTO para marcar comisiones como pagadas
@@ -42,4 +35,3 @@ export class MarkCommissionsPaidRequest {
   @IsOptional()
   notes?: string;
 }
-

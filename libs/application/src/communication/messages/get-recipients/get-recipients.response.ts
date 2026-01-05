@@ -69,4 +69,3 @@ export class GetRecipientsResponse {
     this.total = total;
   }
 }
-

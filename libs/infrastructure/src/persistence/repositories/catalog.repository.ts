@@ -114,4 +114,3 @@ export class CatalogRepository implements ICatalogRepository {
     await this.catalogRepository.delete(id);
   }
 }
-

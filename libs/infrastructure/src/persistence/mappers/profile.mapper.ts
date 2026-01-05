@@ -68,4 +68,3 @@ export class ProfileMapper {
     return entity;
   }
 }
-

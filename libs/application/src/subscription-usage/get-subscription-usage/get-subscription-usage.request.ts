@@ -16,4 +16,3 @@ export class GetSubscriptionUsageRequest {
   @Min(1)
   partnerSubscriptionId: number;
 }
-

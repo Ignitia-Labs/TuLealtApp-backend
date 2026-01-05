@@ -21,9 +21,7 @@ export class RegisterUserHandler {
   async execute(request: RegisterUserRequest): Promise<RegisterUserResponse> {
     // Validar que si se proporciona tenantId, también se proporcione registrationBranchId
     if (request.tenantId && !request.registrationBranchId) {
-      throw new BadRequestException(
-        'registrationBranchId is required when tenantId is provided',
-      );
+      throw new BadRequestException('registrationBranchId is required when tenantId is provided');
     }
 
     // Convertir RegisterUserRequest a CreateUserRequest
@@ -50,9 +48,8 @@ export class RegisterUserHandler {
         createMembershipRequest.points = 0;
         createMembershipRequest.status = 'active';
 
-        const membershipResult = await this.createCustomerMembershipHandler.execute(
-          createMembershipRequest,
-        );
+        const membershipResult =
+          await this.createCustomerMembershipHandler.execute(createMembershipRequest);
         membership = membershipResult.membership;
       } catch (error) {
         // Si falla la creación de la membership, no fallamos el registro del usuario

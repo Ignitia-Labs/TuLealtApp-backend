@@ -53,4 +53,3 @@ export class GetInvoicesRequest {
   @Min(1)
   limit?: number;
 }
-

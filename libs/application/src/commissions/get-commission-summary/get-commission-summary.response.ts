@@ -27,7 +27,7 @@ export class CommissionByPartnerDto {
 
   @ApiProperty({
     description: 'Monto total de comisiones',
-    example: 1550.00,
+    example: 1550.0,
     type: Number,
   })
   totalAmount: number;
@@ -114,4 +114,3 @@ export class GetCommissionSummaryResponse {
     this.byPartner = byPartner;
   }
 }
-

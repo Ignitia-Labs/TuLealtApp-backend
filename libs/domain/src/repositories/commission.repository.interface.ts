@@ -34,18 +34,12 @@ export interface ICommissionRepository {
   /**
    * Buscar todas las comisiones de un usuario staff
    */
-  findByStaffUserId(
-    staffUserId: number,
-    filters?: CommissionFilters,
-  ): Promise<Commission[]>;
+  findByStaffUserId(staffUserId: number, filters?: CommissionFilters): Promise<Commission[]>;
 
   /**
    * Buscar todas las comisiones de un partner
    */
-  findByPartnerId(
-    partnerId: number,
-    filters?: CommissionFilters,
-  ): Promise<Commission[]>;
+  findByPartnerId(partnerId: number, filters?: CommissionFilters): Promise<Commission[]>;
 
   /**
    * Guardar una nueva comisión
@@ -90,18 +84,12 @@ export interface ICommissionRepository {
   /**
    * Contar comisiones por staff con filtros
    */
-  countByStaffUserId(
-    staffUserId: number,
-    filters?: CommissionFilters,
-  ): Promise<number>;
+  countByStaffUserId(staffUserId: number, filters?: CommissionFilters): Promise<number>;
 
   /**
    * Contar comisiones por partner con filtros
    */
-  countByPartnerId(
-    partnerId: number,
-    filters?: CommissionFilters,
-  ): Promise<number>;
+  countByPartnerId(partnerId: number, filters?: CommissionFilters): Promise<number>;
 
   /**
    * Buscar todas las comisiones con filtros opcionales
@@ -165,4 +153,3 @@ export interface ICommissionRepository {
     }>
   >;
 }
-

@@ -35,4 +35,3 @@ export class DeleteTenantHandler {
     return new DeleteTenantResponse('Tenant deleted successfully', request.tenantId);
   }
 }
-

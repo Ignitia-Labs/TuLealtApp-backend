@@ -35,11 +35,10 @@ export class CommissionCalculationService {
   ): Promise<Commission[]> {
     try {
       // 1. Obtener asignaciones activas del partner en la fecha del pago
-      const assignments =
-        await this.assignmentRepository.findActiveAssignmentsByDate(
-          partnerId,
-          payment.paymentDate,
-        );
+      const assignments = await this.assignmentRepository.findActiveAssignmentsByDate(
+        partnerId,
+        payment.paymentDate,
+      );
 
       if (assignments.length === 0) {
         // No hay asignaciones, no se generan comisiones
@@ -50,8 +49,7 @@ export class CommissionCalculationService {
       }
 
       // 2. Verificar que no existan comisiones ya creadas para este pago
-      const existingCommissions =
-        await this.commissionRepository.findByPaymentId(payment.id);
+      const existingCommissions = await this.commissionRepository.findByPaymentId(payment.id);
 
       if (existingCommissions.length > 0) {
         this.logger.warn(
@@ -93,19 +91,13 @@ export class CommissionCalculationService {
       }
 
       // 4. Guardar todas las comisiones
-      const savedCommissions =
-        await this.commissionRepository.saveMany(commissions);
+      const savedCommissions = await this.commissionRepository.saveMany(commissions);
 
-      this.logger.log(
-        `Created ${savedCommissions.length} commissions for payment ${payment.id}`,
-      );
+      this.logger.log(`Created ${savedCommissions.length} commissions for payment ${payment.id}`);
 
       return savedCommissions;
     } catch (error) {
-      this.logger.error(
-        `Error calculating commissions for payment ${payment.id}:`,
-        error,
-      );
+      this.logger.error(`Error calculating commissions for payment ${payment.id}:`, error);
       throw error;
     }
   }
@@ -114,9 +106,7 @@ export class CommissionCalculationService {
    * Calcular y crear comisiones para un billing cycle cuando se marca como 'paid'
    * Se ejecuta automáticamente cuando un billing cycle es marcado como 'paid'
    */
-  async calculateCommissionsForBillingCycle(
-    billingCycle: BillingCycle,
-  ): Promise<Commission[]> {
+  async calculateCommissionsForBillingCycle(billingCycle: BillingCycle): Promise<Commission[]> {
     try {
       // 1. Verificar que el billing cycle esté pagado
       if (billingCycle.status !== 'paid' && billingCycle.paymentStatus !== 'paid') {
@@ -127,9 +117,7 @@ export class CommissionCalculationService {
       }
 
       // 2. Obtener todos los pagos asociados al billing cycle
-      const cyclePayments = await this.paymentRepository.findByBillingCycleId(
-        billingCycle.id,
-      );
+      const cyclePayments = await this.paymentRepository.findByBillingCycleId(billingCycle.id);
 
       if (cyclePayments.length === 0) {
         this.logger.warn(
@@ -140,8 +128,9 @@ export class CommissionCalculationService {
 
       // 3. Verificar si ya existen comisiones para este billing cycle
       // Usar findByBillingCycleId para verificación directa (más eficiente)
-      const existingCommissions =
-        await this.commissionRepository.findByBillingCycleId(billingCycle.id);
+      const existingCommissions = await this.commissionRepository.findByBillingCycleId(
+        billingCycle.id,
+      );
 
       if (existingCommissions.length > 0) {
         this.logger.log(
@@ -157,11 +146,10 @@ export class CommissionCalculationService {
         cyclePayments.sort((a, b) => a.paymentDate.getTime() - b.paymentDate.getTime())[0]
           .paymentDate;
 
-      const assignments =
-        await this.assignmentRepository.findActiveAssignmentsByDate(
-          billingCycle.partnerId,
-          paymentDate,
-        );
+      const assignments = await this.assignmentRepository.findActiveAssignmentsByDate(
+        billingCycle.partnerId,
+        paymentDate,
+      );
 
       if (assignments.length === 0) {
         this.logger.log(
@@ -208,8 +196,7 @@ export class CommissionCalculationService {
       }
 
       // 6. Guardar todas las comisiones
-      const savedCommissions =
-        await this.commissionRepository.saveMany(commissions);
+      const savedCommissions = await this.commissionRepository.saveMany(commissions);
 
       this.logger.log(
         `Created ${savedCommissions.length} commissions for billing cycle ${billingCycle.id}`,
@@ -228,11 +215,7 @@ export class CommissionCalculationService {
   /**
    * Calcular el monto de comisión basado en el monto del pago y el porcentaje
    */
-  private calculateCommissionAmount(
-    paymentAmount: number,
-    commissionPercent: number,
-  ): number {
+  private calculateCommissionAmount(paymentAmount: number, commissionPercent: number): number {
     return (paymentAmount * commissionPercent) / 100;
   }
 }
-

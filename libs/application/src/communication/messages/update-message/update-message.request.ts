@@ -74,4 +74,3 @@ export class UpdateMessageRequest {
   @IsOptional()
   attachments?: AttachmentDto[];
 }
-

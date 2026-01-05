@@ -63,7 +63,10 @@ export class CustomerMembershipRepository implements ICustomerMembershipReposito
     return membershipEntities.map((entity) => CustomerMembershipMapper.toDomain(entity));
   }
 
-  async findByUserIdAndTenantId(userId: number, tenantId: number): Promise<CustomerMembership | null> {
+  async findByUserIdAndTenantId(
+    userId: number,
+    tenantId: number,
+  ): Promise<CustomerMembership | null> {
     const membershipEntity = await this.membershipRepository.findOne({
       where: {
         userId,
@@ -112,4 +115,3 @@ export class CustomerMembershipRepository implements ICustomerMembershipReposito
     });
   }
 }
-

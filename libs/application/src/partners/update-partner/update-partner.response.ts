@@ -70,6 +70,14 @@ export class UpdatePartnerResponse {
   logo: string | null;
 
   @ApiProperty({
+    description: 'Banner del partner',
+    example: 'https://example.com/banners/partner-banner.jpg',
+    type: String,
+    nullable: true,
+  })
+  banner: string | null;
+
+  @ApiProperty({
     description: 'Categoría del negocio',
     example: 'Retail',
     type: String,
@@ -186,6 +194,7 @@ export class UpdatePartnerResponse {
     city: string,
     plan: string,
     logo: string | null,
+    banner: string | null,
     category: string,
     branchesNumber: number,
     website: string | null,
@@ -211,6 +220,7 @@ export class UpdatePartnerResponse {
     this.city = city;
     this.plan = plan;
     this.logo = logo;
+    this.banner = banner;
     this.category = category;
     this.branchesNumber = branchesNumber;
     this.website = website;

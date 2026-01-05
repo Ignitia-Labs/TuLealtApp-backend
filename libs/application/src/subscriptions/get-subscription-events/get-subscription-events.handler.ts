@@ -1,7 +1,10 @@
 import { Injectable, Inject, BadRequestException } from '@nestjs/common';
 import { ISubscriptionEventRepository } from '@libs/domain';
 import { GetSubscriptionEventsRequest } from './get-subscription-events.request';
-import { GetSubscriptionEventsResponse, SubscriptionEventResponse } from './get-subscription-events.response';
+import {
+  GetSubscriptionEventsResponse,
+  SubscriptionEventResponse,
+} from './get-subscription-events.response';
 
 /**
  * Handler para obtener eventos de suscripciones
@@ -95,9 +98,7 @@ export class GetSubscriptionEventsHandler {
       // Por ahora, usamos la longitud de los eventos (no es ideal pero funciona)
       total = events.length;
     } else {
-      throw new BadRequestException(
-        'When not using date range, subscriptionId must be provided',
-      );
+      throw new BadRequestException('When not using date range, subscriptionId must be provided');
     }
 
     // Convertir eventos a DTOs de respuesta
@@ -126,4 +127,3 @@ export class GetSubscriptionEventsHandler {
     );
   }
 }
-

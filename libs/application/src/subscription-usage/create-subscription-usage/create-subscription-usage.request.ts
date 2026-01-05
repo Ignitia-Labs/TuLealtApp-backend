@@ -64,4 +64,3 @@ export class CreateSubscriptionUsageRequest {
   @Min(0)
   rewardsCount?: number;
 }
-

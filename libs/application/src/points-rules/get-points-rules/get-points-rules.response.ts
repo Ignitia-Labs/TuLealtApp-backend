@@ -62,4 +62,3 @@ export class GetPointsRulesResponse {
     this.total = rules.length;
   }
 }
-

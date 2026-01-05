@@ -23,10 +23,7 @@ export class CreditBalanceService {
    * @param currency Moneda de la suscripción
    * @returns Crédito disponible calculado dinámicamente
    */
-  async calculateAvailableCreditBalance(
-    subscriptionId: number,
-    currency: string,
-  ): Promise<number> {
+  async calculateAvailableCreditBalance(subscriptionId: number, currency: string): Promise<number> {
     // Obtener todos los pagos de la suscripción
     const allPayments = await this.paymentRepository.findBySubscriptionId(subscriptionId);
 
@@ -44,7 +41,9 @@ export class CreditBalanceService {
 
     for (const payment of originalPayments) {
       // Obtener todos los payments derivados de este payment original
-      const derivedPayments = await this.paymentRepository.findDerivedByOriginalPaymentId(payment.id);
+      const derivedPayments = await this.paymentRepository.findDerivedByOriginalPaymentId(
+        payment.id,
+      );
 
       // Filtrar solo payments derivados que están realmente aplicados a un billing cycle o invoice válido
       const validDerivedPayments = derivedPayments.filter(
@@ -75,4 +74,3 @@ export class CreditBalanceService {
     return roundToTwoDecimals(calculatedCreditBalance);
   }
 }
-

@@ -115,7 +115,11 @@ export class UsersController {
     type: BadRequestErrorResponseDto,
     example: {
       statusCode: 400,
-      message: ['email must be an email', 'name should not be empty', 'password must be longer than or equal to 6 characters'],
+      message: [
+        'email must be an email',
+        'name should not be empty',
+        'password must be longer than or equal to 6 characters',
+      ],
       error: 'Bad Request',
     },
   })
@@ -360,7 +364,8 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Bloquear un usuario',
-    description: 'Bloquea un usuario del sistema, desactivando su cuenta. Requiere permisos de administrador.',
+    description:
+      'Bloquea un usuario del sistema, desactivando su cuenta. Requiere permisos de administrador.',
   })
   @ApiParam({
     name: 'id',
@@ -444,7 +449,8 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Desbloquear un usuario',
-    description: 'Desbloquea un usuario del sistema, reactivando su cuenta. Requiere permisos de administrador.',
+    description:
+      'Desbloquea un usuario del sistema, reactivando su cuenta. Requiere permisos de administrador.',
   })
   @ApiParam({
     name: 'id',
@@ -669,7 +675,8 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Actualizar perfil de usuario',
-    description: 'Actualiza el perfil de un usuario existente (actualización parcial). Requiere permisos de administrador.',
+    description:
+      'Actualiza el perfil de un usuario existente (actualización parcial). Requiere permisos de administrador.',
   })
   @ApiParam({
     name: 'id',

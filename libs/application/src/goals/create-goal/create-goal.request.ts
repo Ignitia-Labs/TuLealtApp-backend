@@ -20,10 +20,26 @@ export class CreateGoalRequest {
 
   @ApiProperty({
     description: 'Métrica a medir',
-    enum: ['mrr', 'arr', 'activeSubscriptions', 'churnRate', 'retentionRate', 'newSubscriptions', 'upgrades'],
+    enum: [
+      'mrr',
+      'arr',
+      'activeSubscriptions',
+      'churnRate',
+      'retentionRate',
+      'newSubscriptions',
+      'upgrades',
+    ],
     example: 'mrr',
   })
-  @IsEnum(['mrr', 'arr', 'activeSubscriptions', 'churnRate', 'retentionRate', 'newSubscriptions', 'upgrades'])
+  @IsEnum([
+    'mrr',
+    'arr',
+    'activeSubscriptions',
+    'churnRate',
+    'retentionRate',
+    'newSubscriptions',
+    'upgrades',
+  ])
   metric: GoalMetric;
 
   @ApiProperty({
@@ -58,4 +74,3 @@ export class CreateGoalRequest {
   @IsOptional()
   isActive?: boolean;
 }
-

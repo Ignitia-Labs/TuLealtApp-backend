@@ -147,4 +147,3 @@ export class CustomerTierDto {
     this.updatedAt = updatedAt;
   }
 }
-

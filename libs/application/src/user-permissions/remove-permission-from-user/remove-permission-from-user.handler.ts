@@ -14,7 +14,9 @@ export class RemovePermissionFromUserHandler {
     private readonly userPermissionRepository: IUserPermissionRepository,
   ) {}
 
-  async execute(request: RemovePermissionFromUserRequest): Promise<RemovePermissionFromUserResponse> {
+  async execute(
+    request: RemovePermissionFromUserRequest,
+  ): Promise<RemovePermissionFromUserResponse> {
     // Buscar la asignación existente
     const userPermission = await this.userPermissionRepository.findById(request.userPermissionId);
 
@@ -42,4 +44,3 @@ export class RemovePermissionFromUserHandler {
     );
   }
 }
-

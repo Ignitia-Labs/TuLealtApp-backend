@@ -23,4 +23,3 @@ export class DeleteInvoiceResponse {
     this.message = message;
   }
 }
-

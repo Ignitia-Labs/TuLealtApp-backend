@@ -27,4 +27,3 @@ export class DeletePointsRuleHandler {
     return new DeletePointsRuleResponse('Points rule deleted successfully', request.pointsRuleId);
   }
 }
-

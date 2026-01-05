@@ -95,4 +95,3 @@ export class GetProfileUsersResponse {
     this.total = total;
   }
 }
-

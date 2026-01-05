@@ -22,7 +22,9 @@ export class ChangeTransactionIdToAutoIncrement1770200000000 implements Migratio
 
     // Eliminar el índice existente si existe
     try {
-      const index = table.indices.find((idx) => idx.name === 'IDX_transactionId' || idx.columnNames.includes('transactionId'));
+      const index = table.indices.find(
+        (idx) => idx.name === 'IDX_transactionId' || idx.columnNames.includes('transactionId'),
+      );
       if (index) {
         await queryRunner.dropIndex('payments', index.name);
       }
@@ -32,22 +34,30 @@ export class ChangeTransactionIdToAutoIncrement1770200000000 implements Migratio
 
     // Cambiar la columna de VARCHAR a INT AUTO_INCREMENT
     // Primero, eliminar valores no numéricos o convertirlos
-    await queryRunner.query(`
+    await queryRunner
+      .query(
+        `
       UPDATE payments
       SET transactionId = NULL
       WHERE transactionId IS NOT NULL
       AND transactionId NOT REGEXP '^[0-9]+$'
-    `).catch((error) => {
-      console.log('Error cleaning transactionId values:', error.message);
-    });
+    `,
+      )
+      .catch((error) => {
+        console.log('Error cleaning transactionId values:', error.message);
+      });
 
     // Cambiar el tipo de columna a INT
-    await queryRunner.query(`
+    await queryRunner
+      .query(
+        `
       ALTER TABLE payments
       MODIFY COLUMN transactionId INT NULL
-    `).catch((error) => {
-      console.log('Error modifying transactionId column:', error.message);
-    });
+    `,
+      )
+      .catch((error) => {
+        console.log('Error modifying transactionId column:', error.message);
+      });
 
     // Crear una secuencia/tabla temporal para auto-incremento
     // Como MySQL no soporta AUTO_INCREMENT en columnas que no son PRIMARY KEY,
@@ -72,21 +82,29 @@ export class ChangeTransactionIdToAutoIncrement1770200000000 implements Migratio
     }
 
     // Convertir valores numéricos a string antes de cambiar el tipo
-    await queryRunner.query(`
+    await queryRunner
+      .query(
+        `
       UPDATE payments
       SET transactionId = CAST(transactionId AS CHAR)
       WHERE transactionId IS NOT NULL
-    `).catch((error) => {
-      console.log('Error converting transactionId to string:', error.message);
-    });
+    `,
+      )
+      .catch((error) => {
+        console.log('Error converting transactionId to string:', error.message);
+      });
 
     // Cambiar el tipo de columna de vuelta a VARCHAR
-    await queryRunner.query(`
+    await queryRunner
+      .query(
+        `
       ALTER TABLE payments
       MODIFY COLUMN transactionId VARCHAR(100) NULL
-    `).catch((error) => {
-      console.log('Error reverting transactionId column:', error.message);
-    });
+    `,
+      )
+      .catch((error) => {
+        console.log('Error reverting transactionId column:', error.message);
+      });
 
     // Recrear el índice
     try {
@@ -102,4 +120,3 @@ export class ChangeTransactionIdToAutoIncrement1770200000000 implements Migratio
     }
   }
 }
-

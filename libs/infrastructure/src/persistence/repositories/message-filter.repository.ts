@@ -24,9 +24,7 @@ export class MessageFilterRepository implements IMessageFilterRepository {
   }
 
   async saveMany(filters: MessageFilter[]): Promise<MessageFilter[]> {
-    const entities = filters.map((filter) =>
-      MessageFilterMapper.toPersistence(filter),
-    );
+    const entities = filters.map((filter) => MessageFilterMapper.toPersistence(filter));
     const savedEntities = await this.filterRepository.save(entities);
     return savedEntities.map((entity) => MessageFilterMapper.toDomain(entity));
   }
@@ -35,4 +33,3 @@ export class MessageFilterRepository implements IMessageFilterRepository {
     await this.filterRepository.delete({ messageId });
   }
 }
-

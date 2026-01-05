@@ -67,7 +67,8 @@ export class PointsRuleDto {
   multiplier: number | null;
 
   @ApiProperty({
-    description: 'Días de la semana aplicables (0=Domingo, 1=Lunes, ..., 6=Sábado). null = todos los días',
+    description:
+      'Días de la semana aplicables (0=Domingo, 1=Lunes, ..., 6=Sábado). null = todos los días',
     example: [1, 2, 3, 4, 5],
     type: Number,
     isArray: true,
@@ -168,4 +169,3 @@ export class PointsRuleDto {
     this.updatedAt = updatedAt;
   }
 }
-

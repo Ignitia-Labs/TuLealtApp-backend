@@ -65,4 +65,3 @@ export class CouponEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

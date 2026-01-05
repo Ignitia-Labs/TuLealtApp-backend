@@ -20,4 +20,3 @@ export interface IMessageFilterRepository {
    */
   deleteByMessageId(messageId: number): Promise<void>;
 }
-

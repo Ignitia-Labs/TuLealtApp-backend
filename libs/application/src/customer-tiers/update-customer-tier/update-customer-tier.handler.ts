@@ -15,7 +15,10 @@ export class UpdateCustomerTierHandler {
     private readonly customerTierRepository: ICustomerTierRepository,
   ) {}
 
-  async execute(customerTierId: number, request: UpdateCustomerTierRequest): Promise<UpdateCustomerTierResponse> {
+  async execute(
+    customerTierId: number,
+    request: UpdateCustomerTierRequest,
+  ): Promise<UpdateCustomerTierResponse> {
     // Buscar el tier existente
     const existingTier = await this.customerTierRepository.findById(customerTierId);
 
@@ -74,4 +77,3 @@ export class UpdateCustomerTierHandler {
     return new UpdateCustomerTierResponse(tierDto);
   }
 }
-

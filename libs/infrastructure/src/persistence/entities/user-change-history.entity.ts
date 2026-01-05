@@ -70,4 +70,3 @@ export class UserChangeHistoryEntity {
   @CreateDateColumn()
   createdAt: Date;
 }
-

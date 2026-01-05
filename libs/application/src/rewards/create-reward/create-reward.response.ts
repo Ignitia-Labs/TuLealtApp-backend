@@ -138,4 +138,3 @@ export class CreateRewardResponse {
     this.updatedAt = updatedAt;
   }
 }
-

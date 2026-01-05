@@ -1,8 +1,4 @@
-import {
-  MigrationInterface,
-  QueryRunner,
-  TableColumn,
-} from 'typeorm';
+import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
 /**
  * Migración para hacer paymentId nullable en la tabla commissions
@@ -15,9 +11,7 @@ import {
  *
  * NOTA: Las comisiones deben tener al menos paymentId o billingCycleId (validación a nivel de aplicación)
  */
-export class MakePaymentIdNullableInCommissions1770520000000
-  implements MigrationInterface
-{
+export class MakePaymentIdNullableInCommissions1770520000000 implements MigrationInterface {
   name = 'MakePaymentIdNullableInCommissions1770520000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -117,4 +111,3 @@ export class MakePaymentIdNullableInCommissions1770520000000
     console.log('✅ Columna paymentId ahora es NOT NULL en commissions.');
   }
 }
-

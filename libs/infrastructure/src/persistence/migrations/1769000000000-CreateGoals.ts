@@ -40,7 +40,8 @@ export class CreateGoals1769000000000 implements MigrationInterface {
             type: 'varchar',
             length: '50',
             isNullable: false,
-            comment: 'Métrica a medir: mrr, arr, activeSubscriptions, churnRate, retentionRate, newSubscriptions, upgrades',
+            comment:
+              'Métrica a medir: mrr, arr, activeSubscriptions, churnRate, retentionRate, newSubscriptions, upgrades',
           },
           {
             name: 'targetValue',
@@ -138,4 +139,3 @@ export class CreateGoals1769000000000 implements MigrationInterface {
     await queryRunner.dropTable('goals', true);
   }
 }
-

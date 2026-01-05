@@ -3,13 +3,7 @@
  * Representa los criterios de filtrado para mensajes tipo 'filtered'
  * No depende de frameworks ni librerías externas
  */
-export type FilterType =
-  | 'plan'
-  | 'country'
-  | 'status'
-  | 'date_range'
-  | 'category'
-  | 'custom';
+export type FilterType = 'plan' | 'country' | 'status' | 'date_range' | 'category' | 'custom';
 
 export class MessageFilter {
   constructor(
@@ -33,4 +27,3 @@ export class MessageFilter {
     return new MessageFilter(id || 0, messageId, filterType, filterValue, now);
   }
 }
-

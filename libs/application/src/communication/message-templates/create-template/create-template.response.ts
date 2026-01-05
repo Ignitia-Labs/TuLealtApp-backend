@@ -64,4 +64,3 @@ export class CreateTemplateResponse {
     this.isActive = isActive;
   }
 }
-

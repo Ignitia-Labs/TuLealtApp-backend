@@ -150,4 +150,3 @@ export class CreateCustomerTierRequest {
   @IsOptional()
   status?: 'active' | 'inactive';
 }
-

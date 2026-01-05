@@ -49,4 +49,3 @@ export class ProfileEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

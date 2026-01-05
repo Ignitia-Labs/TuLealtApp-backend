@@ -36,4 +36,3 @@ export class CountryEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

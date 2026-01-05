@@ -20,7 +20,7 @@ export class PeriodStatsDto {
 
   @ApiProperty({
     description: 'Monto total de comisiones',
-    example: 5000.00,
+    example: 5000.0,
     type: Number,
   })
   totalAmount: number;
@@ -97,21 +97,21 @@ export class TopStaffDto {
 
   @ApiProperty({
     description: 'Monto total de comisiones',
-    example: 10000.00,
+    example: 10000.0,
     type: Number,
   })
   totalAmount: number;
 
   @ApiProperty({
     description: 'Monto pendiente',
-    example: 3000.00,
+    example: 3000.0,
     type: Number,
   })
   pendingAmount: number;
 
   @ApiProperty({
     description: 'Monto pagado',
-    example: 7000.00,
+    example: 7000.0,
     type: Number,
   })
   paidAmount: number;
@@ -171,7 +171,7 @@ export class TopPartnerDto {
 
   @ApiProperty({
     description: 'Monto total de comisiones',
-    example: 8000.00,
+    example: 8000.0,
     type: Number,
   })
   totalAmount: number;
@@ -285,8 +285,3 @@ export class GetCommissionsDashboardResponse {
     this.previousPeriodComparison = previousPeriodComparison;
   }
 }
-
-
-
-
-

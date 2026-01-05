@@ -97,4 +97,3 @@ export class AddPointsRuleAndCustomerTierFields1768000000000 implements Migratio
     }
   }
 }
-

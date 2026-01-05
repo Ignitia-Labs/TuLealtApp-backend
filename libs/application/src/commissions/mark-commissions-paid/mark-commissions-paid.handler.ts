@@ -1,14 +1,5 @@
-import {
-  Injectable,
-  Inject,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
-import {
-  ICommissionRepository,
-  IPartnerRepository,
-  IUserRepository,
-} from '@libs/domain';
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { ICommissionRepository, IPartnerRepository, IUserRepository } from '@libs/domain';
 import { MarkCommissionsPaidRequest } from './mark-commissions-paid.request';
 import { MarkCommissionsPaidResponse } from './mark-commissions-paid.response';
 import { CommissionDto } from '../get-payment-commissions/get-payment-commissions.response';
@@ -27,9 +18,7 @@ export class MarkCommissionsPaidHandler {
     private readonly userRepository: IUserRepository,
   ) {}
 
-  async execute(
-    request: MarkCommissionsPaidRequest,
-  ): Promise<MarkCommissionsPaidResponse> {
+  async execute(request: MarkCommissionsPaidRequest): Promise<MarkCommissionsPaidResponse> {
     if (request.commissionIds.length === 0) {
       throw new BadRequestException('At least one commission ID is required');
     }
@@ -60,17 +49,11 @@ export class MarkCommissionsPaidHandler {
 
       try {
         const updatedCommission = commission.markAsPaid(paidDate, request.notes || null);
-        const savedCommission = await this.commissionRepository.update(
-          updatedCommission,
-        );
+        const savedCommission = await this.commissionRepository.update(updatedCommission);
 
         // Enriquecer con información del usuario y partner
-        const staffUser = await this.userRepository.findById(
-          savedCommission.staffUserId,
-        );
-        const partner = await this.partnerRepository.findById(
-          savedCommission.partnerId,
-        );
+        const staffUser = await this.userRepository.findById(savedCommission.staffUserId);
+        const partner = await this.partnerRepository.findById(savedCommission.partnerId);
 
         updatedCommissions.push(
           new CommissionDto(
@@ -94,15 +77,9 @@ export class MarkCommissionsPaidHandler {
     }
 
     if (errors.length > 0 && updatedCommissions.length === 0) {
-      throw new BadRequestException(
-        `Failed to update commissions: ${errors.join('; ')}`,
-      );
+      throw new BadRequestException(`Failed to update commissions: ${errors.join('; ')}`);
     }
 
-    return new MarkCommissionsPaidResponse(
-      updatedCommissions.length,
-      updatedCommissions,
-    );
+    return new MarkCommissionsPaidResponse(updatedCommissions.length, updatedCommissions);
   }
 }
-

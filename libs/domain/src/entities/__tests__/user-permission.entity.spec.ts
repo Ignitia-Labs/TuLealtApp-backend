@@ -1,4 +1,4 @@
-import { UserPermission } from './user-permission.entity';
+import { UserPermission } from '../user-permission.entity';
 
 describe('UserPermission Entity', () => {
   describe('create', () => {
@@ -126,4 +126,3 @@ describe('UserPermission Entity', () => {
     });
   });
 });
-

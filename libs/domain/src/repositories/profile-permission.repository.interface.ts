@@ -51,4 +51,3 @@ export interface IProfilePermissionRepository {
    */
   deleteByPermissionId(permissionId: number): Promise<void>;
 }
-

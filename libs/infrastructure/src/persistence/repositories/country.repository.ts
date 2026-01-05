@@ -77,4 +77,3 @@ export class CountryRepository implements ICountryRepository {
     return countryEntities.map((entity) => CountryMapper.toDomain(entity));
   }
 }
-

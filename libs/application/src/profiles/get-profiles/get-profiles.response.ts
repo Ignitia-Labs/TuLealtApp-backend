@@ -106,4 +106,3 @@ export class GetProfilesResponse {
     this.total = total;
   }
 }
-

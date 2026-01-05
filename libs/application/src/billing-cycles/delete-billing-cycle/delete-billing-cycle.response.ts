@@ -23,4 +23,3 @@ export class DeleteBillingCycleResponse {
     this.message = message;
   }
 }
-

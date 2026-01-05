@@ -39,4 +39,3 @@ export class GetPartnerStaffAssignmentsRequest {
   @Type(() => Boolean)
   activeOnly?: boolean;
 }
-

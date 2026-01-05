@@ -32,7 +32,8 @@ export class RegisterUserResponse {
   createdAt: Date;
 
   @ApiProperty({
-    description: 'Información de la membership creada automáticamente (si se proporcionaron tenantId y registrationBranchId)',
+    description:
+      'Información de la membership creada automáticamente (si se proporcionaron tenantId y registrationBranchId)',
     type: CustomerMembershipDto,
     required: false,
     nullable: true,

@@ -22,10 +22,7 @@ import { ProfileMapper } from '../persistence/mappers/profile.mapper';
  * Incluye todos los repositorios necesarios
  */
 @Module({
-  imports: [
-    InfrastructureModule,
-    TypeOrmModule.forFeature([ProfileEntity]),
-  ],
+  imports: [InfrastructureModule, TypeOrmModule.forFeature([ProfileEntity])],
 })
 class MigrationScriptModule {}
 
@@ -102,9 +99,7 @@ async function bootstrap() {
       if (dataSource) {
         profileEntityRepository = dataSource.getRepository(ProfileEntity);
       } else {
-        throw new Error(
-          'No se pudo obtener el repositorio de ProfileEntity ni el DataSource.',
-        );
+        throw new Error('No se pudo obtener el repositorio de ProfileEntity ni el DataSource.');
       }
     }
 
@@ -221,7 +216,9 @@ async function bootstrap() {
                 permissionCodes.push(permission.code);
               }
             }
-            logger.log(`  ℹ️  Perfil ya tiene ${permissionCodes.length} permisos en profile_permissions.`);
+            logger.log(
+              `  ℹ️  Perfil ya tiene ${permissionCodes.length} permisos en profile_permissions.`,
+            );
           }
         }
 
@@ -262,9 +259,7 @@ async function bootstrap() {
         if (profilePermissionsToCreate.length > 0) {
           await profilePermissionRepository.saveMany(profilePermissionsToCreate);
           result.stats.totalPermissionsMigrated += profilePermissionsToCreate.length;
-          logger.log(
-            `  ✅ ${profilePermissionsToCreate.length} permisos migrados exitosamente`,
-          );
+          logger.log(`  ✅ ${profilePermissionsToCreate.length} permisos migrados exitosamente`);
         } else {
           logger.log(`  ⏭️  No hay permisos nuevos para migrar`);
         }
@@ -272,9 +267,7 @@ async function bootstrap() {
         // Registrar permisos no encontrados
         if (notFoundPermissions.length > 0) {
           result.stats.permissionsNotFound.push(...notFoundPermissions);
-          logger.warn(
-            `  ⚠️  ${notFoundPermissions.length} permisos no encontrados en catálogo`,
-          );
+          logger.warn(`  ⚠️  ${notFoundPermissions.length} permisos no encontrados en catálogo`);
         }
 
         result.stats.profilesProcessed++;
@@ -294,7 +287,9 @@ async function bootstrap() {
     console.log('\n========================================');
     console.log('📊 Reporte de Migración');
     console.log('========================================');
-    console.log(`Estado: ${result.stats.profilesWithErrors === 0 ? '✅ ÉXITO' : '⚠️  CON ERRORES'}`);
+    console.log(
+      `Estado: ${result.stats.profilesWithErrors === 0 ? '✅ ÉXITO' : '⚠️  CON ERRORES'}`,
+    );
     console.log('');
     console.log('Estadísticas:');
     console.log(`  - Total de perfiles: ${result.stats.totalProfiles}`);
@@ -315,7 +310,9 @@ async function bootstrap() {
     if (result.stats.errors.length > 0) {
       console.log('\n❌ Errores encontrados:');
       result.stats.errors.forEach((error, index) => {
-        console.log(`  ${index + 1}. Perfil "${error.profileName}" (ID: ${error.profileId}): ${error.error}`);
+        console.log(
+          `  ${index + 1}. Perfil "${error.profileName}" (ID: ${error.profileId}): ${error.error}`,
+        );
       });
     }
 
@@ -345,4 +342,3 @@ async function bootstrap() {
 if (require.main === module) {
   bootstrap();
 }
-

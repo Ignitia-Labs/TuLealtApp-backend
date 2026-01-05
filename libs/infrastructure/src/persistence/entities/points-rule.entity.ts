@@ -69,4 +69,3 @@ export class PointsRuleEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

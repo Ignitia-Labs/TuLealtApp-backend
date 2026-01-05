@@ -57,4 +57,3 @@ export class UserProfileEntity {
   @Column('boolean', { default: true })
   isActive: boolean;
 }
-

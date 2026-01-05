@@ -24,7 +24,9 @@ export class DeleteCustomerTierHandler {
     // Eliminar el tier
     await this.customerTierRepository.delete(request.customerTierId);
 
-    return new DeleteCustomerTierResponse('Customer tier deleted successfully', request.customerTierId);
+    return new DeleteCustomerTierResponse(
+      'Customer tier deleted successfully',
+      request.customerTierId,
+    );
   }
 }
-

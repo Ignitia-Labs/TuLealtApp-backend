@@ -121,7 +121,11 @@ export class UserProfilesController {
     type: BadRequestErrorResponseDto,
     example: {
       statusCode: 400,
-      message: ['userId must be a number', 'profileId must be a number', 'assignedBy must be a number'],
+      message: [
+        'userId must be a number',
+        'profileId must be a number',
+        'assignedBy must be a number',
+      ],
       error: 'Bad Request',
     },
   })
@@ -279,7 +283,9 @@ export class UserProfilesController {
     description: 'Error interno del servidor',
     type: InternalServerErrorResponseDto,
   })
-  async getUserProfiles(@Param('userId', ParseIntPipe) userId: number): Promise<GetUserProfilesResponse> {
+  async getUserProfiles(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<GetUserProfilesResponse> {
     const request = new GetUserProfilesRequest();
     request.userId = userId;
     return this.getUserProfilesHandler.execute(request);
@@ -355,4 +361,3 @@ export class UserProfilesController {
     return this.getProfileUsersHandler.execute(request);
   }
 }
-

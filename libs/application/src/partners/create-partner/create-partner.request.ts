@@ -176,6 +176,17 @@ export class CreatePartnerRequest {
   logo?: string | null;
 
   @ApiProperty({
+    description: 'URL del banner del partner',
+    example: 'https://example.com/banners/partner-banner.jpg',
+    type: String,
+    required: false,
+    nullable: true,
+  })
+  @IsString()
+  @IsOptional()
+  banner?: string | null;
+
+  @ApiProperty({
     description: 'Número de sucursales',
     example: 5,
     type: Number,
@@ -321,7 +332,8 @@ export class CreatePartnerRequest {
   subscriptionTaxPercent?: number | null;
 
   @ApiProperty({
-    description: 'ID de la moneda para la suscripción (referencia a la tabla currencies). Si no se proporciona, se usará la moneda del partner (currencyId)',
+    description:
+      'ID de la moneda para la suscripción (referencia a la tabla currencies). Si no se proporciona, se usará la moneda del partner (currencyId)',
     example: 1,
     type: Number,
     required: false,

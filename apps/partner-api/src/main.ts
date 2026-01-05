@@ -44,7 +44,9 @@ async function bootstrap() {
   // Configuración de Swagger
   const config = new DocumentBuilder()
     .setTitle('Partner API')
-    .setDescription('API para partners del sistema. Permite gestionar operaciones y consultar información del sistema.')
+    .setDescription(
+      'API para partners del sistema. Permite gestionar operaciones y consultar información del sistema.',
+    )
     .setVersion('1.0')
     .addTag('Partner Pricing', 'Consulta de planes de precios')
     .addTag('Partner Profiles', 'Gestión de perfiles del partner')
@@ -52,7 +54,6 @@ async function bootstrap() {
     .addTag('Partner Users', 'Gestión de usuarios del partner (PARTNER y PARTNER_STAFF)')
     .addTag('Partner User Permissions', 'Consulta de permisos de usuarios del partner')
     .addTag('Partner Catalogs', 'Consulta de catálogos del sistema')
-    .addTag('Orders', 'Gestión de pedidos')
     .addTag('Products', 'Gestión de productos')
     .addBearerAuth(
       {

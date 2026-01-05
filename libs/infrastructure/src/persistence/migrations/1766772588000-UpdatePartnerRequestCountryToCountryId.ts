@@ -83,9 +83,7 @@ export class UpdatePartnerRequestCountryToCountryId1766772588000 implements Migr
     }
 
     // Eliminar foreign key si existe
-    const existingFk = table.foreignKeys.find(
-      (fk) => fk.columnNames.indexOf('countryId') !== -1,
-    );
+    const existingFk = table.foreignKeys.find((fk) => fk.columnNames.indexOf('countryId') !== -1);
     if (existingFk) {
       await queryRunner.dropForeignKey('partner_requests', existingFk);
     }

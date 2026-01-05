@@ -106,4 +106,3 @@ export class GetMessageResponse {
     this.attachments = message.attachments;
   }
 }
-

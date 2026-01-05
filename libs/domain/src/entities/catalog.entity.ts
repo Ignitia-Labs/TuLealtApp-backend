@@ -3,7 +3,11 @@
  * Representa un elemento de catálogo configurable del sistema
  * No depende de frameworks ni librerías externas
  */
-export type CatalogType = 'BUSINESS_CATEGORIES' | 'REWARD_TYPES' | 'PAYMENT_METHODS' | 'PAYMENT_CATEGORIES';
+export type CatalogType =
+  | 'BUSINESS_CATEGORIES'
+  | 'REWARD_TYPES'
+  | 'PAYMENT_METHODS'
+  | 'PAYMENT_CATEGORIES';
 
 export class Catalog {
   constructor(

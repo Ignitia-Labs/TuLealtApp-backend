@@ -57,4 +57,3 @@ export class CountrySwaggerDto {
   })
   updatedAt: Date;
 }
-

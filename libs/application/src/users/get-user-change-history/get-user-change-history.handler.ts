@@ -1,7 +1,10 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { IUserRepository, IUserChangeHistoryRepository } from '@libs/domain';
 import { GetUserChangeHistoryRequest } from './get-user-change-history.request';
-import { GetUserChangeHistoryResponse, UserChangeHistoryItem } from './get-user-change-history.response';
+import {
+  GetUserChangeHistoryResponse,
+  UserChangeHistoryItem,
+} from './get-user-change-history.response';
 
 /**
  * Handler para el caso de uso de obtener el historial de cambios de un usuario
@@ -50,4 +53,3 @@ export class GetUserChangeHistoryHandler {
     return new GetUserChangeHistoryResponse(historyItems, total);
   }
 }
-

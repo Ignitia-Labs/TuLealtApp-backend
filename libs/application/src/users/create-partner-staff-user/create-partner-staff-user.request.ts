@@ -27,4 +27,3 @@ export class CreatePartnerStaffUserRequest extends CreateUserRequest {
   @IsOptional()
   profileIds?: number[];
 }
-

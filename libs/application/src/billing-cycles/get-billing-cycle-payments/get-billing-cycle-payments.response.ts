@@ -157,4 +157,3 @@ export class GetBillingCyclePaymentsResponse {
     this.totalPayments = payments.length;
   }
 }
-

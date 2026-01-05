@@ -49,4 +49,3 @@ export class GetInvoicesResponse {
     this.limit = limit;
   }
 }
-

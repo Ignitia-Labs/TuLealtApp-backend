@@ -42,6 +42,14 @@ export class GetTenantResponse {
   logo: string | null;
 
   @ApiProperty({
+    description: 'Banner del tenant',
+    example: 'http://localhost:9000/tulealtapp-images/tenants/abc123-banner.png',
+    type: String,
+    nullable: true,
+  })
+  banner: string | null;
+
+  @ApiProperty({
     description: 'Categoría del tenant',
     example: 'Cafeterías',
     type: String,
@@ -138,6 +146,7 @@ export class GetTenantResponse {
     name: string,
     description: string | null,
     logo: string | null,
+    banner: string | null,
     category: string,
     currencyId: string,
     primaryColor: string,
@@ -157,6 +166,7 @@ export class GetTenantResponse {
     this.name = name;
     this.description = description;
     this.logo = logo;
+    this.banner = banner;
     this.category = category;
     this.currencyId = currencyId;
     this.primaryColor = primaryColor;

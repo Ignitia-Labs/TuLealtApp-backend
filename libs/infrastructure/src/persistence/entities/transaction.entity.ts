@@ -62,4 +62,3 @@ export class TransactionEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

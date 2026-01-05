@@ -49,4 +49,3 @@ export interface IUserProfileRepository {
    */
   findActiveByUserId(userId: number): Promise<UserProfile[]>;
 }
-

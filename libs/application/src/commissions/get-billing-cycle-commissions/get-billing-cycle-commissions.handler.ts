@@ -6,9 +6,7 @@ import {
   IUserRepository,
 } from '@libs/domain';
 import { GetBillingCycleCommissionsRequest } from './get-billing-cycle-commissions.request';
-import {
-  GetBillingCycleCommissionsResponse,
-} from './get-billing-cycle-commissions.response';
+import { GetBillingCycleCommissionsResponse } from './get-billing-cycle-commissions.response';
 import { CommissionDto } from '../get-payment-commissions/get-payment-commissions.response';
 
 /**
@@ -31,14 +29,10 @@ export class GetBillingCycleCommissionsHandler {
     request: GetBillingCycleCommissionsRequest,
   ): Promise<GetBillingCycleCommissionsResponse> {
     // Verificar que el billing cycle existe
-    const billingCycle = await this.billingCycleRepository.findById(
-      request.billingCycleId,
-    );
+    const billingCycle = await this.billingCycleRepository.findById(request.billingCycleId);
 
     if (!billingCycle) {
-      throw new NotFoundException(
-        `Billing cycle with ID ${request.billingCycleId} not found`,
-      );
+      throw new NotFoundException(`Billing cycle with ID ${request.billingCycleId} not found`);
     }
 
     // Obtener comisiones del billing cycle
@@ -49,12 +43,8 @@ export class GetBillingCycleCommissionsHandler {
     // Enriquecer con información de usuarios staff y partners
     const commissionDtos = await Promise.all(
       commissions.map(async (commission) => {
-        const staffUser = await this.userRepository.findById(
-          commission.staffUserId,
-        );
-        const partner = await this.partnerRepository.findById(
-          commission.partnerId,
-        );
+        const staffUser = await this.userRepository.findById(commission.staffUserId);
+        const partner = await this.partnerRepository.findById(commission.partnerId);
 
         return new CommissionDto(
           commission.id,
@@ -83,4 +73,3 @@ export class GetBillingCycleCommissionsHandler {
     );
   }
 }
-

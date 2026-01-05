@@ -16,4 +16,3 @@ export class GetSubscriptionRequest {
   @Min(1)
   subscriptionId: number;
 }
-

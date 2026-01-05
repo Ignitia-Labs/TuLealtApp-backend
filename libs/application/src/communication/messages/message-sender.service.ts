@@ -61,9 +61,7 @@ export class MessageSenderService {
 
     if (recipientType === 'broadcast') {
       const partners = await this.partnerRepository.findAll();
-      return partners
-        .filter((p) => p.status === 'active')
-        .map((p) => p.id);
+      return partners.filter((p) => p.status === 'active').map((p) => p.id);
     }
 
     if (recipientType === 'filtered' && filters) {
@@ -296,4 +294,3 @@ export class MessageSenderService {
     return this.recipientRepository.getDeliveryStats(messageId);
   }
 }
-

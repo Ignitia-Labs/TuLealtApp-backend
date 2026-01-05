@@ -51,4 +51,3 @@ export interface IUserPermissionRepository {
    */
   findActiveByPermissionId(permissionId: number): Promise<UserPermission[]>;
 }
-

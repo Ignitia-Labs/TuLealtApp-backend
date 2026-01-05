@@ -89,4 +89,3 @@ export class SubscriptionAlertEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

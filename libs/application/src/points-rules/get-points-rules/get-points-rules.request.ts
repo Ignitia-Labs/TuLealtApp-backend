@@ -16,4 +16,3 @@ export class GetPointsRulesRequest {
   @Min(1)
   tenantId: number;
 }
-

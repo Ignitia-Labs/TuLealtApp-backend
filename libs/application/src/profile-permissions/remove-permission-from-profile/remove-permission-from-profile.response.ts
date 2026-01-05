@@ -31,4 +31,3 @@ export class RemovePermissionFromProfileResponse {
     this.message = message;
   }
 }
-

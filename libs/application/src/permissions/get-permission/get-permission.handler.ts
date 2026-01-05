@@ -27,7 +27,9 @@ export class GetPermissionHandler {
     }
 
     if (!permission) {
-      const identifier = request.permissionId ? `ID ${request.permissionId}` : `code '${request.code}'`;
+      const identifier = request.permissionId
+        ? `ID ${request.permissionId}`
+        : `code '${request.code}'`;
       throw new NotFoundException(`Permission with ${identifier} not found`);
     }
 
@@ -44,4 +46,3 @@ export class GetPermissionHandler {
     );
   }
 }
-

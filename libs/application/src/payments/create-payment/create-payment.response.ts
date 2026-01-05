@@ -247,4 +247,3 @@ export class CreatePaymentResponse {
     this.updatedAt = updatedAt;
   }
 }
-

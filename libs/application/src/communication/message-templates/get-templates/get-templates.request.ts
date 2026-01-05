@@ -31,4 +31,3 @@ export class GetTemplatesRequest {
   @IsOptional()
   search?: string;
 }
-

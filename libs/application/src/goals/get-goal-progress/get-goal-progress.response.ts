@@ -86,4 +86,3 @@ export class GetGoalProgressResponse {
     this.calculatedAt = calculatedAt;
   }
 }
-

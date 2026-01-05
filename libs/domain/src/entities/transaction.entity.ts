@@ -58,7 +58,15 @@ export class Transaction {
     metadata: Record<string, any> | null = null,
     membershipId: number | null = null,
   ): Transaction {
-    return Transaction.create(userId, 'earn', Math.abs(points), description, metadata, 'completed', membershipId);
+    return Transaction.create(
+      userId,
+      'earn',
+      Math.abs(points),
+      description,
+      metadata,
+      'completed',
+      membershipId,
+    );
   }
 
   /**
@@ -71,7 +79,15 @@ export class Transaction {
     metadata: Record<string, any> | null = null,
     membershipId: number | null = null,
   ): Transaction {
-    return Transaction.create(userId, 'redeem', -Math.abs(points), description, metadata, 'completed', membershipId);
+    return Transaction.create(
+      userId,
+      'redeem',
+      -Math.abs(points),
+      description,
+      metadata,
+      'completed',
+      membershipId,
+    );
   }
 
   /**
@@ -83,7 +99,15 @@ export class Transaction {
     description: string,
     membershipId: number | null = null,
   ): Transaction {
-    return Transaction.create(userId, 'expire', -Math.abs(points), description, null, 'completed', membershipId);
+    return Transaction.create(
+      userId,
+      'expire',
+      -Math.abs(points),
+      description,
+      null,
+      'completed',
+      membershipId,
+    );
   }
 
   /**
@@ -96,7 +120,15 @@ export class Transaction {
     metadata: Record<string, any> | null = null,
     membershipId: number | null = null,
   ): Transaction {
-    return Transaction.create(userId, 'adjust', points, description, metadata, 'completed', membershipId);
+    return Transaction.create(
+      userId,
+      'adjust',
+      points,
+      description,
+      metadata,
+      'completed',
+      membershipId,
+    );
   }
 
   /**
@@ -142,4 +174,3 @@ export class Transaction {
     );
   }
 }
-

@@ -69,8 +69,8 @@ export class ProfilePermissionRepository implements IProfilePermissionRepository
   }
 
   async saveMany(profilePermissions: ProfilePermission[]): Promise<ProfilePermission[]> {
-    const entities = profilePermissions.map((pp) =>
-      ProfilePermissionMapper.toPersistence(pp) as ProfilePermissionEntity,
+    const entities = profilePermissions.map(
+      (pp) => ProfilePermissionMapper.toPersistence(pp) as ProfilePermissionEntity,
     );
     const savedEntities = await this.profilePermissionRepository.save(entities);
     return savedEntities.map((entity) => ProfilePermissionMapper.toDomain(entity));
@@ -95,4 +95,3 @@ export class ProfilePermissionRepository implements IProfilePermissionRepository
     });
   }
 }
-

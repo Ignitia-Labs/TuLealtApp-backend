@@ -180,9 +180,7 @@ export class CommissionsController {
     description: 'Lista de comisiones',
     type: GetCommissionsResponse,
   })
-  async getCommissions(
-    @Query() query: any,
-  ): Promise<GetCommissionsResponse> {
+  async getCommissions(@Query() query: any): Promise<GetCommissionsResponse> {
     const request = new GetCommissionsRequest();
     if (query.staffUserId) {
       request.staffUserId = Number(query.staffUserId);
@@ -296,9 +294,7 @@ export class CommissionsController {
     description: 'Lista de desembolsos pendientes',
     type: GetPendingDisbursementsResponse,
   })
-  async getPendingDisbursements(
-    @Query() query: any,
-  ): Promise<GetPendingDisbursementsResponse> {
+  async getPendingDisbursements(@Query() query: any): Promise<GetPendingDisbursementsResponse> {
     const request = new GetPendingDisbursementsRequest();
     if (query.staffUserId) {
       request.staffUserId = Number(query.staffUserId);
@@ -359,9 +355,7 @@ export class CommissionsController {
     description: 'Dashboard de comisiones',
     type: GetCommissionsDashboardResponse,
   })
-  async getDashboard(
-    @Query() query: any,
-  ): Promise<GetCommissionsDashboardResponse> {
+  async getDashboard(@Query() query: any): Promise<GetCommissionsDashboardResponse> {
     const request = new GetCommissionsDashboardRequest();
     if (query.startDate) {
       request.startDate = query.startDate;
@@ -404,4 +398,3 @@ export class CommissionsController {
     return this.markCommissionsPaidHandler.execute(request);
   }
 }
-

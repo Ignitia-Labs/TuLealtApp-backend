@@ -23,4 +23,3 @@ export class MarkAllNotificationsReadResponse {
     this.message = 'All notifications marked as read';
   }
 }
-

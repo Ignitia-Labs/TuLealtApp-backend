@@ -49,4 +49,3 @@ export class GetPaymentsResponse {
     this.limit = limit;
   }
 }
-

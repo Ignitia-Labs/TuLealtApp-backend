@@ -39,4 +39,3 @@ export class UpdateCategoriesToBusinessCategories1766873200000 implements Migrat
     console.log('✓ Revertidos registros de BUSINESS_CATEGORIES a CATEGORIES');
   }
 }
-

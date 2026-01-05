@@ -47,4 +47,3 @@ export class GetRewardsHandler {
     return new GetRewardsResponse(rewardDtos);
   }
 }
-

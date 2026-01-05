@@ -51,8 +51,8 @@ export class PointsRuleMapper {
     entity.status = domainEntity.status;
     entity.priority = domainEntity.priority;
     if (domainEntity.id > 0) {
-    entity.createdAt = domainEntity.createdAt;
-    entity.updatedAt = domainEntity.updatedAt;
+      entity.createdAt = domainEntity.createdAt;
+      entity.updatedAt = domainEntity.updatedAt;
     }
     return entity;
   }

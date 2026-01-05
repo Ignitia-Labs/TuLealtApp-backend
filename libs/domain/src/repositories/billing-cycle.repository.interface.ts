@@ -43,10 +43,7 @@ export interface IBillingCycleRepository {
   /**
    * Busca billing cycles que aún tienen saldo pendiente
    */
-  findWithRemainingBalance(
-    subscriptionId: number,
-    currency?: string,
-  ): Promise<BillingCycle[]>;
+  findWithRemainingBalance(subscriptionId: number, currency?: string): Promise<BillingCycle[]>;
 
   /**
    * Elimina un ciclo de facturación

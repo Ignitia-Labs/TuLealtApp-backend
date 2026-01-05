@@ -11,4 +11,3 @@ export class DeletePointsRuleRequest {
   })
   pointsRuleId: number;
 }
-

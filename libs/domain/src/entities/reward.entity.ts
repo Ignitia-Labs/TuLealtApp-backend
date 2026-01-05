@@ -92,8 +92,7 @@ export class Reward {
    */
   reduceStock(amount: number = 1): Reward {
     const newStock = this.stock === -1 ? -1 : Math.max(0, this.stock - amount);
-    const newStatus =
-      newStock === 0 && this.stock !== -1 ? 'out_of_stock' : this.status;
+    const newStatus = newStock === 0 && this.stock !== -1 ? 'out_of_stock' : this.status;
     return new Reward(
       this.id,
       this.tenantId,
@@ -112,4 +111,3 @@ export class Reward {
     );
   }
 }
-

@@ -33,6 +33,22 @@ interface IUserProfileRepository {
 }
 
 /**
+ * Interfaz del repositorio de tenants
+ * Se define aquí para evitar dependencia circular
+ */
+interface ITenantRepository {
+  findById(id: number): Promise<{ partnerId: number } | null>;
+}
+
+/**
+ * Interfaz del repositorio de branches
+ * Se define aquí para evitar dependencia circular
+ */
+interface IBranchRepository {
+  findById(id: number): Promise<{ tenantId: number } | null>;
+}
+
+/**
  * Guard para validar que un partner solo acceda a sus propios recursos
  *
  * Este guard valida que cuando un usuario con rol PARTNER o PARTNER_STAFF intenta acceder a un recurso,
@@ -60,6 +76,12 @@ export class PartnerResourceGuard implements CanActivate {
     @Optional()
     @Inject('IUserProfileRepository')
     private readonly userProfileRepository?: IUserProfileRepository,
+    @Optional()
+    @Inject('ITenantRepository')
+    private readonly tenantRepository?: ITenantRepository,
+    @Optional()
+    @Inject('IBranchRepository')
+    private readonly branchRepository?: IBranchRepository,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -96,7 +118,14 @@ export class PartnerResourceGuard implements CanActivate {
     // Validar recursos según los parámetros de la ruta
     const profileId = request.params.id || request.params.profileId;
     const userId = request.params.userId;
-    const userProfileId = request.params.id && request.path.includes('user-profiles') ? request.params.id : null;
+    const userProfileId =
+      request.params.id && request.path.includes('user-profiles') ? request.params.id : null;
+    const tenantId =
+      request.params.id && request.path.includes('tenants')
+        ? request.params.id
+        : request.params.tenantId;
+    const branchId =
+      request.params.id && request.path.includes('branches') ? request.params.id : null;
 
     // Validar perfil si se accede a un perfil
     if (profileId && this.profileRepository && request.path.includes('profiles')) {
@@ -139,7 +168,46 @@ export class PartnerResourceGuard implements CanActivate {
       if (this.userRepository) {
         const assignedUser = await this.userRepository.findById(userProfile.userId);
         if (assignedUser && assignedUser.partnerId !== userPartnerId) {
-          throw new ForbiddenException('You can only access user profile assignments from your partner');
+          throw new ForbiddenException(
+            'You can only access user profile assignments from your partner',
+          );
+        }
+      }
+    }
+
+    // Validar tenant si se accede a un tenant
+    if (tenantId && this.tenantRepository && request.path.includes('tenants')) {
+      const tenant = await this.tenantRepository.findById(parseInt(tenantId));
+      if (!tenant) {
+        // Permitir que el handler maneje el 404
+        return true;
+      }
+
+      // El tenant debe pertenecer al partner del usuario autenticado
+      if (tenant.partnerId !== userPartnerId) {
+        throw new ForbiddenException('You can only access tenants from your partner');
+      }
+    }
+
+    // Validar branch si se accede a una branch
+    if (branchId && this.branchRepository && request.path.includes('branches')) {
+      const branch = await this.branchRepository.findById(parseInt(branchId));
+      if (!branch) {
+        // Permitir que el handler maneje el 404
+        return true;
+      }
+
+      // Obtener el tenant de la branch y validar que pertenezca al partner
+      if (this.tenantRepository) {
+        const tenant = await this.tenantRepository.findById(branch.tenantId);
+        if (!tenant) {
+          // Permitir que el handler maneje el 404
+          return true;
+        }
+
+        // El tenant debe pertenecer al partner del usuario autenticado
+        if (tenant.partnerId !== userPartnerId) {
+          throw new ForbiddenException('You can only access branches from your partner');
         }
       }
     }
@@ -147,4 +215,3 @@ export class PartnerResourceGuard implements CanActivate {
     return true;
   }
 }
-

@@ -32,4 +32,3 @@ export interface RequireAccessMetadata {
  */
 export const RequireAccess = (module: string, resource: string, action: string) =>
   SetMetadata(REQUIRE_ACCESS_KEY, { module, resource, action });
-

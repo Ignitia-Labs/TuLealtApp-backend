@@ -74,19 +74,14 @@ export class GetGoalProgressHandler {
     // Calcular tendencia comparando con período anterior equivalente
     let trend: TrendInfo | null = null;
     try {
-      const periodDuration =
-        goal.periodEnd.getTime() - goal.periodStart.getTime();
-      const previousPeriodStart = new Date(
-        goal.periodStart.getTime() - periodDuration,
-      );
+      const periodDuration = goal.periodEnd.getTime() - goal.periodStart.getTime();
+      const previousPeriodStart = new Date(goal.periodStart.getTime() - periodDuration);
       const previousPeriodEnd = goal.periodStart;
 
       const previousStatsRequest = new GetSubscriptionStatsRequest();
       previousStatsRequest.startDate = previousPeriodStart.toISOString();
       previousStatsRequest.endDate = previousPeriodEnd.toISOString();
-      const previousStats = await this.getSubscriptionStatsHandler.execute(
-        previousStatsRequest,
-      );
+      const previousStats = await this.getSubscriptionStatsHandler.execute(previousStatsRequest);
 
       const previousValue = goal.calculateCurrentValue({
         mrr: previousStats.mrr,
@@ -98,25 +93,13 @@ export class GetGoalProgressHandler {
         upgrades: previousStats.upgrades,
       });
 
-      const trendInfo = this.goalProgressService.calculateTrend(
-        goal,
-        currentValue,
-        previousValue,
-      );
+      const trendInfo = this.goalProgressService.calculateTrend(goal, currentValue, previousValue);
       trend = new TrendInfo(trendInfo.change, trendInfo.changePercentage);
     } catch (error) {
       // Si no hay datos del período anterior, la tendencia será null
       trend = null;
     }
 
-    return new GetGoalProgressResponse(
-      goal.id,
-      progress,
-      projection,
-      status,
-      trend,
-      currentDate,
-    );
+    return new GetGoalProgressResponse(goal.id, progress, projection, status, trend, currentDate);
   }
 }
-

@@ -34,8 +34,11 @@ export class UpdatePartnerHandler {
       request.city ?? existingPartner.city,
       request.plan ?? existingPartner.plan,
       request.logo !== undefined ? request.logo : existingPartner.logo,
+      request.banner !== undefined ? request.banner : existingPartner.banner,
       request.category ?? existingPartner.category,
-      request.branchesNumber !== undefined ? request.branchesNumber : existingPartner.branchesNumber,
+      request.branchesNumber !== undefined
+        ? request.branchesNumber
+        : existingPartner.branchesNumber,
       request.website !== undefined ? request.website : existingPartner.website,
       request.socialMedia !== undefined ? request.socialMedia : existingPartner.socialMedia,
       request.rewardType ?? existingPartner.rewardType,
@@ -65,6 +68,7 @@ export class UpdatePartnerHandler {
       savedPartner.city,
       savedPartner.plan,
       savedPartner.logo,
+      savedPartner.banner,
       savedPartner.category,
       savedPartner.branchesNumber,
       savedPartner.website,

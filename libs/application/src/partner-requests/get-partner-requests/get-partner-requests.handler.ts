@@ -34,9 +34,7 @@ export class GetPartnerRequestsHandler {
       total = allRequests.length;
     }
 
-    const requests = partnerRequests.map(
-      (pr) => new GetPartnerRequestResponse(pr),
-    );
+    const requests = partnerRequests.map((pr) => new GetPartnerRequestResponse(pr));
 
     return new GetPartnerRequestsResponse(requests, total);
   }

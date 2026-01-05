@@ -39,13 +39,7 @@ export class CreatePartnerRequestResponse {
   })
   email: string;
 
-  constructor(
-    id: number,
-    status: string,
-    submittedAt: Date,
-    name: string,
-    email: string,
-  ) {
+  constructor(id: number, status: string, submittedAt: Date, name: string, email: string) {
     this.id = id;
     this.status = status;
     this.submittedAt = submittedAt.toISOString();

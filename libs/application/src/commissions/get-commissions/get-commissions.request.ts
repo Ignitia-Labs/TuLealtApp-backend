@@ -80,4 +80,3 @@ export class GetCommissionsRequest {
   @Type(() => Number)
   limit?: number;
 }
-

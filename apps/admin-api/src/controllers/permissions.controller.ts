@@ -202,7 +202,9 @@ export class PermissionsController {
     description: 'Error interno del servidor',
     type: InternalServerErrorResponseDto,
   })
-  async createPermission(@Body() request: CreatePermissionRequest): Promise<CreatePermissionResponse> {
+  async createPermission(
+    @Body() request: CreatePermissionRequest,
+  ): Promise<CreatePermissionResponse> {
     return this.createPermissionHandler.execute(request);
   }
 
@@ -456,4 +458,3 @@ export class PermissionsController {
     return this.getPermissionProfilesHandler.execute(request);
   }
 }
-

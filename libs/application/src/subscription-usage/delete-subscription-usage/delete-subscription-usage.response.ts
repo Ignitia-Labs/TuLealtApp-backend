@@ -23,4 +23,3 @@ export class DeleteSubscriptionUsageResponse {
     this.message = message;
   }
 }
-

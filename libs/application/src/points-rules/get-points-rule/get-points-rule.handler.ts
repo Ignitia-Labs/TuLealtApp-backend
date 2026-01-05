@@ -43,4 +43,3 @@ export class GetPointsRuleHandler {
     return new GetPointsRuleResponse(ruleDto);
   }
 }
-

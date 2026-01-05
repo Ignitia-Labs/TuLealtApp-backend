@@ -1,13 +1,5 @@
-import {
-  Injectable,
-  Inject,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
-import {
-  IPartnerStaffAssignmentRepository,
-  PartnerStaffAssignment,
-} from '@libs/domain';
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { IPartnerStaffAssignmentRepository, PartnerStaffAssignment } from '@libs/domain';
 import { UpdatePartnerStaffAssignmentRequest } from './update-partner-staff-assignment.request';
 import { UpdatePartnerStaffAssignmentResponse } from './update-partner-staff-assignment.response';
 import { PartnerStaffAssignmentService } from '../partner-staff-assignment.service';
@@ -31,9 +23,7 @@ export class UpdatePartnerStaffAssignmentHandler {
     const existingAssignment = await this.assignmentRepository.findById(id);
 
     if (!existingAssignment) {
-      throw new NotFoundException(
-        `Partner staff assignment with ID ${id} not found`,
-      );
+      throw new NotFoundException(`Partner staff assignment with ID ${id} not found`);
     }
 
     let updatedAssignment: PartnerStaffAssignment = existingAssignment;
@@ -78,11 +68,7 @@ export class UpdatePartnerStaffAssignmentHandler {
         id, // Excluir la asignación actual
       );
 
-      updatedAssignment = updatedAssignment.updateDates(
-        startDate,
-        endDate,
-        request.notes || null,
-      );
+      updatedAssignment = updatedAssignment.updateDates(startDate, endDate, request.notes || null);
     }
 
     // Actualizar estado activo si se proporciona
@@ -112,8 +98,7 @@ export class UpdatePartnerStaffAssignmentHandler {
     }
 
     // Guardar la asignación actualizada
-    const savedAssignment =
-      await this.assignmentRepository.update(updatedAssignment);
+    const savedAssignment = await this.assignmentRepository.update(updatedAssignment);
 
     return new UpdatePartnerStaffAssignmentResponse(
       savedAssignment.id,
@@ -128,4 +113,3 @@ export class UpdatePartnerStaffAssignmentHandler {
     );
   }
 }
-

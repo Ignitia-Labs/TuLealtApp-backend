@@ -62,4 +62,3 @@ export class GetPermissionsHandler {
     return new GetPermissionsResponse(permissionDtos, total);
   }
 }
-

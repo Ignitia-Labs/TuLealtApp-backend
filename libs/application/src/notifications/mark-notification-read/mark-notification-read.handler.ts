@@ -26,4 +26,3 @@ export class MarkNotificationReadHandler {
     return new MarkNotificationReadResponse(savedNotification.id, savedNotification.read);
   }
 }
-

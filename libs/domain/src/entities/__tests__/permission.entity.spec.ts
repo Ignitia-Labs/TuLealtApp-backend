@@ -1,4 +1,4 @@
-import { Permission } from './permission.entity';
+import { Permission } from '../permission.entity';
 
 describe('Permission Entity', () => {
   describe('create', () => {
@@ -256,4 +256,3 @@ describe('Permission Entity', () => {
     });
   });
 });
-

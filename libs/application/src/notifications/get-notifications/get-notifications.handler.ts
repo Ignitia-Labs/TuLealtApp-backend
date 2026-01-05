@@ -45,4 +45,3 @@ export class GetNotificationsHandler {
     return new GetNotificationsResponse(notificationDtos, unreadCount);
   }
 }
-

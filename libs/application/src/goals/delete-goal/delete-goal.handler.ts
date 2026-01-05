@@ -25,4 +25,3 @@ export class DeleteGoalHandler {
     return new DeleteGoalResponse(request.goalId, 'Goal deleted successfully');
   }
 }
-

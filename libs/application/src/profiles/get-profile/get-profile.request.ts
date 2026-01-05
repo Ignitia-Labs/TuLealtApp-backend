@@ -13,4 +13,3 @@ export class GetProfileRequest {
   @IsNumber()
   profileId: number;
 }
-

@@ -148,7 +148,9 @@ export class SubscriptionUsageController {
       error: 'Internal Server Error',
     },
   })
-  async create(@Body() request: CreateSubscriptionUsageRequest): Promise<CreateSubscriptionUsageResponse> {
+  async create(
+    @Body() request: CreateSubscriptionUsageRequest,
+  ): Promise<CreateSubscriptionUsageResponse> {
     return this.createSubscriptionUsageHandler.execute(request);
   }
 
@@ -222,7 +224,9 @@ export class SubscriptionUsageController {
       error: 'Internal Server Error',
     },
   })
-  async get(@Param('subscriptionId', ParseIntPipe) subscriptionId: number): Promise<GetSubscriptionUsageResponse> {
+  async get(
+    @Param('subscriptionId', ParseIntPipe) subscriptionId: number,
+  ): Promise<GetSubscriptionUsageResponse> {
     const request = new GetSubscriptionUsageRequest();
     request.partnerSubscriptionId = subscriptionId;
     return this.getSubscriptionUsageHandler.execute(request);
@@ -274,7 +278,10 @@ export class SubscriptionUsageController {
     type: BadRequestErrorResponseDto,
     example: {
       statusCode: 400,
-      message: ['tenantsCount must be a positive number', 'customersCount must be a positive number'],
+      message: [
+        'tenantsCount must be a positive number',
+        'customersCount must be a positive number',
+      ],
       error: 'Bad Request',
     },
   })
@@ -390,10 +397,11 @@ export class SubscriptionUsageController {
       error: 'Internal Server Error',
     },
   })
-  async delete(@Param('subscriptionId', ParseIntPipe) subscriptionId: number): Promise<DeleteSubscriptionUsageResponse> {
+  async delete(
+    @Param('subscriptionId', ParseIntPipe) subscriptionId: number,
+  ): Promise<DeleteSubscriptionUsageResponse> {
     const request = new DeleteSubscriptionUsageRequest();
     request.partnerSubscriptionId = subscriptionId;
     return this.deleteSubscriptionUsageHandler.execute(request);
   }
 }
-

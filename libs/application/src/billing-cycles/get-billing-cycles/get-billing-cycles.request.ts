@@ -29,4 +29,3 @@ export class GetBillingCyclesRequest {
   @Min(1)
   partnerId?: number;
 }
-

@@ -17,7 +17,15 @@ export class CreateGoalResponse {
 
   @ApiProperty({
     description: 'Métrica a medir',
-    enum: ['mrr', 'arr', 'activeSubscriptions', 'churnRate', 'retentionRate', 'newSubscriptions', 'upgrades'],
+    enum: [
+      'mrr',
+      'arr',
+      'activeSubscriptions',
+      'churnRate',
+      'retentionRate',
+      'newSubscriptions',
+      'upgrades',
+    ],
     example: 'mrr',
   })
   metric: GoalMetric;
@@ -76,4 +84,3 @@ export class CreateGoalResponse {
     this.updatedAt = updatedAt;
   }
 }
-

@@ -10,13 +10,7 @@ import {
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import {
   GetUserPermissionsHandler,
   GetUserPermissionsRequest,
@@ -169,4 +163,3 @@ export class UserPermissionsController {
     return this.getUserPermissionsHandler.execute(request);
   }
 }
-
