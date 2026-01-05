@@ -27,6 +27,9 @@ export class CountryEntity {
   @Column('varchar', { length: 3 })
   currencyCode: string; // Código ISO de 3 letras de la moneda (ej: "USD", "GTQ")
 
+  @Column('varchar', { length: 10, nullable: true })
+  countryCode: string | null; // Código telefónico internacional (ej: "+502", "+1", "+52") - opcional
+
   @Column('varchar', { length: 20, default: 'active' })
   status: 'active' | 'inactive';
 

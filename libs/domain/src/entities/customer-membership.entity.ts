@@ -8,7 +8,7 @@ export class CustomerMembership {
     public readonly id: number,
     public readonly userId: number,
     public readonly tenantId: number,
-    public readonly registrationBranchId: number,
+    public readonly registrationBranchId: number | null,
     public readonly points: number,
     public readonly tierId: number | null,
     public readonly totalSpent: number,
@@ -28,7 +28,7 @@ export class CustomerMembership {
   static create(
     userId: number,
     tenantId: number,
-    registrationBranchId: number,
+    registrationBranchId: number | null = null,
     points: number = 0,
     tierId: number | null = null,
     totalSpent: number = 0,

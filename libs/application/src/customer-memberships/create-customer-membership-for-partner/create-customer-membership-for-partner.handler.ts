@@ -4,6 +4,7 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ICustomerMembershipRepository,
@@ -14,15 +15,16 @@ import {
   CustomerMembership,
 } from '@libs/domain';
 import { generateMembershipQrCode } from '@libs/shared';
-import { CreateCustomerMembershipRequest } from './create-customer-membership.request';
-import { CreateCustomerMembershipResponse } from './create-customer-membership.response';
+import { CreateCustomerMembershipRequest } from '../create-customer-membership/create-customer-membership.request';
+import { CreateCustomerMembershipResponse } from '../create-customer-membership/create-customer-membership.response';
 import { CustomerMembershipDto } from '../dto/customer-membership.dto';
 
 /**
- * Handler para el caso de uso de crear una membership
+ * Handler para crear una membership desde Partner API
+ * Valida que el tenant pertenezca al partner del usuario autenticado
  */
 @Injectable()
-export class CreateCustomerMembershipHandler {
+export class CreateCustomerMembershipForPartnerHandler {
   constructor(
     @Inject('ICustomerMembershipRepository')
     private readonly membershipRepository: ICustomerMembershipRepository,
@@ -38,6 +40,7 @@ export class CreateCustomerMembershipHandler {
 
   async execute(
     request: CreateCustomerMembershipRequest,
+    partnerId: number,
   ): Promise<CreateCustomerMembershipResponse> {
     // Validar que el usuario existe
     const user = await this.userRepository.findById(request.userId);
@@ -49,6 +52,13 @@ export class CreateCustomerMembershipHandler {
     const tenant = await this.tenantRepository.findById(request.tenantId);
     if (!tenant) {
       throw new NotFoundException(`Tenant with ID ${request.tenantId} not found`);
+    }
+
+    // Validar que el tenant pertenece al partner del usuario autenticado
+    if (tenant.partnerId !== partnerId) {
+      throw new ForbiddenException(
+        `Tenant ${request.tenantId} does not belong to your partner`,
+      );
     }
 
     // Validar branch solo si se proporciona
@@ -111,7 +121,6 @@ export class CreateCustomerMembershipHandler {
 
   /**
    * Genera un QR code único para la membership
-   * Utiliza el servicio utilitario y verifica unicidad en la base de datos
    */
   private async generateUniqueQrCode(userId: number, tenantId: number): Promise<string> {
     let qrCode: string;
@@ -119,11 +128,9 @@ export class CreateCustomerMembershipHandler {
     const maxAttempts = 10;
 
     do {
-      // Generar QR code usando el servicio utilitario
       qrCode = generateMembershipQrCode({ userId, tenantId });
       attempts++;
 
-      // Verificar que el QR code sea único
       const existing = await this.membershipRepository.findByQrCode(qrCode);
       if (!existing) {
         return qrCode;
@@ -139,13 +146,11 @@ export class CreateCustomerMembershipHandler {
    * Convierte una entidad CustomerMembership a DTO con información denormalizada
    */
   private async toDto(membership: CustomerMembership): Promise<CustomerMembershipDto> {
-    // Obtener información del tenant
     const tenant = await this.tenantRepository.findById(membership.tenantId);
     if (!tenant) {
       throw new Error(`Tenant with ID ${membership.tenantId} not found`);
     }
 
-    // Obtener información de la branch de registro (si existe)
     let branchName: string | null = null;
     if (membership.registrationBranchId) {
       const branch = await this.branchRepository.findById(membership.registrationBranchId);
@@ -155,7 +160,6 @@ export class CreateCustomerMembershipHandler {
       branchName = branch.name;
     }
 
-    // Obtener información del tier si existe
     let tierName: string | null = null;
     let tierColor: string | null = null;
     if (membership.tierId) {
@@ -166,7 +170,6 @@ export class CreateCustomerMembershipHandler {
       }
     }
 
-    // Calcular availableRewards (por ahora retornamos 0, se puede implementar lógica más adelante)
     const availableRewards = 0;
 
     return new CustomerMembershipDto(
@@ -175,7 +178,7 @@ export class CreateCustomerMembershipHandler {
       membership.tenantId,
       tenant.name,
       tenant.logo,
-      tenant.logo, // tenantImage puede ser igual a logo
+      tenant.logo,
       tenant.category,
       tenant.primaryColor,
       membership.registrationBranchId,
@@ -196,3 +199,4 @@ export class CreateCustomerMembershipHandler {
     );
   }
 }
+

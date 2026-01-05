@@ -48,7 +48,6 @@ export * from './entities/permission.entity';
 export * from './entities/user-permission.entity';
 export * from './entities/profile-permission.entity';
 export * from './entities/user-change-history.entity';
-export * from './entities/customer-partner.entity';
 
 // Repository Interfaces
 export * from './repositories/user.repository.interface';
@@ -89,4 +88,3 @@ export * from './repositories/permission.repository.interface';
 export * from './repositories/user-permission.repository.interface';
 export * from './repositories/profile-permission.repository.interface';
 export * from './repositories/user-change-history.repository.interface';
-export * from './repositories/customer-partner.repository.interface';

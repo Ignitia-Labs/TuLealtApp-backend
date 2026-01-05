@@ -114,4 +114,125 @@ export class CustomerMembershipRepository implements ICustomerMembershipReposito
       where: { tenantId },
     });
   }
+
+  async findByUserIdAndStatus(
+    userId: number,
+    status: 'active' | 'inactive',
+  ): Promise<CustomerMembership[]> {
+    const membershipEntities = await this.membershipRepository.find({
+      where: {
+        userId,
+        status,
+      },
+      order: {
+        joinedDate: 'DESC',
+      },
+    });
+
+    return membershipEntities.map((entity) => CustomerMembershipMapper.toDomain(entity));
+  }
+
+  async findCustomersByPartnerIdPaginated(
+    partnerId: number,
+    page: number,
+    limit: number,
+    status?: 'active' | 'inactive' | 'suspended',
+  ): Promise<{ data: CustomerMembership[]; total: number }> {
+    // Hacer JOIN con tenants usando la relación de TypeORM para filtrar por partnerId
+    // Esto asegura que solo se retornen customers asociados a tenants del partner
+    // Seleccionar explícitamente todos los campos de membership para evitar problemas con JOINs
+    const queryBuilder = this.membershipRepository
+      .createQueryBuilder('membership')
+      .select([
+        'membership.id',
+        'membership.userId',
+        'membership.tenantId',
+        'membership.registrationBranchId',
+        'membership.points',
+        'membership.tierId',
+        'membership.totalSpent',
+        'membership.totalVisits',
+        'membership.lastVisit',
+        'membership.joinedDate',
+        'membership.qrCode',
+        'membership.status',
+        'membership.createdAt',
+        'membership.updatedAt',
+      ])
+      .innerJoin('membership.tenant', 'tenant')
+      .where('tenant.partnerId = :partnerId', { partnerId })
+      .orderBy('membership.joinedDate', 'DESC');
+
+    // Filtrar por status si se proporciona
+    // Nota: customer_memberships solo tiene 'active' | 'inactive', no 'suspended'
+    if (status) {
+      if (status === 'suspended') {
+        // Suspended no existe en memberships, retornar vacío
+        return { data: [], total: 0 };
+      }
+      queryBuilder.andWhere('membership.status = :status', { status });
+    }
+
+    // Obtener total antes de aplicar paginación
+    const total = await queryBuilder.getCount();
+
+    // Paginación
+    const skip = (page - 1) * limit;
+    queryBuilder.skip(skip).take(limit);
+
+    // Obtener datos
+    const membershipEntities = await queryBuilder.getMany();
+
+    const data = membershipEntities.map((entity) =>
+      CustomerMembershipMapper.toDomain(entity),
+    );
+
+    return { data, total };
+  }
+
+  async findCustomersByPartnerId(
+    partnerId: number,
+    status?: 'active' | 'inactive' | 'suspended',
+  ): Promise<CustomerMembership[]> {
+    // Hacer JOIN con tenants usando la relación de TypeORM para filtrar por partnerId
+    // Esto asegura que solo se retornen customers asociados a tenants del partner
+    // Seleccionar explícitamente todos los campos de membership para evitar problemas con JOINs
+    const queryBuilder = this.membershipRepository
+      .createQueryBuilder('membership')
+      .select([
+        'membership.id',
+        'membership.userId',
+        'membership.tenantId',
+        'membership.registrationBranchId',
+        'membership.points',
+        'membership.tierId',
+        'membership.totalSpent',
+        'membership.totalVisits',
+        'membership.lastVisit',
+        'membership.joinedDate',
+        'membership.qrCode',
+        'membership.status',
+        'membership.createdAt',
+        'membership.updatedAt',
+      ])
+      .innerJoin('membership.tenant', 'tenant')
+      .where('tenant.partnerId = :partnerId', { partnerId })
+      .orderBy('membership.joinedDate', 'DESC');
+
+    // Filtrar por status si se proporciona
+    if (status) {
+      if (status === 'suspended') {
+        // Suspended no existe en memberships, retornar vacío
+        return [];
+      }
+      queryBuilder.andWhere('membership.status = :status', { status });
+    }
+
+    // Obtener todos los datos sin paginación
+    const membershipEntities = await queryBuilder.getMany();
+
+    return membershipEntities.map((entity) =>
+      CustomerMembershipMapper.toDomain(entity),
+    );
+  }
 }

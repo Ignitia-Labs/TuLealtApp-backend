@@ -75,10 +75,14 @@ export class GetCustomerMembershipsHandler {
       throw new Error(`Tenant with ID ${membership.tenantId} not found`);
     }
 
-    // Obtener información de la branch de registro
-    const branch = await this.branchRepository.findById(membership.registrationBranchId);
-    if (!branch) {
-      throw new Error(`Branch with ID ${membership.registrationBranchId} not found`);
+    // Obtener información de la branch de registro (si existe)
+    let branchName: string | null = null;
+    if (membership.registrationBranchId) {
+      const branch = await this.branchRepository.findById(membership.registrationBranchId);
+      if (!branch) {
+        throw new Error(`Branch with ID ${membership.registrationBranchId} not found`);
+      }
+      branchName = branch.name;
     }
 
     // Obtener información del tier si existe
@@ -105,7 +109,7 @@ export class GetCustomerMembershipsHandler {
       tenant.category,
       tenant.primaryColor,
       membership.registrationBranchId,
-      branch.name,
+      branchName,
       membership.points,
       membership.tierId,
       tierName,

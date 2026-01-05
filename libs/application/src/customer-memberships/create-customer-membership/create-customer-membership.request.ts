@@ -28,15 +28,17 @@ export class CreateCustomerMembershipRequest {
   tenantId: number;
 
   @ApiProperty({
-    description: 'ID de la branch donde se registró el customer',
+    description:
+      'ID de la branch donde se registró el customer (opcional)',
     example: 5,
     type: Number,
     minimum: 1,
+    required: false,
   })
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   @Min(1)
-  registrationBranchId: number;
+  registrationBranchId?: number;
 
   @ApiProperty({
     description: 'Puntos iniciales (opcional, por defecto 0)',

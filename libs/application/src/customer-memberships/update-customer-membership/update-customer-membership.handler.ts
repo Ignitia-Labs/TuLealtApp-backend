@@ -9,6 +9,7 @@ import {
 import { UpdateCustomerMembershipRequest } from './update-customer-membership.request';
 import { UpdateCustomerMembershipResponse } from './update-customer-membership.response';
 import { CustomerMembershipDto } from '../dto/customer-membership.dto';
+import { TierCalculatorHelper } from '../helpers/tier-calculator.helper';
 
 /**
  * Handler para el caso de uso de actualizar una membership
@@ -40,14 +41,25 @@ export class UpdateCustomerMembershipHandler {
     let updatedMembership = membership;
 
     if (request.points !== undefined) {
-      // Si cambian los puntos, recalcular el tier
-      const tier = await this.tierRepository.findByPoints(membership.tenantId, request.points);
-      updatedMembership = updatedMembership.updateTier(tier ? tier.id : null);
-      // Actualizar puntos usando el método de dominio
+      // Actualizar puntos y recalcular tier automáticamente usando el helper
       if (request.points > membership.points) {
-        updatedMembership = updatedMembership.addPoints(request.points - membership.points);
+        updatedMembership = await TierCalculatorHelper.addPointsAndRecalculateTier(
+          membership,
+          request.points - membership.points,
+          this.tierRepository,
+        );
       } else if (request.points < membership.points) {
-        updatedMembership = updatedMembership.subtractPoints(membership.points - request.points);
+        updatedMembership = await TierCalculatorHelper.subtractPointsAndRecalculateTier(
+          membership,
+          membership.points - request.points,
+          this.tierRepository,
+        );
+      } else {
+        // Si los puntos son iguales, solo recalcular tier por si acaso cambió la configuración
+        updatedMembership = await TierCalculatorHelper.recalculateTier(
+          membership,
+          this.tierRepository,
+        );
       }
     }
 

@@ -19,11 +19,6 @@ export class RegisterUserHandler {
   ) {}
 
   async execute(request: RegisterUserRequest): Promise<RegisterUserResponse> {
-    // Validar que si se proporciona tenantId, también se proporcione registrationBranchId
-    if (request.tenantId && !request.registrationBranchId) {
-      throw new BadRequestException('registrationBranchId is required when tenantId is provided');
-    }
-
     // Convertir RegisterUserRequest a CreateUserRequest
     const createUserRequest = new CreateUserRequest();
     createUserRequest.email = request.email;
@@ -37,14 +32,14 @@ export class RegisterUserHandler {
     // Delegar al handler de crear usuario
     const result = await this.createUserHandler.execute(createUserRequest);
 
-    // Si se proporcionaron tenantId y registrationBranchId, crear automáticamente la membership
+    // Si se proporciona tenantId, crear automáticamente la membership (con o sin branch)
     let membership = null;
-    if (request.tenantId && request.registrationBranchId) {
+    if (request.tenantId) {
       try {
         const createMembershipRequest = new CreateCustomerMembershipRequest();
         createMembershipRequest.userId = result.id;
         createMembershipRequest.tenantId = request.tenantId;
-        createMembershipRequest.registrationBranchId = request.registrationBranchId;
+        createMembershipRequest.registrationBranchId = request.registrationBranchId || undefined;
         createMembershipRequest.points = 0;
         createMembershipRequest.status = 'active';
 

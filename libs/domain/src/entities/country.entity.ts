@@ -9,6 +9,7 @@ export class Country {
     public readonly name: string, // Nombre del país (ej: "Estados Unidos", "Guatemala")
     public readonly code: string | null, // Código ISO de 2 letras (ej: "US", "GT") - opcional
     public readonly currencyCode: string, // Código ISO de 3 letras de la moneda (ej: "USD", "GTQ")
+    public readonly countryCode: string | null, // Código telefónico internacional (ej: "+502", "+1", "+52") - opcional
     public readonly status: 'active' | 'inactive',
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
@@ -22,11 +23,12 @@ export class Country {
     name: string,
     currencyCode: string,
     code: string | null = null,
+    countryCode: string | null = null,
     status: 'active' | 'inactive' = 'active',
     id?: number,
   ): Country {
     const now = new Date();
-    return new Country(id || 0, name, code, currencyCode, status, now, now);
+    return new Country(id || 0, name, code, currencyCode, countryCode, status, now, now);
   }
 
   /**
@@ -45,6 +47,7 @@ export class Country {
       this.name,
       this.code,
       this.currencyCode,
+      this.countryCode,
       'active',
       this.createdAt,
       new Date(),
@@ -60,6 +63,7 @@ export class Country {
       this.name,
       this.code,
       this.currencyCode,
+      this.countryCode,
       'inactive',
       this.createdAt,
       new Date(),

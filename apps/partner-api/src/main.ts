@@ -45,24 +45,64 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Partner API')
     .setDescription(
-      'API para partners del sistema. Permite gestionar operaciones y consultar información del sistema.',
+      `API para partners del sistema. Permite gestionar operaciones y consultar información del sistema.
+
+## Información para Frontend
+
+- **Base URL Desarrollo**: \`http://localhost:3001/partner\`
+- **Base URL Producción**: \`https://api.produccion.com/partner\`
+- **OpenAPI JSON**: \`http://localhost:3001/partner/docs-json\`
+- **OpenAPI YAML**: \`http://localhost:3001/partner/docs-yaml\`
+
+### Autenticación
+
+Esta API utiliza JWT Bearer Token. Para autenticarte:
+
+1. Obtén un token mediante el endpoint \`POST /partner/auth/login\`
+2. Incluye el token en el header: \`Authorization: Bearer <token>\`
+
+### Códigos de Estado
+
+- \`200\` - Éxito
+- \`201\` - Creado exitosamente
+- \`400\` - Error de validación
+- \`401\` - No autenticado
+- \`403\` - Sin permisos
+- \`404\` - No encontrado
+- \`409\` - Conflicto (recurso duplicado)
+- \`500\` - Error del servidor
+
+### Importar en Frontend
+
+Puedes usar herramientas como:
+- **OpenAPI Generator**: \`openapi-generator-cli generate -i http://localhost:3001/partner/docs-json -g typescript-axios -o ./src/api/partner\`
+- **Swagger Codegen**: Similar proceso
+- **Postman**: Importar desde la URL del JSON`,
     )
     .setVersion('1.0')
+    .addTag('Partner', 'Información y gestión del partner autenticado')
     .addTag('Partner Pricing', 'Consulta de planes de precios')
     .addTag('Partner Profiles', 'Gestión de perfiles del partner')
     .addTag('Partner User Profiles', 'Gestión de asignación de perfiles a usuarios')
     .addTag('Partner Users', 'Gestión de usuarios del partner (PARTNER y PARTNER_STAFF)')
     .addTag('Partner User Permissions', 'Consulta de permisos de usuarios del partner')
     .addTag('Partner Catalogs', 'Consulta de catálogos del sistema')
-    .addTag('Products', 'Gestión de productos')
     .addTag('Partner Rewards', 'Gestión de recompensas de los tenants del partner')
+    .addTag('Partner Customers', 'Gestión de customers del partner')
+    .addTag('Partner Customer Tiers', 'Gestión de tiers de customers')
+    .addTag('Partner Points Rules', 'Gestión de reglas de puntos')
+    .addTag('Branches', 'Gestión de branches de los tenants')
+    .addTag('Tenants', 'Gestión de tenants del partner')
+    .addTag('Currencies & Countries', 'Consulta de monedas y países')
+    .addTag('Rate Exchange', 'Consulta de tasas de cambio')
+    .addTag('Contact Inquiry', 'Gestión de consultas de contacto')
     .addBearerAuth(
       {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
         name: 'JWT',
-        description: 'Ingresa el token JWT',
+        description: 'Ingresa el token JWT obtenido del endpoint de login',
         in: 'header',
       },
       'JWT-auth', // Este nombre se usará en los controladores

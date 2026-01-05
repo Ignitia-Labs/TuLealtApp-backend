@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
   IsNotEmpty,
@@ -7,15 +8,13 @@ import {
   IsOptional,
   Min,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
 
 /**
- * DTO de request para registrar un usuario
- * Si se proporcionan tenantId y registrationBranchId, se creará automáticamente una membership
+ * DTO de request para crear un customer desde Partner API
  */
-export class RegisterUserRequest {
+export class CreateCustomerForPartnerRequest {
   @ApiProperty({
-    description: 'Email del usuario',
+    description: 'Email del customer',
     example: 'customer@example.com',
   })
   @IsEmail()
@@ -23,7 +22,7 @@ export class RegisterUserRequest {
   email: string;
 
   @ApiProperty({
-    description: 'Nombre completo del usuario',
+    description: 'Nombre completo del customer',
     example: 'John Doe',
     minLength: 2,
   })
@@ -33,7 +32,7 @@ export class RegisterUserRequest {
   name: string;
 
   @ApiProperty({
-    description: 'Nombre del usuario',
+    description: 'Nombre del customer',
     example: 'John',
     minLength: 2,
   })
@@ -43,7 +42,7 @@ export class RegisterUserRequest {
   firstName: string;
 
   @ApiProperty({
-    description: 'Apellido del usuario',
+    description: 'Apellido del customer',
     example: 'Doe',
     minLength: 2,
   })
@@ -53,7 +52,7 @@ export class RegisterUserRequest {
   lastName: string;
 
   @ApiProperty({
-    description: 'Teléfono del usuario',
+    description: 'Teléfono del customer',
     example: '+1234567890',
   })
   @IsString()
@@ -61,7 +60,7 @@ export class RegisterUserRequest {
   phone: string;
 
   @ApiProperty({
-    description: 'Contraseña del usuario',
+    description: 'Contraseña del customer',
     example: 'SecurePass123!',
     minLength: 6,
   })
@@ -71,20 +70,18 @@ export class RegisterUserRequest {
   password: string;
 
   @ApiProperty({
-    description: 'ID del tenant para crear automáticamente la membership (opcional)',
+    description: 'ID del tenant donde se creará la membership',
     example: 1,
     type: Number,
     minimum: 1,
-    required: false,
   })
   @IsNumber()
-  @IsOptional()
+  @IsNotEmpty()
   @Min(1)
-  tenantId?: number;
+  tenantId: number;
 
   @ApiProperty({
-    description:
-      'ID de la branch donde se registra el customer (opcional)',
+    description: 'ID de la branch donde se registra el customer (opcional)',
     example: 5,
     type: Number,
     minimum: 1,
@@ -94,4 +91,26 @@ export class RegisterUserRequest {
   @IsOptional()
   @Min(1)
   registrationBranchId?: number;
+
+  @ApiProperty({
+    description: 'Puntos iniciales (opcional, por defecto 0)',
+    example: 0,
+    type: Number,
+    minimum: 0,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
+  points?: number;
+
+  @ApiProperty({
+    description: 'Estado inicial (opcional, por defecto active)',
+    example: 'active',
+    enum: ['active', 'inactive'],
+    required: false,
+  })
+  @IsOptional()
+  status?: 'active' | 'inactive';
 }
+

@@ -13,9 +13,6 @@ import {
   GetCustomerMembershipsHandler,
   GetCustomerMembershipHandler,
   GetCustomerPartnersHandler,
-  AssociateCustomerToPartnerHandler,
-  UpdateCustomerPartnerStatusHandler,
-  DissociateCustomerFromPartnerHandler,
 } from '@libs/application';
 
 /**
@@ -41,9 +38,6 @@ import {
     GetCustomerMembershipHandler,
     // Handlers de aplicación - Customer Partners
     GetCustomerPartnersHandler,
-    AssociateCustomerToPartnerHandler,
-    UpdateCustomerPartnerStatusHandler,
-    DissociateCustomerFromPartnerHandler,
   ],
 })
 export class CustomerApiModule {}

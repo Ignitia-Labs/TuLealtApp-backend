@@ -13,7 +13,7 @@ export class CustomerMembershipMapper {
       persistenceEntity.id,
       persistenceEntity.userId,
       persistenceEntity.tenantId,
-      persistenceEntity.registrationBranchId,
+      persistenceEntity.registrationBranchId ?? null,
       persistenceEntity.points ?? 0,
       persistenceEntity.tierId,
       Number(persistenceEntity.totalSpent) ?? 0,
@@ -40,7 +40,7 @@ export class CustomerMembershipMapper {
     }
     entity.userId = domainEntity.userId;
     entity.tenantId = domainEntity.tenantId;
-    entity.registrationBranchId = domainEntity.registrationBranchId;
+    entity.registrationBranchId = domainEntity.registrationBranchId ?? null;
     entity.points = domainEntity.points;
     entity.tierId = domainEntity.tierId;
     entity.totalSpent = domainEntity.totalSpent;

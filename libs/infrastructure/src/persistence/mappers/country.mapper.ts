@@ -13,6 +13,7 @@ export class CountryMapper {
       persistenceEntity.name,
       persistenceEntity.currencyCode,
       persistenceEntity.code,
+      persistenceEntity.countryCode,
       persistenceEntity.status,
       persistenceEntity.id,
     );
@@ -29,6 +30,7 @@ export class CountryMapper {
     entity.name = domainEntity.name;
     entity.code = domainEntity.code;
     entity.currencyCode = domainEntity.currencyCode;
+    entity.countryCode = domainEntity.countryCode;
     entity.status = domainEntity.status;
     if (domainEntity.id > 0) {
       entity.createdAt = domainEntity.createdAt;

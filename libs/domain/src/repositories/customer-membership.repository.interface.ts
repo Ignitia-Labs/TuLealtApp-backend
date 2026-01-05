@@ -55,4 +55,27 @@ export interface ICustomerMembershipRepository {
    * Cuenta el total de customers (memberships) de un tenant
    */
   countByTenantId(tenantId: number): Promise<number>;
+
+  /**
+   * Busca memberships de un usuario filtradas por status
+   */
+  findByUserIdAndStatus(userId: number, status: 'active' | 'inactive'): Promise<CustomerMembership[]>;
+
+  /**
+   * Busca memberships de un partner (a través de tenant.partnerId) con paginación
+   */
+  findCustomersByPartnerIdPaginated(
+    partnerId: number,
+    page: number,
+    limit: number,
+    status?: 'active' | 'inactive' | 'suspended',
+  ): Promise<{ data: CustomerMembership[]; total: number }>;
+
+  /**
+   * Busca todas las memberships de un partner (a través de tenant.partnerId) sin paginación
+   */
+  findCustomersByPartnerId(
+    partnerId: number,
+    status?: 'active' | 'inactive' | 'suspended',
+  ): Promise<CustomerMembership[]>;
 }

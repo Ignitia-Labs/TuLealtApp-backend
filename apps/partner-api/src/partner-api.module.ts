@@ -34,6 +34,8 @@ import {
   AssignProfileToUserHandler,
   RemoveProfileFromUserHandler,
   GetUserProfilesHandler,
+  // Users Handlers
+  CreateUserHandler,
   // Partner Users Handlers
   CreatePartnerStaffUserHandler,
   GetPartnerUsersHandler,
@@ -48,8 +50,10 @@ import {
     GetPartnerWithTenantsAndBranchesHandler,
     UpdatePartnerHandler,
     // Partner Customers Handlers
-  GetPartnerCustomersHandler,
-  // Tenants Handlers
+    GetPartnerCustomersHandler,
+    CreateCustomerForPartnerHandler,
+    CreateCustomerMembershipForPartnerHandler,
+    // Tenants Handlers
   CreateTenantHandler,
   GetTenantHandler,
   GetTenantsByPartnerHandler,
@@ -135,6 +139,8 @@ import {
     AssignProfileToUserHandler,
     RemoveProfileFromUserHandler,
     GetUserProfilesHandler,
+    // Users Handlers
+    CreateUserHandler,
     // Partner Users Handlers
     CreatePartnerStaffUserHandler,
     GetPartnerUsersHandler,
@@ -150,6 +156,8 @@ import {
     UpdatePartnerHandler,
     // Partner Customers Handlers
     GetPartnerCustomersHandler,
+    CreateCustomerForPartnerHandler,
+    CreateCustomerMembershipForPartnerHandler,
     // Tenants Handlers
     CreateTenantHandler,
     GetTenantHandler,

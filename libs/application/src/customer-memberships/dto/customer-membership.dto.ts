@@ -64,18 +64,20 @@ export class CustomerMembershipDto {
   primaryColor: string;
 
   @ApiProperty({
-    description: 'ID de la branch donde se registró el customer',
+    description: 'ID de la branch donde se registró el customer (puede ser null)',
     example: 5,
     type: Number,
+    nullable: true,
   })
-  registrationBranchId: number;
+  registrationBranchId: number | null;
 
   @ApiProperty({
-    description: 'Nombre de la branch donde se registró',
+    description: 'Nombre de la branch donde se registró (puede ser null)',
     example: 'Café Delicia - Centro',
     type: String,
+    nullable: true,
   })
-  registrationBranchName: string;
+  registrationBranchName: string | null;
 
   @ApiProperty({
     description: 'Puntos específicos de este tenant',
@@ -183,8 +185,8 @@ export class CustomerMembershipDto {
     tenantImage: string | null,
     category: string,
     primaryColor: string,
-    registrationBranchId: number,
-    registrationBranchName: string,
+    registrationBranchId: number | null,
+    registrationBranchName: string | null,
     points: number,
     tierId: number | null,
     tierName: string | null,

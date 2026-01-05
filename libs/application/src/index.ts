@@ -452,6 +452,10 @@ export * from './customer-memberships/get-customer-membership/get-customer-membe
 export * from './customer-memberships/create-customer-membership/create-customer-membership.handler';
 export * from './customer-memberships/create-customer-membership/create-customer-membership.request';
 export * from './customer-memberships/create-customer-membership/create-customer-membership.response';
+export * from './customer-memberships/create-customer-membership-for-partner/create-customer-membership-for-partner.handler';
+export * from './customer-memberships/create-customer-for-partner/create-customer-for-partner.handler';
+export * from './customer-memberships/create-customer-for-partner/create-customer-for-partner.request';
+export * from './customer-memberships/create-customer-for-partner/create-customer-for-partner.response';
 export * from './customer-memberships/update-customer-membership/update-customer-membership.handler';
 export * from './customer-memberships/update-customer-membership/update-customer-membership.request';
 export * from './customer-memberships/update-customer-membership/update-customer-membership.response';
@@ -463,21 +467,12 @@ export * from './customer-memberships/delete-customer-membership/delete-customer
 export * from './customer-memberships/dto/customer-membership.dto';
 
 // Customer Partners Handlers
-export * from './customer-partners/associate-customer-to-partner/associate-customer-to-partner.handler';
-export * from './customer-partners/associate-customer-to-partner/associate-customer-to-partner.request';
-export * from './customer-partners/associate-customer-to-partner/associate-customer-to-partner.response';
 export * from './customer-partners/get-customer-partners/get-customer-partners.handler';
 export * from './customer-partners/get-customer-partners/get-customer-partners.request';
 export * from './customer-partners/get-customer-partners/get-customer-partners.response';
 export * from './customer-partners/get-partner-customers/get-partner-customers.handler';
 export * from './customer-partners/get-partner-customers/get-partner-customers.request';
 export * from './customer-partners/get-partner-customers/get-partner-customers.response';
-export * from './customer-partners/update-customer-partner-status/update-customer-partner-status.handler';
-export * from './customer-partners/update-customer-partner-status/update-customer-partner-status.request';
-export * from './customer-partners/update-customer-partner-status/update-customer-partner-status.response';
-export * from './customer-partners/dissociate-customer-from-partner/dissociate-customer-from-partner.handler';
-export * from './customer-partners/dissociate-customer-from-partner/dissociate-customer-from-partner.request';
-export * from './customer-partners/dissociate-customer-from-partner/dissociate-customer-from-partner.response';
 
 // Billing Cycles Handlers
 export * from './billing-cycles/create-billing-cycle/create-billing-cycle.handler';

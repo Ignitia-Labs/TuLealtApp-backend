@@ -51,8 +51,8 @@ export class CustomerMembershipEntity {
   @JoinColumn({ name: 'registrationBranchId' })
   registrationBranch: BranchEntity | null;
 
-  @Column('int')
-  registrationBranchId: number;
+  @Column('int', { nullable: true })
+  registrationBranchId: number | null;
 
   @Column('int', { default: 0 })
   points: number;

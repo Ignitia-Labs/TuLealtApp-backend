@@ -36,6 +36,15 @@ export class CountrySwaggerDto {
   currencyCode: string;
 
   @ApiProperty({
+    description: 'Código telefónico internacional del país',
+    example: '+502',
+    type: String,
+    nullable: true,
+    required: false,
+  })
+  countryCode: string | null;
+
+  @ApiProperty({
     description: 'Estado del país',
     example: 'active',
     enum: ['active', 'inactive'],
