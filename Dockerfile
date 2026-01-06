@@ -27,7 +27,7 @@ WORKDIR /app
 RUN apk add --no-cache tzdata
 
 # Establecer timezone (ajustar según tu región)
-ENV TZ=America/Mexico_City
+ENV TZ=America/Guatemala
 RUN cp /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone
 
