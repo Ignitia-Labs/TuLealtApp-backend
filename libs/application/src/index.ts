@@ -297,6 +297,12 @@ export * from './rewards/get-reward/get-reward.response';
 export * from './transactions/get-transactions/get-transactions.handler';
 export * from './transactions/get-transactions/get-transactions.request';
 export * from './transactions/get-transactions/get-transactions.response';
+export * from './transactions/earn-points/earn-points.handler';
+export * from './transactions/earn-points/earn-points.request';
+export * from './transactions/earn-points/earn-points.response';
+export * from './transactions/redeem-points/redeem-points.handler';
+export * from './transactions/redeem-points/redeem-points.request';
+export * from './transactions/redeem-points/redeem-points.response';
 
 // Notifications Handlers
 export * from './notifications/get-notifications/get-notifications.handler';
@@ -473,6 +479,9 @@ export * from './customer-partners/get-customer-partners/get-customer-partners.r
 export * from './customer-partners/get-partner-customers/get-partner-customers.handler';
 export * from './customer-partners/get-partner-customers/get-partner-customers.request';
 export * from './customer-partners/get-partner-customers/get-partner-customers.response';
+export * from './customer-partners/get-customer-by-qr/get-customer-by-qr.handler';
+export * from './customer-partners/get-customer-by-qr/get-customer-by-qr.request';
+export * from './customer-partners/get-customer-by-qr/get-customer-by-qr.response';
 
 // Billing Cycles Handlers
 export * from './billing-cycles/create-billing-cycle/create-billing-cycle.handler';

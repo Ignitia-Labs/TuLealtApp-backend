@@ -15,6 +15,7 @@ import { PointsRulesController } from './controllers/points-rules.controller';
 import { RewardsController } from './controllers/rewards.controller';
 import { CustomerTiersController } from './controllers/customer-tiers.controller';
 import { ContactInquiryController } from './controllers/contact-inquiry.controller';
+import { TransactionsController } from './controllers/transactions.controller';
 import { InfrastructureModule } from '@libs/infrastructure';
 import { HealthController } from '@libs/shared';
 import { PartnerAuthModule } from './auth/partner-auth.module';
@@ -53,6 +54,11 @@ import {
     GetPartnerCustomersHandler,
     CreateCustomerForPartnerHandler,
     CreateCustomerMembershipForPartnerHandler,
+    GetCustomerByQrHandler,
+    // Transactions Handlers
+    EarnPointsHandler,
+    RedeemPointsHandler,
+    GetTransactionsHandler,
     // Tenants Handlers
   CreateTenantHandler,
   GetTenantHandler,
@@ -115,6 +121,7 @@ import {
     RewardsController,
     CustomerTiersController,
     ContactInquiryController,
+    TransactionsController,
     HealthController,
   ],
   providers: [
@@ -158,6 +165,11 @@ import {
     GetPartnerCustomersHandler,
     CreateCustomerForPartnerHandler,
     CreateCustomerMembershipForPartnerHandler,
+    GetCustomerByQrHandler,
+    // Transactions Handlers
+    EarnPointsHandler,
+    RedeemPointsHandler,
+    GetTransactionsHandler,
     // Tenants Handlers
     CreateTenantHandler,
     GetTenantHandler,

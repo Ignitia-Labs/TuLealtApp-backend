@@ -57,6 +57,18 @@ export class GetTransactionsHandler {
           transaction.status,
           transaction.createdAt,
           transaction.updatedAt,
+          transaction.cashierId,
+          transaction.transactionDate,
+          transaction.transactionAmountTotal,
+          transaction.netAmount,
+          transaction.taxAmount,
+          transaction.itemsCount,
+          transaction.transactionReference,
+          transaction.pointsEarned,
+          transaction.pointsRuleId,
+          transaction.pointsMultiplier,
+          transaction.basePoints,
+          transaction.bonusPoints,
         ),
     );
 

@@ -89,6 +89,7 @@ Puedes usar herramientas como:
     .addTag('Partner Catalogs', 'Consulta de catálogos del sistema')
     .addTag('Partner Rewards', 'Gestión de recompensas de los tenants del partner')
     .addTag('Partner Customers', 'Gestión de customers del partner')
+    .addTag('Transactions', 'Gestión de transacciones de puntos (acumular y canjear)')
     .addTag('Partner Customer Tiers', 'Gestión de tiers de customers')
     .addTag('Partner Points Rules', 'Gestión de reglas de puntos')
     .addTag('Branches', 'Gestión de branches de los tenants')

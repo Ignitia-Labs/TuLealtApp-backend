@@ -6,7 +6,11 @@ import {
   CreateContactInquiryRequest,
   CreateContactInquiryResponse,
 } from '@libs/application';
-import { BadRequestErrorResponseDto, RateLimitGuard } from '@libs/shared';
+import {
+  BadRequestErrorResponseDto,
+  InternalServerErrorResponseDto,
+  RateLimitGuard,
+} from '@libs/shared';
 
 /**
  * Controlador de consultas de contacto para Partner API
@@ -26,11 +30,40 @@ export class ContactInquiryController {
   @ApiOperation({
     summary: 'Crear una consulta de contacto',
     description:
-      'Endpoint público para recibir consultas del formulario de contacto. No requiere autenticación.',
+      'Endpoint público para recibir consultas del formulario de contacto. No requiere autenticación. Tiene un límite de 5 solicitudes por hora por IP.',
   })
   @ApiBody({
     type: CreateContactInquiryRequest,
     description: 'Datos de la consulta de contacto',
+    examples: {
+      consultaBasica: {
+        summary: 'Consulta básica',
+        description: 'Ejemplo de consulta con datos mínimos',
+        value: {
+          name: 'Juan Pérez',
+          email: 'juan@example.com',
+          message: 'Me gustaría obtener más información sobre sus servicios.',
+        },
+      },
+      consultaCompleta: {
+        summary: 'Consulta completa',
+        description: 'Ejemplo de consulta con todos los campos',
+        value: {
+          name: 'María González',
+          email: 'maria@example.com',
+          phone: '+502 1234-5678',
+          subject: 'Consulta sobre planes de precios',
+          message: 'Me gustaría obtener más información sobre los planes disponibles y sus precios.',
+          company: 'Mi Empresa S.A.',
+          metadata: {
+            source: 'landing-page',
+            userAgent: 'Mozilla/5.0...',
+            referrer: 'https://example.com',
+            language: 'es-GT',
+          },
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 201,
@@ -47,6 +80,35 @@ export class ContactInquiryController {
     status: 400,
     description: 'Datos de la consulta inválidos',
     type: BadRequestErrorResponseDto,
+    example: {
+      statusCode: 400,
+      message: [
+        'name should not be empty',
+        'email must be an email',
+        'message should not be empty',
+        'message must be longer than or equal to 10 characters',
+      ],
+      error: 'Bad Request',
+    },
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Límite de solicitudes excedido (rate limit)',
+    example: {
+      statusCode: 429,
+      message: 'Too many requests. Please try again later.',
+      error: 'Too Many Requests',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+    example: {
+      statusCode: 500,
+      message: 'Internal server error',
+      error: 'Internal Server Error',
+    },
   })
   async createContactInquiry(
     @Body() request: CreateContactInquiryRequest,

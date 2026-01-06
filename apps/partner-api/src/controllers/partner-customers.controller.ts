@@ -32,6 +32,9 @@ import {
   CreateCustomerMembershipForPartnerHandler,
   CreateCustomerMembershipRequest,
   CreateCustomerMembershipResponse,
+  GetCustomerByQrHandler,
+  GetCustomerByQrRequest,
+  GetCustomerByQrResponse,
   JwtPayload,
 } from '@libs/application';
 import { IUserRepository } from '@libs/domain';
@@ -66,6 +69,7 @@ export class PartnerCustomersController {
     private readonly getPartnerCustomersHandler: GetPartnerCustomersHandler,
     private readonly createCustomerForPartnerHandler: CreateCustomerForPartnerHandler,
     private readonly createCustomerMembershipForPartnerHandler: CreateCustomerMembershipForPartnerHandler,
+    private readonly getCustomerByQrHandler: GetCustomerByQrHandler,
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
   ) {}
@@ -356,5 +360,118 @@ export class PartnerCustomersController {
     request.userId = userId;
 
     return this.createCustomerMembershipForPartnerHandler.execute(request, currentUser.partnerId);
+  }
+
+  @Get('by-qr/:qrCode')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Buscar customer por QR code',
+    description:
+      'Busca un customer por su código QR único. Retorna información completa del customer incluyendo balance de puntos y tier actual. El customer debe pertenecer al partner del usuario autenticado.',
+  })
+  @ApiParam({
+    name: 'qrCode',
+    description: 'Código QR único del customer',
+    type: String,
+    example: 'QR-USER-10-TENANT-1-A3B5C7',
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Customer encontrado exitosamente',
+    type: GetCustomerByQrResponse,
+    example: {
+      id: 1,
+      userId: 10,
+      customerName: 'John Doe',
+      customerEmail: 'john@example.com',
+      customerPhone: '+1234567890',
+      tenantId: 1,
+      tenantName: 'Café Delicia - Centro',
+      registrationBranchId: 5,
+      registrationBranchName: 'Sucursal Centro',
+      status: 'active',
+      joinedDate: '2023-06-01T00:00:00.000Z',
+      lastActivityDate: '2024-01-15T10:30:00.000Z',
+      points: 1500,
+      tierId: 2,
+      tierName: 'Oro',
+      tierColor: '#FFD700',
+      tierPriority: 3,
+      totalSpent: 2500.5,
+      totalVisits: 25,
+      qrCode: 'QR-USER-10-TENANT-1-A3B5C7',
+      createdAt: '2023-06-01T00:00:00.000Z',
+      updatedAt: '2024-01-15T10:30:00.000Z',
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos de entrada inválidos',
+    type: BadRequestErrorResponseDto,
+    example: {
+      statusCode: 400,
+      message: ['qrCode should not be empty', 'qrCode must be a string'],
+      error: 'Bad Request',
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+    example: {
+      statusCode: 401,
+      message: 'Unauthorized',
+      error: 'Unauthorized',
+    },
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos suficientes o el customer no pertenece a tu partner',
+    type: ForbiddenErrorResponseDto,
+    example: {
+      statusCode: 403,
+      message: 'Customer does not belong to your partner',
+      error: 'Forbidden',
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Customer no encontrado',
+    type: NotFoundErrorResponseDto,
+    example: {
+      statusCode: 404,
+      message: 'Customer with QR code QR-USER-10-TENANT-1-A3B5C7 not found',
+      error: 'Not Found',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+    example: {
+      statusCode: 500,
+      message: 'Internal server error',
+      error: 'Internal Server Error',
+    },
+  })
+  async getCustomerByQr(
+    @CurrentUser() user: JwtPayload,
+    @Param('qrCode') qrCode: string,
+  ): Promise<GetCustomerByQrResponse> {
+    // Obtener el partnerId del usuario autenticado
+    const currentUser = await this.userRepository.findById(user.userId);
+    if (!currentUser) {
+      throw new NotFoundException(`User with ID ${user.userId} not found`);
+    }
+
+    if (!currentUser.partnerId) {
+      throw new ForbiddenException('User does not belong to a partner');
+    }
+
+    const request = new GetCustomerByQrRequest();
+    request.qrCode = qrCode;
+
+    return this.getCustomerByQrHandler.execute(request, currentUser.partnerId);
   }
 }

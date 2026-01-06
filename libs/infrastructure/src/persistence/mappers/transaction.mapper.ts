@@ -20,6 +20,18 @@ export class TransactionMapper {
       persistenceEntity.status,
       persistenceEntity.createdAt,
       persistenceEntity.updatedAt,
+      persistenceEntity.cashierId ?? null,
+      persistenceEntity.transactionDate ?? null,
+      persistenceEntity.transactionAmountTotal ?? null,
+      persistenceEntity.netAmount ?? null,
+      persistenceEntity.taxAmount ?? null,
+      persistenceEntity.itemsCount ?? null,
+      persistenceEntity.transactionReference ?? null,
+      persistenceEntity.pointsEarned ?? null,
+      persistenceEntity.pointsRuleId ?? null,
+      persistenceEntity.pointsMultiplier ?? null,
+      persistenceEntity.basePoints ?? null,
+      persistenceEntity.bonusPoints ?? null,
     );
   }
 
@@ -38,6 +50,18 @@ export class TransactionMapper {
     entity.description = domainEntity.description;
     entity.metadata = domainEntity.metadata;
     entity.status = domainEntity.status;
+    entity.cashierId = domainEntity.cashierId ?? null;
+    entity.transactionDate = domainEntity.transactionDate ?? null;
+    entity.transactionAmountTotal = domainEntity.transactionAmountTotal ?? null;
+    entity.netAmount = domainEntity.netAmount ?? null;
+    entity.taxAmount = domainEntity.taxAmount ?? null;
+    entity.itemsCount = domainEntity.itemsCount ?? null;
+    entity.transactionReference = domainEntity.transactionReference ?? null;
+    entity.pointsEarned = domainEntity.pointsEarned ?? null;
+    entity.pointsRuleId = domainEntity.pointsRuleId ?? null;
+    entity.pointsMultiplier = domainEntity.pointsMultiplier ?? null;
+    entity.basePoints = domainEntity.basePoints ?? null;
+    entity.bonusPoints = domainEntity.bonusPoints ?? null;
     entity.createdAt = domainEntity.createdAt;
     entity.updatedAt = domainEntity.updatedAt;
     return entity;

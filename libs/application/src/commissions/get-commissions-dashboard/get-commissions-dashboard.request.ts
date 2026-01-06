@@ -53,3 +53,4 @@ export class GetCommissionsDashboardRequest {
   @IsOptional()
   topPartnersLimit?: number;
 }
+

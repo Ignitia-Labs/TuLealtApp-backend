@@ -18,6 +18,20 @@ export class Transaction {
     public readonly status: TransactionStatus,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
+    // Nuevos campos para transacciones de compra
+    public readonly cashierId: number | null = null,
+    public readonly transactionDate: Date | null = null,
+    public readonly transactionAmountTotal: number | null = null,
+    public readonly netAmount: number | null = null,
+    public readonly taxAmount: number | null = null,
+    public readonly itemsCount: number | null = null,
+    public readonly transactionReference: string | null = null,
+    public readonly pointsEarned: number | null = null, // Puntos ganados (siempre positivo para earn)
+    public readonly pointsRuleId: number | null = null,
+    // Campos calculados automáticamente
+    public readonly pointsMultiplier: number | null = null,
+    public readonly basePoints: number | null = null,
+    public readonly bonusPoints: number | null = null,
   ) {}
 
   /**
@@ -32,6 +46,19 @@ export class Transaction {
     status: TransactionStatus = 'completed',
     membershipId: number | null = null,
     id?: number,
+    // Nuevos campos opcionales
+    cashierId?: number | null,
+    transactionDate?: Date | null,
+    transactionAmountTotal?: number | null,
+    netAmount?: number | null,
+    taxAmount?: number | null,
+    itemsCount?: number | null,
+    transactionReference?: string | null,
+    pointsEarned?: number | null,
+    pointsRuleId?: number | null,
+    pointsMultiplier?: number | null,
+    basePoints?: number | null,
+    bonusPoints?: number | null,
   ): Transaction {
     const now = new Date();
     return new Transaction(
@@ -45,6 +72,18 @@ export class Transaction {
       status,
       now,
       now,
+      cashierId ?? null,
+      transactionDate ?? null,
+      transactionAmountTotal ?? null,
+      netAmount ?? null,
+      taxAmount ?? null,
+      itemsCount ?? null,
+      transactionReference ?? null,
+      pointsEarned ?? null,
+      pointsRuleId ?? null,
+      pointsMultiplier ?? null,
+      basePoints ?? null,
+      bonusPoints ?? null,
     );
   }
 
@@ -57,7 +96,21 @@ export class Transaction {
     description: string,
     metadata: Record<string, any> | null = null,
     membershipId: number | null = null,
+    // Nuevos campos opcionales
+    cashierId?: number | null,
+    transactionDate?: Date | null,
+    transactionAmountTotal?: number | null,
+    netAmount?: number | null,
+    taxAmount?: number | null,
+    itemsCount?: number | null,
+    transactionReference?: string | null,
+    pointsEarned?: number | null,
+    pointsRuleId?: number | null,
+    pointsMultiplier?: number | null,
+    basePoints?: number | null,
+    bonusPoints?: number | null,
   ): Transaction {
+    const pointsEarnedValue = pointsEarned ?? Math.abs(points);
     return Transaction.create(
       userId,
       'earn',
@@ -66,6 +119,19 @@ export class Transaction {
       metadata,
       'completed',
       membershipId,
+      undefined,
+      cashierId,
+      transactionDate,
+      transactionAmountTotal,
+      netAmount,
+      taxAmount,
+      itemsCount,
+      transactionReference,
+      pointsEarnedValue,
+      pointsRuleId,
+      pointsMultiplier,
+      basePoints,
+      bonusPoints,
     );
   }
 
@@ -153,6 +219,18 @@ export class Transaction {
       'completed',
       this.createdAt,
       new Date(),
+      this.cashierId,
+      this.transactionDate,
+      this.transactionAmountTotal,
+      this.netAmount,
+      this.taxAmount,
+      this.itemsCount,
+      this.transactionReference,
+      this.pointsEarned,
+      this.pointsRuleId,
+      this.pointsMultiplier,
+      this.basePoints,
+      this.bonusPoints,
     );
   }
 
@@ -171,6 +249,18 @@ export class Transaction {
       'cancelled',
       this.createdAt,
       new Date(),
+      this.cashierId,
+      this.transactionDate,
+      this.transactionAmountTotal,
+      this.netAmount,
+      this.taxAmount,
+      this.itemsCount,
+      this.transactionReference,
+      this.pointsEarned,
+      this.pointsRuleId,
+      this.pointsMultiplier,
+      this.basePoints,
+      this.bonusPoints,
     );
   }
 }
