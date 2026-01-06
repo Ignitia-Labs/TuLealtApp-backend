@@ -37,8 +37,8 @@ export class CreateCustomerMemberships1768100000000 implements MigrationInterfac
           {
             name: 'registrationBranchId',
             type: 'int',
-            isNullable: false,
-            comment: 'FK a branches - Branch donde se registró el customer',
+            isNullable: true,
+            comment: 'FK a branches - Branch donde se registró el customer (opcional)',
           },
           {
             name: 'points',

@@ -52,12 +52,17 @@ export class AddTaxFieldsToPartnerSubscriptions1766787800000 implements Migratio
         }),
       );
 
-      // Migrar datos existentes: basePrice = billingAmount
-      await queryRunner.query(`
-        UPDATE partner_subscriptions
-        SET basePrice = billingAmount
-        WHERE basePrice = 0 OR basePrice IS NULL
-      `);
+      // Migrar datos existentes: basePrice = billingAmount (solo si billingAmount existe)
+      // Necesitamos refrescar la tabla después de agregar columnas
+      const refreshedTable = await queryRunner.getTable('partner_subscriptions');
+      const billingAmountColumn = refreshedTable?.findColumnByName('billingAmount');
+      if (billingAmountColumn) {
+        await queryRunner.query(`
+          UPDATE partner_subscriptions
+          SET basePrice = billingAmount
+          WHERE basePrice = 0 OR basePrice IS NULL
+        `);
+      }
     }
 
     // Verificar si taxAmount ya existe
@@ -89,12 +94,17 @@ export class AddTaxFieldsToPartnerSubscriptions1766787800000 implements Migratio
         }),
       );
 
-      // Migrar datos existentes: totalPrice = billingAmount
-      await queryRunner.query(`
-        UPDATE partner_subscriptions
-        SET totalPrice = billingAmount
-        WHERE totalPrice = 0 OR totalPrice IS NULL
-      `);
+      // Migrar datos existentes: totalPrice = billingAmount (solo si billingAmount existe)
+      // Necesitamos refrescar la tabla después de agregar columnas
+      const refreshedTable = await queryRunner.getTable('partner_subscriptions');
+      const billingAmountColumn = refreshedTable?.findColumnByName('billingAmount');
+      if (billingAmountColumn) {
+        await queryRunner.query(`
+          UPDATE partner_subscriptions
+          SET totalPrice = billingAmount
+          WHERE totalPrice = 0 OR totalPrice IS NULL
+        `);
+      }
     }
   }
 

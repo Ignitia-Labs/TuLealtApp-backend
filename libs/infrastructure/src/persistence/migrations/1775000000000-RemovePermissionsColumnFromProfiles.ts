@@ -19,7 +19,7 @@ export class RemovePermissionsColumnFromProfiles1775000000000 implements Migrati
   name = 'RemovePermissionsColumnFromProfiles1775000000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Verificar que la tabla profile_permissions existe y tiene datos
+    // Verificar que la tabla profile_permissions existe
     const profilePermissionsTable = await queryRunner.getTable('profile_permissions');
     if (!profilePermissionsTable) {
       throw new Error(
@@ -27,33 +27,46 @@ export class RemovePermissionsColumnFromProfiles1775000000000 implements Migrati
       );
     }
 
-    // Verificar que hay relaciones en profile_permissions
-    const profilePermissionsCount = await queryRunner.query(
-      'SELECT COUNT(*) as count FROM profile_permissions',
+    // Verificar si hay perfiles en la base de datos
+    const profilesCount = await queryRunner.query(
+      'SELECT COUNT(*) as count FROM profiles',
     );
-    const count = parseInt(profilePermissionsCount[0]?.count || '0', 10);
+    const profilesCountNum = parseInt(profilesCount[0]?.count || '0', 10);
 
-    if (count === 0) {
-      throw new Error(
-        'Cannot remove permissions column: profile_permissions table is empty. Run migration script first.',
+    // Si no hay perfiles, es seguro eliminar la columna (base de datos nueva)
+    if (profilesCountNum === 0) {
+      console.log(
+        '⚠️  No profiles found in database. Safe to remove permissions column (fresh database).',
       );
-    }
-
-    // Verificar que todos los perfiles tienen al menos una relación en profile_permissions
-    const profilesWithoutPermissions = await queryRunner.query(`
-      SELECT p.id, p.name
-      FROM profiles p
-      LEFT JOIN profile_permissions pp ON p.id = pp.profileId
-      WHERE pp.id IS NULL
-    `);
-
-    if (profilesWithoutPermissions.length > 0) {
-      const profileNames = profilesWithoutPermissions
-        .map((p: any) => `${p.name} (ID: ${p.id})`)
-        .join(', ');
-      throw new Error(
-        `Cannot remove permissions column: The following profiles do not have permissions in profile_permissions: ${profileNames}. Please migrate them first.`,
+    } else {
+      // Si hay perfiles, verificar que todos tienen permisos en profile_permissions
+      const profilePermissionsCount = await queryRunner.query(
+        'SELECT COUNT(*) as count FROM profile_permissions',
       );
+      const count = parseInt(profilePermissionsCount[0]?.count || '0', 10);
+
+      if (count === 0) {
+        throw new Error(
+          'Cannot remove permissions column: profile_permissions table is empty but profiles exist. Run migration script first.',
+        );
+      }
+
+      // Verificar que todos los perfiles tienen al menos una relación en profile_permissions
+      const profilesWithoutPermissions = await queryRunner.query(`
+        SELECT p.id, p.name
+        FROM profiles p
+        LEFT JOIN profile_permissions pp ON p.id = pp.profileId
+        WHERE pp.id IS NULL
+      `);
+
+      if (profilesWithoutPermissions.length > 0) {
+        const profileNames = profilesWithoutPermissions
+          .map((p: any) => `${p.name} (ID: ${p.id})`)
+          .join(', ');
+        throw new Error(
+          `Cannot remove permissions column: The following profiles do not have permissions in profile_permissions: ${profileNames}. Please migrate them first.`,
+        );
+      }
     }
 
     // Si todas las validaciones pasan, eliminar la columna

@@ -1,26 +1,26 @@
 import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
-export class MakeRegistrationBranchIdNullable1777100000000
-  implements MigrationInterface
-{
+export class MakeRegistrationBranchIdNullable1777100000000 implements MigrationInterface {
   name = 'MakeRegistrationBranchIdNullable1777100000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Verificar si la tabla existe
     const table = await queryRunner.getTable('customer_memberships');
     if (!table) {
-      console.warn(
-        'Table customer_memberships does not exist. Skipping migration.',
-      );
+      console.warn('Table customer_memberships does not exist. Skipping migration.');
       return;
     }
 
     // Verificar si la columna existe
     const column = table.findColumnByName('registrationBranchId');
     if (!column) {
-      console.warn(
-        'Column registrationBranchId does not exist. Skipping migration.',
-      );
+      console.warn('Column registrationBranchId does not exist. Skipping migration.');
+      return;
+    }
+
+    // Verificar si ya es nullable (idempotente)
+    if (column.isNullable) {
+      console.log('Column registrationBranchId is already nullable. Skipping migration.');
       return;
     }
 
@@ -41,9 +41,7 @@ export class MakeRegistrationBranchIdNullable1777100000000
     // Verificar si la tabla existe
     const table = await queryRunner.getTable('customer_memberships');
     if (!table) {
-      console.warn(
-        'Table customer_memberships does not exist. Skipping rollback.',
-      );
+      console.warn('Table customer_memberships does not exist. Skipping rollback.');
       return;
     }
 
@@ -72,4 +70,3 @@ export class MakeRegistrationBranchIdNullable1777100000000
     );
   }
 }
-
