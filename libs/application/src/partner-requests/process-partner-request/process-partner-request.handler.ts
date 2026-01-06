@@ -103,6 +103,13 @@ export class ProcessPartnerRequestHandler {
     createPartnerRequest.subscriptionBillingFrequency =
       request.subscriptionBillingFrequency || partnerRequest.billingFrequency || 'monthly';
 
+    // Usar subscriptionCurrencyId del partnerRequest si está disponible, sino usar el currencyId del partnerRequest
+    // Si se proporciona en el request, tiene prioridad
+    createPartnerRequest.subscriptionCurrencyId =
+      request.subscriptionCurrencyId ??
+      partnerRequest.subscriptionCurrencyId ??
+      partnerRequest.currencyId;
+
     // Configurar valores de IVA (si se proporcionan en el request, usarlos; sino usar valores por defecto)
     createPartnerRequest.subscriptionIncludeTax = request.subscriptionIncludeTax ?? false;
     createPartnerRequest.subscriptionTaxPercent = request.subscriptionTaxPercent ?? null;

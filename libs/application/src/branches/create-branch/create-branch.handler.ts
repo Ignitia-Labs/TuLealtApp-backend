@@ -2,6 +2,13 @@ import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { ITenantRepository, IBranchRepository, IPartnerRepository, Branch } from '@libs/domain';
 import { CreateBranchRequest } from './create-branch.request';
 import { CreateBranchResponse } from './create-branch.response';
+import { SubscriptionUsageHelper } from '@libs/application';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import {
+  PartnerSubscriptionUsageEntity,
+  PartnerSubscriptionEntity,
+} from '@libs/infrastructure';
 
 /**
  * Handler para el caso de uso de crear una branch
@@ -15,6 +22,10 @@ export class CreateBranchHandler {
     private readonly branchRepository: IBranchRepository,
     @Inject('IPartnerRepository')
     private readonly partnerRepository: IPartnerRepository,
+    @InjectRepository(PartnerSubscriptionUsageEntity)
+    private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
+    @InjectRepository(PartnerSubscriptionEntity)
+    private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
   ) {}
 
   async execute(request: CreateBranchRequest): Promise<CreateBranchResponse> {
@@ -41,6 +52,19 @@ export class CreateBranchHandler {
 
     // Actualizar las estadísticas del partner
     await this.partnerRepository.updateStats(tenant.partnerId);
+
+    // Incrementar el contador de branches en el uso de suscripción
+    const subscriptionId = await SubscriptionUsageHelper.getSubscriptionIdFromTenantId(
+      tenant.id,
+      this.tenantRepository,
+      this.subscriptionRepository,
+    );
+    if (subscriptionId) {
+      await SubscriptionUsageHelper.incrementBranchesCount(
+        subscriptionId,
+        this.usageRepository,
+      );
+    }
 
     // Retornar response DTO
     return new CreateBranchResponse(

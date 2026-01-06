@@ -5,6 +5,8 @@ import { CreateTenantResponse } from './create-tenant.response';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TenantFeaturesEntity, TenantMapper } from '@libs/infrastructure';
+import { SubscriptionUsageHelper } from '@libs/application';
+import { PartnerSubscriptionUsageEntity, PartnerSubscriptionEntity } from '@libs/infrastructure';
 
 /**
  * Handler para el caso de uso de crear un tenant
@@ -18,6 +20,10 @@ export class CreateTenantHandler {
     private readonly tenantRepository: ITenantRepository,
     @InjectRepository(TenantFeaturesEntity)
     private readonly featuresRepository: Repository<TenantFeaturesEntity>,
+    @InjectRepository(PartnerSubscriptionUsageEntity)
+    private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
+    @InjectRepository(PartnerSubscriptionEntity)
+    private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
   ) {}
 
   async execute(request: CreateTenantRequest): Promise<CreateTenantResponse> {
@@ -60,6 +66,15 @@ export class CreateTenantHandler {
 
     // Actualizar las estadísticas del partner
     await this.partnerRepository.updateStats(savedTenant.partnerId);
+
+    // Incrementar el contador de tenants en el uso de suscripción
+    const subscriptionId = await SubscriptionUsageHelper.getSubscriptionIdFromPartnerId(
+      savedTenant.partnerId,
+      this.subscriptionRepository,
+    );
+    if (subscriptionId) {
+      await SubscriptionUsageHelper.incrementTenantsCount(subscriptionId, this.usageRepository);
+    }
 
     // Retornar response DTO
     return new CreateTenantResponse(

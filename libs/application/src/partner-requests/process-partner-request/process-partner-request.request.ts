@@ -116,6 +116,18 @@ export class ProcessPartnerRequestRequest {
   subscriptionTaxPercent?: number | null;
 
   @ApiProperty({
+    description:
+      'ID de la moneda para la suscripción (referencia a la tabla currencies). Si no se proporciona, se usará el subscriptionCurrencyId del partner request o el currencyId del partner request como fallback',
+    example: 1,
+    type: Number,
+    required: false,
+    nullable: true,
+  })
+  @IsNumber()
+  @IsOptional()
+  subscriptionCurrencyId?: number | null;
+
+  @ApiProperty({
     description: 'Límite máximo de tenants',
     example: 5,
     type: Number,

@@ -11,6 +11,8 @@ import { PartnerSubscriptionEntity, PartnerMapper } from '@libs/infrastructure';
 import { CreateSubscriptionRequest } from './create-subscription.request';
 import { CreateSubscriptionResponse } from './create-subscription.response';
 import { SubscriptionEventHelper } from '../subscription-event.helper';
+import { SubscriptionUsageHelper } from '@libs/application';
+import { PartnerSubscriptionUsageEntity } from '@libs/infrastructure';
 
 /**
  * Handler para el caso de uso de crear una suscripción
@@ -26,6 +28,8 @@ export class CreateSubscriptionHandler {
     private readonly currencyRepository: ICurrencyRepository,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
+    @InjectRepository(PartnerSubscriptionUsageEntity)
+    private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
     private readonly subscriptionEventHelper: SubscriptionEventHelper,
   ) {}
 
@@ -117,6 +121,12 @@ export class CreateSubscriptionHandler {
     // Convertir a entidad de persistencia y guardar
     const subscriptionEntity = PartnerMapper.subscriptionToPersistence(subscription);
     const savedEntity = await this.subscriptionRepository.save(subscriptionEntity);
+
+    // Crear automáticamente el registro de uso de suscripción
+    await SubscriptionUsageHelper.createUsageForSubscription(
+      savedEntity.id,
+      this.usageRepository,
+    );
 
     // Registrar evento de creación
     const savedSubscription = PartnerMapper.subscriptionToDomain(savedEntity);

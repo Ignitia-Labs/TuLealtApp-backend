@@ -53,6 +53,7 @@ export class CreatePartnerRequestHandler {
       new Date(),
       request.planId || null,
       request.billingFrequency || null,
+      request.subscriptionCurrencyId || null,
     );
 
     // Guardar la solicitud

@@ -30,6 +30,7 @@ export class PartnerRequestMapper {
       persistenceEntity.socialMedia,
       persistenceEntity.rewardType,
       persistenceEntity.currencyId || 0,
+      persistenceEntity.subscriptionCurrencyId || null,
       persistenceEntity.businessName,
       persistenceEntity.taxId,
       persistenceEntity.fiscalAddress,
@@ -68,6 +69,7 @@ export class PartnerRequestMapper {
     entity.rewardType = domainEntity.rewardType;
     // currencyId es INTEGER tanto en dominio como en BD
     entity.currencyId = domainEntity.currencyId || 0;
+    entity.subscriptionCurrencyId = domainEntity.subscriptionCurrencyId || null;
     entity.businessName = domainEntity.businessName;
     entity.taxId = domainEntity.taxId;
     entity.fiscalAddress = domainEntity.fiscalAddress;

@@ -170,6 +170,18 @@ export class CreatePartnerRequestRequest {
   currencyId: number;
 
   @ApiProperty({
+    description:
+      'ID de la moneda para la suscripción (referencia a la tabla currencies). Si no se proporciona, se usará la moneda del partner (currencyId)',
+    example: 1,
+    type: Number,
+    required: false,
+    nullable: true,
+  })
+  @IsNumber()
+  @IsOptional()
+  subscriptionCurrencyId?: number | null;
+
+  @ApiProperty({
     description: 'Razón social',
     example: 'La Cocina del Sol S.A.',
     type: String,

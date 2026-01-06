@@ -225,7 +225,12 @@ import { AdminAuthModule } from './auth/admin-auth.module';
  * Configura todos los controladores y servicios necesarios
  */
 @Module({
-  imports: [ScheduleModule.forRoot(), InfrastructureModule, StorageModule, AdminAuthModule],
+  imports: [
+    ScheduleModule.forRoot(),
+    InfrastructureModule,
+    StorageModule,
+    AdminAuthModule,
+  ],
   controllers: [
     UsersController,
     PricingController,

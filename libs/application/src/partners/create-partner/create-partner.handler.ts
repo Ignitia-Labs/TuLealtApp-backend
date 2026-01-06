@@ -3,6 +3,7 @@ import {
   IPartnerRepository,
   ICurrencyRepository,
   IPricingPlanRepository,
+  ICountryRepository,
   Partner,
   PartnerSubscription,
   PartnerLimits,
@@ -16,9 +17,12 @@ import {
   PartnerSubscriptionEntity,
   PartnerLimitsEntity,
   PartnerStatsEntity,
+  PartnerEntity,
 } from '@libs/infrastructure';
 import { PartnerMapper } from '@libs/infrastructure';
 import { getPriceForPeriod, calculateFinalPrice } from '@libs/shared';
+import { SubscriptionUsageHelper } from '@libs/application';
+import { PartnerSubscriptionUsageEntity } from '@libs/infrastructure';
 
 /**
  * Handler para el caso de uso de crear un partner
@@ -33,12 +37,18 @@ export class CreatePartnerHandler {
     private readonly currencyRepository: ICurrencyRepository,
     @Inject('IPricingPlanRepository')
     private readonly pricingPlanRepository: IPricingPlanRepository,
+    @Inject('ICountryRepository')
+    private readonly countryRepository: ICountryRepository,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
     @InjectRepository(PartnerLimitsEntity)
     private readonly limitsRepository: Repository<PartnerLimitsEntity>,
     @InjectRepository(PartnerStatsEntity)
     private readonly statsRepository: Repository<PartnerStatsEntity>,
+    @InjectRepository(PartnerEntity)
+    private readonly partnerEntityRepository: Repository<PartnerEntity>,
+    @InjectRepository(PartnerSubscriptionUsageEntity)
+    private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
   ) {}
 
   async execute(request: CreatePartnerRequest): Promise<CreatePartnerResponse> {
@@ -80,8 +90,23 @@ export class CreatePartnerHandler {
       'active',
     );
 
-    // Guardar el partner (la BD asignará el ID automáticamente)
-    const savedPartner = await this.partnerRepository.save(partner);
+    // Consultar el nombre del país si se proporciona countryId
+    let countryName: string | null = null;
+    if (partner.countryId) {
+      const country = await this.countryRepository.findById(partner.countryId);
+      if (country) {
+        countryName = country.name;
+      }
+    }
+
+    // Convertir a entidad de persistencia con el nombre del país
+    const partnerEntity = PartnerMapper.toPersistence(partner, countryName);
+
+    // Guardar el partner usando el repositorio de TypeORM directamente
+    const savedEntity = await this.partnerEntityRepository.save(partnerEntity);
+
+    // Convertir de vuelta a dominio
+    const savedPartner = PartnerMapper.toDomain(savedEntity);
 
     // Determinar planType basado en el plan del partner
     const planTypeMap: Record<string, 'esencia' | 'conecta' | 'inspira'> = {
@@ -228,7 +253,13 @@ export class CreatePartnerHandler {
     );
     const subscriptionEntity = PartnerMapper.subscriptionToPersistence(subscription);
     subscriptionEntity.partnerId = savedPartner.id;
-    await this.subscriptionRepository.save(subscriptionEntity);
+    const savedSubscriptionEntity = await this.subscriptionRepository.save(subscriptionEntity);
+
+    // Crear automáticamente el registro de uso de suscripción
+    await SubscriptionUsageHelper.createUsageForSubscription(
+      savedSubscriptionEntity.id,
+      this.usageRepository,
+    );
 
     // Crear y guardar los límites
     const limits = PartnerLimits.create(

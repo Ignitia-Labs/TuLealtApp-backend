@@ -22,6 +22,13 @@ import { CreateCustomerMembershipResponse } from '../create-customer-membership/
 import { CustomerMembershipDto } from '../dto/customer-membership.dto';
 import { CreateCustomerForPartnerRequest } from './create-customer-for-partner.request';
 import { CreateCustomerForPartnerResponse } from './create-customer-for-partner.response';
+import { SubscriptionUsageHelper } from '@libs/application';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import {
+  PartnerSubscriptionUsageEntity,
+  PartnerSubscriptionEntity,
+} from '@libs/infrastructure';
 
 /**
  * Handler para crear un customer completo (usuario + membership) desde Partner API
@@ -41,6 +48,10 @@ export class CreateCustomerForPartnerHandler {
     private readonly branchRepository: IBranchRepository,
     @Inject('ICustomerTierRepository')
     private readonly tierRepository: ICustomerTierRepository,
+    @InjectRepository(PartnerSubscriptionUsageEntity)
+    private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
+    @InjectRepository(PartnerSubscriptionEntity)
+    private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
   ) {}
 
   async execute(
@@ -224,6 +235,19 @@ export class CreateCustomerForPartnerHandler {
 
     // Guardar la membership
     const savedMembership = await this.membershipRepository.save(membership);
+
+    // Incrementar el contador de customers en el uso de suscripción
+    const subscriptionId = await SubscriptionUsageHelper.getSubscriptionIdFromTenantId(
+      savedMembership.tenantId,
+      this.tenantRepository,
+      this.subscriptionRepository,
+    );
+    if (subscriptionId) {
+      await SubscriptionUsageHelper.incrementCustomersCount(
+        subscriptionId,
+        this.usageRepository,
+      );
+    }
 
     // Convertir a DTO con información denormalizada
     const membershipDto = await this.toDto(savedMembership);

@@ -369,7 +369,10 @@ export * from './goals/get-goal-progress/get-goal-progress.request';
 export * from './goals/get-goal-progress/get-goal-progress.response';
 export * from './goals/goal-progress.service';
 
-// Subscription Usage Handlers
+// Subscription Usage Module and Service
+export * from './subscription-usage/subscription-usage.module';
+export * from './subscription-usage/subscription-usage.service';
+export * from './subscription-usage/subscription-usage.helper';
 export * from './subscription-usage/create-subscription-usage/create-subscription-usage.handler';
 export * from './subscription-usage/create-subscription-usage/create-subscription-usage.request';
 export * from './subscription-usage/create-subscription-usage/create-subscription-usage.response';

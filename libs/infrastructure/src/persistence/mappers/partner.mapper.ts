@@ -46,8 +46,10 @@ export class PartnerMapper {
 
   /**
    * Convierte una entidad de dominio a entidad de persistencia
+   * @param domainEntity Entidad de dominio
+   * @param countryName Nombre del país (opcional, se llena automáticamente desde countryId si se proporciona)
    */
-  static toPersistence(domainEntity: Partner): PartnerEntity {
+  static toPersistence(domainEntity: Partner, countryName?: string | null): PartnerEntity {
     const entity = new PartnerEntity();
     if (domainEntity.id > 0) {
       entity.id = domainEntity.id;
@@ -57,6 +59,7 @@ export class PartnerMapper {
     entity.email = domainEntity.email;
     entity.phone = domainEntity.phone;
     entity.countryId = domainEntity.countryId;
+    entity.country = countryName || null;
     entity.city = domainEntity.city;
     entity.plan = domainEntity.plan;
     entity.logo = domainEntity.logo;

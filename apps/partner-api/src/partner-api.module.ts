@@ -103,7 +103,10 @@ import {
  * Configura todos los controladores y servicios necesarios
  */
 @Module({
-  imports: [InfrastructureModule, PartnerAuthModule],
+  imports: [
+    InfrastructureModule,
+    PartnerAuthModule,
+  ],
   controllers: [
     PricingController,
     ProfilesController,

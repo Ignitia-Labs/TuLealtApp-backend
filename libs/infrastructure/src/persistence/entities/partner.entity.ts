@@ -46,10 +46,13 @@ export class PartnerEntity {
     nullable: true,
   })
   @JoinColumn({ name: 'countryId' })
-  country: CountryEntity | null;
+  countryRelation: CountryEntity | null;
 
   @Column('int', { nullable: true })
   countryId: number | null;
+
+  @Column('varchar', { length: 100, nullable: true })
+  country: string | null;
 
   @Column('varchar', { length: 100 })
   city: string;

@@ -2,6 +2,14 @@ import { Injectable, Inject, BadRequestException } from '@nestjs/common';
 import { IRewardRepository, Reward } from '@libs/domain';
 import { CreateRewardRequest } from './create-reward.request';
 import { CreateRewardResponse } from './create-reward.response';
+import { SubscriptionUsageHelper } from '@libs/application';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import {
+  PartnerSubscriptionUsageEntity,
+  PartnerSubscriptionEntity,
+} from '@libs/infrastructure';
+import { ITenantRepository } from '@libs/domain';
 
 /**
  * Handler para el caso de uso de crear una recompensa
@@ -11,6 +19,12 @@ export class CreateRewardHandler {
   constructor(
     @Inject('IRewardRepository')
     private readonly rewardRepository: IRewardRepository,
+    @Inject('ITenantRepository')
+    private readonly tenantRepository: ITenantRepository,
+    @InjectRepository(PartnerSubscriptionUsageEntity)
+    private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
+    @InjectRepository(PartnerSubscriptionEntity)
+    private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
   ) {}
 
   async execute(request: CreateRewardRequest): Promise<CreateRewardResponse> {
@@ -30,6 +44,19 @@ export class CreateRewardHandler {
 
     // Guardar usando el repositorio
     const savedReward = await this.rewardRepository.save(reward);
+
+    // Incrementar el contador de rewards en el uso de suscripción
+    const subscriptionId = await SubscriptionUsageHelper.getSubscriptionIdFromTenantId(
+      savedReward.tenantId,
+      this.tenantRepository,
+      this.subscriptionRepository,
+    );
+    if (subscriptionId) {
+      await SubscriptionUsageHelper.incrementRewardsCount(
+        subscriptionId,
+        this.usageRepository,
+      );
+    }
 
     // Retornar response DTO
     return new CreateRewardResponse(
