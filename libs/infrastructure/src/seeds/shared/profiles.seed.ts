@@ -1,5 +1,11 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { IProfileRepository, Profile } from '@libs/domain';
+import {
+  IProfileRepository,
+  Profile,
+  IProfilePermissionRepository,
+  IPermissionRepository,
+  ProfilePermission,
+} from '@libs/domain';
 import { BaseSeed } from '../base/base-seed';
 
 /**
@@ -22,6 +28,10 @@ export class ProfilesSeed extends BaseSeed {
   constructor(
     @Inject('IProfileRepository')
     private readonly profileRepository: IProfileRepository,
+    @Inject('IProfilePermissionRepository')
+    private readonly profilePermissionRepository: IProfilePermissionRepository,
+    @Inject('IPermissionRepository')
+    private readonly permissionRepository: IPermissionRepository,
   ) {
     super();
   }
@@ -193,11 +203,13 @@ export class ProfilesSeed extends BaseSeed {
 
   /**
    * Crea o actualiza un perfil si ya existe
+   * NOTA: Los permisos se crean con array vacío ya que la columna fue eliminada.
+   * Las relaciones se crean en profile_permissions después de que los permisos existan.
    */
   private async createOrUpdateProfile(
     name: string,
     description: string,
-    permissions: string[],
+    permissionCodes: string[],
     partnerId: number | null,
   ): Promise<void> {
     try {
@@ -205,56 +217,94 @@ export class ProfilesSeed extends BaseSeed {
 
       if (existingProfile) {
         // Verificar si necesita actualización
-        const permissionsChanged =
-          JSON.stringify(existingProfile.permissions.sort()) !== JSON.stringify(permissions.sort());
         const descriptionChanged = existingProfile.description !== description;
 
-        if (permissionsChanged || descriptionChanged) {
-          // Actualizar perfil
-          let updatedProfile = existingProfile;
-          if (permissionsChanged) {
-            // Reemplazar todos los permisos
-            updatedProfile = new Profile(
-              existingProfile.id,
-              existingProfile.name,
-              description,
-              existingProfile.partnerId,
-              permissions,
-              existingProfile.isActive,
-              existingProfile.createdAt,
-              new Date(),
-            );
-          } else if (descriptionChanged) {
-            updatedProfile = new Profile(
-              existingProfile.id,
-              existingProfile.name,
-              description,
-              existingProfile.partnerId,
-              existingProfile.permissions,
-              existingProfile.isActive,
-              existingProfile.createdAt,
-              new Date(),
-            );
-          }
+        if (descriptionChanged) {
+          // Actualizar solo descripción (los permisos se gestionan en profile_permissions)
+          const updatedProfile = new Profile(
+            existingProfile.id,
+            existingProfile.name,
+            description,
+            existingProfile.partnerId,
+            [], // Permisos vacíos - se gestionan en profile_permissions
+            existingProfile.isActive,
+            existingProfile.createdAt,
+            new Date(),
+          );
 
           await this.profileRepository.update(updatedProfile);
-          this.log(
-            `✓ Perfil actualizado: ${name} (ID: ${existingProfile.id}, permisos: ${permissions.length})`,
-          );
+          this.log(`✓ Perfil actualizado: ${name} (ID: ${existingProfile.id})`);
         } else {
           this.log(`- Perfil ya existe: ${name} (ID: ${existingProfile.id})`);
         }
+
+        // Sincronizar permisos en profile_permissions
+        await this.syncProfilePermissions(existingProfile.id, permissionCodes);
       } else {
-        // Crear nuevo perfil
-        const profile = Profile.create(name, permissions, description, partnerId, true);
+        // Crear nuevo perfil sin permisos (la columna fue eliminada)
+        const profile = Profile.create(name, [], description, partnerId, true);
         const savedProfile = await this.profileRepository.save(profile);
         this.log(
-          `✓ Perfil creado: ${name} (ID: ${savedProfile.id}, permisos: ${permissions.length})`,
+          `✓ Perfil creado: ${name} (ID: ${savedProfile.id}, permisos a asignar: ${permissionCodes.length})`,
         );
+
+        // Sincronizar permisos en profile_permissions
+        await this.syncProfilePermissions(savedProfile.id, permissionCodes);
       }
     } catch (error) {
       this.error(`Error al crear/actualizar perfil ${name}: ${error.message}`, error);
       throw error;
+    }
+  }
+
+  /**
+   * Sincroniza los permisos de un perfil en la tabla profile_permissions
+   * Si los permisos no existen aún, se omiten (se crearán cuando PermissionsSeed ejecute)
+   */
+  private async syncProfilePermissions(profileId: number, permissionCodes: string[]): Promise<void> {
+    try {
+      // Obtener relaciones actuales
+      const currentProfilePermissions =
+        await this.profilePermissionRepository.findByProfileId(profileId);
+      const currentPermissionIds = new Set(
+        currentProfilePermissions.map((pp) => pp.permissionId),
+      );
+
+      // Obtener IDs de permisos desde códigos
+      const newPermissionIds: number[] = [];
+      for (const permissionCode of permissionCodes) {
+        const permission = await this.permissionRepository.findByCode(permissionCode);
+        if (permission && permission.isActive) {
+          newPermissionIds.push(permission.id);
+        }
+        // Si el permiso no existe aún, se omite (se creará cuando PermissionsSeed ejecute)
+      }
+
+      // Determinar qué agregar
+      const toAdd: number[] = [];
+      for (const permissionId of newPermissionIds) {
+        if (!currentPermissionIds.has(permissionId)) {
+          toAdd.push(permissionId);
+        }
+      }
+
+      // Agregar nuevas relaciones
+      if (toAdd.length > 0) {
+        const newProfilePermissions = toAdd.map((permissionId) =>
+          ProfilePermission.create(profileId, permissionId),
+        );
+        await this.profilePermissionRepository.saveMany(newProfilePermissions);
+        this.log(
+          `  → ${toAdd.length} permiso(s) asignado(s) al perfil (${permissionCodes.length - toAdd.length} permisos aún no existen en el catálogo)`,
+        );
+      } else if (permissionCodes.length > 0) {
+        this.log(
+          `  → Todos los permisos ya están asignados o no existen aún en el catálogo (${permissionCodes.length} códigos)`,
+        );
+      }
+    } catch (error) {
+      // No fallar si hay error al sincronizar permisos (pueden no existir aún)
+      this.log(`  ⚠️  Advertencia: No se pudieron sincronizar permisos: ${error.message}`);
     }
   }
 }

@@ -39,7 +39,7 @@ export class ProfileMapper {
    * Convierte una entidad de dominio a entidad de persistencia
    *
    * NOTA: Después de la migración a profile_permissions, el campo permissions
-   * puede no existir en la tabla. En ese caso, este campo se omite del objeto.
+   * NO debe incluirse en la entidad de persistencia ya que la columna fue eliminada.
    * Los permisos se gestionan exclusivamente a través de profile_permissions.
    */
   static toPersistence(domainEntity: Profile): Partial<ProfileEntity> {
@@ -50,14 +50,9 @@ export class ProfileMapper {
       isActive: domainEntity.isActive,
     };
 
-    // Solo incluir permissions si el campo existe en la tabla (compatibilidad hacia atrás)
-    // Después de eliminar la columna, este campo se omitirá automáticamente
+    // NO incluir permissions - la columna fue eliminada de la tabla
     // Los permisos se gestionan exclusivamente en profile_permissions
-    if (domainEntity.permissions && domainEntity.permissions.length > 0) {
-      // Nota: Este campo puede no existir después de la migración
-      // TypeORM ignorará campos que no existen en la tabla
-      (entity as any).permissions = domainEntity.permissions;
-    }
+    // (entity.permissions se omite intencionalmente)
 
     if (domainEntity.id > 0) {
       entity.id = domainEntity.id;
