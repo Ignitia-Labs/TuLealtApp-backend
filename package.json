@@ -57,7 +57,9 @@
     "script:generate-commissions": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/generate-commissions-for-billing-cycles.ts",
     "script:validate-permissions": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/validate-permissions-integrity.ts",
     "script:migrate-profile-permissions": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/migrate-profile-permissions.ts",
-    "script:validate-customer-partners": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/validate-customer-partners-migration.ts"
+    "script:validate-customer-partners": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/validate-customer-partners-migration.ts",
+    "script:clean-db": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/clean-database.ts",
+    "script:reset-db": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/reset-database.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.956.0",

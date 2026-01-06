@@ -261,14 +261,15 @@ export class ProfilesSeed extends BaseSeed {
    * Sincroniza los permisos de un perfil en la tabla profile_permissions
    * Si los permisos no existen aún, se omiten (se crearán cuando PermissionsSeed ejecute)
    */
-  private async syncProfilePermissions(profileId: number, permissionCodes: string[]): Promise<void> {
+  private async syncProfilePermissions(
+    profileId: number,
+    permissionCodes: string[],
+  ): Promise<void> {
     try {
       // Obtener relaciones actuales
       const currentProfilePermissions =
         await this.profilePermissionRepository.findByProfileId(profileId);
-      const currentPermissionIds = new Set(
-        currentProfilePermissions.map((pp) => pp.permissionId),
-      );
+      const currentPermissionIds = new Set(currentProfilePermissions.map((pp) => pp.permissionId));
 
       // Obtener IDs de permisos desde códigos
       const newPermissionIds: number[] = [];

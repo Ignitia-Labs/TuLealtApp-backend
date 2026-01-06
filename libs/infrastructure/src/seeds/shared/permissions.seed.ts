@@ -1,25 +1,28 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { IProfileRepository, IPermissionRepository, Permission, Profile } from '@libs/domain';
-import { ProfileEntity, ProfileMapper } from '@libs/infrastructure';
+import {
+  IPermissionRepository,
+  Permission,
+  IProfilePermissionRepository,
+  ProfilePermission,
+  IProfileRepository,
+} from '@libs/domain';
 import { BaseSeed } from '../base/base-seed';
 
 /**
  * Seed para crear el catálogo centralizado de permisos
- * Extrae permisos únicos de los perfiles existentes y los crea en el catálogo
+ * Crea todos los permisos definidos en los perfiles del sistema
  *
- * Este seed debe ejecutarse después de ProfilesSeed para poder extraer los permisos
+ * Este seed debe ejecutarse después de ProfilesSeed para poder vincular los permisos a los perfiles
  */
 @Injectable()
 export class PermissionsSeed extends BaseSeed {
   constructor(
-    @Inject('IProfileRepository')
-    private readonly profileRepository: IProfileRepository,
     @Inject('IPermissionRepository')
     private readonly permissionRepository: IPermissionRepository,
-    @InjectRepository(ProfileEntity)
-    private readonly profileEntityRepository: Repository<ProfileEntity>,
+    @Inject('IProfilePermissionRepository')
+    private readonly profilePermissionRepository: IProfilePermissionRepository,
+    @Inject('IProfileRepository')
+    private readonly profileRepository: IProfileRepository,
   ) {
     super();
   }
@@ -28,22 +31,92 @@ export class PermissionsSeed extends BaseSeed {
     return 'PermissionsSeed';
   }
 
+  /**
+   * Obtiene todos los códigos de permisos definidos en los perfiles del sistema
+   * Estos son los permisos hardcodeados en ProfilesSeed
+   */
+  private getAllPermissionCodes(): string[] {
+    return [
+      // Permisos administrativos
+      'admin.*',
+      'admin.users.*',
+      'admin.users.view',
+      'admin.users.create',
+      'admin.users.update',
+      'admin.partners.*',
+      'admin.partners.view',
+      'admin.partners.create',
+      'admin.partners.update',
+      'admin.subscriptions.*',
+      'admin.subscriptions.view',
+      'admin.subscriptions.create',
+      'admin.subscriptions.update',
+      'admin.billing.*',
+      'admin.billing.view',
+      'admin.invoices.*',
+      'admin.invoices.view',
+      'admin.invoices.create',
+      'admin.payments.*',
+      'admin.payments.view',
+      'admin.payments.create',
+      'admin.profiles.*',
+      'admin.profiles.view',
+      'admin.user-profiles.*',
+      'admin.user-profiles.view',
+      'admin.user-profiles.assign',
+      'admin.catalogs.*',
+      'admin.catalogs.view',
+      'admin.catalogs.create',
+      'admin.catalogs.update',
+      'admin.rewards.*',
+      'admin.rewards.view',
+      'admin.rewards.create',
+      'admin.rewards.update',
+      'admin.transactions.*',
+      'admin.transactions.view',
+      'admin.notifications.*',
+      'admin.notifications.view',
+      'admin.goals.*',
+      'admin.goals.view',
+      'admin.goals.create',
+      'admin.goals.update',
+      'admin.commissions.*',
+      'admin.commissions.view',
+      'admin.communication.*',
+      'admin.communication.view',
+      'admin.communication.create',
+      // Permisos de partner
+      'partner.*',
+      'partner.branches.*',
+      'partner.products.*',
+      'partner.rewards.*',
+      'partner.customers.*',
+      'partner.customers.view',
+      'partner.customers.create',
+      'partner.transactions.*',
+      'partner.transactions.view',
+      'partner.transactions.create',
+      'partner.reports.*',
+      'partner.reports.view',
+      'partner.staff.*',
+      'partner.staff.view',
+      'partner.staff.manage',
+      'partner.profiles.*',
+      'partner.profiles.view',
+      'partner.profiles.create',
+      'partner.profiles.update',
+    ];
+  }
+
   async run(): Promise<void> {
     this.log('Iniciando seed de permisos...');
 
     try {
-      // Obtener todos los perfiles existentes
-      const allProfiles = await this.getAllProfiles();
+      // Obtener todos los códigos de permisos definidos
+      const allPermissionCodes = this.getAllPermissionCodes();
+      const uniquePermissions = new Set(allPermissionCodes);
 
-      // Extraer todos los permisos únicos de los perfiles
-      const uniquePermissions = new Set<string>();
-      for (const profile of allProfiles) {
-        for (const permissionCode of profile.permissions) {
-          uniquePermissions.add(permissionCode);
-        }
-      }
-
-      this.log(`Encontrados ${uniquePermissions.size} permisos únicos en los perfiles`);
+      this.log(`Creando ${uniquePermissions.size} permisos únicos...`);
 
       // Crear permisos en el catálogo
       let createdCount = 0;
@@ -86,6 +159,10 @@ export class PermissionsSeed extends BaseSeed {
       this.log(
         `✓ Seed de permisos completado: ${createdCount} creados, ${skippedCount} ya existían`,
       );
+
+      // Después de crear los permisos, vincularlos a los perfiles
+      this.log('\nVinculando permisos a perfiles...');
+      await this.linkPermissionsToProfiles();
     } catch (error) {
       this.error(`Error en seed de permisos: ${error.message}`, error);
       throw error;
@@ -93,18 +170,158 @@ export class PermissionsSeed extends BaseSeed {
   }
 
   /**
-   * Obtiene todos los perfiles del sistema
+   * Vincula los permisos creados a los perfiles correspondientes
+   * Usa los mismos datos hardcodeados que ProfilesSeed
    */
-  private async getAllProfiles(): Promise<Profile[]> {
-    // Obtener todos los perfiles usando query directa
-    const profileEntities = await this.profileEntityRepository.find({
-      order: {
-        partnerId: 'ASC',
-        name: 'ASC',
-      },
-    });
+  private async linkPermissionsToProfiles(): Promise<void> {
+    try {
+      // Definir los perfiles y sus permisos (mismo formato que ProfilesSeed)
+      const profilePermissionsMap: Record<string, string[]> = {
+        'Super Admin': ['admin.*'],
+        Admin: [
+          'admin.users.*',
+          'admin.partners.*',
+          'admin.subscriptions.*',
+          'admin.billing.*',
+          'admin.invoices.*',
+          'admin.payments.*',
+          'admin.profiles.*',
+          'admin.user-profiles.*',
+          'admin.catalogs.*',
+          'admin.rewards.*',
+          'admin.transactions.*',
+          'admin.notifications.*',
+          'admin.goals.*',
+          'admin.commissions.*',
+          'admin.communication.*',
+        ],
+        Staff: [
+          'admin.users.view',
+          'admin.users.create',
+          'admin.users.update',
+          'admin.partners.view',
+          'admin.partners.create',
+          'admin.partners.update',
+          'admin.subscriptions.view',
+          'admin.subscriptions.create',
+          'admin.subscriptions.update',
+          'admin.billing.view',
+          'admin.invoices.view',
+          'admin.invoices.create',
+          'admin.payments.view',
+          'admin.payments.create',
+          'admin.profiles.view',
+          'admin.user-profiles.view',
+          'admin.user-profiles.assign',
+          'admin.catalogs.view',
+          'admin.catalogs.create',
+          'admin.catalogs.update',
+          'admin.rewards.view',
+          'admin.rewards.create',
+          'admin.rewards.update',
+          'admin.transactions.view',
+          'admin.notifications.view',
+          'admin.goals.view',
+          'admin.goals.create',
+          'admin.goals.update',
+          'admin.commissions.view',
+          'admin.communication.view',
+          'admin.communication.create',
+        ],
+        'Partner Owner': ['partner.*'],
+        'Gerente de Tienda': [
+          'partner.branches.*',
+          'partner.products.*',
+          'partner.rewards.*',
+          'partner.customers.view',
+          'partner.transactions.view',
+          'partner.reports.view',
+          'partner.staff.view',
+          'partner.staff.manage',
+          'partner.profiles.view',
+          'partner.profiles.create',
+          'partner.profiles.update',
+        ],
+        Vendedor: [
+          'partner.products.view',
+          'partner.rewards.view',
+          'partner.customers.view',
+          'partner.customers.create',
+          'partner.transactions.create',
+          'partner.transactions.view',
+        ],
+        Cajero: [
+          'partner.transactions.create',
+          'partner.transactions.view',
+          'partner.customers.view',
+          'partner.rewards.view',
+        ],
+        Analista: [
+          'partner.reports.view',
+          'partner.transactions.view',
+          'partner.customers.view',
+          'partner.products.view',
+          'partner.rewards.view',
+        ],
+      };
 
-    return profileEntities.map((entity) => ProfileMapper.toDomain(entity));
+      let linkedCount = 0;
+      let skippedCount = 0;
+
+      for (const [profileName, permissionCodes] of Object.entries(profilePermissionsMap)) {
+        // Buscar el perfil por nombre
+        const profile = await this.profileRepository.findByName(profileName, null);
+        if (!profile) {
+          this.log(`  ⚠️  Perfil "${profileName}" no encontrado, omitiendo...`);
+          continue;
+        }
+
+        // Obtener relaciones actuales
+        const currentProfilePermissions = await this.profilePermissionRepository.findByProfileId(
+          profile.id,
+        );
+        const currentPermissionIds = new Set(
+          currentProfilePermissions.map((pp) => pp.permissionId),
+        );
+
+        // Obtener IDs de permisos desde códigos
+        const newPermissionIds: number[] = [];
+        for (const permissionCode of permissionCodes) {
+          const permission = await this.permissionRepository.findByCode(permissionCode);
+          if (permission && permission.isActive) {
+            newPermissionIds.push(permission.id);
+          }
+        }
+
+        // Determinar qué agregar
+        const toAdd: number[] = [];
+        for (const permissionId of newPermissionIds) {
+          if (!currentPermissionIds.has(permissionId)) {
+            toAdd.push(permissionId);
+          }
+        }
+
+        // Agregar nuevas relaciones
+        if (toAdd.length > 0) {
+          const newProfilePermissions = toAdd.map((permissionId) =>
+            ProfilePermission.create(profile.id, permissionId),
+          );
+          await this.profilePermissionRepository.saveMany(newProfilePermissions);
+          linkedCount += toAdd.length;
+          this.log(`  ✓ ${profileName}: ${toAdd.length} permiso(s) vinculado(s)`);
+        } else {
+          skippedCount += permissionCodes.length;
+          this.log(`  - ${profileName}: todos los permisos ya están vinculados`);
+        }
+      }
+
+      this.log(
+        `✓ Vinculación completada: ${linkedCount} permisos vinculados, ${skippedCount} ya existían`,
+      );
+    } catch (error) {
+      this.log(`  ⚠️  Advertencia al vincular permisos: ${error.message}`);
+      // No fallar si hay error al vincular (puede ser que los perfiles no existan aún)
+    }
   }
 
   /**
