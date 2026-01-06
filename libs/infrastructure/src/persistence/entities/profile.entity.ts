@@ -37,8 +37,10 @@ export class ProfileEntity {
   @Column('int', { nullable: true })
   partnerId: number | null;
 
-  @Column('json', { nullable: true, select: false })
-  permissions?: string[]; // ["module.resource.action", ...] - DEPRECATED: Usar tabla profile_permissions (no se selecciona automáticamente)
+  // permissions property removed - column was deleted from database
+  // Permissions are now managed through profile_permissions table
+  // This property is kept for TypeScript compatibility but is not persisted
+  permissions?: string[]; // DEPRECATED: Not persisted. Use profile_permissions table instead.
 
   @Column('boolean', { default: true })
   isActive: boolean;
