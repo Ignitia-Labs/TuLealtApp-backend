@@ -25,10 +25,7 @@ import { CreateCustomerForPartnerResponse } from './create-customer-for-partner.
 import { SubscriptionUsageHelper } from '@libs/application';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  PartnerSubscriptionUsageEntity,
-  PartnerSubscriptionEntity,
-} from '@libs/infrastructure';
+import { PartnerSubscriptionUsageEntity, PartnerSubscriptionEntity } from '@libs/infrastructure';
 
 /**
  * Handler para crear un customer completo (usuario + membership) desde Partner API
@@ -66,18 +63,14 @@ export class CreateCustomerForPartnerHandler {
 
     // Validar que el tenant pertenece al partner del usuario autenticado
     if (tenant.partnerId !== partnerId) {
-      throw new ForbiddenException(
-        `Tenant ${request.tenantId} does not belong to your partner`,
-      );
+      throw new ForbiddenException(`Tenant ${request.tenantId} does not belong to your partner`);
     }
 
     // Validar branch solo si se proporciona
     if (request.registrationBranchId) {
       const branch = await this.branchRepository.findById(request.registrationBranchId);
       if (!branch) {
-        throw new NotFoundException(
-          `Branch with ID ${request.registrationBranchId} not found`,
-        );
+        throw new NotFoundException(`Branch with ID ${request.registrationBranchId} not found`);
       }
       if (branch.tenantId !== request.tenantId) {
         throw new BadRequestException(
@@ -98,11 +91,10 @@ export class CreateCustomerForPartnerHandler {
       createMembershipRequest.status = request.status || 'active';
 
       // Validar que no existe ya una membership para ese usuario+tenant
-      const existingMembership =
-        await this.membershipRepository.findByUserIdAndTenantId(
-          existingUser.id,
-          request.tenantId,
-        );
+      const existingMembership = await this.membershipRepository.findByUserIdAndTenantId(
+        existingUser.id,
+        request.tenantId,
+      );
       if (existingMembership) {
         throw new ConflictException(
           `Membership already exists for user ${existingUser.id} and tenant ${request.tenantId}`,
@@ -110,10 +102,7 @@ export class CreateCustomerForPartnerHandler {
       }
 
       // Crear la membership usando el handler existente
-      const membershipResult = await this.createMembership(
-        createMembershipRequest,
-        partnerId,
-      );
+      const membershipResult = await this.createMembership(createMembershipRequest, partnerId);
 
       return new CreateCustomerForPartnerResponse(
         existingUser.id,
@@ -145,10 +134,7 @@ export class CreateCustomerForPartnerHandler {
     createMembershipRequest.points = request.points || 0;
     createMembershipRequest.status = request.status || 'active';
 
-    const membershipResult = await this.createMembership(
-      createMembershipRequest,
-      partnerId,
-    );
+    const membershipResult = await this.createMembership(createMembershipRequest, partnerId);
 
     return new CreateCustomerForPartnerResponse(
       userResult.id,
@@ -179,18 +165,14 @@ export class CreateCustomerForPartnerHandler {
       throw new NotFoundException(`Tenant with ID ${request.tenantId} not found`);
     }
     if (tenant.partnerId !== partnerId) {
-      throw new ForbiddenException(
-        `Tenant ${request.tenantId} does not belong to your partner`,
-      );
+      throw new ForbiddenException(`Tenant ${request.tenantId} does not belong to your partner`);
     }
 
     // Validar branch solo si se proporciona
     if (request.registrationBranchId) {
       const branch = await this.branchRepository.findById(request.registrationBranchId);
       if (!branch) {
-        throw new NotFoundException(
-          `Branch with ID ${request.registrationBranchId} not found`,
-        );
+        throw new NotFoundException(`Branch with ID ${request.registrationBranchId} not found`);
       }
       if (branch.tenantId !== request.tenantId) {
         throw new BadRequestException(
@@ -243,10 +225,7 @@ export class CreateCustomerForPartnerHandler {
       this.subscriptionRepository,
     );
     if (subscriptionId) {
-      await SubscriptionUsageHelper.incrementCustomersCount(
-        subscriptionId,
-        this.usageRepository,
-      );
+      await SubscriptionUsageHelper.incrementCustomersCount(subscriptionId, this.usageRepository);
     }
 
     // Convertir a DTO con información denormalizada
@@ -334,4 +313,3 @@ export class CreateCustomerForPartnerHandler {
     );
   }
 }
-

@@ -1,18 +1,5 @@
-import {
-  Controller,
-  Get,
-  Query,
-  HttpCode,
-  HttpStatus,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiQuery,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { Controller, Get, Query, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import {
   GetCustomerPartnersHandler,
   GetCustomerPartnersRequest,
@@ -42,9 +29,7 @@ import { JwtPayload } from '@libs/application';
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class CustomerPartnersController {
-  constructor(
-    private readonly getCustomerPartnersHandler: GetCustomerPartnersHandler,
-  ) {}
+  constructor(private readonly getCustomerPartnersHandler: GetCustomerPartnersHandler) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)

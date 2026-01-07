@@ -28,8 +28,7 @@ export class CreateCustomerMembershipRequest {
   tenantId: number;
 
   @ApiProperty({
-    description:
-      'ID de la branch donde se registró el customer (opcional)',
+    description: 'ID de la branch donde se registró el customer (opcional)',
     example: 5,
     type: Number,
     minimum: 1,

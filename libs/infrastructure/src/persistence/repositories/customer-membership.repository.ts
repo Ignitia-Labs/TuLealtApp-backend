@@ -183,9 +183,7 @@ export class CustomerMembershipRepository implements ICustomerMembershipReposito
     // Obtener datos
     const membershipEntities = await queryBuilder.getMany();
 
-    const data = membershipEntities.map((entity) =>
-      CustomerMembershipMapper.toDomain(entity),
-    );
+    const data = membershipEntities.map((entity) => CustomerMembershipMapper.toDomain(entity));
 
     return { data, total };
   }
@@ -231,8 +229,6 @@ export class CustomerMembershipRepository implements ICustomerMembershipReposito
     // Obtener todos los datos sin paginación
     const membershipEntities = await queryBuilder.getMany();
 
-    return membershipEntities.map((entity) =>
-      CustomerMembershipMapper.toDomain(entity),
-    );
+    return membershipEntities.map((entity) => CustomerMembershipMapper.toDomain(entity));
   }
 }

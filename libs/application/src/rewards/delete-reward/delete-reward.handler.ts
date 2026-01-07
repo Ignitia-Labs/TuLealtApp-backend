@@ -5,10 +5,7 @@ import { DeleteRewardResponse } from './delete-reward.response';
 import { SubscriptionUsageHelper } from '@libs/application';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  PartnerSubscriptionUsageEntity,
-  PartnerSubscriptionEntity,
-} from '@libs/infrastructure';
+import { PartnerSubscriptionUsageEntity, PartnerSubscriptionEntity } from '@libs/infrastructure';
 import { ITenantRepository } from '@libs/domain';
 
 /**
@@ -48,13 +45,9 @@ export class DeleteRewardHandler {
 
     // Decrementar el contador de rewards en el uso de suscripción
     if (subscriptionId) {
-      await SubscriptionUsageHelper.decrementRewardsCount(
-        subscriptionId,
-        this.usageRepository,
-      );
+      await SubscriptionUsageHelper.decrementRewardsCount(subscriptionId, this.usageRepository);
     }
 
     return new DeleteRewardResponse('Reward deleted successfully', request.rewardId);
   }
 }
-

@@ -53,7 +53,8 @@ export class ContactInquiryController {
           email: 'maria@example.com',
           phone: '+502 1234-5678',
           subject: 'Consulta sobre planes de precios',
-          message: 'Me gustaría obtener más información sobre los planes disponibles y sus precios.',
+          message:
+            'Me gustaría obtener más información sobre los planes disponibles y sus precios.',
           company: 'Mi Empresa S.A.',
           metadata: {
             source: 'landing-page',
@@ -129,7 +130,8 @@ export class ContactInquiryController {
     }
 
     if (!request.metadata.language && req.headers['accept-language']) {
-      request.metadata.language = req.headers['accept-language']?.toString().split(',')[0] || undefined;
+      request.metadata.language =
+        req.headers['accept-language']?.toString().split(',')[0] || undefined;
     }
 
     if (!request.metadata.timestamp) {
@@ -143,4 +145,3 @@ export class ContactInquiryController {
     return this.createContactInquiryHandler.execute(request);
   }
 }
-

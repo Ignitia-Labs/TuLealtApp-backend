@@ -113,4 +113,3 @@ export class CreateCustomerForPartnerRequest {
   @IsOptional()
   status?: 'active' | 'inactive';
 }
-

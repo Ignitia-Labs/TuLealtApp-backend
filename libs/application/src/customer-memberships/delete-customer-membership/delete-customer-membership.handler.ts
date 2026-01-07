@@ -5,10 +5,7 @@ import { DeleteCustomerMembershipResponse } from './delete-customer-membership.r
 import { SubscriptionUsageHelper } from '@libs/application';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  PartnerSubscriptionUsageEntity,
-  PartnerSubscriptionEntity,
-} from '@libs/infrastructure';
+import { PartnerSubscriptionUsageEntity, PartnerSubscriptionEntity } from '@libs/infrastructure';
 import { ITenantRepository } from '@libs/domain';
 
 /**
@@ -50,10 +47,7 @@ export class DeleteCustomerMembershipHandler {
 
     // Decrementar el contador de customers en el uso de suscripción
     if (subscriptionId) {
-      await SubscriptionUsageHelper.decrementCustomersCount(
-        subscriptionId,
-        this.usageRepository,
-      );
+      await SubscriptionUsageHelper.decrementCustomersCount(subscriptionId, this.usageRepository);
     }
 
     return new DeleteCustomerMembershipResponse(request.membershipId);

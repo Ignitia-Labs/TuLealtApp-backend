@@ -21,10 +21,7 @@ import { CustomerMembershipDto } from '../dto/customer-membership.dto';
 import { SubscriptionUsageHelper } from '@libs/application';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  PartnerSubscriptionUsageEntity,
-  PartnerSubscriptionEntity,
-} from '@libs/infrastructure';
+import { PartnerSubscriptionUsageEntity, PartnerSubscriptionEntity } from '@libs/infrastructure';
 
 /**
  * Handler para crear una membership desde Partner API
@@ -67,18 +64,14 @@ export class CreateCustomerMembershipForPartnerHandler {
 
     // Validar que el tenant pertenece al partner del usuario autenticado
     if (tenant.partnerId !== partnerId) {
-      throw new ForbiddenException(
-        `Tenant ${request.tenantId} does not belong to your partner`,
-      );
+      throw new ForbiddenException(`Tenant ${request.tenantId} does not belong to your partner`);
     }
 
     // Validar branch solo si se proporciona
     if (request.registrationBranchId) {
       const branch = await this.branchRepository.findById(request.registrationBranchId);
       if (!branch) {
-        throw new NotFoundException(
-          `Branch with ID ${request.registrationBranchId} not found`,
-        );
+        throw new NotFoundException(`Branch with ID ${request.registrationBranchId} not found`);
       }
       if (branch.tenantId !== request.tenantId) {
         throw new BadRequestException(
@@ -131,10 +124,7 @@ export class CreateCustomerMembershipForPartnerHandler {
       this.subscriptionRepository,
     );
     if (subscriptionId) {
-      await SubscriptionUsageHelper.incrementCustomersCount(
-        subscriptionId,
-        this.usageRepository,
-      );
+      await SubscriptionUsageHelper.incrementCustomersCount(subscriptionId, this.usageRepository);
     }
 
     // Convertir a DTO con información denormalizada
@@ -223,4 +213,3 @@ export class CreateCustomerMembershipForPartnerHandler {
     );
   }
 }
-

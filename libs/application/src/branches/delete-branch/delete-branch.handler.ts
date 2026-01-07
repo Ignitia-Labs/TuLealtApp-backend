@@ -5,10 +5,7 @@ import { DeleteBranchResponse } from './delete-branch.response';
 import { SubscriptionUsageHelper } from '@libs/application';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  PartnerSubscriptionUsageEntity,
-  PartnerSubscriptionEntity,
-} from '@libs/infrastructure';
+import { PartnerSubscriptionUsageEntity, PartnerSubscriptionEntity } from '@libs/infrastructure';
 
 /**
  * Handler para el caso de uso de eliminar una branch
@@ -47,10 +44,7 @@ export class DeleteBranchHandler {
 
     // Decrementar el contador de branches en el uso de suscripción
     if (subscriptionId) {
-      await SubscriptionUsageHelper.decrementBranchesCount(
-        subscriptionId,
-        this.usageRepository,
-      );
+      await SubscriptionUsageHelper.decrementBranchesCount(subscriptionId, this.usageRepository);
     }
 
     return new DeleteBranchResponse('Branch deleted successfully', request.branchId);

@@ -213,4 +213,3 @@ export class CurrenciesController {
     return this.getCountriesHandler.execute(request);
   }
 }
-

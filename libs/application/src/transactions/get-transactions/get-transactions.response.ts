@@ -99,7 +99,7 @@ export class TransactionDto {
 
   @ApiProperty({
     description: 'Monto total de la transacción (con impuestos)',
-    example: 150.00,
+    example: 150.0,
     type: Number,
     nullable: true,
     required: false,

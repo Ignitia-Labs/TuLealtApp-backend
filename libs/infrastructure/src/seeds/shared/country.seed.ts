@@ -73,7 +73,12 @@ export class CountrySeed extends BaseSeed {
         { name: 'Granada', code: 'GD', currencyCode: 'XCD', countryCode: '+1' },
         { name: 'San Cristóbal y Nieves', code: 'KN', currencyCode: 'XCD', countryCode: '+1' },
         { name: 'Santa Lucía', code: 'LC', currencyCode: 'XCD', countryCode: '+1' },
-        { name: 'San Vicente y las Granadinas', code: 'VC', currencyCode: 'XCD', countryCode: '+1' },
+        {
+          name: 'San Vicente y las Granadinas',
+          code: 'VC',
+          currencyCode: 'XCD',
+          countryCode: '+1',
+        },
         { name: 'Anguila', code: 'AI', currencyCode: 'XCD', countryCode: '+1' },
         { name: 'Montserrat', code: 'MS', currencyCode: 'XCD', countryCode: '+1' },
       ];

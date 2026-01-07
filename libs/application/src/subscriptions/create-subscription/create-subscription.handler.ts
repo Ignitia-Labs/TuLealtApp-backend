@@ -123,10 +123,7 @@ export class CreateSubscriptionHandler {
     const savedEntity = await this.subscriptionRepository.save(subscriptionEntity);
 
     // Crear automáticamente el registro de uso de suscripción
-    await SubscriptionUsageHelper.createUsageForSubscription(
-      savedEntity.id,
-      this.usageRepository,
-    );
+    await SubscriptionUsageHelper.createUsageForSubscription(savedEntity.id, this.usageRepository);
 
     // Registrar evento de creación
     const savedSubscription = PartnerMapper.subscriptionToDomain(savedEntity);

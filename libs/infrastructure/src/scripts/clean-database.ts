@@ -130,4 +130,3 @@ if (require.main === module) {
 }
 
 export { cleanDatabase };
-

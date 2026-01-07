@@ -133,7 +133,9 @@ export class PointsRulesController {
       }
 
       if (tenant.partnerId !== userEntity.partnerId) {
-        throw new ForbiddenException('You can only access points rules from tenants of your partner');
+        throw new ForbiddenException(
+          'You can only access points rules from tenants of your partner',
+        );
       }
     }
 
@@ -205,7 +207,9 @@ export class PointsRulesController {
       }
 
       if (tenant.partnerId !== userEntity.partnerId) {
-        throw new ForbiddenException('You can only create points rules for tenants from your partner');
+        throw new ForbiddenException(
+          'You can only create points rules for tenants from your partner',
+        );
       }
     }
 
@@ -353,7 +357,9 @@ export class PointsRulesController {
       }
 
       if (tenant.partnerId !== userEntity.partnerId) {
-        throw new ForbiddenException('You can only update points rules from tenants of your partner');
+        throw new ForbiddenException(
+          'You can only update points rules from tenants of your partner',
+        );
       }
     }
 
@@ -431,7 +437,9 @@ export class PointsRulesController {
       }
 
       if (tenant.partnerId !== userEntity.partnerId) {
-        throw new ForbiddenException('You can only delete points rules from tenants of your partner');
+        throw new ForbiddenException(
+          'You can only delete points rules from tenants of your partner',
+        );
       }
     }
 
@@ -453,4 +461,3 @@ export class PointsRulesController {
     return this.deletePointsRuleHandler.execute(request);
   }
 }
-

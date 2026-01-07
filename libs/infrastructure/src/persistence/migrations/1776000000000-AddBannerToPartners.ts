@@ -39,4 +39,3 @@ export class AddBannerToPartners1776000000000 implements MigrationInterface {
     }
   }
 }
-

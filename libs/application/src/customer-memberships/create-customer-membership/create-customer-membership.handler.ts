@@ -20,10 +20,7 @@ import { CustomerMembershipDto } from '../dto/customer-membership.dto';
 import { SubscriptionUsageHelper } from '@libs/application';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  PartnerSubscriptionUsageEntity,
-  PartnerSubscriptionEntity,
-} from '@libs/infrastructure';
+import { PartnerSubscriptionUsageEntity, PartnerSubscriptionEntity } from '@libs/infrastructure';
 
 /**
  * Handler para el caso de uso de crear una membership
@@ -66,9 +63,7 @@ export class CreateCustomerMembershipHandler {
     if (request.registrationBranchId) {
       const branch = await this.branchRepository.findById(request.registrationBranchId);
       if (!branch) {
-        throw new NotFoundException(
-          `Branch with ID ${request.registrationBranchId} not found`,
-        );
+        throw new NotFoundException(`Branch with ID ${request.registrationBranchId} not found`);
       }
       if (branch.tenantId !== request.tenantId) {
         throw new BadRequestException(
@@ -121,10 +116,7 @@ export class CreateCustomerMembershipHandler {
       this.subscriptionRepository,
     );
     if (subscriptionId) {
-      await SubscriptionUsageHelper.incrementCustomersCount(
-        subscriptionId,
-        this.usageRepository,
-      );
+      await SubscriptionUsageHelper.incrementCustomersCount(subscriptionId, this.usageRepository);
     }
 
     // Convertir a DTO con información denormalizada

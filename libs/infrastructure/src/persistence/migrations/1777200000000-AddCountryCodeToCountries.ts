@@ -50,4 +50,3 @@ export class AddCountryCodeToCountries1777200000000 implements MigrationInterfac
     await queryRunner.dropColumn('countries', 'countryCode');
   }
 }
-

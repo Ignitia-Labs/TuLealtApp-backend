@@ -5,10 +5,7 @@ import { CreateBranchResponse } from './create-branch.response';
 import { SubscriptionUsageHelper } from '@libs/application';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  PartnerSubscriptionUsageEntity,
-  PartnerSubscriptionEntity,
-} from '@libs/infrastructure';
+import { PartnerSubscriptionUsageEntity, PartnerSubscriptionEntity } from '@libs/infrastructure';
 
 /**
  * Handler para el caso de uso de crear una branch
@@ -60,10 +57,7 @@ export class CreateBranchHandler {
       this.subscriptionRepository,
     );
     if (subscriptionId) {
-      await SubscriptionUsageHelper.incrementBranchesCount(
-        subscriptionId,
-        this.usageRepository,
-      );
+      await SubscriptionUsageHelper.incrementBranchesCount(subscriptionId, this.usageRepository);
     }
 
     // Retornar response DTO

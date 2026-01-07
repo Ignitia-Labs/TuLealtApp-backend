@@ -47,55 +47,55 @@ import {
   // Catalogs Handlers
   GetCatalogsHandler,
   GetCatalogHandler,
-    // Partners Handlers
-    GetPartnerWithTenantsAndBranchesHandler,
-    UpdatePartnerHandler,
-    // Partner Customers Handlers
-    GetPartnerCustomersHandler,
-    CreateCustomerForPartnerHandler,
-    CreateCustomerMembershipForPartnerHandler,
-    GetCustomerByQrHandler,
-    // Transactions Handlers
-    EarnPointsHandler,
-    RedeemPointsHandler,
-    GetTransactionsHandler,
-    // Tenants Handlers
+  // Partners Handlers
+  GetPartnerWithTenantsAndBranchesHandler,
+  UpdatePartnerHandler,
+  // Partner Customers Handlers
+  GetPartnerCustomersHandler,
+  CreateCustomerForPartnerHandler,
+  CreateCustomerMembershipForPartnerHandler,
+  GetCustomerByQrHandler,
+  // Transactions Handlers
+  EarnPointsHandler,
+  RedeemPointsHandler,
+  GetTransactionsHandler,
+  // Tenants Handlers
   CreateTenantHandler,
   GetTenantHandler,
   GetTenantsByPartnerHandler,
   UpdateTenantHandler,
   DeleteTenantHandler,
   // Branches Handlers
-    CreateBranchHandler,
-    GetBranchHandler,
-    GetBranchesByTenantHandler,
-    UpdateBranchHandler,
-    DeleteBranchHandler,
-    // Currencies Handlers
-    GetCurrenciesHandler,
-    // Countries Handlers
-    GetCountriesHandler,
-    // Rate Exchange Handlers
-    GetRateExchangeHandler,
-    // Points Rules Handlers
-    GetPointsRulesHandler,
-    CreatePointsRuleHandler,
-    UpdatePointsRuleHandler,
-    DeletePointsRuleHandler,
-    // Rewards Handlers
-    GetRewardsHandler,
-    GetRewardHandler,
-    CreateRewardHandler,
-    UpdateRewardHandler,
-    DeleteRewardHandler,
-    // Customer Tiers Handlers
-    GetCustomerTiersHandler,
-    GetCustomerTierHandler,
-    CreateCustomerTierHandler,
-    UpdateCustomerTierHandler,
-    DeleteCustomerTierHandler,
-    // Contact Inquiries Handlers
-    CreateContactInquiryHandler,
+  CreateBranchHandler,
+  GetBranchHandler,
+  GetBranchesByTenantHandler,
+  UpdateBranchHandler,
+  DeleteBranchHandler,
+  // Currencies Handlers
+  GetCurrenciesHandler,
+  // Countries Handlers
+  GetCountriesHandler,
+  // Rate Exchange Handlers
+  GetRateExchangeHandler,
+  // Points Rules Handlers
+  GetPointsRulesHandler,
+  CreatePointsRuleHandler,
+  UpdatePointsRuleHandler,
+  DeletePointsRuleHandler,
+  // Rewards Handlers
+  GetRewardsHandler,
+  GetRewardHandler,
+  CreateRewardHandler,
+  UpdateRewardHandler,
+  DeleteRewardHandler,
+  // Customer Tiers Handlers
+  GetCustomerTiersHandler,
+  GetCustomerTierHandler,
+  CreateCustomerTierHandler,
+  UpdateCustomerTierHandler,
+  DeleteCustomerTierHandler,
+  // Contact Inquiries Handlers
+  CreateContactInquiryHandler,
 } from '@libs/application';
 
 /**
@@ -103,10 +103,7 @@ import {
  * Configura todos los controladores y servicios necesarios
  */
 @Module({
-  imports: [
-    InfrastructureModule,
-    PartnerAuthModule,
-  ],
+  imports: [InfrastructureModule, PartnerAuthModule],
   controllers: [
     PricingController,
     ProfilesController,

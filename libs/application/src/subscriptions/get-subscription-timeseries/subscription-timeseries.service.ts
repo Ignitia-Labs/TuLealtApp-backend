@@ -93,7 +93,7 @@ export class SubscriptionTimeseriesService {
    */
   private generatePeriods(startDate: Date, endDate: Date, groupBy: GroupByPeriod): Period[] {
     const periods: Period[] = [];
-    let currentDate = new Date(startDate);
+    const currentDate = new Date(startDate);
 
     while (currentDate < endDate) {
       const periodStart = new Date(currentDate);

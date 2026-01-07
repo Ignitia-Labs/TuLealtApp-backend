@@ -47,4 +47,3 @@ export class AddSubscriptionCurrencyIdToPartnerRequestsIfMissing1767737612188
     }
   }
 }
-

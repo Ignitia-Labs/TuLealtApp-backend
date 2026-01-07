@@ -137,4 +137,3 @@ export class CreateContactInquiryRequest {
   @Type(() => ContactMetadataDto)
   metadata?: ContactMetadataDto;
 }
-

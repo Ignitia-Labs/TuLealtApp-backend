@@ -285,6 +285,3 @@ export class GetCommissionsDashboardResponse {
     this.previousPeriodComparison = previousPeriodComparison;
   }
 }
-
-
-

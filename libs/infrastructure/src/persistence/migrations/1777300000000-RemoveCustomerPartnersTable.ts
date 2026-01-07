@@ -21,9 +21,7 @@ export class RemoveCustomerPartnersTable1777300000000 implements MigrationInterf
     }
 
     // Obtener conteo antes de eliminar (para logging)
-    const countResult = await queryRunner.query(
-      'SELECT COUNT(*) as count FROM customer_partners',
-    );
+    const countResult = await queryRunner.query('SELECT COUNT(*) as count FROM customer_partners');
     const count = parseInt(countResult[0]?.count || '0', 10);
     console.log(`📊 Total registros en customer_partners antes de eliminar: ${count}`);
 
@@ -182,4 +180,3 @@ export class RemoveCustomerPartnersTable1777300000000 implements MigrationInterf
     );
   }
 }
-

@@ -164,4 +164,3 @@ if (require.main === module) {
 }
 
 export { resetDatabase };
-

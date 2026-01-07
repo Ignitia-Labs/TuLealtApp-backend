@@ -119,4 +119,3 @@ export class UpdateRewardRequest {
   @IsOptional()
   validUntil?: string | null;
 }
-

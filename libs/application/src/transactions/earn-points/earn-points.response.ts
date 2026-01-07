@@ -32,4 +32,3 @@ export class EarnPointsResponse {
     this.tierName = tierName;
   }
 }
-

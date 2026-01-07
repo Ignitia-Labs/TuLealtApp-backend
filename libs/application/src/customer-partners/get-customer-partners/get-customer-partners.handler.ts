@@ -44,9 +44,7 @@ export class GetCustomerPartnersHandler {
       : await this.membershipRepository.findByUserId(request.userId);
 
     // Convertir a DTOs con información denormalizada
-    const partnerItems = await Promise.all(
-      memberships.map((membership) => this.toDto(membership)),
-    );
+    const partnerItems = await Promise.all(memberships.map((membership) => this.toDto(membership)));
 
     return new GetCustomerPartnersResponse(partnerItems);
   }

@@ -74,4 +74,3 @@ export class MakeCountryNullableInPartners1767737612190 implements MigrationInte
     }
   }
 }
-

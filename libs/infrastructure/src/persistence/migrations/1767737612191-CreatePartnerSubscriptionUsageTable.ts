@@ -99,7 +99,9 @@ export class CreatePartnerSubscriptionUsageTable1767737612191 implements Migrati
       );
       console.log('✅ Foreign key created to partner_subscriptions.');
     } else {
-      console.warn('⚠️  Table partner_subscriptions does not exist. Skipping foreign key creation.');
+      console.warn(
+        '⚠️  Table partner_subscriptions does not exist. Skipping foreign key creation.',
+      );
     }
   }
 
@@ -127,4 +129,3 @@ export class CreatePartnerSubscriptionUsageTable1767737612191 implements Migrati
     console.log('✅ Table partner_subscription_usage dropped.');
   }
 }
-

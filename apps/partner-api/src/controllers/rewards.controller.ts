@@ -641,4 +641,3 @@ export class RewardsController {
     return this.deleteRewardHandler.execute(request);
   }
 }
-

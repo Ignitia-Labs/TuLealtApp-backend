@@ -1,4 +1,10 @@
-import { Injectable, ExecutionContext, HttpException, HttpStatus, CanActivate } from '@nestjs/common';
+import {
+  Injectable,
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+  CanActivate,
+} from '@nestjs/common';
 import { Request } from 'express';
 
 /**
@@ -79,4 +85,3 @@ export class RateLimitGuard implements CanActivate {
     }
   }
 }
-

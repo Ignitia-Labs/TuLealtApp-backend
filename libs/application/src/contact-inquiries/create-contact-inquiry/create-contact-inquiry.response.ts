@@ -44,4 +44,3 @@ export class CreateContactInquiryResponse {
     this.createdAt = createdAt.toISOString();
   }
 }
-

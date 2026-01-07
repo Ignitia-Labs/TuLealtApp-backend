@@ -69,4 +69,3 @@ export class TierCalculatorHelper {
     return this.recalculateTier(updatedMembership, tierRepository);
   }
 }
-

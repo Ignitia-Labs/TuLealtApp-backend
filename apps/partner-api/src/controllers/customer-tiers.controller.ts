@@ -587,4 +587,3 @@ export class CustomerTiersController {
     return this.deleteCustomerTierHandler.execute(request);
   }
 }
-

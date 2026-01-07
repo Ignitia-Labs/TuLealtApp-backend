@@ -62,4 +62,3 @@ export class CreateCustomerForPartnerResponse {
     this.userCreated = userCreated;
   }
 }
-

@@ -32,4 +32,3 @@ export class RedeemPointsResponse {
     this.tierName = tierName;
   }
 }
-

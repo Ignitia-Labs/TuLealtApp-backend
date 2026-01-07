@@ -48,4 +48,3 @@ export class RedeemPointsRequest {
   @IsOptional()
   metadata?: Record<string, any>;
 }
-

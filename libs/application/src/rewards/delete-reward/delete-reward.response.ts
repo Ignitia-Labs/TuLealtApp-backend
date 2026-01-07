@@ -23,4 +23,3 @@ export class DeleteRewardResponse {
     this.id = id;
   }
 }
-

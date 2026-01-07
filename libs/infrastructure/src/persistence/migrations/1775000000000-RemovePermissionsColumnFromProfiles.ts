@@ -28,9 +28,7 @@ export class RemovePermissionsColumnFromProfiles1775000000000 implements Migrati
     }
 
     // Verificar si hay perfiles en la base de datos
-    const profilesCount = await queryRunner.query(
-      'SELECT COUNT(*) as count FROM profiles',
-    );
+    const profilesCount = await queryRunner.query('SELECT COUNT(*) as count FROM profiles');
     const profilesCountNum = parseInt(profilesCount[0]?.count || '0', 10);
 
     // Si no hay perfiles, es seguro eliminar la columna (base de datos nueva)

@@ -83,8 +83,7 @@ export class RegisterUserRequest {
   tenantId?: number;
 
   @ApiProperty({
-    description:
-      'ID de la branch donde se registra el customer (opcional)',
+    description: 'ID de la branch donde se registra el customer (opcional)',
     example: 5,
     type: Number,
     minimum: 1,

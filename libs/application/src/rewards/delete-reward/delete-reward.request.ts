@@ -11,4 +11,3 @@ export class DeleteRewardRequest {
   })
   rewardId: number;
 }
-

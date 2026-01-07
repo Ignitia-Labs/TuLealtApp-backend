@@ -59,7 +59,10 @@ export interface ICustomerMembershipRepository {
   /**
    * Busca memberships de un usuario filtradas por status
    */
-  findByUserIdAndStatus(userId: number, status: 'active' | 'inactive'): Promise<CustomerMembership[]>;
+  findByUserIdAndStatus(
+    userId: number,
+    status: 'active' | 'inactive',
+  ): Promise<CustomerMembership[]>;
 
   /**
    * Busca memberships de un partner (a través de tenant.partnerId) con paginación

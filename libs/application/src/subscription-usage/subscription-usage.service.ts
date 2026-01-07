@@ -37,9 +37,7 @@ export class SubscriptionUsageService {
       });
 
       if (existingUsage) {
-        this.logger.debug(
-          `Usage record already exists for subscription ${partnerSubscriptionId}`,
-        );
+        this.logger.debug(`Usage record already exists for subscription ${partnerSubscriptionId}`);
         return existingUsage;
       }
 
@@ -48,9 +46,7 @@ export class SubscriptionUsageService {
       const usageEntity = PartnerSubscriptionUsageMapper.toPersistence(usage);
       const savedEntity = await this.usageRepository.save(usageEntity);
 
-      this.logger.log(
-        `Created usage record for subscription ${partnerSubscriptionId}`,
-      );
+      this.logger.log(`Created usage record for subscription ${partnerSubscriptionId}`);
       return savedEntity;
     } catch (error) {
       this.logger.error(
@@ -232,9 +228,7 @@ export class SubscriptionUsageService {
       });
 
       if (!usageEntity) {
-        this.logger.warn(
-          `Could not create usage record for subscription ${partnerSubscriptionId}`,
-        );
+        this.logger.warn(`Could not create usage record for subscription ${partnerSubscriptionId}`);
         return;
       }
     }
@@ -243,14 +237,10 @@ export class SubscriptionUsageService {
     const currentValue = usageEntity[counterName] || 0;
     const newValue = Math.max(0, currentValue + delta); // No permitir valores negativos
 
-    await this.usageRepository.update(
-      { partnerSubscriptionId },
-      { [counterName]: newValue },
-    );
+    await this.usageRepository.update({ partnerSubscriptionId }, { [counterName]: newValue });
 
     this.logger.debug(
       `Updated ${counterName} for subscription ${partnerSubscriptionId}: ${currentValue} -> ${newValue}`,
     );
   }
 }
-

@@ -5,10 +5,7 @@ import { CreateRewardResponse } from './create-reward.response';
 import { SubscriptionUsageHelper } from '@libs/application';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  PartnerSubscriptionUsageEntity,
-  PartnerSubscriptionEntity,
-} from '@libs/infrastructure';
+import { PartnerSubscriptionUsageEntity, PartnerSubscriptionEntity } from '@libs/infrastructure';
 import { ITenantRepository } from '@libs/domain';
 
 /**
@@ -52,10 +49,7 @@ export class CreateRewardHandler {
       this.subscriptionRepository,
     );
     if (subscriptionId) {
-      await SubscriptionUsageHelper.incrementRewardsCount(
-        subscriptionId,
-        this.usageRepository,
-      );
+      await SubscriptionUsageHelper.incrementRewardsCount(subscriptionId, this.usageRepository);
     }
 
     // Retornar response DTO

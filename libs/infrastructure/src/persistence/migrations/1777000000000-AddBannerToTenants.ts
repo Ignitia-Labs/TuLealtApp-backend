@@ -39,4 +39,3 @@ export class AddBannerToTenants1777000000000 implements MigrationInterface {
     }
   }
 }
-

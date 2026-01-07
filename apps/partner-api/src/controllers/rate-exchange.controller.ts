@@ -85,4 +85,3 @@ export class RateExchangeController {
     return this.getRateExchangeHandler.execute(request);
   }
 }
-

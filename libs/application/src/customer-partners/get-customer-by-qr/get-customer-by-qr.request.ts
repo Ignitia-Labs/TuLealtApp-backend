@@ -14,4 +14,3 @@ export class GetCustomerByQrRequest {
   @IsNotEmpty()
   qrCode: string;
 }
-

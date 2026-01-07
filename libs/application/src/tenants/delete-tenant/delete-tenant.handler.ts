@@ -5,10 +5,7 @@ import { DeleteTenantResponse } from './delete-tenant.response';
 import { SubscriptionUsageHelper } from '@libs/application';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  PartnerSubscriptionUsageEntity,
-  PartnerSubscriptionEntity,
-} from '@libs/infrastructure';
+import { PartnerSubscriptionUsageEntity, PartnerSubscriptionEntity } from '@libs/infrastructure';
 
 /**
  * Handler para el caso de uso de eliminar un tenant
@@ -51,10 +48,7 @@ export class DeleteTenantHandler {
 
     // Decrementar el contador de tenants en el uso de suscripción
     if (subscriptionId) {
-      await SubscriptionUsageHelper.decrementTenantsCount(
-        subscriptionId,
-        this.usageRepository,
-      );
+      await SubscriptionUsageHelper.decrementTenantsCount(subscriptionId, this.usageRepository);
     }
 
     return new DeleteTenantResponse('Tenant deleted successfully', request.tenantId);

@@ -1,8 +1,5 @@
 import { Repository } from 'typeorm';
-import {
-  PartnerSubscriptionUsageEntity,
-  PartnerSubscriptionEntity,
-} from '@libs/infrastructure';
+import { PartnerSubscriptionUsageEntity, PartnerSubscriptionEntity } from '@libs/infrastructure';
 import { PartnerSubscriptionUsageMapper } from '@libs/infrastructure';
 import { PartnerSubscriptionUsage } from '@libs/domain';
 
@@ -44,10 +41,7 @@ export class SubscriptionUsageHelper {
       await usageRepository.save(usageEntity);
     } catch (error) {
       // Log error pero no lanzar excepción para no interrumpir el flujo principal
-      console.error(
-        `Error creating subscription usage for subscription ${subscriptionId}:`,
-        error,
-      );
+      console.error(`Error creating subscription usage for subscription ${subscriptionId}:`, error);
     }
   }
 
@@ -84,10 +78,7 @@ export class SubscriptionUsageHelper {
         return null;
       }
 
-      return this.getSubscriptionIdFromPartnerId(
-        tenant.partnerId,
-        subscriptionRepository,
-      );
+      return this.getSubscriptionIdFromPartnerId(tenant.partnerId, subscriptionRepository);
     } catch (error) {
       console.error(`Error getting subscription ID for tenant ${tenantId}:`, error);
       return null;
@@ -137,11 +128,7 @@ export class SubscriptionUsageHelper {
       // Asegurar que el registro de uso existe
       await this.ensureUsageRecordExists(subscriptionId, usageRepository);
 
-      await usageRepository.decrement(
-        { partnerSubscriptionId: subscriptionId },
-        'tenantsCount',
-        1,
-      );
+      await usageRepository.decrement({ partnerSubscriptionId: subscriptionId }, 'tenantsCount', 1);
       // Asegurar que no sea negativo
       await usageRepository
         .createQueryBuilder()
@@ -150,10 +137,7 @@ export class SubscriptionUsageHelper {
         .where('partnerSubscriptionId = :subscriptionId', { subscriptionId })
         .execute();
     } catch (error) {
-      console.error(
-        `Error decrementing tenants count for subscription ${subscriptionId}:`,
-        error,
-      );
+      console.error(`Error decrementing tenants count for subscription ${subscriptionId}:`, error);
     }
   }
 
@@ -175,10 +159,7 @@ export class SubscriptionUsageHelper {
         1,
       );
     } catch (error) {
-      console.error(
-        `Error incrementing branches count for subscription ${subscriptionId}:`,
-        error,
-      );
+      console.error(`Error incrementing branches count for subscription ${subscriptionId}:`, error);
     }
   }
 
@@ -207,10 +188,7 @@ export class SubscriptionUsageHelper {
         .where('partnerSubscriptionId = :subscriptionId', { subscriptionId })
         .execute();
     } catch (error) {
-      console.error(
-        `Error decrementing branches count for subscription ${subscriptionId}:`,
-        error,
-      );
+      console.error(`Error decrementing branches count for subscription ${subscriptionId}:`, error);
     }
   }
 
@@ -283,16 +261,9 @@ export class SubscriptionUsageHelper {
       // Asegurar que el registro de uso existe
       await this.ensureUsageRecordExists(subscriptionId, usageRepository);
 
-      await usageRepository.increment(
-        { partnerSubscriptionId: subscriptionId },
-        'rewardsCount',
-        1,
-      );
+      await usageRepository.increment({ partnerSubscriptionId: subscriptionId }, 'rewardsCount', 1);
     } catch (error) {
-      console.error(
-        `Error incrementing rewards count for subscription ${subscriptionId}:`,
-        error,
-      );
+      console.error(`Error incrementing rewards count for subscription ${subscriptionId}:`, error);
     }
   }
 
@@ -308,11 +279,7 @@ export class SubscriptionUsageHelper {
       // Asegurar que el registro de uso existe
       await this.ensureUsageRecordExists(subscriptionId, usageRepository);
 
-      await usageRepository.decrement(
-        { partnerSubscriptionId: subscriptionId },
-        'rewardsCount',
-        1,
-      );
+      await usageRepository.decrement({ partnerSubscriptionId: subscriptionId }, 'rewardsCount', 1);
       // Asegurar que no sea negativo
       await usageRepository
         .createQueryBuilder()
@@ -321,10 +288,7 @@ export class SubscriptionUsageHelper {
         .where('partnerSubscriptionId = :subscriptionId', { subscriptionId })
         .execute();
     } catch (error) {
-      console.error(
-        `Error decrementing rewards count for subscription ${subscriptionId}:`,
-        error,
-      );
+      console.error(`Error decrementing rewards count for subscription ${subscriptionId}:`, error);
     }
   }
 
@@ -373,4 +337,3 @@ export class SubscriptionUsageHelper {
     }
   }
 }
-

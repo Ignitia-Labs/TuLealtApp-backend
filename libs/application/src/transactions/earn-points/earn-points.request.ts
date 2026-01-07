@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsNumber, IsOptional, IsObject, Min, IsDateString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsObject,
+  Min,
+  IsDateString,
+} from 'class-validator';
 
 /**
  * Request para acumular puntos (earn)
@@ -15,7 +23,8 @@ export class EarnPointsRequest {
   qrCode: string;
 
   @ApiProperty({
-    description: 'Cantidad de puntos a acumular (si se proporciona, se usa directamente; si no, se calcula con points rules)',
+    description:
+      'Cantidad de puntos a acumular (si se proporciona, se usa directamente; si no, se calcula con points rules)',
     example: 150,
     type: Number,
     required: false,
@@ -28,7 +37,7 @@ export class EarnPointsRequest {
 
   @ApiProperty({
     description: 'Monto de compra en moneda local (requerido si no se proporciona points)',
-    example: 150.00,
+    example: 150.0,
     type: Number,
     required: false,
     minimum: 0,
@@ -70,7 +79,7 @@ export class EarnPointsRequest {
 
   @ApiProperty({
     description: 'Monto total de la transacción (con impuestos)',
-    example: 150.00,
+    example: 150.0,
     type: Number,
     required: false,
     minimum: 0,
@@ -140,4 +149,3 @@ export class EarnPointsRequest {
   @IsOptional()
   metadata?: Record<string, any>;
 }
-

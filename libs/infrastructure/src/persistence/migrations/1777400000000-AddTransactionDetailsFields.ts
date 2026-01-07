@@ -42,7 +42,8 @@ export class AddTransactionDetailsFields1777400000000 implements MigrationInterf
     }
 
     // Agregar transactionAmountTotal
-    const transactionAmountTotalColumn = transactionsTable.findColumnByName('transactionAmountTotal');
+    const transactionAmountTotalColumn =
+      transactionsTable.findColumnByName('transactionAmountTotal');
     if (!transactionAmountTotalColumn) {
       await queryRunner.addColumn(
         'transactions',
@@ -238,4 +239,3 @@ export class AddTransactionDetailsFields1777400000000 implements MigrationInterf
     }
   }
 }
-
