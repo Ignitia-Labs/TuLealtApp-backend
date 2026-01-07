@@ -224,6 +224,10 @@ export * from './partner-requests/assign-partner-request-user/assign-partner-req
 export * from './partner-requests/assign-partner-request-user/assign-partner-request-user.request';
 export * from './partner-requests/assign-partner-request-user/assign-partner-request-user.response';
 
+export * from './partner-requests/update-partner-request/update-partner-request.handler';
+export * from './partner-requests/update-partner-request/update-partner-request.request';
+export * from './partner-requests/update-partner-request/update-partner-request.response';
+
 // Tenants Handlers
 export * from './tenants/create-tenant/create-tenant.handler';
 export * from './tenants/create-tenant/create-tenant.request';

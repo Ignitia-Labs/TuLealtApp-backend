@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -44,6 +45,9 @@ import {
   AssignPartnerRequestUserHandler,
   AssignPartnerRequestUserRequest,
   AssignPartnerRequestUserResponse,
+  UpdatePartnerRequestHandler,
+  UpdatePartnerRequestRequest,
+  UpdatePartnerRequestResponse,
 } from '@libs/application';
 import {
   UnauthorizedErrorResponseDto,
@@ -51,7 +55,11 @@ import {
   BadRequestErrorResponseDto,
   NotFoundErrorResponseDto,
   InternalServerErrorResponseDto,
+  CurrentUser,
+  JwtAuthGuard,
+  RolesGuard,
 } from '@libs/shared';
+import { JwtPayload } from '@libs/application';
 
 /**
  * Controlador de Partner Requests para Admin API
@@ -61,6 +69,7 @@ import {
  * - POST /admin/partner-requests - Crear una nueva solicitud
  * - GET /admin/partner-requests - Obtener todas las solicitudes (con filtros opcionales)
  * - GET /admin/partner-requests/:id - Obtener solicitud por ID
+ * - PATCH /admin/partner-requests/:id - Actualizar campos de la solicitud
  * - PATCH /admin/partner-requests/:id/status - Actualizar estado de la solicitud
  * - PATCH /admin/partner-requests/:id/notes - Agregar/actualizar notas
  * - PATCH /admin/partner-requests/:id/reject - Rechazar solicitud
@@ -78,6 +87,7 @@ export class PartnerRequestsController {
     private readonly rejectPartnerRequestHandler: RejectPartnerRequestHandler,
     private readonly processPartnerRequestHandler: ProcessPartnerRequestHandler,
     private readonly assignPartnerRequestUserHandler: AssignPartnerRequestUserHandler,
+    private readonly updatePartnerRequestHandler: UpdatePartnerRequestHandler,
   ) {}
 
   @Post()
@@ -263,6 +273,99 @@ export class PartnerRequestsController {
     const request = new GetPartnerRequestRequest();
     request.id = id;
     return this.getPartnerRequestHandler.execute(request);
+  }
+
+  @Patch(':id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Actualizar solicitud de partner',
+    description:
+      'Actualiza los campos de una solicitud de partner. Todos los campos son opcionales. El campo updatedBy se establece automáticamente con el usuario que ejecuta la acción.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único de la solicitud',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiBody({
+    type: UpdatePartnerRequestRequest,
+    examples: {
+      example1: {
+        summary: 'Actualizar campos básicos',
+        value: {
+          name: 'Restaurante La Cocina del Sol Actualizado',
+          responsibleName: 'Roberto Méndez Actualizado',
+          email: 'roberto.actualizado@cocinasol.gt',
+          phone: '+502 3333-5555',
+          countryId: 1,
+          city: 'Ciudad de Guatemala',
+          plan: 'inspira',
+          planId: 2,
+          category: 'Restaurantes Premium',
+          website: 'https://cocinasol.gt/nuevo',
+          socialMedia: '@cocinadelsolgt_nuevo',
+        },
+      },
+      example2: {
+        summary: 'Actualizar solo algunos campos',
+        value: {
+          name: 'Nuevo Nombre',
+          email: 'nuevo@email.com',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Solicitud actualizada exitosamente',
+    type: UpdatePartnerRequestResponse,
+    example: {
+      id: 1,
+      status: 'in-progress',
+      name: 'Restaurante La Cocina del Sol Actualizado',
+      email: 'roberto.actualizado@cocinasol.gt',
+      updatedBy: 5,
+      lastUpdated: '2024-11-14T09:30:00Z',
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos inválidos',
+    type: BadRequestErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos suficientes',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Solicitud no encontrada',
+    type: NotFoundErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async updatePartnerRequest(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: Omit<UpdatePartnerRequestRequest, 'requestId'>,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<UpdatePartnerRequestResponse> {
+    const request = new UpdatePartnerRequestRequest();
+    request.requestId = id;
+    Object.assign(request, body);
+    return this.updatePartnerRequestHandler.execute(request, user.userId);
   }
 
   @Patch(':id/status')

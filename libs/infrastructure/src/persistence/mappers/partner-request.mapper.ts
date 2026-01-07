@@ -38,6 +38,7 @@ export class PartnerRequestMapper {
       persistenceEntity.billingEmail,
       persistenceEntity.notes,
       persistenceEntity.assignedTo,
+      persistenceEntity.updatedBy,
       persistenceEntity.lastUpdated,
     );
   }
@@ -77,6 +78,7 @@ export class PartnerRequestMapper {
     entity.billingEmail = domainEntity.billingEmail;
     entity.notes = domainEntity.notes;
     entity.assignedTo = domainEntity.assignedTo;
+    entity.updatedBy = domainEntity.updatedBy;
     entity.lastUpdated = domainEntity.lastUpdated;
     return entity;
   }

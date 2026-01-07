@@ -90,6 +90,7 @@ import {
   RejectPartnerRequestHandler,
   ProcessPartnerRequestHandler,
   AssignPartnerRequestUserHandler,
+  UpdatePartnerRequestHandler,
   GetAdminStaffUsersHandler,
   CreateSubscriptionHandler,
   GetSubscriptionHandler,
@@ -331,6 +332,7 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     RejectPartnerRequestHandler,
     ProcessPartnerRequestHandler,
     AssignPartnerRequestUserHandler,
+    UpdatePartnerRequestHandler,
     // Handlers de aplicación - Subscriptions
     CreateSubscriptionHandler,
     GetSubscriptionHandler,

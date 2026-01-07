@@ -36,6 +36,7 @@ export class PartnerRequest {
     public readonly billingEmail: string,
     public readonly notes: string | null,
     public readonly assignedTo: number | null,
+    public readonly updatedBy: number | null,
     public readonly lastUpdated: Date,
   ) {}
 
@@ -100,6 +101,7 @@ export class PartnerRequest {
       billingEmail,
       notes,
       assignedTo,
+      null, // updatedBy inicialmente null
       now,
     );
   }
@@ -144,6 +146,7 @@ export class PartnerRequest {
       this.billingEmail,
       this.notes,
       assignedTo !== undefined ? assignedTo : this.assignedTo,
+      this.updatedBy,
       new Date(),
     );
   }
@@ -180,6 +183,7 @@ export class PartnerRequest {
       this.billingEmail,
       this.notes,
       this.assignedTo,
+      this.updatedBy,
       new Date(),
     );
   }
@@ -216,6 +220,7 @@ export class PartnerRequest {
       this.billingEmail,
       this.notes,
       this.assignedTo,
+      this.updatedBy,
       new Date(),
     );
   }
@@ -252,6 +257,7 @@ export class PartnerRequest {
       this.billingEmail,
       this.notes,
       this.assignedTo,
+      this.updatedBy,
       new Date(),
     );
   }
@@ -288,6 +294,7 @@ export class PartnerRequest {
       this.billingEmail,
       notes,
       this.assignedTo,
+      this.updatedBy,
       new Date(),
     );
   }
@@ -324,6 +331,59 @@ export class PartnerRequest {
       this.billingEmail,
       this.notes,
       userId,
+      this.updatedBy,
+      new Date(),
+    );
+  }
+
+  /**
+   * Método de dominio para actualizar campos de la solicitud
+   */
+  updateFields(
+    updatedBy: number,
+    fields: {
+      name?: string;
+      responsibleName?: string;
+      email?: string;
+      phone?: string;
+      countryId?: number | null;
+      city?: string;
+      plan?: string;
+      planId?: number | null;
+      category?: string;
+      website?: string | null;
+      socialMedia?: string | null;
+    },
+  ): PartnerRequest {
+    return new PartnerRequest(
+      this.id,
+      this.status,
+      this.submittedAt,
+      fields.name !== undefined ? fields.name : this.name,
+      fields.responsibleName !== undefined ? fields.responsibleName : this.responsibleName,
+      fields.email !== undefined ? fields.email : this.email,
+      fields.phone !== undefined ? fields.phone : this.phone,
+      fields.countryId !== undefined ? fields.countryId : this.countryId,
+      fields.city !== undefined ? fields.city : this.city,
+      fields.plan !== undefined ? fields.plan : this.plan,
+      fields.planId !== undefined ? fields.planId : this.planId,
+      this.billingFrequency,
+      this.logo,
+      fields.category !== undefined ? fields.category : this.category,
+      this.branchesNumber,
+      fields.website !== undefined ? fields.website : this.website,
+      fields.socialMedia !== undefined ? fields.socialMedia : this.socialMedia,
+      this.rewardType,
+      this.currencyId,
+      this.subscriptionCurrencyId,
+      this.businessName,
+      this.taxId,
+      this.fiscalAddress,
+      this.paymentMethod,
+      this.billingEmail,
+      this.notes,
+      this.assignedTo,
+      updatedBy,
       new Date(),
     );
   }

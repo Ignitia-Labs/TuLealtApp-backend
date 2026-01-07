@@ -116,6 +116,9 @@ export class PartnerRequestEntity {
   @Column('int', { nullable: true })
   assignedTo: number | null;
 
+  @Column('int', { nullable: true })
+  updatedBy: number | null;
+
   @Column('datetime')
   lastUpdated: Date;
 
