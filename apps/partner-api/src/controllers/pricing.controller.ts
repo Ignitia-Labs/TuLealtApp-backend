@@ -46,16 +46,13 @@ import {
  * Permite consultar planes activos y calcular precios
  *
  * Endpoints:
- * - GET /partner/pricing/plans - Obtener planes activos
- * - GET /partner/pricing/plans/:id - Obtener plan activo por ID
- * - GET /partner/pricing/plans/slug/:slug - Obtener plan activo por slug
- * - GET /partner/pricing/calculate - Calcular precio de un plan
+ * - GET /partner/pricing/plans - Obtener planes activos (público)
+ * - GET /partner/pricing/plans/:id - Obtener plan activo por ID (requiere autenticación)
+ * - GET /partner/pricing/plans/slug/:slug - Obtener plan activo por slug (requiere autenticación)
+ * - GET /partner/pricing/calculate - Calcular precio de un plan (requiere autenticación)
  */
 @ApiTags('Partner Pricing')
 @Controller('pricing')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('PARTNER', 'PARTNER_STAFF', 'ADMIN', 'ADMIN_STAFF')
-@ApiBearerAuth('JWT-auth')
 export class PricingController {
   constructor(
     private readonly getPricingPlansHandler: GetPricingPlansHandler,
@@ -67,9 +64,9 @@ export class PricingController {
   @Get('plans')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Obtener planes de precios activos',
+    summary: 'Obtener planes de precios activos (público)',
     description:
-      'Obtiene la lista de planes de precios activos disponibles para partners. Solo muestra planes con estado activo.',
+      'Endpoint público que obtiene la lista de planes de precios activos disponibles. Solo muestra planes con estado activo. No requiere autenticación.',
   })
   @ApiResponse({
     status: 200,
@@ -111,26 +108,6 @@ export class PricingController {
     },
   })
   @ApiResponse({
-    status: 401,
-    description: 'No autenticado',
-    type: UnauthorizedErrorResponseDto,
-    example: {
-      statusCode: 401,
-      message: 'Unauthorized',
-      error: 'Unauthorized',
-    },
-  })
-  @ApiResponse({
-    status: 403,
-    description: 'No tiene permisos para acceder a este recurso',
-    type: ForbiddenErrorResponseDto,
-    example: {
-      statusCode: 403,
-      message: 'Forbidden resource',
-      error: 'Forbidden',
-    },
-  })
-  @ApiResponse({
     status: 500,
     description: 'Error interno del servidor',
     type: InternalServerErrorResponseDto,
@@ -147,11 +124,14 @@ export class PricingController {
   }
 
   @Get('plans/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PARTNER', 'PARTNER_STAFF', 'ADMIN', 'ADMIN_STAFF')
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Obtener plan de precios activo por ID',
     description:
-      'Obtiene un plan de precios activo específico por su ID. Solo retorna planes con estado activo.',
+      'Obtiene un plan de precios activo específico por su ID. Solo retorna planes con estado activo. Requiere autenticación.',
   })
   @ApiParam({
     name: 'id',
@@ -237,11 +217,14 @@ export class PricingController {
   }
 
   @Get('plans/slug/:slug')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PARTNER', 'PARTNER_STAFF', 'ADMIN', 'ADMIN_STAFF')
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Obtener plan de precios activo por slug',
     description:
-      'Obtiene un plan de precios activo específico por su slug. Solo retorna planes con estado activo.',
+      'Obtiene un plan de precios activo específico por su slug. Solo retorna planes con estado activo. Requiere autenticación.',
   })
   @ApiParam({
     name: 'slug',
@@ -327,11 +310,14 @@ export class PricingController {
   }
 
   @Get('calculate')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PARTNER', 'PARTNER_STAFF', 'ADMIN', 'ADMIN_STAFF')
+  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Calcular precio de un plan',
     description:
-      'Calcula el precio final de un plan activo para un período de facturación específico. Permite especificar la moneda para el cálculo (USD o GTQ).',
+      'Calcula el precio final de un plan activo para un período de facturación específico. Permite especificar la moneda para el cálculo (USD o GTQ). Requiere autenticación.',
   })
   @ApiQuery({
     name: 'planId',
