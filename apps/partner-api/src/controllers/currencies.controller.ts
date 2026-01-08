@@ -1,5 +1,5 @@
-import { Controller, Get, Query, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
+import { Controller, Get, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import {
   GetCurrenciesHandler,
   GetCurrenciesRequest,
@@ -9,18 +9,14 @@ import {
   GetCountriesResponse,
 } from '@libs/application';
 import {
-  JwtAuthGuard,
-  RolesGuard,
-  Roles,
   BadRequestErrorResponseDto,
-  UnauthorizedErrorResponseDto,
-  ForbiddenErrorResponseDto,
   InternalServerErrorResponseDto,
 } from '@libs/shared';
 
 /**
  * Controlador de currencies y countries para Partner API
  * Permite obtener las monedas y países disponibles en el sistema (solo lectura)
+ * Endpoints públicos - No requieren autenticación
  *
  * Endpoints:
  * - GET /partner/currencies - Obtener todas las monedas
@@ -28,9 +24,6 @@ import {
  */
 @ApiTags('Currencies & Countries')
 @Controller('currencies')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('PARTNER', 'PARTNER_STAFF', 'ADMIN', 'ADMIN_STAFF')
-@ApiBearerAuth('JWT-auth')
 export class CurrenciesController {
   constructor(
     private readonly getCurrenciesHandler: GetCurrenciesHandler,
@@ -42,7 +35,7 @@ export class CurrenciesController {
   @ApiOperation({
     summary: 'Obtener todas las monedas',
     description:
-      'Obtiene la lista completa de monedas disponibles. Por defecto solo devuelve monedas activas. Solo lectura.',
+      'Obtiene la lista completa de monedas disponibles. Por defecto solo devuelve monedas activas. Solo lectura. Endpoint público - No requiere autenticación.',
   })
   @ApiQuery({
     name: 'includeInactive',
@@ -95,16 +88,6 @@ export class CurrenciesController {
     },
   })
   @ApiResponse({
-    status: 401,
-    description: 'No autenticado',
-    type: UnauthorizedErrorResponseDto,
-  })
-  @ApiResponse({
-    status: 403,
-    description: 'No tiene permisos para acceder a este recurso',
-    type: ForbiddenErrorResponseDto,
-  })
-  @ApiResponse({
     status: 500,
     description: 'Error interno del servidor',
     type: InternalServerErrorResponseDto,
@@ -127,7 +110,7 @@ export class CurrenciesController {
   @ApiOperation({
     summary: 'Obtener todos los países',
     description:
-      'Obtiene la lista completa de países disponibles. Por defecto solo devuelve países activos. Solo lectura.',
+      'Obtiene la lista completa de países disponibles. Por defecto solo devuelve países activos. Solo lectura. Endpoint público - No requiere autenticación.',
   })
   @ApiQuery({
     name: 'includeInactive',
@@ -184,16 +167,6 @@ export class CurrenciesController {
       message: ['includeInactive must be a boolean value'],
       error: 'Bad Request',
     },
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'No autenticado',
-    type: UnauthorizedErrorResponseDto,
-  })
-  @ApiResponse({
-    status: 403,
-    description: 'No tiene permisos para acceder a este recurso',
-    type: ForbiddenErrorResponseDto,
   })
   @ApiResponse({
     status: 500,

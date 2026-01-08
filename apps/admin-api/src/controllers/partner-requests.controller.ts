@@ -165,7 +165,7 @@ export class PartnerRequestsController {
   async createPartnerRequest(
     @Body() request: CreatePartnerRequestRequest,
   ): Promise<CreatePartnerRequestResponse> {
-    return this.createPartnerRequestHandler.execute(request);
+    return this.createPartnerRequestHandler.execute(request, 'internal');
   }
 
   @Get()

@@ -13,7 +13,10 @@ export class CreatePartnerRequestHandler {
     private readonly partnerRequestRepository: IPartnerRequestRepository,
   ) {}
 
-  async execute(request: CreatePartnerRequestRequest): Promise<CreatePartnerRequestResponse> {
+  async execute(
+    request: CreatePartnerRequestRequest,
+    source: 'public' | 'internal' = 'internal',
+  ): Promise<CreatePartnerRequestResponse> {
     // Validar que el email no exista en otra solicitud pendiente o en progreso
     const existingRequests = await this.partnerRequestRepository.findAll();
     const existingRequestByEmail = existingRequests.find(
@@ -54,6 +57,7 @@ export class CreatePartnerRequestHandler {
       request.planId || null,
       request.billingFrequency || null,
       request.subscriptionCurrencyId || null,
+      source,
     );
 
     // Guardar la solicitud

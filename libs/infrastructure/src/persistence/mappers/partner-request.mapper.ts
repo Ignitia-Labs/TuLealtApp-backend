@@ -40,6 +40,7 @@ export class PartnerRequestMapper {
       persistenceEntity.assignedTo,
       persistenceEntity.updatedBy,
       persistenceEntity.lastUpdated,
+      persistenceEntity.source || 'internal', // Por defecto 'internal' para compatibilidad
     );
   }
 
@@ -80,6 +81,7 @@ export class PartnerRequestMapper {
     entity.assignedTo = domainEntity.assignedTo;
     entity.updatedBy = domainEntity.updatedBy;
     entity.lastUpdated = domainEntity.lastUpdated;
+    entity.source = domainEntity.source || 'internal'; // Por defecto 'internal' para compatibilidad
     return entity;
   }
 }

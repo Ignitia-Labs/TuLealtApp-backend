@@ -6,7 +6,6 @@ import {
   HttpCode,
   HttpStatus,
   ParseIntPipe,
-  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -14,7 +13,6 @@ import {
   ApiResponse,
   ApiParam,
   ApiQuery,
-  ApiBearerAuth,
 } from '@nestjs/swagger';
 import {
   GetCatalogsHandler,
@@ -25,18 +23,16 @@ import {
   GetCatalogResponse,
 } from '@libs/application';
 import {
-  UnauthorizedErrorResponseDto,
-  ForbiddenErrorResponseDto,
   BadRequestErrorResponseDto,
   NotFoundErrorResponseDto,
   InternalServerErrorResponseDto,
-  JwtAuthGuard,
 } from '@libs/shared';
 
 /**
  * Controlador de catálogos para Partner API
  * Permite consultar los catálogos configurables del sistema (categorías, tipos de recompensas, métodos de pago)
  * Solo permite operaciones de lectura (GET)
+ * Endpoints públicos - No requieren autenticación
  *
  * Endpoints:
  * - GET /partner/catalogs - Obtener todos los catálogos o filtrar por tipo
@@ -44,8 +40,6 @@ import {
  */
 @ApiTags('Partner Catalogs')
 @Controller('catalogs')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth('JWT-auth')
 export class CatalogsController {
   constructor(
     private readonly getCatalogsHandler: GetCatalogsHandler,
@@ -57,7 +51,7 @@ export class CatalogsController {
   @ApiOperation({
     summary: 'Obtener catálogos',
     description:
-      'Obtiene la lista de elementos de catálogo. Permite filtrar por tipo (BUSINESS_CATEGORIES, REWARD_TYPES, PAYMENT_METHODS) y opcionalmente incluir elementos inactivos. Los resultados se ordenan por tipo, orden de visualización y valor.',
+      'Obtiene la lista de elementos de catálogo. Permite filtrar por tipo (BUSINESS_CATEGORIES, REWARD_TYPES, PAYMENT_METHODS) y opcionalmente incluir elementos inactivos. Los resultados se ordenan por tipo, orden de visualización y valor. Endpoint público - No requiere autenticación.',
   })
   @ApiQuery({
     name: 'type',
@@ -125,26 +119,6 @@ export class CatalogsController {
     },
   })
   @ApiResponse({
-    status: 401,
-    description: 'No autenticado',
-    type: UnauthorizedErrorResponseDto,
-    example: {
-      statusCode: 401,
-      message: 'Unauthorized',
-      error: 'Unauthorized',
-    },
-  })
-  @ApiResponse({
-    status: 403,
-    description: 'No tiene permisos suficientes',
-    type: ForbiddenErrorResponseDto,
-    example: {
-      statusCode: 403,
-      message: 'Forbidden resource',
-      error: 'Forbidden',
-    },
-  })
-  @ApiResponse({
     status: 500,
     description: 'Error interno del servidor',
     type: InternalServerErrorResponseDto,
@@ -174,7 +148,7 @@ export class CatalogsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Obtener elemento de catálogo por ID',
-    description: 'Obtiene la información completa de un elemento de catálogo por su ID',
+    description: 'Obtiene la información completa de un elemento de catálogo por su ID. Endpoint público - No requiere autenticación.',
   })
   @ApiParam({
     name: 'id',
@@ -196,26 +170,6 @@ export class CatalogsController {
       isActive: true,
       createdAt: '2024-01-15T10:30:00.000Z',
       updatedAt: '2024-01-15T10:30:00.000Z',
-    },
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'No autenticado',
-    type: UnauthorizedErrorResponseDto,
-    example: {
-      statusCode: 401,
-      message: 'Unauthorized',
-      error: 'Unauthorized',
-    },
-  })
-  @ApiResponse({
-    status: 403,
-    description: 'No tiene permisos suficientes',
-    type: ForbiddenErrorResponseDto,
-    example: {
-      statusCode: 403,
-      message: 'Forbidden resource',
-      error: 'Forbidden',
     },
   })
   @ApiResponse({

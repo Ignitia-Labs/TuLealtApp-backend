@@ -6,6 +6,7 @@
 import type { BillingFrequency } from './partner-subscription.entity';
 
 export type PartnerRequestStatus = 'pending' | 'in-progress' | 'enrolled' | 'rejected';
+export type PartnerRequestSource = 'public' | 'internal';
 
 export class PartnerRequest {
   constructor(
@@ -38,6 +39,7 @@ export class PartnerRequest {
     public readonly assignedTo: number | null,
     public readonly updatedBy: number | null,
     public readonly lastUpdated: Date,
+    public readonly source: PartnerRequestSource,
   ) {}
 
   /**
@@ -70,6 +72,7 @@ export class PartnerRequest {
     planId: number | null = null,
     billingFrequency: BillingFrequency | null = null,
     subscriptionCurrencyId: number | null = null,
+    source: PartnerRequestSource = 'internal',
     id?: number,
   ): PartnerRequest {
     const now = new Date();
@@ -103,6 +106,7 @@ export class PartnerRequest {
       assignedTo,
       null, // updatedBy inicialmente null
       now,
+      source,
     );
   }
 
@@ -148,6 +152,7 @@ export class PartnerRequest {
       assignedTo !== undefined ? assignedTo : this.assignedTo,
       this.updatedBy,
       new Date(),
+      this.source,
     );
   }
 
@@ -185,6 +190,7 @@ export class PartnerRequest {
       this.assignedTo,
       this.updatedBy,
       new Date(),
+      this.source,
     );
   }
 
@@ -222,6 +228,7 @@ export class PartnerRequest {
       this.assignedTo,
       this.updatedBy,
       new Date(),
+      this.source,
     );
   }
 
@@ -259,6 +266,7 @@ export class PartnerRequest {
       this.assignedTo,
       this.updatedBy,
       new Date(),
+      this.source,
     );
   }
 
@@ -296,6 +304,7 @@ export class PartnerRequest {
       this.assignedTo,
       this.updatedBy,
       new Date(),
+      this.source,
     );
   }
 
@@ -333,6 +342,7 @@ export class PartnerRequest {
       userId,
       this.updatedBy,
       new Date(),
+      this.source,
     );
   }
 
@@ -385,6 +395,7 @@ export class PartnerRequest {
       this.assignedTo,
       updatedBy,
       new Date(),
+      this.source,
     );
   }
 }

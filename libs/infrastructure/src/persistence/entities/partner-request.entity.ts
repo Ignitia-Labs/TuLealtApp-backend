@@ -122,6 +122,9 @@ export class PartnerRequestEntity {
   @Column('datetime')
   lastUpdated: Date;
 
+  @Column('varchar', { length: 20, default: 'internal' })
+  source: 'public' | 'internal';
+
   @CreateDateColumn()
   createdAt: Date;
 
