@@ -215,6 +215,13 @@ export class GetPartnerRequestResponse {
   })
   updatedAt: string;
 
+  @ApiProperty({
+    description: 'Origen de la solicitud',
+    example: 'public',
+    enum: ['public', 'internal'],
+  })
+  source: 'public' | 'internal';
+
   constructor(partnerRequest: any) {
     this.id = partnerRequest.id;
     this.status = partnerRequest.status;
@@ -245,5 +252,6 @@ export class GetPartnerRequestResponse {
     this.lastUpdated = partnerRequest.lastUpdated.toISOString();
     this.createdAt = partnerRequest.createdAt?.toISOString() || new Date().toISOString();
     this.updatedAt = partnerRequest.updatedAt?.toISOString() || new Date().toISOString();
+    this.source = partnerRequest.source || 'internal';
   }
 }
