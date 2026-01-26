@@ -46,6 +46,13 @@ export class ProcessPartnerRequestResponse {
   })
   partnerDomain: string;
 
+  @ApiProperty({
+    description: 'Código único de búsqueda rápida para el partner (para QR code)',
+    example: 'PARTNER-ABC234',
+    type: String,
+  })
+  partnerQuickSearchCode: string;
+
   constructor(
     partnerId: number,
     requestId: number,
@@ -53,6 +60,7 @@ export class ProcessPartnerRequestResponse {
     partnerName: string,
     partnerEmail: string,
     partnerDomain: string,
+    partnerQuickSearchCode: string,
   ) {
     this.partnerId = partnerId;
     this.requestId = requestId;
@@ -60,5 +68,6 @@ export class ProcessPartnerRequestResponse {
     this.partnerName = partnerName;
     this.partnerEmail = partnerEmail;
     this.partnerDomain = partnerDomain;
+    this.partnerQuickSearchCode = partnerQuickSearchCode;
   }
 }

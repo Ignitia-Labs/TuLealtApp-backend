@@ -116,7 +116,15 @@ export class GetPartnerHandler {
               | 'semiannual'
               | 'annual',
             billingAmount: Number(partnerEntity.subscription.billingAmount) || 0,
+            includeTax: partnerEntity.subscription.includeTax ?? false,
+            taxPercent: partnerEntity.subscription.taxPercent
+              ? Number(partnerEntity.subscription.taxPercent)
+              : null,
+            basePrice: Number(partnerEntity.subscription.basePrice) || 0,
+            taxAmount: Number(partnerEntity.subscription.taxAmount) || 0,
+            totalPrice: Number(partnerEntity.subscription.totalPrice) || 0,
             currency: partnerEntity.subscription.currency || 'USD',
+            currencyId: partnerEntity.subscription.currencyId ?? null,
             nextBillingDate: nextBillingDate,
             nextBillingAmount: Number(partnerEntity.subscription.nextBillingAmount) || 0,
             currentPeriodStart: currentPeriodStart,
@@ -124,6 +132,17 @@ export class GetPartnerHandler {
             trialEndDate: partnerEntity.subscription.trialEndDate
               ? new Date(partnerEntity.subscription.trialEndDate)
               : null,
+            pausedAt: partnerEntity.subscription.pausedAt
+              ? new Date(partnerEntity.subscription.pausedAt)
+              : null,
+            pauseReason: partnerEntity.subscription.pauseReason ?? null,
+            gracePeriodDays: partnerEntity.subscription.gracePeriodDays ?? 7,
+            retryAttempts: partnerEntity.subscription.retryAttempts ?? 0,
+            maxRetryAttempts: partnerEntity.subscription.maxRetryAttempts ?? 3,
+            discountPercent: partnerEntity.subscription.discountPercent
+              ? Number(partnerEntity.subscription.discountPercent)
+              : null,
+            discountCode: partnerEntity.subscription.discountCode ?? null,
             lastPaymentDate: partnerEntity.subscription.lastPaymentDate
               ? new Date(partnerEntity.subscription.lastPaymentDate)
               : null,
@@ -139,6 +158,8 @@ export class GetPartnerHandler {
               partnerEntity.subscription.autoRenew !== undefined
                 ? partnerEntity.subscription.autoRenew
                 : true,
+            createdAt: partnerEntity.subscription.createdAt,
+            updatedAt: partnerEntity.subscription.updatedAt,
           };
           console.log('[GetPartnerHandler] Subscription DTO creado exitosamente');
         } catch (subscriptionError) {
@@ -210,6 +231,7 @@ export class GetPartnerHandler {
           partner.paymentMethod || '',
           partner.billingEmail || '',
           partner.domain || '',
+          partner.quickSearchCode || '',
           partner.status || 'active',
           partner.createdAt || new Date(),
           partner.updatedAt || new Date(),

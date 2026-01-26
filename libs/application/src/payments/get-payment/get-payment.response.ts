@@ -220,9 +220,8 @@ export class GetPaymentResponse {
 
   @ApiProperty({
     description: 'Lista de aplicaciones de este payment (payments derivados)',
-    type: 'object',
+    type: Object,
     isArray: true,
-    required: false,
   })
   applications?: Array<{
     id: number;
@@ -234,8 +233,7 @@ export class GetPaymentResponse {
 
   @ApiProperty({
     description: 'Resumen simplificado para UI: agrupa información de aplicación',
-    type: 'object',
-    required: false,
+    type: Object,
   })
   summary?: {
     totalAmount: number;

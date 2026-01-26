@@ -46,5 +46,9 @@ export * from './pricing';
 // Utils
 export * from './utils/slug.util';
 export * from './utils/qr-code.util';
+export * from './utils/partner-code.util';
 export * from './utils/math.util';
 export * from './utils/subscription-event.util';
+export * from './utils/color.util';
+export * from './utils/password.util';
+export * from './utils/name.util';

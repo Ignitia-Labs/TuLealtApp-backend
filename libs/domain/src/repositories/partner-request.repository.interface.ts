@@ -36,4 +36,9 @@ export interface IPartnerRequestRepository {
    * Actualiza una solicitud existente
    */
   update(request: PartnerRequest): Promise<PartnerRequest>;
+
+  /**
+   * Elimina una solicitud por su ID
+   */
+  delete(id: number): Promise<void>;
 }

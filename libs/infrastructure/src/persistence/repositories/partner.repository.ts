@@ -96,6 +96,24 @@ export class PartnerRepository implements IPartnerRepository {
     );
   }
 
+  async findByQuickSearchCode(code: string): Promise<Partner | null> {
+    const partnerEntity = await this.partnerRepository.findOne({
+      where: { quickSearchCode: code },
+      relations: ['subscription', 'limits', 'stats'],
+    });
+
+    if (!partnerEntity) {
+      return null;
+    }
+
+    return PartnerMapper.toDomain(
+      partnerEntity,
+      partnerEntity.subscription,
+      partnerEntity.limits,
+      partnerEntity.stats,
+    );
+  }
+
   async findAll(): Promise<Partner[]> {
     const partnerEntities = await this.partnerRepository.find({
       relations: ['subscription', 'limits', 'stats'],

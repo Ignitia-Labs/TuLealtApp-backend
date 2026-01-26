@@ -182,6 +182,18 @@ export class CreatePartnerRequestRequest {
   subscriptionCurrencyId?: number | null;
 
   @ApiProperty({
+    description:
+      'Días de prueba gratuita personalizados para el partner. Si no se proporciona, se obtendrá del plan de precios (planId). Si se proporciona, este valor tendrá prioridad sobre el del plan.',
+    example: 7,
+    type: Number,
+    required: false,
+    nullable: true,
+  })
+  @IsNumber()
+  @IsOptional()
+  trialDays?: number | null;
+
+  @ApiProperty({
     description: 'Razón social',
     example: 'La Cocina del Sol S.A.',
     type: String,

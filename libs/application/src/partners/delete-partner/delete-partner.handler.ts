@@ -223,7 +223,7 @@ export class DeletePartnerHandler {
               description: tenantEntity.description || null,
               logo: tenantEntity.logo || null,
               category: tenantEntity.category || '',
-              currencyId: tenantEntity.currencyId || '',
+              currencyId: tenantEntity.currencyId || 0,
               primaryColor: tenantEntity.primaryColor || '',
               secondaryColor: tenantEntity.secondaryColor || '',
               pointsExpireDays: tenantEntity.pointsExpireDays || 0,

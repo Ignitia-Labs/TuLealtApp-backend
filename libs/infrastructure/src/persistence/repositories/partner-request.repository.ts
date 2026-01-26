@@ -68,4 +68,8 @@ export class PartnerRequestRepository implements IPartnerRequestRepository {
     const updatedEntity = await this.partnerRequestRepository.save(entity);
     return PartnerRequestMapper.toDomain(updatedEntity);
   }
+
+  async delete(id: number): Promise<void> {
+    await this.partnerRequestRepository.delete(id);
+  }
 }

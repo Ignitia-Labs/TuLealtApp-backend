@@ -58,10 +58,10 @@ export class GetTenantResponse {
 
   @ApiProperty({
     description: 'ID de la moneda',
-    example: 'currency-8',
-    type: String,
+    example: 8,
+    type: Number,
   })
-  currencyId: string;
+  currencyId: number;
 
   @ApiProperty({
     description: 'Color primario',
@@ -148,7 +148,7 @@ export class GetTenantResponse {
     logo: string | null,
     banner: string | null,
     category: string,
-    currencyId: string,
+    currencyId: number,
     primaryColor: string,
     secondaryColor: string,
     pointsExpireDays: number,

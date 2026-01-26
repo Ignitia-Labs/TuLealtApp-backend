@@ -14,12 +14,15 @@
     "start:admin": "nest start admin-api --watch",
     "start:partner": "nest start partner-api --watch",
     "start:customer": "nest start customer-api --watch",
+    "start:all": "concurrently \"npm run start:admin\" \"npm run start:partner\" \"npm run start:customer\" --names \"admin,partner,customer\" --prefix-colors \"blue,green,yellow\"",
     "start:dev:admin": "nest start admin-api --watch --debug",
     "start:dev:partner": "nest start partner-api --watch --debug",
     "start:dev:customer": "nest start customer-api --watch --debug",
+    "start:dev:all": "concurrently \"npm run start:dev:admin\" \"npm run start:dev:partner\" \"npm run start:dev:customer\" --names \"admin,partner,customer\" --prefix-colors \"blue,green,yellow\"",
     "start:prod:admin": "node dist/apps/admin-api/main",
     "start:prod:partner": "node dist/apps/partner-api/main",
     "start:prod:customer": "node dist/apps/customer-api/main",
+    "start:prod:all": "concurrently \"npm run start:prod:admin\" \"npm run start:prod:partner\" \"npm run start:prod:customer\" --names \"admin,partner,customer\" --prefix-colors \"blue,green,yellow\"",
     "lint": "eslint \"{apps,libs}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -59,19 +62,23 @@
     "script:migrate-profile-permissions": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/migrate-profile-permissions.ts",
     "script:validate-customer-partners": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/validate-customer-partners-migration.ts",
     "script:clean-db": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/clean-database.ts",
-    "script:reset-db": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/reset-database.ts"
+    "script:reset-db": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/reset-database.ts",
+    "security:audit": "npm audit",
+    "security:fix": "npm audit fix",
+    "security:fix-force": "npm audit fix --force",
+    "security:check": "npm audit --audit-level=moderate"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.956.0",
     "@aws-sdk/s3-request-presigner": "^3.956.0",
-    "@nestjs/common": "^10.0.0",
-    "@nestjs/core": "^10.0.0",
+    "@nestjs/common": "^11.0.16",
+    "@nestjs/core": "^11.0.16",
     "@nestjs/jwt": "^11.0.1",
     "@nestjs/passport": "^11.0.5",
-    "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/platform-express": "^11.0.16",
     "@nestjs/schedule": "^6.1.0",
-    "@nestjs/swagger": "^7.1.0",
-    "@nestjs/typeorm": "^10.0.0",
+    "@nestjs/swagger": "^11.2.5",
+    "@nestjs/typeorm": "^11.0.0",
     "@types/nodemailer": "^7.0.4",
     "@types/passport-jwt": "^4.0.1",
     "@types/pdfkit": "^0.17.4",
@@ -91,9 +98,9 @@
     "typeorm": "^0.3.17"
   },
   "devDependencies": {
-    "@nestjs/cli": "^10.0.0",
-    "@nestjs/schematics": "^10.0.0",
-    "@nestjs/testing": "^10.0.0",
+    "@nestjs/cli": "^11.0.16",
+    "@nestjs/schematics": "^11.0.0",
+    "@nestjs/testing": "^11.0.16",
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^4.17.17",
     "@types/jest": "^29.5.2",
@@ -102,6 +109,7 @@
     "@types/stripe": "^8.0.416",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "concurrently": "^8.2.2",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^5.0.0",
@@ -114,6 +122,10 @@
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.1.3"
+  },
+  "overrides": {
+    "lodash": "^4.17.23",
+    "tar": "^7.5.6"
   },
   "jest": {
     "moduleFileExtensions": [

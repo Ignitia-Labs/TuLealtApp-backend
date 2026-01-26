@@ -228,6 +228,10 @@ export * from './partner-requests/update-partner-request/update-partner-request.
 export * from './partner-requests/update-partner-request/update-partner-request.request';
 export * from './partner-requests/update-partner-request/update-partner-request.response';
 
+export * from './partner-requests/delete-partner-request/delete-partner-request.handler';
+export * from './partner-requests/delete-partner-request/delete-partner-request.request';
+export * from './partner-requests/delete-partner-request/delete-partner-request.response';
+
 // Tenants Handlers
 export * from './tenants/create-tenant/create-tenant.handler';
 export * from './tenants/create-tenant/create-tenant.request';

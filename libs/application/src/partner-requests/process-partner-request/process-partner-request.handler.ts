@@ -1,13 +1,33 @@
-import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable, Inject, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
+import { Repository, DataSource, EntityManager, In } from 'typeorm';
 import {
   IPartnerRequestRepository,
   IPartnerRepository,
   ISubscriptionEventRepository,
+  ICountryRepository,
+  IUserRepository,
   SubscriptionEvent,
+  Tenant,
+  TenantFeatures,
+  Branch,
+  User,
 } from '@libs/domain';
-import { PartnerSubscriptionEntity } from '@libs/infrastructure';
+import {
+  PartnerSubscriptionEntity,
+  PartnerEntity,
+  PartnerSubscriptionUsageEntity,
+  TenantEntity,
+  TenantFeaturesEntity,
+  BranchEntity,
+  PartnerStatsEntity,
+  UserEntity,
+  TenantMapper,
+  BranchMapper,
+  UserMapper,
+} from '@libs/infrastructure';
+import { generateColorsFromString, generateRandomPassword, extractFirstNameAndLastName } from '@libs/shared';
+import * as bcrypt from 'bcrypt';
 import { CreatePartnerHandler } from '../../partners/create-partner/create-partner.handler';
 import { CreatePartnerRequest } from '../../partners/create-partner/create-partner.request';
 import { ProcessPartnerRequestRequest } from './process-partner-request.request';
@@ -25,8 +45,14 @@ export class ProcessPartnerRequestHandler {
     private readonly partnerRepository: IPartnerRepository,
     @Inject('ISubscriptionEventRepository')
     private readonly subscriptionEventRepository: ISubscriptionEventRepository,
+    @Inject('ICountryRepository')
+    private readonly countryRepository: ICountryRepository,
+    @Inject('IUserRepository')
+    private readonly userRepository: IUserRepository,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
     private readonly createPartnerHandler: CreatePartnerHandler,
   ) {}
 
@@ -46,14 +72,34 @@ export class ProcessPartnerRequestHandler {
       throw new BadRequestException('No se puede procesar una solicitud rechazada');
     }
 
+    // Validar que fiscalAddress no sea null (necesario para crear branch)
+    if (!partnerRequest.fiscalAddress) {
+      throw new BadRequestException(
+        'La dirección fiscal es requerida para crear la sucursal principal',
+      );
+    }
+
+    // Validar que countryId no sea null (necesario para crear branch)
+    if (!partnerRequest.countryId) {
+      throw new BadRequestException('El país es requerido para crear la sucursal principal');
+    }
+
+    // Si se proporciona trialDays en el request, actualizar la solicitud antes de procesar
+    let updatedPartnerRequest = partnerRequest;
+    if (request.trialDays !== undefined && request.trialDays !== null) {
+      // Actualizar trialDays en la solicitud
+      updatedPartnerRequest = partnerRequest.updateTrialDays(request.trialDays, null);
+      await this.partnerRequestRepository.update(updatedPartnerRequest);
+    }
+
     // Usar directamente el countryId del partnerRequest
-    const countryId = partnerRequest.countryId;
+    const countryId = updatedPartnerRequest.countryId;
 
     // Generar dominio si no se proporciona
     const domain =
       request.domain ||
-      partnerRequest.email.split('@')[1] ||
-      `${partnerRequest.name.toLowerCase().replace(/\s+/g, '-')}.gt`;
+      updatedPartnerRequest.email.split('@')[1] ||
+      `${updatedPartnerRequest.name.toLowerCase().replace(/\s+/g, '-')}.gt`;
 
     // Validar que el dominio no exista
     const existingPartnerByDomain = await this.partnerRepository.findByDomain(domain);
@@ -61,35 +107,44 @@ export class ProcessPartnerRequestHandler {
       throw new BadRequestException(`Ya existe un partner con el dominio: ${domain}`);
     }
 
+    // Obtener trialDays: usar el del request si se proporciona, sino el de la solicitud actualizada
+    const trialDaysToUse =
+      request.trialDays !== undefined && request.trialDays !== null
+        ? request.trialDays
+        : updatedPartnerRequest.trialDays;
+
     // Crear el DTO para crear el partner
     const createPartnerRequest = new CreatePartnerRequest();
-    createPartnerRequest.name = partnerRequest.name;
-    createPartnerRequest.responsibleName = partnerRequest.responsibleName;
-    createPartnerRequest.email = partnerRequest.email;
-    createPartnerRequest.phone = partnerRequest.phone;
+    createPartnerRequest.name = updatedPartnerRequest.name;
+    createPartnerRequest.responsibleName = updatedPartnerRequest.responsibleName;
+    createPartnerRequest.email = updatedPartnerRequest.email;
+    createPartnerRequest.phone = updatedPartnerRequest.phone;
     createPartnerRequest.countryId = countryId;
-    createPartnerRequest.city = partnerRequest.city;
-    createPartnerRequest.plan = partnerRequest.plan;
-    createPartnerRequest.logo = partnerRequest.logo;
-    createPartnerRequest.category = partnerRequest.category;
-    createPartnerRequest.branchesNumber = partnerRequest.branchesNumber;
-    createPartnerRequest.website = partnerRequest.website;
-    createPartnerRequest.socialMedia = partnerRequest.socialMedia;
-    createPartnerRequest.rewardType = partnerRequest.rewardType;
+    createPartnerRequest.city = updatedPartnerRequest.city;
+    createPartnerRequest.plan = updatedPartnerRequest.plan;
+    createPartnerRequest.logo = updatedPartnerRequest.logo;
+    createPartnerRequest.category = updatedPartnerRequest.category;
+    createPartnerRequest.branchesNumber = updatedPartnerRequest.branchesNumber;
+    createPartnerRequest.website = updatedPartnerRequest.website;
+    createPartnerRequest.socialMedia = updatedPartnerRequest.socialMedia;
+    createPartnerRequest.rewardType = updatedPartnerRequest.rewardType;
     // currencyId es number tanto en dominio como en request
-    createPartnerRequest.currencyId = partnerRequest.currencyId;
-    createPartnerRequest.businessName = partnerRequest.businessName;
-    createPartnerRequest.taxId = partnerRequest.taxId;
-    createPartnerRequest.fiscalAddress = partnerRequest.fiscalAddress;
-    createPartnerRequest.paymentMethod = partnerRequest.paymentMethod;
-    createPartnerRequest.billingEmail = partnerRequest.billingEmail;
+    createPartnerRequest.currencyId = updatedPartnerRequest.currencyId;
+    createPartnerRequest.businessName = updatedPartnerRequest.businessName;
+    createPartnerRequest.taxId = updatedPartnerRequest.taxId;
+    createPartnerRequest.fiscalAddress = updatedPartnerRequest.fiscalAddress;
+    createPartnerRequest.paymentMethod = updatedPartnerRequest.paymentMethod;
+    createPartnerRequest.billingEmail = updatedPartnerRequest.billingEmail;
     createPartnerRequest.domain = domain;
+    createPartnerRequest.subscriptionTrialDays = trialDaysToUse;
 
     // Usar planId del partnerRequest si está disponible, sino usar el del request o generar uno basado en el plan
     // subscriptionPlanId debe ser un string (puede ser el ID convertido a string o un slug)
     createPartnerRequest.subscriptionPlanId =
       request.subscriptionPlanId ||
-      (partnerRequest.planId ? `plan-${partnerRequest.planId}` : `plan-${partnerRequest.plan}`);
+      (updatedPartnerRequest.planId
+        ? `plan-${updatedPartnerRequest.planId}`
+        : `plan-${updatedPartnerRequest.plan}`);
 
     createPartnerRequest.subscriptionStartDate =
       request.subscriptionStartDate || new Date().toISOString();
@@ -101,14 +156,14 @@ export class ProcessPartnerRequestHandler {
       request.subscriptionAutoRenew !== undefined ? request.subscriptionAutoRenew : true;
     // Usar billingFrequency del partnerRequest si está disponible, sino usar el del request o 'monthly' por defecto
     createPartnerRequest.subscriptionBillingFrequency =
-      request.subscriptionBillingFrequency || partnerRequest.billingFrequency || 'monthly';
+      request.subscriptionBillingFrequency || updatedPartnerRequest.billingFrequency || 'monthly';
 
     // Usar subscriptionCurrencyId del partnerRequest si está disponible, sino usar el currencyId del partnerRequest
     // Si se proporciona en el request, tiene prioridad
     createPartnerRequest.subscriptionCurrencyId =
       request.subscriptionCurrencyId ??
-      partnerRequest.subscriptionCurrencyId ??
-      partnerRequest.currencyId;
+      updatedPartnerRequest.subscriptionCurrencyId ??
+      updatedPartnerRequest.currencyId;
 
     // Configurar valores de IVA (si se proporcionan en el request, usarlos; sino usar valores por defecto)
     createPartnerRequest.subscriptionIncludeTax = request.subscriptionIncludeTax ?? false;
@@ -130,49 +185,383 @@ export class ProcessPartnerRequestHandler {
     createPartnerRequest.limitsMaxCustomers = request.limitsMaxCustomers || 5000;
     createPartnerRequest.limitsMaxRewards = request.limitsMaxRewards || 50;
 
-    // Crear el partner
-    const createPartnerResponse = await this.createPartnerHandler.execute(createPartnerRequest);
+    // Envolver toda la lógica en una transacción para garantizar atomicidad
+    return await this.dataSource.transaction(async (manager) => {
+      // Crear el partner
+      const createPartnerResponse = await this.createPartnerHandler.execute(createPartnerRequest);
 
-    // Obtener la suscripción creada para el partner
-    const subscriptionEntity = await this.subscriptionRepository.findOne({
-      where: { partnerId: createPartnerResponse.id },
+      // Obtener la suscripción creada para el partner usando manager
+      const subscriptionEntity = await manager.findOne(PartnerSubscriptionEntity, {
+        where: { partnerId: createPartnerResponse.id },
+        order: { createdAt: 'DESC' },
+      });
+
+      // Registrar evento de creación de suscripción si existe
+      if (subscriptionEntity) {
+        const subscriptionEvent = SubscriptionEvent.create(
+          subscriptionEntity.id,
+          createPartnerResponse.id,
+          'created',
+          'Suscripción creada',
+          `Suscripción creada para el partner ${createPartnerResponse.name} con plan ${createPartnerRequest.subscriptionPlanId}`,
+          new Date(),
+          null, // paymentId
+          null, // invoiceId
+          {
+            partnerRequestId: partnerRequest.id,
+            planId: createPartnerRequest.subscriptionPlanId,
+            planType: partnerRequest.plan,
+            billingFrequency: createPartnerRequest.subscriptionBillingFrequency || 'monthly',
+            billingAmount: createPartnerRequest.subscriptionLastPaymentAmount || 0,
+          },
+        );
+
+        await this.subscriptionEventRepository.save(subscriptionEvent);
+      }
+
+      // Generar colores desde el nombre del partner
+      const colors = generateColorsFromString(updatedPartnerRequest.name);
+
+      // Obtener nombre del país
+      const country = await this.countryRepository.findById(updatedPartnerRequest.countryId!);
+      if (!country) {
+        throw new NotFoundException(
+          `Country with ID ${updatedPartnerRequest.countryId} not found`,
+        );
+      }
+
+      // Crear tenant automáticamente
+      const tenantEntity = await this.createTenantWithManager(
+        manager,
+        createPartnerResponse.id,
+        updatedPartnerRequest,
+        colors,
+      );
+
+      // Crear branch automáticamente
+      await this.createBranchWithManager(
+        manager,
+        tenantEntity.id,
+        updatedPartnerRequest,
+        country.name,
+      );
+
+      // Crear usuario partner automáticamente
+      await this.createPartnerUserWithManager(
+        manager,
+        createPartnerResponse.id,
+        updatedPartnerRequest,
+      );
+
+      // Marcar la solicitud como enrolled usando manager si es necesario
+      // Nota: El repositorio puede usar su propia conexión, pero como estamos en transacción,
+      // TypeORM debería manejar esto correctamente
+      const enrolledRequest = updatedPartnerRequest.markEnrolled();
+      await this.partnerRequestRepository.update(enrolledRequest);
+
+      return new ProcessPartnerRequestResponse(
+        createPartnerResponse.id,
+        updatedPartnerRequest.id,
+        'enrolled',
+        createPartnerResponse.name,
+        createPartnerResponse.email,
+        createPartnerResponse.domain,
+        createPartnerResponse.quickSearchCode,
+      );
+    });
+  }
+
+  /**
+   * Crea un tenant usando el EntityManager de la transacción
+   */
+  private async createTenantWithManager(
+    manager: EntityManager,
+    partnerId: number,
+    partnerRequest: any,
+    colors: { primary: string; secondary: string },
+  ): Promise<TenantEntity> {
+    // Validar que el partner exista
+    const partnerEntity = await manager.findOne(PartnerEntity, {
+      where: { id: partnerId },
+    });
+    if (!partnerEntity) {
+      throw new NotFoundException(`Partner with ID ${partnerId} not found`);
+    }
+
+    // Obtener la suscripción del partner para usar su currencyId
+    const subscriptionEntity = await manager.findOne(PartnerSubscriptionEntity, {
+      where: { partnerId },
       order: { createdAt: 'DESC' },
     });
 
-    // Registrar evento de creación de suscripción si existe
-    if (subscriptionEntity) {
-      const subscriptionEvent = SubscriptionEvent.create(
-        subscriptionEntity.id,
-        createPartnerResponse.id,
-        'created',
-        'Suscripción creada',
-        `Suscripción creada para el partner ${createPartnerResponse.name} con plan ${createPartnerRequest.subscriptionPlanId}`,
-        new Date(),
-        null, // paymentId
-        null, // invoiceId
-        {
-          partnerRequestId: partnerRequest.id,
-          planId: createPartnerRequest.subscriptionPlanId,
-          planType: partnerRequest.plan,
-          billingFrequency: createPartnerRequest.subscriptionBillingFrequency || 'monthly',
-          billingAmount: createPartnerRequest.subscriptionLastPaymentAmount || 0,
-        },
+    if (!subscriptionEntity) {
+      throw new NotFoundException(
+        `Subscription not found for partner with ID ${partnerId}`,
       );
-
-      await this.subscriptionEventRepository.save(subscriptionEvent);
     }
 
-    // Marcar la solicitud como enrolled
-    const enrolledRequest = partnerRequest.markEnrolled();
-    await this.partnerRequestRepository.update(enrolledRequest);
+    // Usar el currencyId de la suscripción (puede ser null)
+    const subscriptionCurrencyId = subscriptionEntity.currencyId;
 
-    return new ProcessPartnerRequestResponse(
-      createPartnerResponse.id,
-      partnerRequest.id,
-      'enrolled',
-      createPartnerResponse.name,
-      createPartnerResponse.email,
-      createPartnerResponse.domain,
+    if (!subscriptionCurrencyId) {
+      throw new BadRequestException(
+        `Subscription currencyId is required to create tenant for partner ${partnerId}`,
+      );
+    }
+
+    // Crear entidad de dominio del tenant usando el currencyId directamente como number
+    const tenant = Tenant.create(
+      partnerId,
+      partnerRequest.name,
+      partnerRequest.category,
+      subscriptionCurrencyId,
+      colors.primary,
+      colors.secondary,
+      365, // pointsExpireDays
+      100, // minPointsToRedeem
+      null, // description
+      partnerRequest.logo || null, // logo
+      null, // banner
+      'active',
     );
+
+    // Convertir a entidad de persistencia
+    const tenantEntity = TenantMapper.toPersistence(tenant);
+
+    // Guardar usando manager
+    const savedTenantEntity = await manager.save(TenantEntity, tenantEntity);
+
+    // Crear y guardar las características
+    const features = TenantFeatures.create(
+      savedTenantEntity.id,
+      true, // qrScanning
+      true, // offlineMode
+      true, // referralProgram
+      true, // birthdayRewards
+    );
+    const featuresEntity = TenantMapper.featuresToPersistence(features);
+    featuresEntity.tenantId = savedTenantEntity.id;
+    await manager.save(TenantFeaturesEntity, featuresEntity);
+
+    // Actualizar estadísticas del partner usando manager
+    await this.updatePartnerStatsWithManager(manager, partnerId);
+
+    // Incrementar contador de tenants en uso de suscripción
+    // Reutilizar subscriptionEntity obtenido anteriormente
+    if (subscriptionEntity) {
+      const usageRepository = manager.getRepository(PartnerSubscriptionUsageEntity);
+      const existingUsage = await usageRepository.findOne({
+        where: { partnerSubscriptionId: subscriptionEntity.id },
+      });
+
+      if (existingUsage) {
+        await usageRepository.increment(
+          { partnerSubscriptionId: subscriptionEntity.id },
+          'tenantsCount',
+          1,
+        );
+      } else {
+        // Crear registro de uso si no existe
+        const usageEntity = usageRepository.create({
+          partnerSubscriptionId: subscriptionEntity.id,
+          tenantsCount: 1,
+          branchesCount: 0,
+          customersCount: 0,
+          rewardsCount: 0,
+        });
+        await usageRepository.save(usageEntity);
+      }
+    }
+
+    return savedTenantEntity;
+  }
+
+  /**
+   * Crea una branch usando el EntityManager de la transacción
+   */
+  private async createBranchWithManager(
+    manager: EntityManager,
+    tenantId: number,
+    partnerRequest: any,
+    countryName: string,
+  ): Promise<BranchEntity> {
+    // Validar que el tenant exista
+    const tenantEntity = await manager.findOne(TenantEntity, {
+      where: { id: tenantId },
+    });
+    if (!tenantEntity) {
+      throw new NotFoundException(`Tenant with ID ${tenantId} not found`);
+    }
+
+    // Validar que fiscalAddress no sea null
+    if (!partnerRequest.fiscalAddress) {
+      throw new BadRequestException('Fiscal address is required to create branch');
+    }
+
+    // Crear entidad de dominio de la branch
+    const branch = Branch.create(
+      tenantId,
+      'Sucursal Principal', // name
+      partnerRequest.fiscalAddress, // address
+      partnerRequest.city, // city
+      countryName, // country
+      partnerRequest.phone || null, // phone
+      partnerRequest.email || null, // email
+      'active',
+    );
+
+    // Convertir a entidad de persistencia
+    const branchEntity = BranchMapper.toPersistence(branch);
+
+    // Guardar usando manager
+    const savedBranchEntity = await manager.save(BranchEntity, branchEntity);
+
+    // Actualizar estadísticas del partner usando manager
+    await this.updatePartnerStatsWithManager(manager, tenantEntity.partnerId);
+
+    // Incrementar contador de branches en uso de suscripción
+    const subscriptionEntity = await manager.findOne(PartnerSubscriptionEntity, {
+      where: { partnerId: tenantEntity.partnerId },
+      order: { createdAt: 'DESC' },
+    });
+    if (subscriptionEntity) {
+      const usageRepository = manager.getRepository(PartnerSubscriptionUsageEntity);
+      const existingUsage = await usageRepository.findOne({
+        where: { partnerSubscriptionId: subscriptionEntity.id },
+      });
+
+      if (existingUsage) {
+        await usageRepository.increment(
+          { partnerSubscriptionId: subscriptionEntity.id },
+          'branchesCount',
+          1,
+        );
+      } else {
+        // Crear registro de uso si no existe
+        const usageEntity = usageRepository.create({
+          partnerSubscriptionId: subscriptionEntity.id,
+          tenantsCount: 0,
+          branchesCount: 1,
+          customersCount: 0,
+          rewardsCount: 0,
+        });
+        await usageRepository.save(usageEntity);
+      }
+    }
+
+    return savedBranchEntity;
+  }
+
+  /**
+   * Actualiza las estadísticas del partner usando el EntityManager de la transacción
+   */
+  private async updatePartnerStatsWithManager(
+    manager: EntityManager,
+    partnerId: number,
+  ): Promise<void> {
+    // Contar tenants del partner
+    const tenantsCount = await manager.count(TenantEntity, {
+      where: { partnerId },
+    });
+
+    // Contar branches de todos los tenants del partner
+    const tenants = await manager.find(TenantEntity, {
+      where: { partnerId },
+      select: ['id'],
+    });
+    const tenantIds = tenants.map((t) => t.id);
+    const branchesCount =
+      tenantIds.length > 0
+        ? await manager.count(BranchEntity, {
+            where: { tenantId: In(tenantIds) },
+          })
+        : 0;
+
+    // Obtener o crear las stats del partner
+    let statsEntity = await manager.findOne(PartnerStatsEntity, {
+      where: { partnerId },
+    });
+
+    if (!statsEntity) {
+      // Crear stats si no existen
+      statsEntity = new PartnerStatsEntity();
+      statsEntity.partnerId = partnerId;
+      statsEntity.tenantsCount = 0;
+      statsEntity.branchesCount = 0;
+      statsEntity.customersCount = 0;
+      statsEntity.rewardsCount = 0;
+    }
+
+    // Actualizar los conteos
+    statsEntity.tenantsCount = tenantsCount;
+    statsEntity.branchesCount = branchesCount;
+    // customersCount y rewardsCount se mantienen (se actualizarán por otros procesos)
+
+    await manager.save(PartnerStatsEntity, statsEntity);
+  }
+
+  /**
+   * Crea un usuario partner usando el EntityManager de la transacción
+   */
+  private async createPartnerUserWithManager(
+    manager: EntityManager,
+    partnerId: number,
+    partnerRequest: any,
+  ): Promise<UserEntity> {
+    // Validar que el partner exista
+    const partnerEntity = await manager.findOne(PartnerEntity, {
+      where: { id: partnerId },
+    });
+    if (!partnerEntity) {
+      throw new NotFoundException(`Partner with ID ${partnerId} not found`);
+    }
+
+    // Validar que el email no exista
+    const existingUser = await manager.findOne(UserEntity, {
+      where: { email: partnerRequest.email },
+    });
+    if (existingUser) {
+      throw new ConflictException('User with this email already exists');
+    }
+
+    // Determinar nombre completo (priorizar responsibleName sobre name)
+    const fullName =
+      (partnerRequest.responsibleName && partnerRequest.responsibleName.trim()) ||
+      (partnerRequest.name && partnerRequest.name.trim()) ||
+      '';
+
+    // Extraer firstName y lastName
+    const { firstName, lastName } = extractFirstNameAndLastName(fullName);
+
+    // Generar contraseña temporal aleatoria
+    const temporaryPassword = generateRandomPassword(12);
+
+    // Generar hash de la contraseña
+    const passwordHash = await bcrypt.hash(temporaryPassword, 10);
+
+    // Crear entidad de dominio del usuario
+    const user = User.create(
+      partnerRequest.email,
+      fullName || 'Usuario Partner', // name
+      firstName,
+      lastName,
+      partnerRequest.phone,
+      passwordHash,
+      ['PARTNER'], // roles
+      null, // profile
+      partnerId, // partnerId
+      null, // tenantId
+      null, // branchId
+      null, // avatar
+      'active', // status
+    );
+
+    // Convertir a entidad de persistencia
+    const userEntity = UserMapper.toPersistence(user);
+
+    // Guardar usando manager
+    const savedUserEntity = await manager.save(UserEntity, userEntity);
+
+    return savedUserEntity;
   }
 }

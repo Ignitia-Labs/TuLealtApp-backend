@@ -92,6 +92,15 @@ export class GetPartnerRequestResponse {
   billingFrequency: 'monthly' | 'quarterly' | 'semiannual' | 'annual' | null;
 
   @ApiProperty({
+    description:
+      'Días de prueba gratuita personalizados para el partner. Si es null, se usará el valor del plan de precios.',
+    example: 7,
+    type: Number,
+    nullable: true,
+  })
+  trialDays: number | null;
+
+  @ApiProperty({
     description: 'Logo',
     example: 'https://ui-avatars.com/api/?name=Cocina+Sol&background=f97316&color=fff',
     type: String,
@@ -235,6 +244,7 @@ export class GetPartnerRequestResponse {
     this.plan = partnerRequest.plan;
     this.planId = partnerRequest.planId;
     this.billingFrequency = partnerRequest.billingFrequency;
+    this.trialDays = partnerRequest.trialDays;
     this.logo = partnerRequest.logo;
     this.category = partnerRequest.category;
     this.branchesNumber = partnerRequest.branchesNumber;

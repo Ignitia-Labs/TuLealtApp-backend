@@ -33,6 +33,13 @@ export class CreatePartnerResponse {
   domain: string;
 
   @ApiProperty({
+    description: 'Código único de búsqueda rápida para el partner (para QR code)',
+    example: 'PARTNER-ABC234',
+    type: String,
+  })
+  quickSearchCode: string;
+
+  @ApiProperty({
     description: 'Plan del partner',
     example: 'conecta',
     type: String,
@@ -58,6 +65,7 @@ export class CreatePartnerResponse {
     name: string,
     email: string,
     domain: string,
+    quickSearchCode: string,
     plan: string,
     status: string,
     createdAt: Date,
@@ -66,6 +74,7 @@ export class CreatePartnerResponse {
     this.name = name;
     this.email = email;
     this.domain = domain;
+    this.quickSearchCode = quickSearchCode;
     this.plan = plan;
     this.status = status;
     this.createdAt = createdAt;

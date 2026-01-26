@@ -14,7 +14,7 @@ export class TenantMapper {
       persistenceEntity.partnerId,
       persistenceEntity.name,
       persistenceEntity.category,
-      persistenceEntity.currencyId.toString(),
+      persistenceEntity.currencyId,
       persistenceEntity.primaryColor,
       persistenceEntity.secondaryColor,
       persistenceEntity.pointsExpireDays,
@@ -41,7 +41,7 @@ export class TenantMapper {
     entity.logo = domainEntity.logo;
     entity.banner = domainEntity.banner;
     entity.category = domainEntity.category;
-    entity.currencyId = parseInt(domainEntity.currencyId, 10) || 0;
+    entity.currencyId = domainEntity.currencyId;
     entity.primaryColor = domainEntity.primaryColor;
     entity.secondaryColor = domainEntity.secondaryColor;
     entity.pointsExpireDays = domainEntity.pointsExpireDays;

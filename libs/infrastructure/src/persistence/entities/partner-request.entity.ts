@@ -95,6 +95,9 @@ export class PartnerRequestEntity {
   @Column('int', { nullable: true })
   subscriptionCurrencyId: number | null;
 
+  @Column('int', { nullable: true })
+  trialDays: number | null;
+
   @Column('varchar', { length: 255 })
   businessName: string;
 

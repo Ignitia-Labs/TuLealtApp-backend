@@ -34,6 +34,7 @@ export class PartnerMapper {
       persistenceEntity.paymentMethod || '',
       persistenceEntity.billingEmail || '',
       persistenceEntity.domain || '',
+      persistenceEntity.quickSearchCode || '',
       persistenceEntity.logo || null,
       persistenceEntity.banner || null,
       persistenceEntity.branchesNumber || 0,
@@ -77,6 +78,7 @@ export class PartnerMapper {
     entity.paymentMethod = domainEntity.paymentMethod;
     entity.billingEmail = domainEntity.billingEmail;
     entity.domain = domainEntity.domain;
+    entity.quickSearchCode = domainEntity.quickSearchCode;
     entity.status = domainEntity.status;
     if (domainEntity.id > 0) {
       entity.createdAt = domainEntity.createdAt;

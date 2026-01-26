@@ -1,5 +1,9 @@
 import { Injectable, Inject, BadRequestException } from '@nestjs/common';
-import { IPartnerRequestRepository, PartnerRequest } from '@libs/domain';
+import {
+  IPartnerRequestRepository,
+  IPricingPlanRepository,
+  PartnerRequest,
+} from '@libs/domain';
 import { CreatePartnerRequestRequest } from './create-partner-request.request';
 import { CreatePartnerRequestResponse } from './create-partner-request.response';
 
@@ -11,6 +15,8 @@ export class CreatePartnerRequestHandler {
   constructor(
     @Inject('IPartnerRequestRepository')
     private readonly partnerRequestRepository: IPartnerRequestRepository,
+    @Inject('IPricingPlanRepository')
+    private readonly pricingPlanRepository: IPricingPlanRepository,
   ) {}
 
   async execute(
@@ -27,6 +33,17 @@ export class CreatePartnerRequestHandler {
       throw new BadRequestException(
         'Ya existe una solicitud pendiente o en progreso con este email',
       );
+    }
+
+    // Obtener trialDays: si se proporciona en el request, usarlo; si no, obtenerlo del plan
+    let trialDays: number | null = request.trialDays ?? null;
+
+    if (trialDays === null && request.planId) {
+      // Intentar obtener trialDays del plan de precios
+      const pricingPlan = await this.pricingPlanRepository.findById(request.planId);
+      if (pricingPlan) {
+        trialDays = pricingPlan.trialDays;
+      }
     }
 
     // Crear la entidad de dominio
@@ -57,6 +74,7 @@ export class CreatePartnerRequestHandler {
       request.planId || null,
       request.billingFrequency || null,
       request.subscriptionCurrencyId || null,
+      trialDays,
       source,
     );
 

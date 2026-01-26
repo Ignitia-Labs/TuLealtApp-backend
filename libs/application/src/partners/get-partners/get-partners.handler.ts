@@ -45,7 +45,7 @@ export class GetPartnersHandler {
         partnerEntity.stats,
       );
 
-      // Mapear subscription
+      // Mapear subscription con todos los campos
       const subscriptionDto: PartnerSubscriptionSwaggerDto | null = partnerEntity.subscription
         ? {
             planId: partnerEntity.subscription.planId,
@@ -54,17 +54,38 @@ export class GetPartnersHandler {
             renewalDate: partnerEntity.subscription.renewalDate,
             status: partnerEntity.subscription.status,
             billingFrequency: partnerEntity.subscription.billingFrequency,
-            billingAmount: partnerEntity.subscription.billingAmount,
-            currency: partnerEntity.subscription.currency,
+            billingAmount: Number(partnerEntity.subscription.billingAmount) || 0,
+            includeTax: partnerEntity.subscription.includeTax ?? false,
+            taxPercent: partnerEntity.subscription.taxPercent
+              ? Number(partnerEntity.subscription.taxPercent)
+              : null,
+            basePrice: Number(partnerEntity.subscription.basePrice) || 0,
+            taxAmount: Number(partnerEntity.subscription.taxAmount) || 0,
+            totalPrice: Number(partnerEntity.subscription.totalPrice) || 0,
+            currency: partnerEntity.subscription.currency || 'USD',
+            currencyId: partnerEntity.subscription.currencyId ?? null,
             nextBillingDate: partnerEntity.subscription.nextBillingDate,
-            nextBillingAmount: partnerEntity.subscription.nextBillingAmount,
+            nextBillingAmount: Number(partnerEntity.subscription.nextBillingAmount) || 0,
             currentPeriodStart: partnerEntity.subscription.currentPeriodStart,
             currentPeriodEnd: partnerEntity.subscription.currentPeriodEnd,
-            trialEndDate: partnerEntity.subscription.trialEndDate,
-            lastPaymentDate: partnerEntity.subscription.lastPaymentDate,
-            lastPaymentAmount: partnerEntity.subscription.lastPaymentAmount,
-            paymentStatus: partnerEntity.subscription.paymentStatus,
-            autoRenew: partnerEntity.subscription.autoRenew,
+            trialEndDate: partnerEntity.subscription.trialEndDate ?? null,
+            pausedAt: partnerEntity.subscription.pausedAt ?? null,
+            pauseReason: partnerEntity.subscription.pauseReason ?? null,
+            gracePeriodDays: partnerEntity.subscription.gracePeriodDays ?? 7,
+            retryAttempts: partnerEntity.subscription.retryAttempts ?? 0,
+            maxRetryAttempts: partnerEntity.subscription.maxRetryAttempts ?? 3,
+            discountPercent: partnerEntity.subscription.discountPercent
+              ? Number(partnerEntity.subscription.discountPercent)
+              : null,
+            discountCode: partnerEntity.subscription.discountCode ?? null,
+            lastPaymentDate: partnerEntity.subscription.lastPaymentDate ?? null,
+            lastPaymentAmount: partnerEntity.subscription.lastPaymentAmount
+              ? Number(partnerEntity.subscription.lastPaymentAmount)
+              : null,
+            paymentStatus: partnerEntity.subscription.paymentStatus ?? null,
+            autoRenew: partnerEntity.subscription.autoRenew ?? true,
+            createdAt: partnerEntity.subscription.createdAt,
+            updatedAt: partnerEntity.subscription.updatedAt,
           }
         : null;
 
@@ -111,6 +132,7 @@ export class GetPartnersHandler {
         partner.paymentMethod,
         partner.billingEmail,
         partner.domain,
+        partner.quickSearchCode,
         partner.status,
         partner.createdAt,
         partner.updatedAt,

@@ -343,6 +343,18 @@ export class CreatePartnerRequest {
   @IsOptional()
   subscriptionCurrencyId?: number | null;
 
+  @ApiProperty({
+    description:
+      'Días de prueba gratuita para la suscripción. Si se proporciona, este valor tendrá prioridad sobre el del plan de precios. Si no se proporciona, se usará el valor del plan de precios.',
+    example: 7,
+    type: Number,
+    required: false,
+    nullable: true,
+  })
+  @IsNumber()
+  @IsOptional()
+  subscriptionTrialDays?: number | null;
+
   // Limits data
   @ApiProperty({
     description: 'Máximo número de tenants',

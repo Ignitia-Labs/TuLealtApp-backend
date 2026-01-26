@@ -30,13 +30,13 @@ export class UpdateTenantRequest {
 
   @ApiProperty({
     description: 'ID de la moneda',
-    example: 'currency-8',
-    type: String,
+    example: 8,
+    type: Number,
     required: false,
   })
-  @IsString()
+  @IsNumber()
   @IsOptional()
-  currencyId?: string;
+  currencyId?: number;
 
   @ApiProperty({
     description: 'Color primario del tenant',

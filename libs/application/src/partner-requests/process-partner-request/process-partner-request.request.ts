@@ -128,6 +128,18 @@ export class ProcessPartnerRequestRequest {
   subscriptionCurrencyId?: number | null;
 
   @ApiProperty({
+    description:
+      'Días de prueba gratuita personalizados para el partner. Si se proporciona, se actualizará en la solicitud antes de procesar. Si no se proporciona, se usará el valor almacenado en la solicitud o el del plan de precios.',
+    example: 7,
+    type: Number,
+    required: false,
+    nullable: true,
+  })
+  @IsNumber()
+  @IsOptional()
+  trialDays?: number | null;
+
+  @ApiProperty({
     description: 'Límite máximo de tenants',
     example: 5,
     type: Number,

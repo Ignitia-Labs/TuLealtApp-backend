@@ -36,12 +36,12 @@ export class CreateTenantRequest {
 
   @ApiProperty({
     description: 'ID de la moneda',
-    example: 'currency-8',
-    type: String,
+    example: 8,
+    type: Number,
   })
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  currencyId: string;
+  currencyId: number;
 
   @ApiProperty({
     description: 'Color primario del tenant',

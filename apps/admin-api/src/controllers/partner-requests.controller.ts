@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Body,
   Param,
   Query,
@@ -48,6 +49,9 @@ import {
   UpdatePartnerRequestHandler,
   UpdatePartnerRequestRequest,
   UpdatePartnerRequestResponse,
+  DeletePartnerRequestHandler,
+  DeletePartnerRequestRequest,
+  DeletePartnerRequestResponse,
 } from '@libs/application';
 import {
   UnauthorizedErrorResponseDto,
@@ -74,6 +78,7 @@ import { JwtPayload } from '@libs/application';
  * - PATCH /admin/partner-requests/:id/notes - Agregar/actualizar notas
  * - PATCH /admin/partner-requests/:id/reject - Rechazar solicitud
  * - POST /admin/partner-requests/:id/process - Procesar solicitud (convertir a partner)
+ * - DELETE /admin/partner-requests/:id - Eliminar solicitud
  */
 @ApiTags('Partner Requests')
 @Controller('partner-requests')
@@ -88,6 +93,7 @@ export class PartnerRequestsController {
     private readonly processPartnerRequestHandler: ProcessPartnerRequestHandler,
     private readonly assignPartnerRequestUserHandler: AssignPartnerRequestUserHandler,
     private readonly updatePartnerRequestHandler: UpdatePartnerRequestHandler,
+    private readonly deletePartnerRequestHandler: DeletePartnerRequestHandler,
   ) {}
 
   @Post()
@@ -765,5 +771,58 @@ export class PartnerRequestsController {
       Object.assign(request, body);
     }
     return this.processPartnerRequestHandler.execute(request);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Eliminar solicitud de partner',
+    description:
+      'Elimina una solicitud de partner del sistema. Esta acción es irreversible. Se elimina el registro completo de la base de datos.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único de la solicitud a eliminar',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Solicitud eliminada exitosamente',
+    type: DeletePartnerRequestResponse,
+    example: {
+      message: 'Partner request deleted successfully',
+      id: 1,
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos suficientes',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Solicitud no encontrada',
+    type: NotFoundErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async deletePartnerRequest(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<DeletePartnerRequestResponse> {
+    const request = new DeletePartnerRequestRequest();
+    request.requestId = id;
+    return this.deletePartnerRequestHandler.execute(request);
   }
 }

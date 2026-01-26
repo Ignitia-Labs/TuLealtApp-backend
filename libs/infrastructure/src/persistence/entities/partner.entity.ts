@@ -110,6 +110,10 @@ export class PartnerEntity {
   @Column('varchar', { length: 255, unique: true })
   domain: string;
 
+  @Column('varchar', { length: 20, unique: true })
+  @Index('IDX_PARTNERS_QUICK_SEARCH_CODE', ['quickSearchCode'])
+  quickSearchCode: string;
+
   @Column('varchar', { length: 20, default: 'active' })
   status: 'active' | 'suspended' | 'inactive';
 

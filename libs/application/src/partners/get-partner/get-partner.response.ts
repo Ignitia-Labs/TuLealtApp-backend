@@ -168,6 +168,13 @@ export class GetPartnerResponse {
   domain: string;
 
   @ApiProperty({
+    description: 'Código de búsqueda rápida del partner',
+    example: 'ABC123',
+    type: String,
+  })
+  quickSearchCode: string;
+
+  @ApiProperty({
     description: 'Estado del partner',
     example: 'active',
     type: String,
@@ -232,6 +239,7 @@ export class GetPartnerResponse {
     paymentMethod: string,
     billingEmail: string,
     domain: string,
+    quickSearchCode: string,
     status: string,
     createdAt: Date,
     updatedAt: Date,
@@ -261,6 +269,7 @@ export class GetPartnerResponse {
     this.paymentMethod = paymentMethod;
     this.billingEmail = billingEmail;
     this.domain = domain;
+    this.quickSearchCode = quickSearchCode;
     this.status = status;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;

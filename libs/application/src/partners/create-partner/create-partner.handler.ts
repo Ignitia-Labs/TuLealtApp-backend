@@ -8,6 +8,8 @@ import {
   PartnerSubscription,
   PartnerLimits,
   PartnerStats,
+  SubscriptionStatus,
+  BillingFrequency,
 } from '@libs/domain';
 import { CreatePartnerRequest } from './create-partner.request';
 import { CreatePartnerResponse } from './create-partner.response';
@@ -20,7 +22,7 @@ import {
   PartnerEntity,
 } from '@libs/infrastructure';
 import { PartnerMapper } from '@libs/infrastructure';
-import { getPriceForPeriod, calculateFinalPrice } from '@libs/shared';
+import { getPriceForPeriod, calculateFinalPrice, generatePartnerQuickSearchCode } from '@libs/shared';
 import { SubscriptionUsageHelper } from '@libs/application';
 import { PartnerSubscriptionUsageEntity } from '@libs/infrastructure';
 
@@ -64,6 +66,23 @@ export class CreatePartnerHandler {
       throw new BadRequestException('Partner with this domain already exists');
     }
 
+    // Generar código único de búsqueda rápida
+    let quickSearchCode: string;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    do {
+      quickSearchCode = generatePartnerQuickSearchCode();
+      const existingPartner = await this.partnerRepository.findByQuickSearchCode(quickSearchCode);
+      if (!existingPartner) {
+        break;
+      }
+      attempts++;
+      if (attempts >= maxAttempts) {
+        throw new BadRequestException('Failed to generate unique quick search code after multiple attempts');
+      }
+    } while (true);
+
     // Crear la entidad de dominio del partner sin ID (la BD lo generará automáticamente)
     const partner = Partner.create(
       request.name,
@@ -82,6 +101,7 @@ export class CreatePartnerHandler {
       request.paymentMethod,
       request.billingEmail,
       request.domain,
+      quickSearchCode,
       request.logo || null,
       request.banner || null,
       request.branchesNumber || 0,
@@ -131,10 +151,27 @@ export class CreatePartnerHandler {
     // Usar el código de la currency de la suscripción (ej: 'GTQ', 'USD')
     const currencyCode = subscriptionCurrency.code;
 
-    // Calcular fechas y montos por defecto
-    const startDate = new Date(request.subscriptionStartDate);
-    const renewalDate = new Date(request.subscriptionRenewalDate);
     const billingFrequency = request.subscriptionBillingFrequency || 'monthly'; // Usar el del request o 'monthly' por defecto
+
+    // Obtener el plan de precios para obtener trialDays y precio
+    let pricingPlan = null;
+
+    // Intentar buscar por ID numérico primero
+    const numericPlanId = parseInt(request.subscriptionPlanId, 10);
+    if (!isNaN(numericPlanId)) {
+      pricingPlan = await this.pricingPlanRepository.findById(numericPlanId);
+    }
+
+    // Si no se encontró por ID, buscar por slug
+    if (!pricingPlan) {
+      pricingPlan = await this.pricingPlanRepository.findBySlug(request.subscriptionPlanId);
+    }
+
+    // Si aún no se encontró, intentar sin el prefijo "plan-"
+    if (!pricingPlan) {
+      const slugWithoutPrefix = request.subscriptionPlanId.replace(/^plan-/, '');
+      pricingPlan = await this.pricingPlanRepository.findBySlug(slugWithoutPrefix);
+    }
 
     // Obtener el precio del plan si no se proporciona subscriptionLastPaymentAmount
     let billingAmount: number;
@@ -145,26 +182,6 @@ export class CreatePartnerHandler {
       // Usar el valor proporcionado
       billingAmount = request.subscriptionLastPaymentAmount;
     } else {
-      // Buscar el plan de precios y obtener su precio según la frecuencia de facturación
-      let pricingPlan = null;
-
-      // Intentar buscar por ID numérico primero
-      const numericPlanId = parseInt(request.subscriptionPlanId, 10);
-      if (!isNaN(numericPlanId)) {
-        pricingPlan = await this.pricingPlanRepository.findById(numericPlanId);
-      }
-
-      // Si no se encontró por ID, buscar por slug
-      if (!pricingPlan) {
-        pricingPlan = await this.pricingPlanRepository.findBySlug(request.subscriptionPlanId);
-      }
-
-      // Si aún no se encontró, intentar sin el prefijo "plan-"
-      if (!pricingPlan) {
-        const slugWithoutPrefix = request.subscriptionPlanId.replace(/^plan-/, '');
-        pricingPlan = await this.pricingPlanRepository.findBySlug(slugWithoutPrefix);
-      }
-
       if (pricingPlan) {
         // Obtener el precio final del plan para la frecuencia de facturación (incluye descuentos si aplican)
         const finalPrice = calculateFinalPrice(pricingPlan, billingFrequency);
@@ -185,6 +202,33 @@ export class CreatePartnerHandler {
         billingAmount = 0;
       }
     }
+
+    // Obtener días de prueba: usar el del request si se proporciona, sino el del plan
+    const trialDays =
+      request.subscriptionTrialDays !== undefined && request.subscriptionTrialDays !== null
+        ? request.subscriptionTrialDays
+        : pricingPlan?.trialDays ?? 0;
+
+    // Calcular fechas considerando los días de prueba gratuita
+    const registrationDate = request.subscriptionStartDate
+      ? new Date(request.subscriptionStartDate)
+      : new Date();
+
+    const subscriptionDates = this.calculateSubscriptionDates(
+      registrationDate,
+      trialDays,
+      billingFrequency,
+      request.subscriptionRenewalDate ? new Date(request.subscriptionRenewalDate) : null,
+    );
+
+    const {
+      trialEndDate,
+      startDate,
+      renewalDate,
+      status,
+      currentPeriodStart,
+      currentPeriodEnd,
+    } = subscriptionDates;
 
     // Calcular valores de IVA
     // Si se proporcionan directamente basePrice, taxAmount y totalPrice, usarlos
@@ -229,15 +273,15 @@ export class CreatePartnerHandler {
       subscriptionCurrencyId, // currencyId de la suscripción (puede ser diferente del partner)
       renewalDate, // nextBillingDate = renewalDate por defecto
       totalPrice, // nextBillingAmount = totalPrice (incluye IVA si aplica)
-      startDate, // currentPeriodStart = startDate por defecto
-      renewalDate, // currentPeriodEnd = renewalDate por defecto
+      currentPeriodStart, // currentPeriodStart calculado según días de prueba
+      currentPeriodEnd, // currentPeriodEnd calculado según días de prueba
       includeTax,
       taxPercent,
       basePrice,
       taxAmount,
       totalPrice,
-      'active',
-      null, // trialEndDate
+      status, // status: 'trialing' si hay días de prueba, 'active' si no
+      trialEndDate, // trialEndDate calculado según días de prueba
       null, // pausedAt
       null, // pauseReason
       7, // gracePeriodDays
@@ -285,9 +329,125 @@ export class CreatePartnerHandler {
       savedPartner.name,
       savedPartner.email,
       savedPartner.domain,
+      savedPartner.quickSearchCode,
       savedPartner.plan,
       savedPartner.status,
       savedPartner.createdAt,
     );
+  }
+
+  /**
+   * Calcula las fechas de la suscripción considerando los días de prueba gratuita
+   * @param registrationDate Fecha de registro del partner
+   * @param trialDays Días de prueba gratuita del plan
+   * @param billingFrequency Frecuencia de facturación
+   * @param providedRenewalDate Fecha de renovación proporcionada manualmente (opcional)
+   * @returns Objeto con las fechas calculadas y el estado inicial
+   */
+  private calculateSubscriptionDates(
+    registrationDate: Date,
+    trialDays: number,
+    billingFrequency: BillingFrequency,
+    providedRenewalDate: Date | null,
+  ): {
+    trialEndDate: Date | null;
+    startDate: Date;
+    renewalDate: Date;
+    status: SubscriptionStatus;
+    currentPeriodStart: Date;
+    currentPeriodEnd: Date;
+  } {
+    // Normalizar la fecha de registro (inicio del día)
+    const normalizedRegistrationDate = new Date(registrationDate);
+    normalizedRegistrationDate.setHours(0, 0, 0, 0);
+
+    // Si hay días de prueba, calcular fechas considerando el período de prueba
+    if (trialDays > 0) {
+      // Calcular fecha de fin del período de prueba
+      // Sumar trialDays días a la fecha de registro usando milisegundos para evitar problemas con setDate
+      const trialEndDate = new Date(
+        normalizedRegistrationDate.getTime() + trialDays * 24 * 60 * 60 * 1000,
+      );
+      // Establecer al final del día (23:59:59.999)
+      trialEndDate.setHours(23, 59, 59, 999);
+
+      // La suscripción comienza el día siguiente al fin del período de prueba
+      const startDate = new Date(trialEndDate.getTime() + 24 * 60 * 60 * 1000);
+      startDate.setHours(0, 0, 0, 0);
+
+      // Calcular fecha de renovación desde startDate (no desde registrationDate)
+      // Si se proporciona una fecha de renovación manual, validar que sea posterior a startDate
+      let renewalDate: Date;
+      if (providedRenewalDate) {
+        const providedDate = new Date(providedRenewalDate);
+        // Si la fecha proporcionada es anterior o igual a startDate, calcularla automáticamente
+        if (providedDate <= startDate) {
+          renewalDate = this.calculateRenewalDate(startDate, billingFrequency);
+        } else {
+          renewalDate = providedDate;
+        }
+      } else {
+        renewalDate = this.calculateRenewalDate(startDate, billingFrequency);
+      }
+
+      return {
+        trialEndDate,
+        startDate,
+        renewalDate,
+        status: 'trialing' as SubscriptionStatus,
+        currentPeriodStart: startDate,
+        currentPeriodEnd: renewalDate,
+      };
+    } else {
+      // Sin días de prueba: la suscripción comienza inmediatamente
+      const startDate = normalizedRegistrationDate;
+
+      // Calcular fecha de renovación
+      const renewalDate = providedRenewalDate
+        ? new Date(providedRenewalDate)
+        : this.calculateRenewalDate(startDate, billingFrequency);
+
+      return {
+        trialEndDate: null,
+        startDate,
+        renewalDate,
+        status: 'active' as SubscriptionStatus,
+        currentPeriodStart: startDate,
+        currentPeriodEnd: renewalDate,
+      };
+    }
+  }
+
+  /**
+   * Calcula la fecha de renovación según la frecuencia de facturación
+   * @param startDate Fecha de inicio del período
+   * @param billingFrequency Frecuencia de facturación
+   * @returns Fecha de renovación calculada
+   */
+  private calculateRenewalDate(startDate: Date, billingFrequency: BillingFrequency): Date {
+    const renewalDate = new Date(startDate);
+
+    switch (billingFrequency) {
+      case 'monthly':
+        renewalDate.setMonth(renewalDate.getMonth() + 1);
+        break;
+      case 'quarterly':
+        renewalDate.setMonth(renewalDate.getMonth() + 3);
+        break;
+      case 'semiannual':
+        renewalDate.setMonth(renewalDate.getMonth() + 6);
+        break;
+      case 'annual':
+        renewalDate.setFullYear(renewalDate.getFullYear() + 1);
+        break;
+      default:
+        // Por defecto, mensual
+        renewalDate.setMonth(renewalDate.getMonth() + 1);
+    }
+
+    // Establecer hora al final del día
+    renewalDate.setHours(23, 59, 59, 999);
+
+    return renewalDate;
   }
 }
