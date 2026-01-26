@@ -95,10 +95,10 @@ import {
   CreateCustomerTierHandler,
   UpdateCustomerTierHandler,
   DeleteCustomerTierHandler,
-    // Contact Inquiries Handlers
-    CreateContactInquiryHandler,
-    // Partner Requests Handlers
-    CreatePartnerRequestHandler,
+  // Contact Inquiries Handlers
+  CreateContactInquiryHandler,
+  // Partner Requests Handlers
+  CreatePartnerRequestHandler,
 } from '@libs/application';
 
 /**

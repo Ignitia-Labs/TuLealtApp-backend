@@ -53,4 +53,3 @@ export class AddUpdatedByToPartnerRequests1777500000000 implements MigrationInte
     }
   }
 }
-

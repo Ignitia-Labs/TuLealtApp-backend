@@ -22,7 +22,11 @@ import {
   PartnerEntity,
 } from '@libs/infrastructure';
 import { PartnerMapper } from '@libs/infrastructure';
-import { getPriceForPeriod, calculateFinalPrice, generatePartnerQuickSearchCode } from '@libs/shared';
+import {
+  getPriceForPeriod,
+  calculateFinalPrice,
+  generatePartnerQuickSearchCode,
+} from '@libs/shared';
 import { SubscriptionUsageHelper } from '@libs/application';
 import { PartnerSubscriptionUsageEntity } from '@libs/infrastructure';
 
@@ -79,7 +83,9 @@ export class CreatePartnerHandler {
       }
       attempts++;
       if (attempts >= maxAttempts) {
-        throw new BadRequestException('Failed to generate unique quick search code after multiple attempts');
+        throw new BadRequestException(
+          'Failed to generate unique quick search code after multiple attempts',
+        );
       }
     } while (true);
 
@@ -207,7 +213,7 @@ export class CreatePartnerHandler {
     const trialDays =
       request.subscriptionTrialDays !== undefined && request.subscriptionTrialDays !== null
         ? request.subscriptionTrialDays
-        : pricingPlan?.trialDays ?? 0;
+        : (pricingPlan?.trialDays ?? 0);
 
     // Calcular fechas considerando los días de prueba gratuita
     const registrationDate = request.subscriptionStartDate
@@ -221,14 +227,8 @@ export class CreatePartnerHandler {
       request.subscriptionRenewalDate ? new Date(request.subscriptionRenewalDate) : null,
     );
 
-    const {
-      trialEndDate,
-      startDate,
-      renewalDate,
-      status,
-      currentPeriodStart,
-      currentPeriodEnd,
-    } = subscriptionDates;
+    const { trialEndDate, startDate, renewalDate, status, currentPeriodStart, currentPeriodEnd } =
+      subscriptionDates;
 
     // Calcular valores de IVA
     // Si se proporcionan directamente basePrice, taxAmount y totalPrice, usarlos

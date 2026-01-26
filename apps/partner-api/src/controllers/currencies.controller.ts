@@ -8,10 +8,7 @@ import {
   GetCountriesRequest,
   GetCountriesResponse,
 } from '@libs/application';
-import {
-  BadRequestErrorResponseDto,
-  InternalServerErrorResponseDto,
-} from '@libs/shared';
+import { BadRequestErrorResponseDto, InternalServerErrorResponseDto } from '@libs/shared';
 
 /**
  * Controlador de currencies y countries para Partner API

@@ -13,18 +13,12 @@ export class DeletePartnerRequestHandler {
     private readonly partnerRequestRepository: IPartnerRequestRepository,
   ) {}
 
-  async execute(
-    request: DeletePartnerRequestRequest,
-  ): Promise<DeletePartnerRequestResponse> {
+  async execute(request: DeletePartnerRequestRequest): Promise<DeletePartnerRequestResponse> {
     // Verificar que la solicitud exista
-    const existingRequest = await this.partnerRequestRepository.findById(
-      request.requestId,
-    );
+    const existingRequest = await this.partnerRequestRepository.findById(request.requestId);
 
     if (!existingRequest) {
-      throw new NotFoundException(
-        `Partner request with ID ${request.requestId} not found`,
-      );
+      throw new NotFoundException(`Partner request with ID ${request.requestId} not found`);
     }
 
     // Eliminar la solicitud

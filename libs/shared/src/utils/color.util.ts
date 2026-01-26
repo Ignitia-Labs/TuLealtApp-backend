@@ -48,7 +48,11 @@ function adjustComponent(component: number, min: number = 50, max: number = 200)
  * @param b Componente azul (0-255)
  * @returns Color complementario en formato { r, g, b }
  */
-function generateComplementary(r: number, g: number, b: number): { r: number; g: number; b: number } {
+function generateComplementary(
+  r: number,
+  g: number,
+  b: number,
+): { r: number; g: number; b: number } {
   // Color complementario: invertir y ajustar
   const compR = adjustComponent(255 - r, 80, 220);
   const compG = adjustComponent(255 - g, 80, 220);

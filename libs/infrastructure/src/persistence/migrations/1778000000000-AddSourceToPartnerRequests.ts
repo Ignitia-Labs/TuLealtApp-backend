@@ -33,7 +33,8 @@ export class AddSourceToPartnerRequests1778000000000 implements MigrationInterfa
         length: '20',
         default: "'internal'",
         isNullable: false,
-        comment: "Indica el origen de la solicitud: 'public' (partner-api) o 'internal' (admin-api)",
+        comment:
+          "Indica el origen de la solicitud: 'public' (partner-api) o 'internal' (admin-api)",
       }),
     );
 

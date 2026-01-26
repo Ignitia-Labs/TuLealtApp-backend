@@ -1,19 +1,5 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Query,
-  HttpCode,
-  HttpStatus,
-  ParseIntPipe,
-} from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { Controller, Get, Param, Query, HttpCode, HttpStatus, ParseIntPipe } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import {
   GetCatalogsHandler,
   GetCatalogsRequest,
@@ -148,7 +134,8 @@ export class CatalogsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Obtener elemento de catálogo por ID',
-    description: 'Obtiene la información completa de un elemento de catálogo por su ID. Endpoint público - No requiere autenticación.',
+    description:
+      'Obtiene la información completa de un elemento de catálogo por su ID. Endpoint público - No requiere autenticación.',
   })
   @ApiParam({
     name: 'id',

@@ -1,9 +1,5 @@
 import { Injectable, Inject, BadRequestException } from '@nestjs/common';
-import {
-  IPartnerRequestRepository,
-  IPricingPlanRepository,
-  PartnerRequest,
-} from '@libs/domain';
+import { IPartnerRequestRepository, IPricingPlanRepository, PartnerRequest } from '@libs/domain';
 import { CreatePartnerRequestRequest } from './create-partner-request.request';
 import { CreatePartnerRequestResponse } from './create-partner-request.response';
 

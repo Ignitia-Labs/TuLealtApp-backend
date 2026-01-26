@@ -18,14 +18,10 @@ export class UpdatePartnerRequestHandler {
     updatedBy: number,
   ): Promise<UpdatePartnerRequestResponse> {
     // Buscar la solicitud existente
-    const partnerRequest = await this.partnerRequestRepository.findById(
-      request.requestId,
-    );
+    const partnerRequest = await this.partnerRequestRepository.findById(request.requestId);
 
     if (!partnerRequest) {
-      throw new NotFoundException(
-        `Partner request with ID ${request.requestId} not found`,
-      );
+      throw new NotFoundException(`Partner request with ID ${request.requestId} not found`);
     }
 
     // Preparar los campos a actualizar
@@ -81,9 +77,7 @@ export class UpdatePartnerRequestHandler {
     const updatedRequest = partnerRequest.updateFields(updatedBy, fieldsToUpdate);
 
     // Guardar los cambios
-    const savedRequest = await this.partnerRequestRepository.update(
-      updatedRequest,
-    );
+    const savedRequest = await this.partnerRequestRepository.update(updatedRequest);
 
     return new UpdatePartnerRequestResponse(
       savedRequest.id,
@@ -95,4 +89,3 @@ export class UpdatePartnerRequestHandler {
     );
   }
 }
-

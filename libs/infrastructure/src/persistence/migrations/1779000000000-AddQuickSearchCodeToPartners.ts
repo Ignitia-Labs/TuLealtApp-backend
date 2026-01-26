@@ -27,8 +27,10 @@ export class AddQuickSearchCodeToPartners1779000000000 implements MigrationInter
 
         // Generar códigos para partners existentes que no tengan código
         // Usar un formato similar al que se usa en la aplicación
-        const partners = await queryRunner.query('SELECT id FROM partners WHERE quickSearchCode IS NULL');
-        
+        const partners = await queryRunner.query(
+          'SELECT id FROM partners WHERE quickSearchCode IS NULL',
+        );
+
         for (const partner of partners) {
           // Generar código único: PARTNER-{6 caracteres alfanuméricos sin confusión}
           const safeChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -38,18 +40,18 @@ export class AddQuickSearchCodeToPartners1779000000000 implements MigrationInter
             code += safeChars[randomIndex];
           }
           const quickSearchCode = `PARTNER-${code}`;
-          
+
           // Verificar unicidad antes de asignar
           const existing = await queryRunner.query(
             'SELECT id FROM partners WHERE quickSearchCode = ?',
             [quickSearchCode],
           );
-          
+
           if (existing.length === 0) {
-            await queryRunner.query(
-              'UPDATE partners SET quickSearchCode = ? WHERE id = ?',
-              [quickSearchCode, partner.id],
-            );
+            await queryRunner.query('UPDATE partners SET quickSearchCode = ? WHERE id = ?', [
+              quickSearchCode,
+              partner.id,
+            ]);
           } else {
             // Si hay colisión, generar otro código (máximo 10 intentos)
             let attempts = 0;
@@ -70,10 +72,10 @@ export class AddQuickSearchCodeToPartners1779000000000 implements MigrationInter
               }
               attempts++;
             }
-            await queryRunner.query(
-              'UPDATE partners SET quickSearchCode = ? WHERE id = ?',
-              [uniqueCode, partner.id],
-            );
+            await queryRunner.query('UPDATE partners SET quickSearchCode = ? WHERE id = ?', [
+              uniqueCode,
+              partner.id,
+            ]);
           }
         }
 

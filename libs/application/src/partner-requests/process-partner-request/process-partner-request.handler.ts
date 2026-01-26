@@ -1,4 +1,10 @@
-import { Injectable, Inject, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
 import { Repository, DataSource, EntityManager, In } from 'typeorm';
 import {
@@ -26,7 +32,11 @@ import {
   BranchMapper,
   UserMapper,
 } from '@libs/infrastructure';
-import { generateColorsFromString, generateRandomPassword, extractFirstNameAndLastName } from '@libs/shared';
+import {
+  generateColorsFromString,
+  generateRandomPassword,
+  extractFirstNameAndLastName,
+} from '@libs/shared';
 import * as bcrypt from 'bcrypt';
 import { CreatePartnerHandler } from '../../partners/create-partner/create-partner.handler';
 import { CreatePartnerRequest } from '../../partners/create-partner/create-partner.request';
@@ -225,9 +235,7 @@ export class ProcessPartnerRequestHandler {
       // Obtener nombre del país
       const country = await this.countryRepository.findById(updatedPartnerRequest.countryId!);
       if (!country) {
-        throw new NotFoundException(
-          `Country with ID ${updatedPartnerRequest.countryId} not found`,
-        );
+        throw new NotFoundException(`Country with ID ${updatedPartnerRequest.countryId} not found`);
       }
 
       // Crear tenant automáticamente
@@ -295,9 +303,7 @@ export class ProcessPartnerRequestHandler {
     });
 
     if (!subscriptionEntity) {
-      throw new NotFoundException(
-        `Subscription not found for partner with ID ${partnerId}`,
-      );
+      throw new NotFoundException(`Subscription not found for partner with ID ${partnerId}`);
     }
 
     // Usar el currencyId de la suscripción (puede ser null)

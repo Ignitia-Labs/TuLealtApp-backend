@@ -22,9 +22,7 @@ import {
 @Controller('public/partner-requests')
 @UseGuards(new RateLimitGuard(5, 3600000)) // 5 requests por hora
 export class PartnerRequestsController {
-  constructor(
-    private readonly createPartnerRequestHandler: CreatePartnerRequestHandler,
-  ) {}
+  constructor(private readonly createPartnerRequestHandler: CreatePartnerRequestHandler) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)

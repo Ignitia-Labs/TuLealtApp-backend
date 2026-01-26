@@ -30,7 +30,8 @@ export class AddTrialDaysToPartnerRequests1780000000000 implements MigrationInte
         name: 'trialDays',
         type: 'int',
         isNullable: true,
-        comment: 'Días de prueba gratuita personalizados para el partner. Si es null, se usa el valor del plan de precios.',
+        comment:
+          'Días de prueba gratuita personalizados para el partner. Si es null, se usa el valor del plan de precios.',
       }),
     );
 

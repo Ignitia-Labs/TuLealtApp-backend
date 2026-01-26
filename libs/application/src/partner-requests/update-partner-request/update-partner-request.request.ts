@@ -1,10 +1,4 @@
-import {
-  IsEmail,
-  IsString,
-  IsOptional,
-  IsNumber,
-  MinLength,
-} from 'class-validator';
+import { IsEmail, IsString, IsOptional, IsNumber, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
@@ -135,4 +129,3 @@ export class UpdatePartnerRequestRequest {
   @IsOptional()
   socialMedia?: string | null;
 }
-
