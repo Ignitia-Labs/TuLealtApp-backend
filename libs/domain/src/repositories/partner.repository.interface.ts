@@ -31,11 +31,6 @@ export interface IPartnerRepository {
   findByDomain(domain: string): Promise<Partner | null>;
 
   /**
-   * Busca un partner por su código de búsqueda rápida
-   */
-  findByQuickSearchCode(code: string): Promise<Partner | null>;
-
-  /**
    * Obtiene todos los partners
    */
   findAll(): Promise<Partner[]>;

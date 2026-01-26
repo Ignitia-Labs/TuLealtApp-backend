@@ -110,7 +110,13 @@ export class AuthenticatePartnerUserHandler {
     if (user.tenantId) {
       const tenant = await this.tenantRepository.findById(user.tenantId);
       if (tenant && tenant.partnerId === partner.id) {
-        tenantInfo = new TenantInfoDto(tenant.id, tenant.name, tenant.partnerId, tenant.status);
+        tenantInfo = new TenantInfoDto(
+          tenant.id,
+          tenant.name,
+          tenant.partnerId,
+          tenant.quickSearchCode,
+          tenant.status,
+        );
       }
     }
 
@@ -121,7 +127,13 @@ export class AuthenticatePartnerUserHandler {
       if (branch) {
         // Validar que el branch pertenezca al tenant del usuario (si hay tenantId)
         if (!user.tenantId || branch.tenantId === user.tenantId) {
-          branchInfo = new BranchInfoDto(branch.id, branch.name, branch.tenantId, branch.status);
+          branchInfo = new BranchInfoDto(
+            branch.id,
+            branch.name,
+            branch.tenantId,
+            branch.quickSearchCode,
+            branch.status,
+          );
         }
       }
     }

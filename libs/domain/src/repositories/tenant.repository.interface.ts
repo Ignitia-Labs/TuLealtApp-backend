@@ -34,4 +34,9 @@ export interface ITenantRepository {
    * Elimina un tenant por su ID
    */
   delete(id: number): Promise<void>;
+
+  /**
+   * Busca un tenant por su código de búsqueda rápida
+   */
+  findByQuickSearchCode(code: string): Promise<Tenant | null>;
 }

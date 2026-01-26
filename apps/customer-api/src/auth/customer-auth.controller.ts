@@ -23,8 +23,8 @@ import { JwtAuthGuard, CurrentUser } from '@libs/shared';
  * - POST /customer/auth/login - Iniciar sesión como cliente (requiere rol CUSTOMER o sin rol específico)
  * - GET /customer/auth/me - Obtener perfil del cliente autenticado (requiere autenticación)
  */
-@ApiTags('Customer Auth')
-@Controller('customer/auth')
+@ApiTags('Auth')
+@Controller('auth')
 export class CustomerAuthController {
   constructor(
     private readonly registerUserHandler: RegisterUserHandler,
@@ -37,7 +37,12 @@ export class CustomerAuthController {
   @ApiOperation({
     summary: 'Registrar un nuevo cliente',
     description:
-      'Registra un nuevo cliente. Si se proporcionan tenantId y registrationBranchId, se creará automáticamente una membership para ese tenant.',
+      'Registra un nuevo cliente. Puede registrarse de varias formas:\n' +
+      '1. Con código de invitación (invitationCode)\n' +
+      '2. Escaneando código del tenant (tenantQuickSearchCode)\n' +
+      '3. Escaneando código de la branch (branchQuickSearchCode)\n' +
+      '4. Con tenantId directo (tenantId y opcionalmente registrationBranchId)\n' +
+      'Solo se puede proporcionar uno de estos métodos a la vez.',
   })
   @ApiBody({ type: RegisterUserRequest })
   @ApiResponse({

@@ -231,7 +231,6 @@ export class GetPartnerHandler {
           partner.paymentMethod || '',
           partner.billingEmail || '',
           partner.domain || '',
-          partner.quickSearchCode || '',
           partner.status || 'active',
           partner.createdAt || new Date(),
           partner.updatedAt || new Date(),

@@ -42,6 +42,7 @@ export class UpdateTenantHandler {
       request.secondaryColor ?? existingTenant.secondaryColor,
       request.pointsExpireDays ?? existingTenant.pointsExpireDays,
       request.minPointsToRedeem ?? existingTenant.minPointsToRedeem,
+      existingTenant.quickSearchCode, // No se puede cambiar el quickSearchCode
       request.status ?? existingTenant.status,
       existingTenant.createdAt, // Preservar fecha de creación
       new Date(), // Actualizar fecha de modificación

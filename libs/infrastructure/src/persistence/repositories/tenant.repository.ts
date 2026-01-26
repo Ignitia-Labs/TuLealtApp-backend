@@ -69,4 +69,17 @@ export class TenantRepository implements ITenantRepository {
   async delete(id: number): Promise<void> {
     await this.tenantRepository.delete(id);
   }
+
+  async findByQuickSearchCode(code: string): Promise<Tenant | null> {
+    const tenantEntity = await this.tenantRepository.findOne({
+      where: { quickSearchCode: code },
+      relations: ['features'],
+    });
+
+    if (!tenantEntity) {
+      return null;
+    }
+
+    return TenantMapper.toDomain(tenantEntity, tenantEntity.features);
+  }
 }

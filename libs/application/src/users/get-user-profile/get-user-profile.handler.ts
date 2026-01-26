@@ -54,7 +54,13 @@ export class GetUserProfileHandler {
     if (user.tenantId) {
       const tenant = await this.tenantRepository.findById(user.tenantId);
       if (tenant) {
-        tenantInfo = new TenantInfoDto(tenant.id, tenant.name, tenant.partnerId, tenant.status);
+        tenantInfo = new TenantInfoDto(
+          tenant.id,
+          tenant.name,
+          tenant.partnerId,
+          tenant.quickSearchCode,
+          tenant.status,
+        );
       }
     }
 
@@ -63,7 +69,13 @@ export class GetUserProfileHandler {
     if (user.branchId) {
       const branch = await this.branchRepository.findById(user.branchId);
       if (branch) {
-        branchInfo = new BranchInfoDto(branch.id, branch.name, branch.tenantId, branch.status);
+        branchInfo = new BranchInfoDto(
+          branch.id,
+          branch.name,
+          branch.tenantId,
+          branch.quickSearchCode,
+          branch.status,
+        );
       }
     }
 

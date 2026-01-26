@@ -15,6 +15,7 @@ export class BranchMapper {
       persistenceEntity.address,
       persistenceEntity.city,
       persistenceEntity.country,
+      persistenceEntity.quickSearchCode,
       persistenceEntity.phone,
       persistenceEntity.email,
       persistenceEntity.status,
@@ -35,6 +36,7 @@ export class BranchMapper {
     entity.address = domainEntity.address;
     entity.city = domainEntity.city;
     entity.country = domainEntity.country;
+    entity.quickSearchCode = domainEntity.quickSearchCode;
     entity.phone = domainEntity.phone;
     entity.email = domainEntity.email;
     entity.status = domainEntity.status;

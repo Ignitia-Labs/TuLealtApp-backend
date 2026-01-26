@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
 import { ITenantRepository, IBranchRepository, IPartnerRepository, Branch } from '@libs/domain';
 import { CreateBranchRequest } from './create-branch.request';
 import { CreateBranchResponse } from './create-branch.response';
@@ -6,6 +6,7 @@ import { SubscriptionUsageHelper } from '@libs/application';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PartnerSubscriptionUsageEntity, PartnerSubscriptionEntity } from '@libs/infrastructure';
+import { generateBranchQuickSearchCode } from '@libs/shared';
 
 /**
  * Handler para el caso de uso de crear una branch
@@ -32,6 +33,25 @@ export class CreateBranchHandler {
       throw new NotFoundException(`Tenant with ID ${request.tenantId} not found`);
     }
 
+    // Generar código único de búsqueda rápida
+    let quickSearchCode: string;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    do {
+      quickSearchCode = generateBranchQuickSearchCode();
+      const existingBranch = await this.branchRepository.findByQuickSearchCode(quickSearchCode);
+      if (!existingBranch) {
+        break;
+      }
+      attempts++;
+      if (attempts >= maxAttempts) {
+        throw new BadRequestException(
+          'Failed to generate unique quick search code after multiple attempts',
+        );
+      }
+    } while (true);
+
     // Crear la entidad de dominio de la branch sin ID (la BD lo generará automáticamente)
     const branch = Branch.create(
       request.tenantId,
@@ -39,6 +59,7 @@ export class CreateBranchHandler {
       request.address,
       request.city,
       request.country,
+      quickSearchCode,
       request.phone || null,
       request.email || null,
       'active',

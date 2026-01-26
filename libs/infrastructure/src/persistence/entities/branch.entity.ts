@@ -16,6 +16,7 @@ import { TenantEntity } from './tenant.entity';
  */
 @Entity('branches')
 @Index('IDX_BRANCHES_TENANT_ID', ['tenantId'])
+@Index('IDX_BRANCHES_QUICK_SEARCH_CODE', ['quickSearchCode'])
 export class BranchEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -46,6 +47,9 @@ export class BranchEntity {
 
   @Column('varchar', { length: 255, nullable: true })
   email: string | null;
+
+  @Column('varchar', { length: 20, unique: true })
+  quickSearchCode: string;
 
   @Column('varchar', { length: 20, default: 'active' })
   status: 'active' | 'inactive' | 'closed';

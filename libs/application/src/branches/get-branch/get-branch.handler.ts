@@ -29,6 +29,7 @@ export class GetBranchHandler {
       branch.country,
       branch.phone,
       branch.email,
+      branch.quickSearchCode,
       branch.status,
       branch.createdAt,
       branch.updatedAt,

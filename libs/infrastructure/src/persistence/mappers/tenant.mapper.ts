@@ -17,6 +17,7 @@ export class TenantMapper {
       persistenceEntity.currencyId,
       persistenceEntity.primaryColor,
       persistenceEntity.secondaryColor,
+      persistenceEntity.quickSearchCode,
       persistenceEntity.pointsExpireDays,
       persistenceEntity.minPointsToRedeem,
       persistenceEntity.description,
@@ -46,6 +47,7 @@ export class TenantMapper {
     entity.secondaryColor = domainEntity.secondaryColor;
     entity.pointsExpireDays = domainEntity.pointsExpireDays;
     entity.minPointsToRedeem = domainEntity.minPointsToRedeem;
+    entity.quickSearchCode = domainEntity.quickSearchCode;
     entity.status = domainEntity.status;
     if (domainEntity.id > 0) {
       entity.createdAt = domainEntity.createdAt;

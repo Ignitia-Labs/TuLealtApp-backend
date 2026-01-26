@@ -63,4 +63,16 @@ export class BranchRepository implements IBranchRepository {
   async delete(id: number): Promise<void> {
     await this.branchRepository.delete(id);
   }
+
+  async findByQuickSearchCode(code: string): Promise<Branch | null> {
+    const branchEntity = await this.branchRepository.findOne({
+      where: { quickSearchCode: code },
+    });
+
+    if (!branchEntity) {
+      return null;
+    }
+
+    return BranchMapper.toDomain(branchEntity);
+  }
 }

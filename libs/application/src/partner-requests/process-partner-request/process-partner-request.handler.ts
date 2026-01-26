@@ -36,6 +36,8 @@ import {
   generateColorsFromString,
   generateRandomPassword,
   extractFirstNameAndLastName,
+  generateTenantQuickSearchCode,
+  generateBranchQuickSearchCode,
 } from '@libs/shared';
 import * as bcrypt from 'bcrypt';
 import { CreatePartnerHandler } from '../../partners/create-partner/create-partner.handler';
@@ -247,7 +249,7 @@ export class ProcessPartnerRequestHandler {
       );
 
       // Crear branch automáticamente
-      await this.createBranchWithManager(
+      const branchEntity = await this.createBranchWithManager(
         manager,
         tenantEntity.id,
         updatedPartnerRequest,
@@ -274,7 +276,8 @@ export class ProcessPartnerRequestHandler {
         createPartnerResponse.name,
         createPartnerResponse.email,
         createPartnerResponse.domain,
-        createPartnerResponse.quickSearchCode,
+        tenantEntity.quickSearchCode,
+        branchEntity.quickSearchCode,
       );
     });
   }
@@ -315,6 +318,27 @@ export class ProcessPartnerRequestHandler {
       );
     }
 
+    // Generar código único de búsqueda rápida para el tenant
+    let tenantQuickSearchCode: string;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    do {
+      tenantQuickSearchCode = generateTenantQuickSearchCode();
+      const existingTenant = await manager.findOne(TenantEntity, {
+        where: { quickSearchCode: tenantQuickSearchCode },
+      });
+      if (!existingTenant) {
+        break;
+      }
+      attempts++;
+      if (attempts >= maxAttempts) {
+        throw new BadRequestException(
+          'Failed to generate unique tenant quick search code after multiple attempts',
+        );
+      }
+    } while (true);
+
     // Crear entidad de dominio del tenant usando el currencyId directamente como number
     const tenant = Tenant.create(
       partnerId,
@@ -323,6 +347,7 @@ export class ProcessPartnerRequestHandler {
       subscriptionCurrencyId,
       colors.primary,
       colors.secondary,
+      tenantQuickSearchCode,
       365, // pointsExpireDays
       100, // minPointsToRedeem
       null, // description
@@ -404,6 +429,27 @@ export class ProcessPartnerRequestHandler {
       throw new BadRequestException('Fiscal address is required to create branch');
     }
 
+    // Generar código único de búsqueda rápida para la branch
+    let branchQuickSearchCode: string;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    do {
+      branchQuickSearchCode = generateBranchQuickSearchCode();
+      const existingBranch = await manager.findOne(BranchEntity, {
+        where: { quickSearchCode: branchQuickSearchCode },
+      });
+      if (!existingBranch) {
+        break;
+      }
+      attempts++;
+      if (attempts >= maxAttempts) {
+        throw new BadRequestException(
+          'Failed to generate unique branch quick search code after multiple attempts',
+        );
+      }
+    } while (true);
+
     // Crear entidad de dominio de la branch
     const branch = Branch.create(
       tenantId,
@@ -411,6 +457,7 @@ export class ProcessPartnerRequestHandler {
       partnerRequest.fiscalAddress, // address
       partnerRequest.city, // city
       countryName, // country
+      branchQuickSearchCode,
       partnerRequest.phone || null, // phone
       partnerRequest.email || null, // email
       'active',

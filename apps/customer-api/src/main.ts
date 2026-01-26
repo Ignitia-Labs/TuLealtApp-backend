@@ -44,8 +44,6 @@ async function bootstrap() {
     .setTitle('Customer API')
     .setDescription('API para clientes del sistema')
     .setVersion('1.0')
-    .addTag('Auth', 'Autenticación y registro')
-    .addTag('Users', 'Gestión de perfil de usuario')
     .addBearerAuth()
     .build();
 

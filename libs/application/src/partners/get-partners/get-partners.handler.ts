@@ -132,7 +132,6 @@ export class GetPartnersHandler {
         partner.paymentMethod,
         partner.billingEmail,
         partner.domain,
-        partner.quickSearchCode,
         partner.status,
         partner.createdAt,
         partner.updatedAt,

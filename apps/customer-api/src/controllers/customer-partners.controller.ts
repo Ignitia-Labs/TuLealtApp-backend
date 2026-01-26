@@ -25,7 +25,7 @@ import { JwtPayload } from '@libs/application';
  * - GET /customer/partners - Listar todos los partners del usuario autenticado
  */
 @ApiTags('Customer Partners')
-@Controller('customer/partners')
+@Controller('partners')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class CustomerPartnersController {

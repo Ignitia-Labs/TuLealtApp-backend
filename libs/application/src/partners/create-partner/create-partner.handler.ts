@@ -22,11 +22,7 @@ import {
   PartnerEntity,
 } from '@libs/infrastructure';
 import { PartnerMapper } from '@libs/infrastructure';
-import {
-  getPriceForPeriod,
-  calculateFinalPrice,
-  generatePartnerQuickSearchCode,
-} from '@libs/shared';
+import { getPriceForPeriod, calculateFinalPrice } from '@libs/shared';
 import { SubscriptionUsageHelper } from '@libs/application';
 import { PartnerSubscriptionUsageEntity } from '@libs/infrastructure';
 
@@ -70,25 +66,6 @@ export class CreatePartnerHandler {
       throw new BadRequestException('Partner with this domain already exists');
     }
 
-    // Generar código único de búsqueda rápida
-    let quickSearchCode: string;
-    let attempts = 0;
-    const maxAttempts = 10;
-
-    do {
-      quickSearchCode = generatePartnerQuickSearchCode();
-      const existingPartner = await this.partnerRepository.findByQuickSearchCode(quickSearchCode);
-      if (!existingPartner) {
-        break;
-      }
-      attempts++;
-      if (attempts >= maxAttempts) {
-        throw new BadRequestException(
-          'Failed to generate unique quick search code after multiple attempts',
-        );
-      }
-    } while (true);
-
     // Crear la entidad de dominio del partner sin ID (la BD lo generará automáticamente)
     const partner = Partner.create(
       request.name,
@@ -107,7 +84,6 @@ export class CreatePartnerHandler {
       request.paymentMethod,
       request.billingEmail,
       request.domain,
-      quickSearchCode,
       request.logo || null,
       request.banner || null,
       request.branchesNumber || 0,
@@ -329,7 +305,6 @@ export class CreatePartnerHandler {
       savedPartner.name,
       savedPartner.email,
       savedPartner.domain,
-      savedPartner.quickSearchCode,
       savedPartner.plan,
       savedPartner.status,
       savedPartner.createdAt,

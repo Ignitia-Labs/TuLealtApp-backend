@@ -92,6 +92,13 @@ export class GetTenantResponse {
   minPointsToRedeem: number;
 
   @ApiProperty({
+    description: 'Código único de búsqueda rápida del tenant (para QR code)',
+    example: 'TENANT-ABC234',
+    type: String,
+  })
+  quickSearchCode: string;
+
+  @ApiProperty({
     description: 'Estado del tenant',
     example: 'active',
     type: String,
@@ -153,6 +160,7 @@ export class GetTenantResponse {
     secondaryColor: string,
     pointsExpireDays: number,
     minPointsToRedeem: number,
+    quickSearchCode: string,
     status: string,
     createdAt: Date,
     updatedAt: Date,
@@ -173,6 +181,7 @@ export class GetTenantResponse {
     this.secondaryColor = secondaryColor;
     this.pointsExpireDays = pointsExpireDays;
     this.minPointsToRedeem = minPointsToRedeem;
+    this.quickSearchCode = quickSearchCode;
     this.status = status;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;

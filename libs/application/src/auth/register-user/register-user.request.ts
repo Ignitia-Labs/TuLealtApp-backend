@@ -93,4 +93,34 @@ export class RegisterUserRequest {
   @IsOptional()
   @Min(1)
   registrationBranchId?: number;
+
+  @ApiProperty({
+    description: 'Código de invitación para registro (opcional, formato: INVITE-XXXXXX)',
+    example: 'INVITE-ABC123',
+    type: String,
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  invitationCode?: string;
+
+  @ApiProperty({
+    description: 'Código de búsqueda rápida del tenant (opcional, formato: TENANT-XXXXXX)',
+    example: 'TENANT-ABC234',
+    type: String,
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  tenantQuickSearchCode?: string;
+
+  @ApiProperty({
+    description: 'Código de búsqueda rápida de la branch (opcional, formato: BRANCH-XXXXXX)',
+    example: 'BRANCH-ABC234',
+    type: String,
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  branchQuickSearchCode?: string;
 }

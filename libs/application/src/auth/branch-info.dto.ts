@@ -23,6 +23,13 @@ export class BranchInfoDto {
   tenantId: number;
 
   @ApiProperty({
+    description: 'Código único de búsqueda rápida de la branch (para QR code)',
+    example: 'BRANCH-ABC234',
+    type: String,
+  })
+  quickSearchCode: string;
+
+  @ApiProperty({
     description: 'Estado del branch',
     example: 'active',
     enum: ['active', 'inactive', 'closed'],
@@ -33,11 +40,13 @@ export class BranchInfoDto {
     id: number,
     name: string,
     tenantId: number,
+    quickSearchCode: string,
     status: 'active' | 'inactive' | 'closed',
   ) {
     this.id = id;
     this.name = name;
     this.tenantId = tenantId;
+    this.quickSearchCode = quickSearchCode;
     this.status = status;
   }
 }

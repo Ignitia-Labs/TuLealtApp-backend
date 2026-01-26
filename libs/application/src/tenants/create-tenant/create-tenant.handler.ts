@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { TenantFeaturesEntity, TenantMapper } from '@libs/infrastructure';
 import { SubscriptionUsageHelper } from '@libs/application';
 import { PartnerSubscriptionUsageEntity, PartnerSubscriptionEntity } from '@libs/infrastructure';
+import { generateTenantQuickSearchCode } from '@libs/shared';
 
 /**
  * Handler para el caso de uso de crear un tenant
@@ -33,6 +34,25 @@ export class CreateTenantHandler {
       throw new NotFoundException(`Partner with ID ${request.partnerId} not found`);
     }
 
+    // Generar código único de búsqueda rápida
+    let quickSearchCode: string;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    do {
+      quickSearchCode = generateTenantQuickSearchCode();
+      const existingTenant = await this.tenantRepository.findByQuickSearchCode(quickSearchCode);
+      if (!existingTenant) {
+        break;
+      }
+      attempts++;
+      if (attempts >= maxAttempts) {
+        throw new BadRequestException(
+          'Failed to generate unique quick search code after multiple attempts',
+        );
+      }
+    } while (true);
+
     // Crear la entidad de dominio del tenant sin ID (la BD lo generará automáticamente)
     const tenant = Tenant.create(
       request.partnerId,
@@ -41,6 +61,7 @@ export class CreateTenantHandler {
       request.currencyId,
       request.primaryColor,
       request.secondaryColor,
+      quickSearchCode,
       request.pointsExpireDays || 365,
       request.minPointsToRedeem || 100,
       request.description || null,

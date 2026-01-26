@@ -49,7 +49,6 @@ export class UpdatePartnerHandler {
       request.paymentMethod ?? existingPartner.paymentMethod,
       request.billingEmail ?? existingPartner.billingEmail,
       request.domain ?? existingPartner.domain,
-      existingPartner.quickSearchCode, // Preservar código de búsqueda rápida (no se puede modificar)
       request.status ?? existingPartner.status,
       existingPartner.createdAt, // Preservar fecha de creación
       new Date(), // Actualizar fecha de modificación

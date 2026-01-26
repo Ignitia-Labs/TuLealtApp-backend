@@ -21,6 +21,7 @@ import { CurrencyEntity } from './currency.entity';
  */
 @Entity('tenants')
 @Index('IDX_TENANTS_PARTNER_ID', ['partnerId'])
+@Index('IDX_TENANTS_QUICK_SEARCH_CODE', ['quickSearchCode'])
 export class TenantEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -71,6 +72,9 @@ export class TenantEntity {
 
   @Column('int', { default: 100 })
   minPointsToRedeem: number;
+
+  @Column('varchar', { length: 20, unique: true })
+  quickSearchCode: string;
 
   @Column('varchar', { length: 20, default: 'active' })
   status: 'active' | 'inactive' | 'suspended';

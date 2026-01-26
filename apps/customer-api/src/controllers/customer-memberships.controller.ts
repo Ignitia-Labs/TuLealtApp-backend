@@ -47,7 +47,7 @@ import { Inject, NotFoundException } from '@nestjs/common';
  * - GET /customer/memberships/qr/:qrCode - Buscar membership por QR code
  */
 @ApiTags('Customer Memberships')
-@Controller('customer/memberships')
+@Controller('memberships')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class CustomerMembershipsController {

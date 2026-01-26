@@ -33,6 +33,7 @@ export class UpdateBranchHandler {
       request.country ?? existingBranch.country,
       request.phone !== undefined ? request.phone : existingBranch.phone,
       request.email !== undefined ? request.email : existingBranch.email,
+      existingBranch.quickSearchCode, // No se puede cambiar el quickSearchCode
       request.status ?? existingBranch.status,
       existingBranch.createdAt, // Preservar fecha de creación
       new Date(), // Actualizar fecha de modificación

@@ -63,6 +63,13 @@ export class GetBranchResponse {
   email: string | null;
 
   @ApiProperty({
+    description: 'Código único de búsqueda rápida de la branch (para QR code)',
+    example: 'BRANCH-ABC234',
+    type: String,
+  })
+  quickSearchCode: string;
+
+  @ApiProperty({
     description: 'Estado de la branch',
     example: 'active',
     type: String,
@@ -92,6 +99,7 @@ export class GetBranchResponse {
     country: string,
     phone: string | null,
     email: string | null,
+    quickSearchCode: string,
     status: string,
     createdAt: Date,
     updatedAt: Date,
@@ -104,6 +112,7 @@ export class GetBranchResponse {
     this.country = country;
     this.phone = phone;
     this.email = email;
+    this.quickSearchCode = quickSearchCode;
     this.status = status;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;

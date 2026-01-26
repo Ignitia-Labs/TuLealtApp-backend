@@ -70,6 +70,7 @@ export class GetTenantsByPartnerHandler {
         tenant.secondaryColor,
         tenant.pointsExpireDays,
         tenant.minPointsToRedeem,
+        tenant.quickSearchCode,
         tenant.status,
         tenant.createdAt,
         tenant.updatedAt,

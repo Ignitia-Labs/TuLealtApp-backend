@@ -23,6 +23,13 @@ export class TenantInfoDto {
   partnerId: number;
 
   @ApiProperty({
+    description: 'Código único de búsqueda rápida del tenant (para QR code)',
+    example: 'TENANT-ABC234',
+    type: String,
+  })
+  quickSearchCode: string;
+
+  @ApiProperty({
     description: 'Estado del tenant',
     example: 'active',
     enum: ['active', 'inactive', 'suspended'],
@@ -33,11 +40,13 @@ export class TenantInfoDto {
     id: number,
     name: string,
     partnerId: number,
+    quickSearchCode: string,
     status: 'active' | 'inactive' | 'suspended',
   ) {
     this.id = id;
     this.name = name;
     this.partnerId = partnerId;
+    this.quickSearchCode = quickSearchCode;
     this.status = status;
   }
 }

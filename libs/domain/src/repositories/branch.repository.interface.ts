@@ -34,4 +34,9 @@ export interface IBranchRepository {
    * Elimina una branch por su ID
    */
   delete(id: number): Promise<void>;
+
+  /**
+   * Busca una branch por su código de búsqueda rápida
+   */
+  findByQuickSearchCode(code: string): Promise<Branch | null>;
 }
