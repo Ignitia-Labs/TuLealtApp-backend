@@ -59,6 +59,10 @@ export * from './users/update-password/update-password.handler';
 export * from './users/update-password/update-password.request';
 export * from './users/update-password/update-password.response';
 
+export * from './users/update-user-password/update-user-password.handler';
+export * from './users/update-user-password/update-user-password.request';
+export * from './users/update-user-password/update-user-password.response';
+
 export * from './users/get-admin-staff-users/get-admin-staff-users.handler';
 export * from './users/get-admin-staff-users/get-admin-staff-users.request';
 export * from './users/get-admin-staff-users/get-admin-staff-users.response';

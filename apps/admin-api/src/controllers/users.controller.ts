@@ -49,6 +49,9 @@ import {
   UpdatePartnerUserAssignmentHandler,
   UpdatePartnerUserAssignmentRequest,
   UpdatePartnerUserAssignmentResponse,
+  UpdateUserPasswordHandler,
+  UpdateUserPasswordRequest,
+  UpdateUserPasswordResponse,
 } from '@libs/application';
 import {
   JwtAuthGuard,
@@ -78,6 +81,7 @@ export class UsersController {
     private readonly updateUserProfileHandler: UpdateUserProfileHandler,
     private readonly getAdminStaffUsersHandler: GetAdminStaffUsersHandler,
     private readonly updatePartnerUserAssignmentHandler: UpdatePartnerUserAssignmentHandler,
+    private readonly updateUserPasswordHandler: UpdateUserPasswordHandler,
   ) {}
 
   @Post()
@@ -876,5 +880,101 @@ export class UsersController {
     request.tenantId = body.tenantId;
     request.branchId = body.branchId;
     return this.updatePartnerUserAssignmentHandler.execute(request);
+  }
+
+  @Patch(':id/password')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  // TODO: En el futuro, agregar validación de permisos aquí:
+  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
+  // @Roles('ADMIN', 'STAFF')
+  // @Permissions('admin.users.update')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: 'Actualizar contraseña de un usuario',
+    description:
+      'Permite a un administrador actualizar la contraseña de cualquier usuario sin requerir la contraseña actual. Útil para resetear contraseñas olvidadas o asignar nuevas contraseñas.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único del usuario cuya contraseña se actualizará',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiBody({
+    type: UpdateUserPasswordRequest,
+    description: 'Nueva contraseña para el usuario',
+    examples: {
+      example1: {
+        summary: 'Actualizar contraseña',
+        value: {
+          newPassword: 'NewSecurePass123!',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Contraseña actualizada exitosamente',
+    type: UpdateUserPasswordResponse,
+    example: {
+      message: 'Contraseña actualizada exitosamente',
+      userId: 1,
+      userEmail: 'user@example.com',
+      updatedAt: '2024-01-20T14:45:00.000Z',
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos inválidos',
+    type: BadRequestErrorResponseDto,
+    example: {
+      statusCode: 400,
+      message: [
+        'newPassword must be longer than or equal to 6 characters',
+        'newPassword should not be empty',
+      ],
+      error: 'Bad Request',
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos suficientes',
+    type: ForbiddenErrorResponseDto,
+    example: {
+      statusCode: 403,
+      message: 'Forbidden resource',
+      error: 'Forbidden',
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuario no encontrado',
+    type: NotFoundErrorResponseDto,
+    example: {
+      statusCode: 404,
+      message: 'User with ID 1 not found',
+      error: 'Not Found',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async updateUserPassword(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: Partial<UpdateUserPasswordRequest>,
+  ): Promise<UpdateUserPasswordResponse> {
+    const request = new UpdateUserPasswordRequest();
+    request.userId = id;
+    request.newPassword = body.newPassword!;
+    return this.updateUserPasswordHandler.execute(request);
   }
 }

@@ -45,6 +45,7 @@ import {
   UpdateUserProfileHandler,
   UpdateMyProfileHandler,
   UpdatePartnerUserAssignmentHandler,
+  UpdateUserPasswordHandler,
   GetPricingPlansHandler,
   GetPricingPlanByIdHandler,
   GetPricingPlanBySlugHandler,
@@ -287,6 +288,7 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     UpdateMyProfileHandler,
     GetAdminStaffUsersHandler,
     UpdatePartnerUserAssignmentHandler,
+    UpdateUserPasswordHandler,
     // Handlers de aplicación - Pricing
     GetPricingPlansHandler,
     GetPricingPlanByIdHandler,
