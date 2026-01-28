@@ -4,6 +4,7 @@ import {
   PartnerSubscriptionEntity,
   TenantEntity,
   BranchEntity,
+  CustomerMembershipEntity,
 } from '@libs/infrastructure';
 import { PartnerSubscriptionUsageMapper } from '@libs/infrastructure';
 import { PartnerSubscriptionUsage } from '@libs/domain';
@@ -52,17 +53,44 @@ export class SubscriptionUsageHelper {
 
   /**
    * Obtiene el subscriptionId desde un partnerId
+   * Solo busca suscripciones con status 'active', 'trialing' o 'past_due'
+   * Prioriza 'active', luego 'trialing', luego 'past_due'
+   *
+   * Optimizado: Usa UNA SOLA query en lugar de 3 queries secuenciales
    */
   static async getSubscriptionIdFromPartnerId(
     partnerId: number,
     subscriptionRepository: Repository<PartnerSubscriptionEntity>,
   ): Promise<number | null> {
     try {
-      const subscription = await subscriptionRepository.findOne({
-        where: { partnerId, status: 'active' },
+      // Obtener todas las suscripciones válidas en una sola query
+      const validSubscriptions = await subscriptionRepository.find({
+        where: { partnerId, status: In(['active', 'trialing', 'past_due']) },
         order: { createdAt: 'DESC' },
       });
-      return subscription?.id || null;
+
+      if (validSubscriptions.length === 0) {
+        return null;
+      }
+
+      // Prioridad: active > trialing > past_due
+      const statusPriority: Record<string, number> = {
+        active: 1,
+        trialing: 2,
+        past_due: 3,
+      };
+
+      validSubscriptions.sort((a, b) => {
+        const priorityA = statusPriority[a.status] || 999;
+        const priorityB = statusPriority[b.status] || 999;
+        if (priorityA !== priorityB) {
+          return priorityA - priorityB;
+        }
+        // Si tienen la misma prioridad, ordenar por fecha (más reciente primero)
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
+
+      return validSubscriptions[0].id;
     } catch (error) {
       console.error(`Error getting subscription ID for partner ${partnerId}:`, error);
       return null;
@@ -71,6 +99,7 @@ export class SubscriptionUsageHelper {
 
   /**
    * Obtiene el subscriptionId desde un tenantId
+   * Primero busca una suscripción activa, si no encuentra, busca la más reciente sin importar status
    */
   static async getSubscriptionIdFromTenantId(
     tenantId: number,
@@ -308,6 +337,7 @@ export class SubscriptionUsageHelper {
     usageRepository: Repository<PartnerSubscriptionUsageEntity>,
     tenantRepository: Repository<TenantEntity>,
     branchRepository: Repository<BranchEntity>,
+    customerMembershipRepository: Repository<CustomerMembershipEntity>,
     allowAnyStatus: boolean = true, // Para recálculo manual, permitir cualquier status
   ): Promise<void> {
     try {
@@ -341,6 +371,7 @@ export class SubscriptionUsageHelper {
         usageRepository,
         tenantRepository,
         branchRepository,
+        customerMembershipRepository,
         partnerId,
       );
     } catch (error) {
@@ -355,12 +386,14 @@ export class SubscriptionUsageHelper {
   /**
    * Recalcula el uso de suscripción para una suscripción específica desde los datos reales de la BD
    * Solo afecta a la suscripción especificada
+   * Recalcula tenantsCount, branchesCount y customersCount
    */
   static async recalculateUsageForSubscription(
     partnerSubscriptionId: number,
     usageRepository: Repository<PartnerSubscriptionUsageEntity>,
     tenantRepository: Repository<TenantEntity>,
     branchRepository: Repository<BranchEntity>,
+    customerMembershipRepository: Repository<CustomerMembershipEntity>,
     partnerId?: number,
   ): Promise<void> {
     try {
@@ -431,6 +464,30 @@ export class SubscriptionUsageHelper {
         `[SubscriptionUsageHelper] Total branches count for partner ${actualPartnerId}: ${branchesCount}`,
       );
 
+      // Contar customers (customer_memberships) de todos los tenants del partner
+      let customersCount = 0;
+      if (tenantIds.length > 0) {
+        customersCount = await customerMembershipRepository
+          .createQueryBuilder('membership')
+          .where('membership.tenantId IN (:...tenantIds)', { tenantIds })
+          .getCount();
+
+        // Log detallado de customers por tenant para debug
+        for (const tenantId of tenantIds) {
+          const customerCountForTenant = await customerMembershipRepository
+            .createQueryBuilder('membership')
+            .where('membership.tenantId = :tenantId', { tenantId })
+            .getCount();
+          console.log(
+            `[SubscriptionUsageHelper] Tenant ${tenantId} has ${customerCountForTenant} customers`,
+          );
+        }
+      }
+
+      console.log(
+        `[SubscriptionUsageHelper] Total customers count for partner ${actualPartnerId}: ${customersCount}`,
+      );
+
       // Asegurar que existe el registro de uso
       await this.ensureUsageRecordExists(partnerSubscriptionId, usageRepository);
 
@@ -449,11 +506,13 @@ export class SubscriptionUsageHelper {
       // Guardar valores anteriores para comparación
       const previousTenantsCount = usageEntity.tenantsCount;
       const previousBranchesCount = usageEntity.branchesCount;
+      const previousCustomersCount = usageEntity.customersCount;
 
-      // Actualizar solo tenantsCount y branchesCount
-      // customersCount y rewardsCount se mantienen (se actualizarán por otros procesos)
+      // Actualizar tenantsCount, branchesCount y customersCount
+      // rewardsCount se mantiene (se actualizará por otros procesos)
       usageEntity.tenantsCount = tenantsCount;
       usageEntity.branchesCount = branchesCount;
+      usageEntity.customersCount = customersCount;
 
       await usageRepository.save(usageEntity);
 
@@ -465,6 +524,9 @@ export class SubscriptionUsageHelper {
       );
       console.log(
         `  - Branches: ${previousBranchesCount} → ${branchesCount} ${previousBranchesCount !== branchesCount ? '⚠️ CHANGED' : '✓'}`,
+      );
+      console.log(
+        `  - Customers: ${previousCustomersCount} → ${customersCount} ${previousCustomersCount !== customersCount ? '⚠️ CHANGED' : '✓'}`,
       );
     } catch (error) {
       console.error(

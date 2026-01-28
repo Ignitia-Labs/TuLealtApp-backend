@@ -1,4 +1,6 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, In } from 'typeorm';
 import {
   IPartnerMessageRepository,
   IPartnerRepository,
@@ -6,6 +8,7 @@ import {
   IMessageRecipientRepository,
   IMessageTemplateRepository,
 } from '@libs/domain';
+import { PartnerEntity, UserEntity, MessageTemplateEntity } from '@libs/infrastructure';
 import { GetMessageResponse } from './get-message.response';
 import { MessageSenderService } from '../message-sender.service';
 
@@ -25,6 +28,12 @@ export class GetMessageHandler {
     private readonly recipientRepository: IMessageRecipientRepository,
     @Inject('IMessageTemplateRepository')
     private readonly templateRepository: IMessageTemplateRepository,
+    @InjectRepository(PartnerEntity)
+    private readonly partnerEntityRepository: Repository<PartnerEntity>,
+    @InjectRepository(UserEntity)
+    private readonly userEntityRepository: Repository<UserEntity>,
+    @InjectRepository(MessageTemplateEntity)
+    private readonly templateEntityRepository: Repository<MessageTemplateEntity>,
     private readonly messageSenderService: MessageSenderService,
   ) {}
 
@@ -35,29 +44,37 @@ export class GetMessageHandler {
       throw new NotFoundException(`Message with ID ${messageId} not found`);
     }
 
-    // Obtener destinatarios
+    // Optimizado: Obtener todos los datos en paralelo en lugar de queries secuenciales
     const recipients = await this.recipientRepository.findByMessageId(message.id);
     const partnerIds = recipients.map((r) => r.partnerId);
-    const partnerNames: string[] = [];
 
-    for (const partnerId of partnerIds) {
-      const partner = await this.partnerRepository.findById(partnerId);
-      if (partner) {
-        partnerNames.push(partner.name);
-      }
-    }
+    // Obtener partners, sender y template en paralelo
+    const [partnerEntities, senderEntity, templateEntity] = await Promise.all([
+      // Obtener todos los partners en una sola query
+      partnerIds.length > 0
+        ? this.partnerEntityRepository.find({
+            where: { id: In(partnerIds) },
+            select: ['id', 'name'],
+          })
+        : Promise.resolve([]),
+      // Obtener sender
+      this.userEntityRepository.findOne({
+        where: { id: message.senderId },
+        select: ['id', 'name', 'roles'],
+      }),
+      // Obtener template si existe
+      message.templateId
+        ? this.templateEntityRepository.findOne({
+            where: { id: message.templateId },
+            select: ['id', 'name'],
+          })
+        : Promise.resolve(null),
+    ]);
 
-    // Obtener información del sender
-    const sender = await this.userRepository.findById(message.senderId);
-    const senderName = sender ? sender.name : 'Unknown';
-    const senderRole = sender?.roles?.[0] || 'unknown';
-
-    // Obtener nombre del template si existe
-    let templateName: string | null = null;
-    if (message.templateId) {
-      const template = await this.templateRepository.findById(message.templateId);
-      templateName = template?.name || null;
-    }
+    const partnerNames = partnerEntities.map((p) => p.name);
+    const senderName = senderEntity?.name || 'Unknown';
+    const senderRole = senderEntity?.roles?.[0] || 'unknown';
+    const templateName = templateEntity?.name || null;
 
     // Obtener estadísticas de entrega
     const deliveryStats = await this.messageSenderService.getDeliveryStats(message.id);

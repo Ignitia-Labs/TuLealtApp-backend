@@ -37,33 +37,34 @@ export class GetSubscriptionHandler {
       subscription.currency,
     );
 
-    // Buscar el plan de precios para obtener el ID numérico y el slug
+    // Optimizado: Buscar el plan de precios intentando todas las variantes en paralelo
     let planId: number = 0;
     let planSlug: string = subscription.planId; // Por defecto usar el planId como slug
 
-    // Intentar buscar el plan por ID numérico primero
     const numericPlanId = parseInt(subscription.planId, 10);
-    if (!isNaN(numericPlanId)) {
-      const plan = await this.pricingPlanRepository.findById(numericPlanId);
-      if (plan) {
-        planId = plan.id;
-        planSlug = plan.slug;
-      }
-    } else {
-      // Si no es numérico, buscar por slug
-      const plan = await this.pricingPlanRepository.findBySlug(subscription.planId);
-      if (plan) {
-        planId = plan.id;
-        planSlug = plan.slug;
-      } else {
-        // Si no se encuentra, intentar buscar sin el prefijo "plan-"
-        const slugWithoutPrefix = subscription.planId.replace(/^plan-/, '');
-        const planBySlug = await this.pricingPlanRepository.findBySlug(slugWithoutPrefix);
-        if (planBySlug) {
-          planId = planBySlug.id;
-          planSlug = planBySlug.slug;
-        }
-      }
+    const slugWithoutPrefix = subscription.planId.replace(/^plan-/, '');
+
+    // Intentar todas las búsquedas posibles en paralelo
+    const planPromises = [
+      // Si es numérico, buscar por ID
+      !isNaN(numericPlanId)
+        ? this.pricingPlanRepository.findById(numericPlanId)
+        : Promise.resolve(null),
+      // Buscar por slug original
+      this.pricingPlanRepository.findBySlug(subscription.planId),
+      // Buscar por slug sin prefijo (solo si es diferente)
+      slugWithoutPrefix !== subscription.planId
+        ? this.pricingPlanRepository.findBySlug(slugWithoutPrefix)
+        : Promise.resolve(null),
+    ];
+
+    const [planById, planBySlug, planBySlugNoPrefix] = await Promise.all(planPromises);
+
+    // Usar el primer plan encontrado (prioridad: ID > slug original > slug sin prefijo)
+    const plan = planById || planBySlug || planBySlugNoPrefix;
+    if (plan) {
+      planId = plan.id;
+      planSlug = plan.slug;
     }
 
     return new GetSubscriptionResponse(

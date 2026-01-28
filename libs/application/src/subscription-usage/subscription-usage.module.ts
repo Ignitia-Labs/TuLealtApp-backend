@@ -6,6 +6,7 @@ import {
   TenantEntity,
   BranchEntity,
   PartnerLimitsEntity,
+  CustomerMembershipEntity,
 } from '@libs/infrastructure';
 import { SubscriptionUsageService } from './subscription-usage.service';
 import { RecalculateSubscriptionUsageHandler } from './recalculate-subscription-usage/recalculate-subscription-usage.handler';
@@ -22,6 +23,7 @@ import { RecalculateSubscriptionUsageHandler } from './recalculate-subscription-
       TenantEntity,
       BranchEntity,
       PartnerLimitsEntity,
+      CustomerMembershipEntity,
     ]),
   ],
   providers: [SubscriptionUsageService, RecalculateSubscriptionUsageHandler],

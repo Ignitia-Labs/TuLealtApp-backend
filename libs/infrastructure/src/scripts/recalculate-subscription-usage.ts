@@ -155,6 +155,27 @@ Ejemplos:
         }
         console.log(`Total branches en BD: ${totalBranches}`);
 
+        // Contar customers (customer_memberships) de todos los tenants del partner
+        let totalCustomers = 0;
+        if (tenantIds.length > 0) {
+          const customersCount = await dataSource.query(
+            'SELECT COUNT(*) as count FROM customer_memberships WHERE tenantId IN (?)',
+            [tenantIds],
+          );
+          totalCustomers = parseInt(customersCount[0]?.count || '0', 10);
+
+          // Mostrar customers por tenant
+          for (const tenantId of tenantIds) {
+            const customerCount = await dataSource.query(
+              'SELECT COUNT(*) as count FROM customer_memberships WHERE tenantId = ?',
+              [tenantId],
+            );
+            const count = parseInt(customerCount[0]?.count || '0', 10);
+            console.log(`  - Tenant ${tenantId}: ${count} customers`);
+          }
+        }
+        console.log(`Total customers en BD: ${totalCustomers}`);
+
         // Obtener límites del partner
         const limits = await dataSource.query('SELECT * FROM partner_limits WHERE partnerId = ?', [
           request.partnerId,

@@ -90,6 +90,7 @@ import { PermissionRepository } from './repositories/permission.repository';
 import { UserPermissionRepository } from './repositories/user-permission.repository';
 import { ProfilePermissionRepository } from './repositories/profile-permission.repository';
 import { UserChangeHistoryRepository } from './repositories/user-change-history.repository';
+import { CustomerMembershipSubscriber } from './subscribers/customer-membership.subscriber';
 import {
   IUserRepository,
   IPricingPlanRepository,
@@ -137,7 +138,17 @@ import {
  */
 @Module({
   imports: [
-    TypeOrmModule.forRoot(getDatabaseConfig()),
+    TypeOrmModule.forRootAsync({
+      useFactory: () => {
+        const config = getDatabaseConfig();
+        // Registrar subscribers después de crear la configuración
+        // Esto evita dependencias circulares
+        return {
+          ...config,
+          subscribers: [CustomerMembershipSubscriber],
+        };
+      },
+    }),
     TypeOrmModule.forFeature([
       UserEntity,
       PricingPlanEntity,
@@ -384,6 +395,8 @@ import {
       provide: 'IUserChangeHistoryRepository',
       useClass: UserChangeHistoryRepository,
     },
+    // TypeORM Subscribers se registran en la configuración de TypeORM
+    // para evitar dependencias circulares
   ],
   exports: [
     'IUserRepository',

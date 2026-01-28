@@ -17,6 +17,9 @@ if (process.env.NODE_ENV !== 'production') {
  * Configuración de la base de datos
  * Lee las variables de entorno para configurar la conexión
  * Prioridad: variables de entorno del sistema > .env.local > valores por defecto
+ *
+ * NOTA: Los subscribers se registran dinámicamente en el DatabaseModule
+ * para evitar dependencias circulares. No se incluyen aquí.
  */
 export const getDatabaseConfig = (): TypeOrmModuleOptions => {
   const isProduction = process.env.NODE_ENV === 'production';

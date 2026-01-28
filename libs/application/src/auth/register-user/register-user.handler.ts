@@ -5,6 +5,8 @@ import {
   Inject,
   ForbiddenException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, In } from 'typeorm';
 import { CreateUserHandler } from '../../users/create-user/create-user.handler';
 import { CreateUserRequest } from '../../users/create-user/create-user.request';
 import { CreateCustomerMembershipHandler } from '../../customer-memberships/create-customer-membership/create-customer-membership.handler';
@@ -12,11 +14,8 @@ import { CreateCustomerMembershipRequest } from '../../customer-memberships/crea
 import { RegisterUserRequest } from './register-user.request';
 import { RegisterUserResponse } from './register-user.response';
 import { ITenantRepository, IBranchRepository, IInvitationCodeRepository } from '@libs/domain';
-import {
-  isValidTenantQuickSearchCode,
-  isValidBranchQuickSearchCode,
-  parseQuickSearchCode,
-} from '@libs/shared';
+import { isValidTenantQuickSearchCode, isValidBranchQuickSearchCode } from '@libs/shared';
+import { PartnerSubscriptionEntity } from '@libs/infrastructure';
 
 /**
  * Handler para el caso de uso de registrar un usuario
@@ -34,6 +33,8 @@ export class RegisterUserHandler {
     private readonly branchRepository: IBranchRepository,
     @Inject('IInvitationCodeRepository')
     private readonly invitationCodeRepository: IInvitationCodeRepository,
+    @InjectRepository(PartnerSubscriptionEntity)
+    private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
   ) {}
 
   async execute(request: RegisterUserRequest): Promise<RegisterUserResponse> {
@@ -148,23 +149,46 @@ export class RegisterUserHandler {
 
       // Crear membership si se resolvió un tenantId
       if (resolvedTenantId) {
-        const createMembershipRequest = new CreateCustomerMembershipRequest();
-        createMembershipRequest.userId = result.id;
-        createMembershipRequest.tenantId = resolvedTenantId;
-        createMembershipRequest.registrationBranchId = resolvedBranchId || undefined;
-        createMembershipRequest.points = 0;
-        createMembershipRequest.status = 'active';
+        // Obtener el tenant para acceder al partnerId
+        const tenant = await this.tenantRepository.findById(resolvedTenantId);
+        if (!tenant) {
+          throw new NotFoundException(`Tenant with ID ${resolvedTenantId} not found`);
+        }
 
-        const membershipResult =
-          await this.createCustomerMembershipHandler.execute(createMembershipRequest);
-        membership = membershipResult.membership;
+        // Validar que el partner tenga una suscripción válida
+        // Esta validación debe fallar el registro completo si la suscripción no es válida
+        await this.validatePartnerSubscription(tenant.partnerId);
+
+        try {
+          const createMembershipRequest = new CreateCustomerMembershipRequest();
+          createMembershipRequest.userId = result.id;
+          createMembershipRequest.tenantId = resolvedTenantId;
+          createMembershipRequest.registrationBranchId = resolvedBranchId || undefined;
+          createMembershipRequest.points = 0;
+          createMembershipRequest.status = 'active';
+
+          const membershipResult =
+            await this.createCustomerMembershipHandler.execute(createMembershipRequest);
+          membership = membershipResult.membership;
+        } catch (error) {
+          // Si falla la creación de la membership, no fallamos el registro del usuario
+          // pero registramos el error para debugging
+          console.error('Error creating automatic membership:', error);
+          // Podríamos lanzar el error si queremos que el registro falle si no se puede crear la membership
+          // throw error;
+        }
       }
     } catch (error) {
-      // Si falla la creación de la membership, no fallamos el registro del usuario
-      // pero registramos el error para debugging
-      console.error('Error creating automatic membership:', error);
-      // Podríamos lanzar el error si queremos que el registro falle si no se puede crear la membership
-      // throw error;
+      // Si es un error de validación de suscripción, relanzarlo para bloquear el registro
+      if (error instanceof ForbiddenException && error.message.includes('suscripción')) {
+        throw error;
+      }
+      // Para otros errores (como NotFoundException de tenant), también relanzarlos
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      // Para otros errores inesperados, registrarlos pero no bloquear el registro
+      console.error('Error processing registration:', error);
     }
 
     // Retornar response específico de registro con información de membership si existe
@@ -174,6 +198,78 @@ export class RegisterUserHandler {
       result.name,
       result.createdAt,
       membership,
+    );
+  }
+
+  /**
+   * Valida que el partner tenga una suscripción válida para permitir el registro
+   * Permite: 'active', 'trialing' (si no hay active), 'past_due' (si no hay active ni trialing)
+   * Bloquea: 'paused', 'suspended', 'cancelled', 'expired', o sin suscripción
+   *
+   * Optimizado: Usa UNA SOLA query para obtener todas las suscripciones del partner
+   * y luego valida por prioridad en memoria, eliminando múltiples round-trips a la BD.
+   */
+  private async validatePartnerSubscription(partnerId: number): Promise<void> {
+    // Obtener todas las suscripciones del partner en una sola query
+    const allSubscriptions = await this.subscriptionRepository.find({
+      where: { partnerId },
+      order: { createdAt: 'DESC' },
+    });
+
+    // Si no hay suscripciones, bloquear registro
+    if (allSubscriptions.length === 0) {
+      console.warn(
+        `[RegisterUserHandler] Partner ${partnerId} does not have a subscription. Registration blocked.`,
+      );
+      throw new ForbiddenException(
+        'No se puede realizar el registro debido a que el negocio no tiene una suscripción activa',
+      );
+    }
+
+    // Separar suscripciones válidas de bloqueadas
+    const validStatuses = ['active', 'trialing', 'past_due'];
+    const blockedStatuses = ['paused', 'suspended', 'cancelled', 'expired'];
+
+    const validSubscriptions = allSubscriptions.filter((sub) => validStatuses.includes(sub.status));
+    const blockedSubscriptions = allSubscriptions.filter((sub) =>
+      blockedStatuses.includes(sub.status),
+    );
+
+    // Si hay suscripciones válidas, validar por prioridad
+    if (validSubscriptions.length > 0) {
+      // Prioridad: active > trialing > past_due
+      const statusPriority: Record<string, number> = {
+        active: 1,
+        trialing: 2,
+        past_due: 3,
+      };
+
+      validSubscriptions.sort((a, b) => {
+        const priorityA = statusPriority[a.status] || 999;
+        const priorityB = statusPriority[b.status] || 999;
+        if (priorityA !== priorityB) {
+          return priorityA - priorityB;
+        }
+        // Si tienen la misma prioridad, ordenar por fecha (más reciente primero)
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
+
+      // La primera suscripción es la de mayor prioridad - permitir registro
+      return;
+    }
+
+    // Si no hay suscripciones válidas pero hay bloqueadas, mostrar el estado
+    if (blockedSubscriptions.length > 0) {
+      const blockedStatus = blockedSubscriptions[0].status;
+      throw new ForbiddenException(
+        `No se puede realizar el registro debido a que el negocio ya no está activo. Estado de la suscripción: ${blockedStatus}`,
+      );
+    }
+
+    // Caso edge: hay suscripciones pero con estados desconocidos
+    // Esto no debería pasar, pero por seguridad bloqueamos
+    throw new ForbiddenException(
+      'No se puede realizar el registro debido a que el negocio no tiene una suscripción activa',
     );
   }
 }

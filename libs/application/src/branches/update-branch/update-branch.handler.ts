@@ -10,6 +10,7 @@ import {
   PartnerSubscriptionEntity,
   TenantEntity,
   BranchEntity,
+  CustomerMembershipEntity,
 } from '@libs/infrastructure';
 
 /**
@@ -31,6 +32,8 @@ export class UpdateBranchHandler {
     private readonly tenantEntityRepository: Repository<TenantEntity>,
     @InjectRepository(BranchEntity)
     private readonly branchEntityRepository: Repository<BranchEntity>,
+    @InjectRepository(CustomerMembershipEntity)
+    private readonly customerMembershipRepository: Repository<CustomerMembershipEntity>,
   ) {}
 
   async execute(branchId: number, request: UpdateBranchRequest): Promise<UpdateBranchResponse> {
@@ -71,6 +74,7 @@ export class UpdateBranchHandler {
         this.usageRepository,
         this.tenantEntityRepository,
         this.branchEntityRepository,
+        this.customerMembershipRepository,
         true, // allowAnyStatus = true para actualizar incluso si la suscripción no está activa
       );
     }

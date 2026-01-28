@@ -52,6 +52,9 @@ export * from './persistence/entities/commission.entity';
 export * from './persistence/entities/profile.entity';
 export * from './persistence/entities/user-profile.entity';
 export * from './persistence/entities/profile-permission.entity';
+export * from './persistence/entities/message-template.entity';
+export * from './persistence/entities/partner-message.entity';
+export * from './persistence/entities/message-recipient.entity';
 
 // Repositories
 export * from './persistence/repositories/user.repository';

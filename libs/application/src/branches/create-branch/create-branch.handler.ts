@@ -10,6 +10,7 @@ import {
   PartnerSubscriptionEntity,
   TenantEntity,
   BranchEntity,
+  CustomerMembershipEntity,
 } from '@libs/infrastructure';
 import { generateBranchQuickSearchCode } from '@libs/shared';
 
@@ -33,6 +34,8 @@ export class CreateBranchHandler {
     private readonly tenantEntityRepository: Repository<TenantEntity>,
     @InjectRepository(BranchEntity)
     private readonly branchEntityRepository: Repository<BranchEntity>,
+    @InjectRepository(CustomerMembershipEntity)
+    private readonly customerMembershipRepository: Repository<CustomerMembershipEntity>,
   ) {}
 
   async execute(request: CreateBranchRequest): Promise<CreateBranchResponse> {
@@ -85,6 +88,7 @@ export class CreateBranchHandler {
       this.usageRepository,
       this.tenantEntityRepository,
       this.branchEntityRepository,
+      this.customerMembershipRepository,
       true, // allowAnyStatus = true para actualizar incluso si la suscripción no está activa
     );
 

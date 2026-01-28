@@ -7,6 +7,7 @@ import {
   TenantEntity,
   BranchEntity,
   PartnerLimitsEntity,
+  CustomerMembershipEntity,
 } from '@libs/infrastructure';
 import { SubscriptionUsageHelper } from '../subscription-usage.helper';
 import { RecalculateSubscriptionUsageRequest } from './recalculate-subscription-usage.request';
@@ -29,6 +30,8 @@ export class RecalculateSubscriptionUsageHandler {
     private readonly tenantRepository: Repository<TenantEntity>,
     @InjectRepository(BranchEntity)
     private readonly branchRepository: Repository<BranchEntity>,
+    @InjectRepository(CustomerMembershipEntity)
+    private readonly customerMembershipRepository: Repository<CustomerMembershipEntity>,
     @InjectRepository(PartnerLimitsEntity)
     private readonly limitsRepository: Repository<PartnerLimitsEntity>,
   ) {}
@@ -62,6 +65,7 @@ export class RecalculateSubscriptionUsageHandler {
         this.usageRepository,
         this.tenantRepository,
         this.branchRepository,
+        this.customerMembershipRepository,
         subscription.partnerId,
       );
 
@@ -77,7 +81,7 @@ export class RecalculateSubscriptionUsageHandler {
 
       if (usageEntity) {
         this.logger.log(
-          `Partner ${subscription.partnerId} - Usage: tenants=${usageEntity.tenantsCount}, branches=${usageEntity.branchesCount}`,
+          `Partner ${subscription.partnerId} - Usage: tenants=${usageEntity.tenantsCount}, branches=${usageEntity.branchesCount}, customers=${usageEntity.customersCount}`,
         );
         if (limitsEntity) {
           this.logger.log(
@@ -106,6 +110,7 @@ export class RecalculateSubscriptionUsageHandler {
         this.usageRepository,
         this.tenantRepository,
         this.branchRepository,
+        this.customerMembershipRepository,
         true, // allowAnyStatus = true para recálculo manual
       );
 
@@ -205,6 +210,7 @@ export class RecalculateSubscriptionUsageHandler {
             this.usageRepository,
             this.tenantRepository,
             this.branchRepository,
+            this.customerMembershipRepository,
             subscription.partnerId,
           );
 

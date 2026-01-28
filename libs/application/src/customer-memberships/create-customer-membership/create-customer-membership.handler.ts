@@ -117,6 +117,13 @@ export class CreateCustomerMembershipHandler {
     );
     if (subscriptionId) {
       await SubscriptionUsageHelper.incrementCustomersCount(subscriptionId, this.usageRepository);
+      console.log(
+        `[CreateCustomerMembershipHandler] Incremented customers count for subscription ${subscriptionId} (tenantId: ${savedMembership.tenantId}, membershipId: ${savedMembership.id})`,
+      );
+    } else {
+      console.warn(
+        `[CreateCustomerMembershipHandler] Could not find subscription for tenantId ${savedMembership.tenantId}. Subscription usage not updated.`,
+      );
     }
 
     // Convertir a DTO con información denormalizada
