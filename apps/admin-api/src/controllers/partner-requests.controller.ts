@@ -693,13 +693,16 @@ export class PartnerRequestsController {
           limitsMaxBranches: 20,
           limitsMaxCustomers: 5000,
           limitsMaxRewards: 50,
+          limitsMaxAdmins: -1,
+          limitsStorageGB: -1,
+          limitsApiCallsPerMonth: -1,
           domain: 'cocinasol.gt',
         },
       },
       example3: {
         summary: 'Procesar con valores de precio e IVA especificados directamente',
         description:
-          'Cuando se proporcionan subscriptionBasePrice, subscriptionTaxAmount y subscriptionTotalPrice, estos valores se usan directamente sin calcular.',
+          'Cuando se proporcionan subscriptionBasePrice, subscriptionTaxAmount y subscriptionTotalPrice, estos valores se usan directamente sin calcular. Los límites se tomarán del plan si no se especifican.',
         value: {
           requestId: 1,
           subscriptionPlanId: 'plan-conecta',
@@ -717,6 +720,9 @@ export class PartnerRequestsController {
           limitsMaxBranches: 20,
           limitsMaxCustomers: 5000,
           limitsMaxRewards: 50,
+          limitsMaxAdmins: -1,
+          limitsStorageGB: -1,
+          limitsApiCallsPerMonth: -1,
           domain: 'cocinasol.gt',
         },
       },

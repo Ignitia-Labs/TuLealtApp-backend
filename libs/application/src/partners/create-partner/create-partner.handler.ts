@@ -288,6 +288,9 @@ export class CreatePartnerHandler {
       request.limitsMaxBranches,
       request.limitsMaxCustomers,
       request.limitsMaxRewards,
+      request.limitsMaxAdmins ?? -1,
+      request.limitsStorageGB ?? -1,
+      request.limitsApiCallsPerMonth ?? -1,
     );
     const limitsEntity = PartnerMapper.limitsToPersistence(limits);
     limitsEntity.partnerId = savedPartner.id;

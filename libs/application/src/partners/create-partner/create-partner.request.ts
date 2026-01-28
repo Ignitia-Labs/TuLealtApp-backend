@@ -391,4 +391,37 @@ export class CreatePartnerRequest {
   @IsNumber()
   @IsNotEmpty()
   limitsMaxRewards: number;
+
+  @ApiProperty({
+    description: 'Máximo número de administradores (-1 para ilimitado)',
+    example: -1,
+    type: Number,
+    required: false,
+    default: -1,
+  })
+  @IsNumber()
+  @IsOptional()
+  limitsMaxAdmins?: number;
+
+  @ApiProperty({
+    description: 'Almacenamiento en GB permitido (-1 para ilimitado)',
+    example: -1,
+    type: Number,
+    required: false,
+    default: -1,
+  })
+  @IsNumber()
+  @IsOptional()
+  limitsStorageGB?: number;
+
+  @ApiProperty({
+    description: 'Número máximo de llamadas API por mes (-1 para ilimitado)',
+    example: -1,
+    type: Number,
+    required: false,
+    default: -1,
+  })
+  @IsNumber()
+  @IsOptional()
+  limitsApiCallsPerMonth?: number;
 }

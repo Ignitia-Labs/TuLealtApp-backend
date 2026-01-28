@@ -13,6 +13,7 @@ import {
   ISubscriptionEventRepository,
   ICountryRepository,
   IUserRepository,
+  IPricingPlanRepository,
   SubscriptionEvent,
   Tenant,
   TenantFeatures,
@@ -61,6 +62,8 @@ export class ProcessPartnerRequestHandler {
     private readonly countryRepository: ICountryRepository,
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
+    @Inject('IPricingPlanRepository')
+    private readonly pricingPlanRepository: IPricingPlanRepository,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
     @InjectDataSource()
@@ -192,10 +195,51 @@ export class ProcessPartnerRequestHandler {
       createPartnerRequest.subscriptionTotalPrice = request.subscriptionTotalPrice;
     }
 
-    createPartnerRequest.limitsMaxTenants = request.limitsMaxTenants || 5;
-    createPartnerRequest.limitsMaxBranches = request.limitsMaxBranches || 20;
-    createPartnerRequest.limitsMaxCustomers = request.limitsMaxCustomers || 5000;
-    createPartnerRequest.limitsMaxRewards = request.limitsMaxRewards || 50;
+    // Obtener límites del plan de precios como referencia
+    let planLimits: {
+      maxTenants: number;
+      maxBranches: number;
+      maxCustomers: number;
+      maxRewards: number;
+      maxAdmins: number;
+      storageGB: number;
+      apiCallsPerMonth: number;
+    } | null = null;
+
+    // Intentar obtener los límites del plan si existe planId
+    if (updatedPartnerRequest.planId) {
+      const pricingPlan = await this.pricingPlanRepository.findById(
+        updatedPartnerRequest.planId,
+      );
+      if (pricingPlan && pricingPlan.limits) {
+        planLimits = {
+          maxTenants: pricingPlan.limits.maxTenants,
+          maxBranches: pricingPlan.limits.maxBranches,
+          maxCustomers: pricingPlan.limits.maxCustomers,
+          maxRewards: pricingPlan.limits.maxRewards,
+          maxAdmins: pricingPlan.limits.maxAdmins,
+          storageGB: pricingPlan.limits.storageGB,
+          apiCallsPerMonth: pricingPlan.limits.apiCallsPerMonth,
+        };
+      }
+    }
+
+    // Usar límites del plan como referencia, pero permitir sobrescribir con valores del request
+    // Si no hay plan o no tiene límites, usar valores por defecto
+    createPartnerRequest.limitsMaxTenants =
+      request.limitsMaxTenants ?? planLimits?.maxTenants ?? 5;
+    createPartnerRequest.limitsMaxBranches =
+      request.limitsMaxBranches ?? planLimits?.maxBranches ?? 20;
+    createPartnerRequest.limitsMaxCustomers =
+      request.limitsMaxCustomers ?? planLimits?.maxCustomers ?? 5000;
+    createPartnerRequest.limitsMaxRewards =
+      request.limitsMaxRewards ?? planLimits?.maxRewards ?? 50;
+    createPartnerRequest.limitsMaxAdmins =
+      request.limitsMaxAdmins ?? planLimits?.maxAdmins ?? -1;
+    createPartnerRequest.limitsStorageGB =
+      request.limitsStorageGB ?? planLimits?.storageGB ?? -1;
+    createPartnerRequest.limitsApiCallsPerMonth =
+      request.limitsApiCallsPerMonth ?? planLimits?.apiCallsPerMonth ?? -1;
 
     // Envolver toda la lógica en una transacción para garantizar atomicidad
     return await this.dataSource.transaction(async (manager) => {

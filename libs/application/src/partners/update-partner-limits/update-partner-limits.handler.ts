@@ -51,7 +51,10 @@ export class UpdatePartnerLimitsHandler {
         request.maxTenants === undefined &&
         request.maxBranches === undefined &&
         request.maxCustomers === undefined &&
-        request.maxRewards === undefined
+        request.maxRewards === undefined &&
+        request.maxAdmins === undefined &&
+        request.storageGB === undefined &&
+        request.apiCallsPerMonth === undefined
       ) {
         throw new BadRequestException('At least one limit field must be provided for update');
       }
@@ -63,6 +66,11 @@ export class UpdatePartnerLimitsHandler {
         request.maxBranches !== undefined ? request.maxBranches : limitsEntity.maxBranches,
         request.maxCustomers !== undefined ? request.maxCustomers : limitsEntity.maxCustomers,
         request.maxRewards !== undefined ? request.maxRewards : limitsEntity.maxRewards,
+        request.maxAdmins !== undefined ? request.maxAdmins : (limitsEntity.maxAdmins ?? -1),
+        request.storageGB !== undefined ? request.storageGB : (limitsEntity.storageGB ?? -1),
+        request.apiCallsPerMonth !== undefined
+          ? request.apiCallsPerMonth
+          : limitsEntity.apiCallsPerMonth ?? -1,
         limitsEntity.id,
       );
 
@@ -82,6 +90,9 @@ export class UpdatePartnerLimitsHandler {
         maxBranches: Number(savedLimitsEntity.maxBranches) || 0,
         maxCustomers: Number(savedLimitsEntity.maxCustomers) || 0,
         maxRewards: Number(savedLimitsEntity.maxRewards) || 0,
+        maxAdmins: Number(savedLimitsEntity.maxAdmins ?? -1),
+        storageGB: Number(savedLimitsEntity.storageGB ?? -1),
+        apiCallsPerMonth: Number(savedLimitsEntity.apiCallsPerMonth ?? -1),
       };
 
       return new UpdatePartnerLimitsResponse(

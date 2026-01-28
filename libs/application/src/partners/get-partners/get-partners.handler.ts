@@ -96,6 +96,9 @@ export class GetPartnersHandler {
             maxBranches: partnerEntity.limits.maxBranches,
             maxCustomers: partnerEntity.limits.maxCustomers,
             maxRewards: partnerEntity.limits.maxRewards,
+            maxAdmins: partnerEntity.limits.maxAdmins ?? -1,
+            storageGB: partnerEntity.limits.storageGB ?? -1,
+            apiCallsPerMonth: partnerEntity.limits.apiCallsPerMonth ?? -1,
           }
         : null;
 

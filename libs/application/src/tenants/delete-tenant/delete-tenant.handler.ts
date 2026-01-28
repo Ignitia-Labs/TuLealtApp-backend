@@ -5,7 +5,12 @@ import { DeleteTenantResponse } from './delete-tenant.response';
 import { SubscriptionUsageHelper } from '@libs/application';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PartnerSubscriptionUsageEntity, PartnerSubscriptionEntity } from '@libs/infrastructure';
+import {
+  PartnerSubscriptionUsageEntity,
+  PartnerSubscriptionEntity,
+  TenantEntity,
+  BranchEntity,
+} from '@libs/infrastructure';
 
 /**
  * Handler para el caso de uso de eliminar un tenant
@@ -21,6 +26,10 @@ export class DeleteTenantHandler {
     private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
+    @InjectRepository(TenantEntity)
+    private readonly tenantEntityRepository: Repository<TenantEntity>,
+    @InjectRepository(BranchEntity)
+    private readonly branchEntityRepository: Repository<BranchEntity>,
   ) {}
 
   async execute(request: DeleteTenantRequest): Promise<DeleteTenantResponse> {
@@ -34,22 +43,22 @@ export class DeleteTenantHandler {
     // Guardar el partnerId antes de eliminar
     const partnerId = tenant.partnerId;
 
-    // Obtener el subscriptionId antes de eliminar para decrementar el contador
-    const subscriptionId = await SubscriptionUsageHelper.getSubscriptionIdFromPartnerId(
-      partnerId,
-      this.subscriptionRepository,
-    );
-
     // Eliminar el tenant (las características se eliminan en cascada por la relación)
     await this.tenantRepository.delete(request.tenantId);
 
     // Actualizar las estadísticas del partner
     await this.partnerRepository.updateStats(partnerId);
 
-    // Decrementar el contador de tenants en el uso de suscripción
-    if (subscriptionId) {
-      await SubscriptionUsageHelper.decrementTenantsCount(subscriptionId, this.usageRepository);
-    }
+    // Recalcular subscription usage del partner afectado
+    // Usar recálculo completo para asegurar que funcione incluso si no hay suscripción activa
+    await SubscriptionUsageHelper.recalculateUsageForPartner(
+      partnerId,
+      this.subscriptionRepository,
+      this.usageRepository,
+      this.tenantEntityRepository,
+      this.branchEntityRepository,
+      true, // allowAnyStatus = true para actualizar incluso si la suscripción no está activa
+    );
 
     return new DeleteTenantResponse('Tenant deleted successfully', request.tenantId);
   }

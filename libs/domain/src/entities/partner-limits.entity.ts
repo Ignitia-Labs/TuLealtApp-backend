@@ -7,10 +7,13 @@ export class PartnerLimits {
   constructor(
     public readonly id: number,
     public readonly partnerId: number,
-    public readonly maxTenants: number,
-    public readonly maxBranches: number,
-    public readonly maxCustomers: number,
-    public readonly maxRewards: number,
+    public readonly maxTenants: number, // -1 para ilimitado
+    public readonly maxBranches: number, // -1 para ilimitado
+    public readonly maxCustomers: number, // -1 para ilimitado
+    public readonly maxRewards: number, // -1 para ilimitado
+    public readonly maxAdmins: number, // -1 para ilimitado
+    public readonly storageGB: number, // -1 para ilimitado
+    public readonly apiCallsPerMonth: number, // -1 para ilimitado
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
   ) {}
@@ -24,6 +27,9 @@ export class PartnerLimits {
     maxBranches: number,
     maxCustomers: number,
     maxRewards: number,
+    maxAdmins: number,
+    storageGB: number,
+    apiCallsPerMonth: number,
     id?: number,
   ): PartnerLimits {
     const now = new Date();
@@ -34,6 +40,9 @@ export class PartnerLimits {
       maxBranches,
       maxCustomers,
       maxRewards,
+      maxAdmins,
+      storageGB,
+      apiCallsPerMonth,
       now,
       now,
     );

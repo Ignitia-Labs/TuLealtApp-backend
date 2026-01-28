@@ -180,6 +180,9 @@ export class GetPartnerHandler {
             maxBranches: Number(partnerEntity.limits.maxBranches) || 0,
             maxCustomers: Number(partnerEntity.limits.maxCustomers) || 0,
             maxRewards: Number(partnerEntity.limits.maxRewards) || 0,
+            maxAdmins: Number(partnerEntity.limits.maxAdmins ?? -1),
+            storageGB: Number(partnerEntity.limits.storageGB ?? -1),
+            apiCallsPerMonth: Number(partnerEntity.limits.apiCallsPerMonth ?? -1),
           };
         } catch (limitsError) {
           console.error('Error al mapear limits:', limitsError);

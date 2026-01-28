@@ -1,15 +1,30 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PartnerSubscriptionUsageEntity, PartnerSubscriptionEntity } from '@libs/infrastructure';
+import {
+  PartnerSubscriptionUsageEntity,
+  PartnerSubscriptionEntity,
+  TenantEntity,
+  BranchEntity,
+  PartnerLimitsEntity,
+} from '@libs/infrastructure';
 import { SubscriptionUsageService } from './subscription-usage.service';
+import { RecalculateSubscriptionUsageHandler } from './recalculate-subscription-usage/recalculate-subscription-usage.handler';
 
 /**
  * Módulo para SubscriptionUsageService
  * Proporciona el servicio y las entidades de TypeORM necesarias
  */
 @Module({
-  imports: [TypeOrmModule.forFeature([PartnerSubscriptionUsageEntity, PartnerSubscriptionEntity])],
-  providers: [SubscriptionUsageService],
-  exports: [SubscriptionUsageService, TypeOrmModule],
+  imports: [
+    TypeOrmModule.forFeature([
+      PartnerSubscriptionUsageEntity,
+      PartnerSubscriptionEntity,
+      TenantEntity,
+      BranchEntity,
+      PartnerLimitsEntity,
+    ]),
+  ],
+  providers: [SubscriptionUsageService, RecalculateSubscriptionUsageHandler],
+  exports: [SubscriptionUsageService, RecalculateSubscriptionUsageHandler, TypeOrmModule],
 })
 export class SubscriptionUsageModule {}

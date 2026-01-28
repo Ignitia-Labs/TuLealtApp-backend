@@ -1,7 +1,16 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { IBranchRepository, Branch } from '@libs/domain';
+import { IBranchRepository, ITenantRepository, Branch } from '@libs/domain';
 import { UpdateBranchRequest } from './update-branch.request';
 import { UpdateBranchResponse } from './update-branch.response';
+import { SubscriptionUsageHelper } from '@libs/application';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import {
+  PartnerSubscriptionUsageEntity,
+  PartnerSubscriptionEntity,
+  TenantEntity,
+  BranchEntity,
+} from '@libs/infrastructure';
 
 /**
  * Handler para el caso de uso de actualizar una branch
@@ -12,6 +21,16 @@ export class UpdateBranchHandler {
   constructor(
     @Inject('IBranchRepository')
     private readonly branchRepository: IBranchRepository,
+    @Inject('ITenantRepository')
+    private readonly tenantRepository: ITenantRepository,
+    @InjectRepository(PartnerSubscriptionUsageEntity)
+    private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
+    @InjectRepository(PartnerSubscriptionEntity)
+    private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
+    @InjectRepository(TenantEntity)
+    private readonly tenantEntityRepository: Repository<TenantEntity>,
+    @InjectRepository(BranchEntity)
+    private readonly branchEntityRepository: Repository<BranchEntity>,
   ) {}
 
   async execute(branchId: number, request: UpdateBranchRequest): Promise<UpdateBranchResponse> {
@@ -41,6 +60,20 @@ export class UpdateBranchHandler {
 
     // Guardar la branch actualizada
     const savedBranch = await this.branchRepository.update(updatedBranch);
+
+    // Recalcular subscription usage del partner afectado
+    // Permitir cualquier status de suscripción para asegurar que se actualice correctamente
+    const tenant = await this.tenantRepository.findById(savedBranch.tenantId);
+    if (tenant) {
+      await SubscriptionUsageHelper.recalculateUsageForPartner(
+        tenant.partnerId,
+        this.subscriptionRepository,
+        this.usageRepository,
+        this.tenantEntityRepository,
+        this.branchEntityRepository,
+        true, // allowAnyStatus = true para actualizar incluso si la suscripción no está activa
+      );
+    }
 
     // Retornar response DTO
     return new UpdateBranchResponse(

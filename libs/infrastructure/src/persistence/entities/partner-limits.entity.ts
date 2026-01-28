@@ -37,7 +37,16 @@ export class PartnerLimitsEntity {
   maxCustomers: number;
 
   @Column('int')
-  maxRewards: number;
+  maxRewards: number; // -1 para ilimitado
+
+  @Column('int')
+  maxAdmins: number; // -1 para ilimitado
+
+  @Column('int')
+  storageGB: number; // -1 para ilimitado
+
+  @Column('int')
+  apiCallsPerMonth: number; // -1 para ilimitado
 
   @CreateDateColumn()
   createdAt: Date;

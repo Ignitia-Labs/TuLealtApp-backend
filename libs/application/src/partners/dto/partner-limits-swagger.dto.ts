@@ -31,4 +31,25 @@ export class PartnerLimitsSwaggerDto {
     type: Number,
   })
   maxRewards: number;
+
+  @ApiProperty({
+    example: -1,
+    description: 'Número máximo de administradores permitidos (-1 para ilimitado)',
+    type: Number,
+  })
+  maxAdmins: number;
+
+  @ApiProperty({
+    example: -1,
+    description: 'Almacenamiento en GB permitido (-1 para ilimitado)',
+    type: Number,
+  })
+  storageGB: number;
+
+  @ApiProperty({
+    example: -1,
+    description: 'Número máximo de llamadas API por mes (-1 para ilimitado)',
+    type: Number,
+  })
+  apiCallsPerMonth: number;
 }

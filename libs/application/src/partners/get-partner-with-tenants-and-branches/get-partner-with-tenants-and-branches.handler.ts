@@ -143,6 +143,9 @@ export class GetPartnerWithTenantsAndBranchesHandler {
           maxBranches: Number(limitsEntity.maxBranches) || 0,
           maxCustomers: Number(limitsEntity.maxCustomers) || 0,
           maxRewards: Number(limitsEntity.maxRewards) || 0,
+          maxAdmins: Number(limitsEntity.maxAdmins ?? -1),
+          storageGB: Number(limitsEntity.storageGB ?? -1),
+          apiCallsPerMonth: Number(limitsEntity.apiCallsPerMonth ?? -1),
         };
       }
     } catch (error) {

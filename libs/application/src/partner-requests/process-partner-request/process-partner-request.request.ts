@@ -172,6 +172,36 @@ export class ProcessPartnerRequestRequest {
   limitsMaxRewards?: number;
 
   @ApiProperty({
+    description: 'Límite máximo de administradores (-1 para ilimitado)',
+    example: -1,
+    type: Number,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  limitsMaxAdmins?: number;
+
+  @ApiProperty({
+    description: 'Almacenamiento en GB permitido (-1 para ilimitado)',
+    example: -1,
+    type: Number,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  limitsStorageGB?: number;
+
+  @ApiProperty({
+    description: 'Número máximo de llamadas API por mes (-1 para ilimitado)',
+    example: -1,
+    type: Number,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  limitsApiCallsPerMonth?: number;
+
+  @ApiProperty({
     description: 'Dominio del partner (se generará automáticamente si no se proporciona)',
     example: 'cocinasol.gt',
     type: String,

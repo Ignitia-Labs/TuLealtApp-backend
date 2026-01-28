@@ -188,6 +188,9 @@ export class PartnerMapper {
       persistenceEntity.maxBranches,
       persistenceEntity.maxCustomers,
       persistenceEntity.maxRewards,
+      persistenceEntity.maxAdmins ?? -1,
+      persistenceEntity.storageGB ?? -1,
+      persistenceEntity.apiCallsPerMonth ?? -1,
       persistenceEntity.id,
     );
   }
@@ -205,6 +208,9 @@ export class PartnerMapper {
     entity.maxBranches = domainEntity.maxBranches;
     entity.maxCustomers = domainEntity.maxCustomers;
     entity.maxRewards = domainEntity.maxRewards;
+    entity.maxAdmins = domainEntity.maxAdmins;
+    entity.storageGB = domainEntity.storageGB;
+    entity.apiCallsPerMonth = domainEntity.apiCallsPerMonth;
     if (domainEntity.id > 0) {
       entity.createdAt = domainEntity.createdAt;
       entity.updatedAt = domainEntity.updatedAt;

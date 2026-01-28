@@ -6,7 +6,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TenantFeaturesEntity, TenantMapper } from '@libs/infrastructure';
 import { SubscriptionUsageHelper } from '@libs/application';
-import { PartnerSubscriptionUsageEntity, PartnerSubscriptionEntity } from '@libs/infrastructure';
+import {
+  PartnerSubscriptionUsageEntity,
+  PartnerSubscriptionEntity,
+  TenantEntity,
+  BranchEntity,
+} from '@libs/infrastructure';
 import { generateTenantQuickSearchCode } from '@libs/shared';
 
 /**
@@ -25,6 +30,10 @@ export class CreateTenantHandler {
     private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
+    @InjectRepository(TenantEntity)
+    private readonly tenantEntityRepository: Repository<TenantEntity>,
+    @InjectRepository(BranchEntity)
+    private readonly branchEntityRepository: Repository<BranchEntity>,
   ) {}
 
   async execute(request: CreateTenantRequest): Promise<CreateTenantResponse> {
@@ -88,14 +97,16 @@ export class CreateTenantHandler {
     // Actualizar las estadísticas del partner
     await this.partnerRepository.updateStats(savedTenant.partnerId);
 
-    // Incrementar el contador de tenants en el uso de suscripción
-    const subscriptionId = await SubscriptionUsageHelper.getSubscriptionIdFromPartnerId(
+    // Recalcular subscription usage del partner afectado
+    // Usar recálculo completo para asegurar que funcione incluso si no hay suscripción activa
+    await SubscriptionUsageHelper.recalculateUsageForPartner(
       savedTenant.partnerId,
       this.subscriptionRepository,
+      this.usageRepository,
+      this.tenantEntityRepository,
+      this.branchEntityRepository,
+      true, // allowAnyStatus = true para actualizar incluso si la suscripción no está activa
     );
-    if (subscriptionId) {
-      await SubscriptionUsageHelper.incrementTenantsCount(subscriptionId, this.usageRepository);
-    }
 
     // Retornar response DTO
     return new CreateTenantResponse(

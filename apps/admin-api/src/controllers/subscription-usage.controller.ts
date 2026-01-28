@@ -32,6 +32,9 @@ import {
   DeleteSubscriptionUsageHandler,
   DeleteSubscriptionUsageRequest,
   DeleteSubscriptionUsageResponse,
+  RecalculateSubscriptionUsageHandler,
+  RecalculateSubscriptionUsageRequest,
+  RecalculateSubscriptionUsageResponse,
 } from '@libs/application';
 import {
   UnauthorizedErrorResponseDto,
@@ -54,6 +57,7 @@ export class SubscriptionUsageController {
     private readonly getSubscriptionUsageHandler: GetSubscriptionUsageHandler,
     private readonly updateSubscriptionUsageHandler: UpdateSubscriptionUsageHandler,
     private readonly deleteSubscriptionUsageHandler: DeleteSubscriptionUsageHandler,
+    private readonly recalculateSubscriptionUsageHandler: RecalculateSubscriptionUsageHandler,
   ) {}
 
   @Post()
@@ -403,5 +407,114 @@ export class SubscriptionUsageController {
     const request = new DeleteSubscriptionUsageRequest();
     request.partnerSubscriptionId = subscriptionId;
     return this.deleteSubscriptionUsageHandler.execute(request);
+  }
+
+  @Post('recalculate')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: 'Recalcular uso de suscripción',
+    description:
+      'Recalcula el uso de suscripción desde los datos reales de la base de datos. Puede recalcular un partner específico, una suscripción específica, o todos los partners activos si no se proporcionan parámetros.',
+  })
+  @ApiBody({
+    type: RecalculateSubscriptionUsageRequest,
+    description: 'Parámetros opcionales para el recálculo',
+    examples: {
+      ejemplo1: {
+        summary: 'Recalcular un partner específico',
+        description: 'Recalcula el uso de suscripción para un partner específico',
+        value: {
+          partnerId: 1,
+        },
+      },
+      ejemplo2: {
+        summary: 'Recalcular una suscripción específica',
+        description: 'Recalcula el uso de suscripción para una suscripción específica',
+        value: {
+          partnerSubscriptionId: 1,
+        },
+      },
+      ejemplo3: {
+        summary: 'Recalcular todos los partners',
+        description: 'Recalcula el uso de suscripción para todos los partners activos (body vacío)',
+        value: {},
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Recálculo completado exitosamente',
+    type: RecalculateSubscriptionUsageResponse,
+    example: {
+      message: 'Subscription usage recalculated successfully',
+      recalculatedCount: 1,
+      results: [
+        {
+          partnerId: 1,
+          partnerSubscriptionId: 1,
+          tenantsCount: 3,
+          branchesCount: 12,
+          customersCount: 2345,
+          rewardsCount: 15,
+        },
+      ],
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos de entrada inválidos',
+    type: BadRequestErrorResponseDto,
+    example: {
+      statusCode: 400,
+      message: ['partnerId must be a positive number'],
+      error: 'Bad Request',
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+    example: {
+      statusCode: 401,
+      message: 'Unauthorized',
+      error: 'Unauthorized',
+    },
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos',
+    type: ForbiddenErrorResponseDto,
+    example: {
+      statusCode: 403,
+      message: 'Forbidden resource',
+      error: 'Forbidden',
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Partner o suscripción no encontrado',
+    type: NotFoundErrorResponseDto,
+    example: {
+      statusCode: 404,
+      message: 'Subscription with ID 1 not found',
+      error: 'Not Found',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+    example: {
+      statusCode: 500,
+      message: 'Internal server error',
+      error: 'Internal Server Error',
+    },
+  })
+  async recalculate(
+    @Body() request: RecalculateSubscriptionUsageRequest,
+  ): Promise<RecalculateSubscriptionUsageResponse> {
+    return this.recalculateSubscriptionUsageHandler.execute(request);
   }
 }

@@ -61,6 +61,7 @@
     "script:validate-permissions": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/validate-permissions-integrity.ts",
     "script:migrate-profile-permissions": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/migrate-profile-permissions.ts",
     "script:validate-customer-partners": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/validate-customer-partners-migration.ts",
+    "script:recalculate-subscription-usage": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/recalculate-subscription-usage.ts",
     "script:clean-db": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/clean-database.ts",
     "script:reset-db": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/reset-database.ts",
     "security:audit": "npm audit",

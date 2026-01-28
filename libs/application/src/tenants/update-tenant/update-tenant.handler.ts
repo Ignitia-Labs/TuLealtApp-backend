@@ -4,7 +4,15 @@ import { UpdateTenantRequest } from './update-tenant.request';
 import { UpdateTenantResponse } from './update-tenant.response';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { TenantFeaturesEntity, TenantMapper } from '@libs/infrastructure';
+import {
+  TenantFeaturesEntity,
+  TenantMapper,
+  PartnerSubscriptionUsageEntity,
+  PartnerSubscriptionEntity,
+  TenantEntity,
+  BranchEntity,
+} from '@libs/infrastructure';
+import { SubscriptionUsageHelper } from '@libs/application';
 
 /**
  * Handler para el caso de uso de actualizar un tenant
@@ -17,6 +25,14 @@ export class UpdateTenantHandler {
     private readonly tenantRepository: ITenantRepository,
     @InjectRepository(TenantFeaturesEntity)
     private readonly featuresRepository: Repository<TenantFeaturesEntity>,
+    @InjectRepository(PartnerSubscriptionUsageEntity)
+    private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
+    @InjectRepository(PartnerSubscriptionEntity)
+    private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
+    @InjectRepository(TenantEntity)
+    private readonly tenantEntityRepository: Repository<TenantEntity>,
+    @InjectRepository(BranchEntity)
+    private readonly branchEntityRepository: Repository<BranchEntity>,
   ) {}
 
   async execute(tenantId: number, request: UpdateTenantRequest): Promise<UpdateTenantResponse> {
@@ -97,6 +113,17 @@ export class UpdateTenantHandler {
     if (!finalTenant) {
       throw new NotFoundException(`Tenant with ID ${tenantId} not found after update`);
     }
+
+    // Recalcular subscription usage del partner afectado
+    // Permitir cualquier status de suscripción para asegurar que se actualice correctamente
+    await SubscriptionUsageHelper.recalculateUsageForPartner(
+      finalTenant.partnerId,
+      this.subscriptionRepository,
+      this.usageRepository,
+      this.tenantEntityRepository,
+      this.branchEntityRepository,
+      true, // allowAnyStatus = true para actualizar incluso si la suscripción no está activa
+    );
 
     // Retornar response DTO
     return new UpdateTenantResponse(

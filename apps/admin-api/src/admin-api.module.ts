@@ -109,6 +109,7 @@ import {
   GetSubscriptionUsageHandler,
   UpdateSubscriptionUsageHandler,
   DeleteSubscriptionUsageHandler,
+  RecalculateSubscriptionUsageHandler,
   CreateSubscriptionAlertHandler,
   GetCatalogsHandler,
   GetCatalogHandler,
@@ -217,6 +218,7 @@ import {
   CreatePartnerUserHandler,
   CreatePartnerStaffUserHandler,
   GetPartnerUsersHandler,
+  SubscriptionUsageModule,
 } from '@libs/application';
 import { InfrastructureModule, StorageModule } from '@libs/infrastructure';
 import { HealthController } from '@libs/shared';
@@ -227,7 +229,13 @@ import { AdminAuthModule } from './auth/admin-auth.module';
  * Configura todos los controladores y servicios necesarios
  */
 @Module({
-  imports: [ScheduleModule.forRoot(), InfrastructureModule, StorageModule, AdminAuthModule],
+  imports: [
+    ScheduleModule.forRoot(),
+    InfrastructureModule,
+    StorageModule,
+    AdminAuthModule,
+    SubscriptionUsageModule,
+  ],
   controllers: [
     UsersController,
     PricingController,
@@ -353,6 +361,7 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     GetSubscriptionUsageHandler,
     UpdateSubscriptionUsageHandler,
     DeleteSubscriptionUsageHandler,
+    RecalculateSubscriptionUsageHandler,
     // Handlers de aplicación - Subscription Alerts
     CreateSubscriptionAlertHandler,
     // Handlers de aplicación - Catalogs

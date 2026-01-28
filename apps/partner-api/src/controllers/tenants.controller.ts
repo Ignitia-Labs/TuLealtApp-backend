@@ -253,6 +253,9 @@ export class TenantsController {
       limitsEntity.maxBranches,
       limitsEntity.maxCustomers,
       limitsEntity.maxRewards,
+      limitsEntity.maxAdmins ?? -1,
+      limitsEntity.storageGB ?? -1,
+      limitsEntity.apiCallsPerMonth ?? -1,
       limitsEntity.id,
     );
 

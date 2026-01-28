@@ -393,6 +393,9 @@ export * from './subscription-usage/update-subscription-usage/update-subscriptio
 export * from './subscription-usage/delete-subscription-usage/delete-subscription-usage.handler';
 export * from './subscription-usage/delete-subscription-usage/delete-subscription-usage.request';
 export * from './subscription-usage/delete-subscription-usage/delete-subscription-usage.response';
+export * from './subscription-usage/recalculate-subscription-usage/recalculate-subscription-usage.handler';
+export * from './subscription-usage/recalculate-subscription-usage/recalculate-subscription-usage.request';
+export * from './subscription-usage/recalculate-subscription-usage/recalculate-subscription-usage.response';
 
 // Subscription Alerts Handlers
 export * from './subscription-alerts/create-subscription-alert/create-subscription-alert.handler';

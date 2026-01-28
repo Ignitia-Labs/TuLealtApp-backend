@@ -15,7 +15,7 @@ export class UpdatePartnerLimitsRequest {
   })
   @IsOptional()
   @IsNumber()
-  @Min(0)
+  @Min(-1)
   maxTenants?: number;
 
   @ApiProperty({
@@ -27,7 +27,7 @@ export class UpdatePartnerLimitsRequest {
   })
   @IsOptional()
   @IsNumber()
-  @Min(0)
+  @Min(-1)
   maxBranches?: number;
 
   @ApiProperty({
@@ -39,18 +39,54 @@ export class UpdatePartnerLimitsRequest {
   })
   @IsOptional()
   @IsNumber()
-  @Min(0)
+  @Min(-1)
   maxCustomers?: number;
 
   @ApiProperty({
     description: 'Número máximo de recompensas permitidas',
     example: 100,
     type: Number,
-    minimum: 0,
+    minimum: -1,
     required: false,
   })
   @IsOptional()
   @IsNumber()
-  @Min(0)
+  @Min(-1)
   maxRewards?: number;
+
+  @ApiProperty({
+    description: 'Número máximo de administradores permitidos (-1 para ilimitado)',
+    example: -1,
+    type: Number,
+    minimum: -1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(-1)
+  maxAdmins?: number;
+
+  @ApiProperty({
+    description: 'Almacenamiento en GB permitido (-1 para ilimitado)',
+    example: -1,
+    type: Number,
+    minimum: -1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(-1)
+  storageGB?: number;
+
+  @ApiProperty({
+    description: 'Número máximo de llamadas API por mes (-1 para ilimitado)',
+    example: -1,
+    type: Number,
+    minimum: -1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(-1)
+  apiCallsPerMonth?: number;
 }

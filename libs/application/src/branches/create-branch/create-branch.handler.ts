@@ -5,7 +5,12 @@ import { CreateBranchResponse } from './create-branch.response';
 import { SubscriptionUsageHelper } from '@libs/application';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PartnerSubscriptionUsageEntity, PartnerSubscriptionEntity } from '@libs/infrastructure';
+import {
+  PartnerSubscriptionUsageEntity,
+  PartnerSubscriptionEntity,
+  TenantEntity,
+  BranchEntity,
+} from '@libs/infrastructure';
 import { generateBranchQuickSearchCode } from '@libs/shared';
 
 /**
@@ -24,6 +29,10 @@ export class CreateBranchHandler {
     private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
+    @InjectRepository(TenantEntity)
+    private readonly tenantEntityRepository: Repository<TenantEntity>,
+    @InjectRepository(BranchEntity)
+    private readonly branchEntityRepository: Repository<BranchEntity>,
   ) {}
 
   async execute(request: CreateBranchRequest): Promise<CreateBranchResponse> {
@@ -71,15 +80,16 @@ export class CreateBranchHandler {
     // Actualizar las estadísticas del partner
     await this.partnerRepository.updateStats(tenant.partnerId);
 
-    // Incrementar el contador de branches en el uso de suscripción
-    const subscriptionId = await SubscriptionUsageHelper.getSubscriptionIdFromTenantId(
-      tenant.id,
-      this.tenantRepository,
+    // Recalcular subscription usage del partner afectado
+    // Usar recálculo completo para asegurar que funcione incluso si no hay suscripción activa
+    await SubscriptionUsageHelper.recalculateUsageForPartner(
+      tenant.partnerId,
       this.subscriptionRepository,
+      this.usageRepository,
+      this.tenantEntityRepository,
+      this.branchEntityRepository,
+      true, // allowAnyStatus = true para actualizar incluso si la suscripción no está activa
     );
-    if (subscriptionId) {
-      await SubscriptionUsageHelper.incrementBranchesCount(subscriptionId, this.usageRepository);
-    }
 
     // Retornar response DTO
     return new CreateBranchResponse(
