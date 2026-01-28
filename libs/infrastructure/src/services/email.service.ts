@@ -3,33 +3,172 @@ import * as nodemailer from 'nodemailer';
 import { Invoice, Tenant } from '@libs/domain';
 
 /**
- * Servicio para enviar emails
+ * Opciones para enviar email
+ */
+export interface SendEmailOptions {
+  to: string | string[];
+  subject: string;
+  html: string;
+  from?: string;
+  cc?: string | string[];
+  bcc?: string | string[];
+}
+
+/**
+ * Servicio para enviar emails con soporte para SMTP con SSL/TLS
+ * Soporta tanto desarrollo (GreenMail) como producción (Hostinger)
  */
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private transporter: nodemailer.Transporter;
+  private readonly isDevelopment: boolean;
+  private readonly smtpConfig: {
+    host: string;
+    port: number;
+    secure: boolean;
+    auth?: { user: string; pass: string };
+    tls?: { rejectUnauthorized: boolean };
+  };
 
   constructor() {
-    // Configurar transporter de nodemailer
-    // En producción, usar SMTP real o servicio como SendGrid, AWS SES, etc.
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'localhost',
-      port: parseInt(process.env.SMTP_PORT || '1025', 10),
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: process.env.SMTP_USER
+    this.isDevelopment = process.env.NODE_ENV !== 'production';
+    this.smtpConfig = this.buildSmtpConfig();
+    this.validateConfiguration();
+    this.transporter = this.createTransporter();
+    this.logConfiguration();
+  }
+
+  /**
+   * Construye la configuración SMTP con detección automática de entorno
+   */
+  private buildSmtpConfig(): {
+    host: string;
+    port: number;
+    secure: boolean;
+    auth?: { user: string; pass: string };
+    tls?: { rejectUnauthorized: boolean };
+  } {
+    const host = process.env.SMTP_HOST || 'localhost';
+    const port = parseInt(process.env.SMTP_PORT || '1025', 10);
+    const isPort465 = port === 465;
+    const isPort3465 = port === 3465; // GreenMail SSL port
+    const isGreenMail = host.includes('greenmail') || (host === 'localhost' && isPort3465);
+
+    // Detectar si debemos usar SSL
+    // Puerto 465 (Hostinger) y 3465 (GreenMail) SIEMPRE requieren SSL directo
+    let secure = false;
+    if (isPort465 || isPort3465) {
+      secure = true; // Forzar SSL para puertos que lo requieren
+    } else {
+      secure = process.env.SMTP_SECURE === 'true';
+    }
+
+    // Configurar autenticación si está disponible
+    const auth =
+      process.env.SMTP_USER && process.env.SMTP_PASSWORD
         ? {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASSWORD,
           }
-        : undefined,
-      // Para desarrollo con MailHog o similar
-      ...(process.env.NODE_ENV !== 'production' && {
-        ignoreTLS: true,
-      }),
-    });
+        : undefined;
 
-    this.logger.log('EmailService initialized');
+    // En desarrollo con GreenMail, aceptar certificados autofirmados
+    const tls =
+      this.isDevelopment && isGreenMail
+        ? { rejectUnauthorized: false }
+        : undefined;
+
+    return {
+      host,
+      port,
+      secure,
+      auth,
+      tls,
+    };
+  }
+
+  /**
+   * Valida que la configuración SMTP sea correcta
+   */
+  private validateConfiguration(): void {
+    if (!this.smtpConfig.host) {
+      throw new Error('SMTP_HOST no está configurado');
+    }
+
+    if (!this.smtpConfig.port || isNaN(this.smtpConfig.port)) {
+      throw new Error('SMTP_PORT no está configurado o es inválido');
+    }
+
+    // En producción, validar que existan credenciales
+    if (!this.isDevelopment && !this.smtpConfig.auth) {
+      this.logger.warn(
+        'SMTP_USER y SMTP_PASSWORD no están configurados. Algunos servidores SMTP pueden requerir autenticación.',
+      );
+    }
+
+    // Validar formato de email remitente
+    const fromEmail = process.env.SMTP_FROM || 'noreply@tulealtapp.com';
+    if (!this.isValidEmail(fromEmail)) {
+      this.logger.warn(`SMTP_FROM tiene un formato de email inválido: ${fromEmail}`);
+    }
+  }
+
+  /**
+   * Crea el transporter de nodemailer con la configuración
+   */
+  private createTransporter(): nodemailer.Transporter {
+    // Usar tipo específico para opciones SMTP que incluye host, port, secure, ignoreTLS, etc.
+    const config: {
+      host: string;
+      port: number;
+      secure: boolean;
+      auth?: { user: string; pass: string };
+      tls?: { rejectUnauthorized: boolean };
+      ignoreTLS?: boolean;
+    } = {
+      host: this.smtpConfig.host,
+      port: this.smtpConfig.port,
+      secure: this.smtpConfig.secure,
+      auth: this.smtpConfig.auth,
+      ...(this.smtpConfig.tls && { tls: this.smtpConfig.tls }),
+    };
+
+    // En desarrollo, solo ignorar TLS si NO estamos usando SSL (puertos 465/3465)
+    if (this.isDevelopment && !this.smtpConfig.secure) {
+      config.ignoreTLS = true;
+    }
+
+    return nodemailer.createTransport(config);
+  }
+
+  /**
+   * Registra la configuración SMTP usada (sin exponer contraseñas)
+   */
+  private logConfiguration(): void {
+    const configInfo = {
+      host: this.smtpConfig.host,
+      port: this.smtpConfig.port,
+      secure: this.smtpConfig.secure,
+      hasAuth: !!this.smtpConfig.auth,
+      environment: this.isDevelopment ? 'development' : 'production',
+    };
+
+    this.logger.log(`EmailService initialized with config: ${JSON.stringify(configInfo)}`);
+
+    if (this.isDevelopment) {
+      this.logger.log(
+        `📧 Modo desarrollo: Los emails se enviarán a GreenMail. Accede a http://localhost:8080 para verlos.`,
+      );
+    }
+  }
+
+  /**
+   * Valida si un string es un email válido
+   */
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   }
 
   /**
@@ -115,36 +254,63 @@ export class EmailService {
   /**
    * Envía un email genérico
    */
-  private async sendEmail(options: {
-    to: string;
-    subject: string;
-    html: string;
-    from?: string;
-  }): Promise<void> {
-    const mailOptions = {
-      from: options.from || process.env.SMTP_FROM || 'noreply@tulealtapp.com',
-      to: options.to,
-      subject: options.subject,
-      html: options.html,
-    };
+  private async sendEmail(options: SendEmailOptions): Promise<void> {
+    try {
+      const mailOptions: nodemailer.SendMailOptions = {
+        from: options.from || process.env.SMTP_FROM || 'noreply@tulealtapp.com',
+        to: Array.isArray(options.to) ? options.to.join(', ') : options.to,
+        subject: options.subject,
+        html: options.html,
+        ...(options.cc && {
+          cc: Array.isArray(options.cc) ? options.cc.join(', ') : options.cc,
+        }),
+        ...(options.bcc && {
+          bcc: Array.isArray(options.bcc) ? options.bcc.join(', ') : options.bcc,
+        }),
+      };
 
-    const info = await this.transporter.sendMail(mailOptions);
-    this.logger.debug(`Email enviado: ${info.messageId}`);
+      // Validar emails antes de enviar
+      const recipients = [
+        ...(Array.isArray(options.to) ? options.to : [options.to]),
+        ...(options.cc ? (Array.isArray(options.cc) ? options.cc : [options.cc]) : []),
+        ...(options.bcc ? (Array.isArray(options.bcc) ? options.bcc : [options.bcc]) : []),
+      ];
+
+      for (const email of recipients) {
+        if (!this.isValidEmail(email)) {
+          throw new Error(`Email inválido: ${email}`);
+        }
+      }
+
+      const info = await this.transporter.sendMail(mailOptions);
+      this.logger.debug(`Email enviado exitosamente: ${info.messageId}`);
+      this.logger.debug(`Destinatarios: ${mailOptions.to}`);
+    } catch (error) {
+      this.logger.error(`Error al enviar email:`, error);
+      // Re-lanzar el error para que el llamador pueda manejarlo
+      throw error;
+    }
   }
 
   /**
    * Envía un email genérico (método público)
+   * Soporta múltiples destinatarios, CC y BCC
    */
-  async sendGenericEmail(options: {
-    to: string;
-    subject: string;
-    html: string;
-    from?: string;
-  }): Promise<void> {
+  async sendGenericEmail(options: SendEmailOptions): Promise<void> {
     await this.sendEmail(options);
   }
 
   /**
+   * Verifica la conexión SMTP (útil para diagnóstico)
+   */
+  async verifyConnection(): Promise<boolean> {
+    try {
+      await this.transporter.verify();
+      this.logger.log('Conexión SMTP verificada correctamente');
+      return true;
+    } catch (error) {
+      this.logger.error('Error al verificar conexión SMTP:', error);
+      return false;
    * Envía un email de invitación con magic link para registro
    */
   async sendInvitationEmail(

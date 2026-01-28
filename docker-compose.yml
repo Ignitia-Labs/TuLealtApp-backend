@@ -47,6 +47,26 @@ services:
       retries: 3
       start_period: 10s
 
+  # GreenMail - Servidor SMTP local con SSL para desarrollo/testing
+  greenmail:
+    image: greenmail/standalone:latest
+    container_name: tulealtapp-greenmail-dev
+    ports:
+      - "${GREENMAIL_SMTP_PORT:-3025}:3025"    # SMTP sin SSL
+      - "${GREENMAIL_SMTPS_PORT:-3465}:3465"   # SMTP con SSL (SMTPS)
+      - "${GREENMAIL_WEB_PORT:-8080}:8080"     # Interfaz web para ver emails
+    environment:
+      - JAVA_OPTS=-Dgreenmail.verbose
+    networks:
+      - tulealtapp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "sh", "-c", "nc -z localhost 3025 && nc -z localhost 3465"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
   # Admin API
   admin-api:
     build:
@@ -81,6 +101,12 @@ services:
       - S3_BUCKET_NAME=${S3_BUCKET_NAME:-tulealtapp-images}
       - S3_REGION=${S3_REGION:-us-east-1}
       - S3_FORCE_PATH_STYLE=true
+      - SMTP_HOST=${SMTP_HOST:-greenmail}
+      - SMTP_PORT=${SMTP_PORT:-3465}
+      - SMTP_SECURE=${SMTP_SECURE:-true}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - SMTP_FROM=${SMTP_FROM:-noreply@tulealtapp.local}
     command: npm run start:admin
     networks:
       - tulealtapp-network
@@ -88,6 +114,8 @@ services:
       mariadb:
         condition: service_healthy
       minio:
+        condition: service_healthy
+      greenmail:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
@@ -125,11 +153,19 @@ services:
       - DB_NAME=${DB_NAME:-tulealtapp}
       - JWT_SECRET=${JWT_SECRET:-your-secret-key-change-in-production}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-24h}
+      - SMTP_HOST=${SMTP_HOST:-greenmail}
+      - SMTP_PORT=${SMTP_PORT:-3465}
+      - SMTP_SECURE=${SMTP_SECURE:-true}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - SMTP_FROM=${SMTP_FROM:-noreply@tulealtapp.local}
     command: npm run start:partner
     networks:
       - tulealtapp-network
     depends_on:
       mariadb:
+        condition: service_healthy
+      greenmail:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
@@ -164,11 +200,19 @@ services:
       - DB_USER=${DB_USER:-tulealtapp}
       - DB_PASSWORD=${DB_PASSWORD:-tulealtapp}
       - DB_NAME=${DB_NAME:-tulealtapp}
+      - SMTP_HOST=${SMTP_HOST:-greenmail}
+      - SMTP_PORT=${SMTP_PORT:-3465}
+      - SMTP_SECURE=${SMTP_SECURE:-true}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - SMTP_FROM=${SMTP_FROM:-noreply@tulealtapp.local}
     command: npm run start:customer
     networks:
       - tulealtapp-network
     depends_on:
       mariadb:
+        condition: service_healthy
+      greenmail:
         condition: service_healthy
     restart: unless-stopped
 
