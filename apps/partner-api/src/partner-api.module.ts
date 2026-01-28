@@ -113,6 +113,7 @@ import {
   UpdateInvitationCodeHandler,
   DeleteInvitationCodeHandler,
   UseInvitationCodeHandler,
+  SendInvitationEmailHandler,
 } from '@libs/application';
 
 /**
@@ -241,6 +242,7 @@ import {
     UpdateInvitationCodeHandler,
     DeleteInvitationCodeHandler,
     UseInvitationCodeHandler,
+    SendInvitationEmailHandler,
   ],
 })
 export class PartnerApiModule {}

@@ -3,6 +3,7 @@ import { IInvitationCodeRepository, ITenantRepository } from '@libs/domain';
 import { GetInvitationCodesRequest } from './get-invitation-codes.request';
 import { GetInvitationCodesResponse } from './get-invitation-codes.response';
 import { GetInvitationCodeResponse } from '../get-invitation-code/get-invitation-code.response';
+import { buildInvitationUrl } from '@libs/shared';
 
 /**
  * Handler para el caso de uso de obtener códigos de invitación de un tenant
@@ -49,8 +50,10 @@ export class GetInvitationCodesHandler {
 
     // Convertir a DTOs de respuesta
     const codeResponses = codes.map(
-      (code) =>
-        new GetInvitationCodeResponse(
+      (code) => {
+        // Construir URL pública (magic link) para cada código
+        const publicUrl = buildInvitationUrl(code.code);
+        return new GetInvitationCodeResponse(
           code.id,
           code.code,
           code.tenantId,
@@ -63,7 +66,9 @@ export class GetInvitationCodesHandler {
           code.createdBy,
           code.createdAt,
           code.updatedAt,
-        ),
+          publicUrl,
+        );
+      },
     );
 
     return new GetInvitationCodesResponse(codeResponses, codeResponses.length);

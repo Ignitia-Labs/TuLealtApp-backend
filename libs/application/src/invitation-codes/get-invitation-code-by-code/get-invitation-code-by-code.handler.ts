@@ -2,6 +2,7 @@ import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { IInvitationCodeRepository } from '@libs/domain';
 import { GetInvitationCodeByCodeRequest } from './get-invitation-code-by-code.request';
 import { GetInvitationCodeByCodeResponse } from './get-invitation-code-by-code.response';
+import { buildInvitationUrl } from '@libs/shared';
 
 /**
  * Handler para el caso de uso de obtener un código de invitación por su valor
@@ -20,6 +21,9 @@ export class GetInvitationCodeByCodeHandler {
       throw new NotFoundException(`Invitation code "${request.code}" not found`);
     }
 
+    // Construir URL pública (magic link)
+    const publicUrl = buildInvitationUrl(code.code);
+
     return new GetInvitationCodeByCodeResponse(
       code.id,
       code.code,
@@ -33,6 +37,7 @@ export class GetInvitationCodeByCodeHandler {
       code.createdBy,
       code.createdAt,
       code.updatedAt,
+      publicUrl,
     );
   }
 }

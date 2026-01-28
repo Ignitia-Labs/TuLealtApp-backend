@@ -91,6 +91,13 @@ export class GetInvitationCodeByCodeResponse {
   })
   updatedAt: Date;
 
+  @ApiProperty({
+    description: 'URL pública para registro con este código de invitación (magic link)',
+    example: 'https://app.tulealtapp.com/register?code=INV-ABC23456',
+    type: String,
+  })
+  publicUrl: string;
+
   constructor(
     id: number,
     code: string,
@@ -104,6 +111,7 @@ export class GetInvitationCodeByCodeResponse {
     createdBy: number,
     createdAt: Date,
     updatedAt: Date,
+    publicUrl: string,
   ) {
     this.id = id;
     this.code = code;
@@ -117,5 +125,6 @@ export class GetInvitationCodeByCodeResponse {
     this.createdBy = createdBy;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
+    this.publicUrl = publicUrl;
   }
 }

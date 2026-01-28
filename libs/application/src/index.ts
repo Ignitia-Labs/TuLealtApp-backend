@@ -669,6 +669,9 @@ export * from './invitation-codes/delete-invitation-code/delete-invitation-code.
 export * from './invitation-codes/use-invitation-code/use-invitation-code.handler';
 export * from './invitation-codes/use-invitation-code/use-invitation-code.request';
 export * from './invitation-codes/use-invitation-code/use-invitation-code.response';
+export * from './invitation-codes/send-invitation-email/send-invitation-email.handler';
+export * from './invitation-codes/send-invitation-email/send-invitation-email.request';
+export * from './invitation-codes/send-invitation-email/send-invitation-email.response';
 
 // Permissions Services
 export * from './permissions/permission.service';

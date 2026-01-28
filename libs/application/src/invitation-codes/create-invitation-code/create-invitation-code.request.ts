@@ -1,5 +1,5 @@
-import { IsOptional, IsNumber, IsDateString, IsEnum, Min, IsInt } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsOptional, IsNumber, IsDateString, IsEnum, Min, IsInt, IsString, IsEmail, IsBoolean } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /**
  * DTO de request para crear un código de invitación
@@ -61,4 +61,32 @@ export class CreateInvitationCodeRequest {
   @IsDateString()
   @IsOptional()
   expiresAt?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Email del destinatario al que se enviará la invitación. Si se proporciona, se enviará un email automáticamente con el magic link.',
+    example: 'customer@example.com',
+    type: String,
+  })
+  @IsEmail()
+  @IsOptional()
+  recipientEmail?: string;
+
+  @ApiPropertyOptional({
+    description: 'Indica si se debe enviar el email automáticamente. Por defecto es true si se proporciona recipientEmail.',
+    example: true,
+    type: Boolean,
+    default: true,
+  })
+  @IsBoolean()
+  @IsOptional()
+  sendEmail?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Mensaje personalizado opcional que se incluirá en el email de invitación.',
+    example: '¡Únete a nuestro programa de lealtad y gana puntos con cada compra!',
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
+  customMessage?: string;
 }

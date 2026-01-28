@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
-import { Invoice } from '@libs/domain';
+import { Invoice, Tenant } from '@libs/domain';
 
 /**
  * Servicio para enviar emails
@@ -142,6 +142,41 @@ export class EmailService {
     from?: string;
   }): Promise<void> {
     await this.sendEmail(options);
+  }
+
+  /**
+   * Envía un email de invitación con magic link para registro
+   */
+  async sendInvitationEmail(
+    recipientEmail: string,
+    invitationCode: string,
+    magicLink: string,
+    tenant: Tenant,
+    customMessage?: string,
+  ): Promise<void> {
+    try {
+      const subject = `¡Te han invitado a unirte a ${tenant.name}!`;
+      const html = this.generateInvitationEmailTemplate(
+        invitationCode,
+        magicLink,
+        tenant,
+        customMessage,
+      );
+
+      await this.sendEmail({
+        to: recipientEmail,
+        subject,
+        html,
+      });
+
+      this.logger.log(
+        `Email de invitación enviado a ${recipientEmail} para código ${invitationCode} del tenant ${tenant.name}`,
+      );
+    } catch (error) {
+      this.logger.error(`Error al enviar email de invitación:`, error);
+      // Lanzar error para que el handler pueda decidir si fallar o continuar
+      throw error;
+    }
   }
 
   /**
@@ -310,5 +345,207 @@ export class EmailService {
       other: 'Otro',
     };
     return translations[method] || method;
+  }
+
+  /**
+   * Genera el template HTML para email de invitación
+   */
+  private generateInvitationEmailTemplate(
+    invitationCode: string,
+    magicLink: string,
+    tenant: Tenant,
+    customMessage?: string,
+  ): string {
+    const expiresAtText = tenant.pointsExpireDays
+      ? `Este código expira en ${tenant.pointsExpireDays} días.`
+      : '';
+
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+              margin: 0;
+              padding: 0;
+              background-color: #f4f4f4;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 0;
+              background-color: #ffffff;
+            }
+            .header {
+              background-color: ${tenant.primaryColor || '#4CAF50'};
+              color: white;
+              padding: 30px 20px;
+              text-align: center;
+            }
+            .header h1 {
+              margin: 0;
+              font-size: 24px;
+            }
+            .content {
+              padding: 30px 20px;
+              background-color: #ffffff;
+            }
+            .tenant-info {
+              text-align: center;
+              margin-bottom: 30px;
+            }
+            ${tenant.logo ? `.tenant-logo { max-width: 150px; height: auto; margin-bottom: 15px; }` : ''}
+            .tenant-name {
+              font-size: 22px;
+              font-weight: bold;
+              color: ${tenant.primaryColor || '#4CAF50'};
+              margin-bottom: 10px;
+            }
+            .button-container {
+              text-align: center;
+              margin: 30px 0;
+            }
+            .button {
+              display: inline-block;
+              padding: 15px 40px;
+              background-color: ${tenant.primaryColor || '#4CAF50'};
+              color: white;
+              text-decoration: none;
+              border-radius: 5px;
+              font-weight: bold;
+              font-size: 16px;
+              transition: background-color 0.3s;
+            }
+            .button:hover {
+              background-color: ${tenant.secondaryColor || '#45a049'};
+            }
+            .code-box {
+              background-color: #e8f5e9;
+              padding: 20px;
+              margin: 25px 0;
+              border-radius: 5px;
+              text-align: center;
+              border: 2px dashed ${tenant.primaryColor || '#4CAF50'};
+            }
+            .code-text {
+              font-family: 'Courier New', monospace;
+              font-size: 20px;
+              font-weight: bold;
+              color: #2e7d32;
+              letter-spacing: 2px;
+            }
+            .custom-message {
+              background-color: #fff3cd;
+              padding: 15px;
+              margin: 20px 0;
+              border-left: 4px solid #ffc107;
+              border-radius: 4px;
+              font-style: italic;
+            }
+            .instructions {
+              background-color: #f9f9f9;
+              padding: 15px;
+              margin: 20px 0;
+              border-radius: 5px;
+            }
+            .instructions ol {
+              margin: 10px 0;
+              padding-left: 20px;
+            }
+            .instructions li {
+              margin: 8px 0;
+            }
+            .footer {
+              text-align: center;
+              padding: 20px;
+              color: #666;
+              font-size: 12px;
+              background-color: #f9f9f9;
+              border-top: 1px solid #e0e0e0;
+            }
+            @media only screen and (max-width: 600px) {
+              .container {
+                width: 100% !important;
+              }
+              .header h1 {
+                font-size: 20px;
+              }
+              .button {
+                padding: 12px 30px;
+                font-size: 14px;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>¡Te han invitado!</h1>
+            </div>
+            <div class="content">
+              <div class="tenant-info">
+                ${tenant.logo ? `<img src="${tenant.logo}" alt="${this.escapeHtml(tenant.name)}" class="tenant-logo" />` : ''}
+                <div class="tenant-name">${this.escapeHtml(tenant.name)}</div>
+                ${tenant.description ? `<p style="color: #666; margin-top: 10px;">${this.escapeHtml(tenant.description)}</p>` : ''}
+              </div>
+
+              <p>Hola,</p>
+              <p>Has sido invitado a formar parte del programa de lealtad de <strong>${this.escapeHtml(tenant.name)}</strong>.</p>
+
+              ${customMessage ? `<div class="custom-message"><p>${this.escapeHtml(customMessage)}</p></div>` : ''}
+
+              <p>Haz clic en el botón siguiente para registrarte y comenzar a ganar puntos:</p>
+
+              <div class="button-container">
+                <a href="${magicLink}" class="button">Registrarme Ahora</a>
+              </div>
+
+              <p style="text-align: center; color: #666; margin-top: 20px;">O copia y pega este código en la página de registro:</p>
+
+              <div class="code-box">
+                <div class="code-text">${invitationCode}</div>
+              </div>
+
+              <div class="instructions">
+                <p><strong>Instrucciones:</strong></p>
+                <ol>
+                  <li>Haz clic en el botón "Registrarme Ahora" o copia el código de arriba</li>
+                  <li>Completa el formulario de registro con tus datos</li>
+                  <li>¡Comienza a ganar puntos y disfrutar de beneficios exclusivos!</li>
+                </ol>
+              </div>
+
+              ${expiresAtText ? `<p style="color: #666; font-size: 14px;"><em>${expiresAtText}</em></p>` : ''}
+
+              <p>¡Esperamos verte pronto!</p>
+              <p>El equipo de ${this.escapeHtml(tenant.name)}</p>
+            </div>
+            <div class="footer">
+              <p>Este es un email automático. Por favor no responda a este mensaje.</p>
+              <p><strong>TuLealtApp</strong> - Sistema de Lealtad</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+  }
+
+  /**
+   * Escapa HTML para prevenir XSS
+   */
+  private escapeHtml(text: string): string {
+    const map: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;',
+    };
+    return text.replace(/[&<>"']/g, (m) => map[m]);
   }
 }

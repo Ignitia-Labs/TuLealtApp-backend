@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import {
   IInvitationCodeRepository,
   ITenantRepository,
@@ -7,13 +7,16 @@ import {
 } from '@libs/domain';
 import { CreateInvitationCodeRequest } from './create-invitation-code.request';
 import { CreateInvitationCodeResponse } from './create-invitation-code.response';
-import { generateInvitationCode } from '@libs/shared';
+import { generateInvitationCode, buildInvitationUrl } from '@libs/shared';
+import { EmailService } from '@libs/infrastructure';
 
 /**
  * Handler para el caso de uso de crear un código de invitación
  */
 @Injectable()
 export class CreateInvitationCodeHandler {
+  private readonly logger = new Logger(CreateInvitationCodeHandler.name);
+
   constructor(
     @Inject('IInvitationCodeRepository')
     private readonly invitationCodeRepository: IInvitationCodeRepository,
@@ -21,6 +24,7 @@ export class CreateInvitationCodeHandler {
     private readonly tenantRepository: ITenantRepository,
     @Inject('IBranchRepository')
     private readonly branchRepository: IBranchRepository,
+    private readonly emailService: EmailService,
   ) {}
 
   async execute(
@@ -89,6 +93,40 @@ export class CreateInvitationCodeHandler {
     // Guardar el código
     const savedCode = await this.invitationCodeRepository.save(invitationCode);
 
+    // Construir URL pública (magic link)
+    const publicUrl = buildInvitationUrl(savedCode.code);
+
+    // Determinar si se debe enviar email
+    const shouldSendEmail =
+      request.recipientEmail &&
+      (request.sendEmail !== false); // Por defecto true si hay email
+
+    let emailSent = false;
+
+    // Enviar email si corresponde
+    if (shouldSendEmail && request.recipientEmail) {
+      try {
+        await this.emailService.sendInvitationEmail(
+          request.recipientEmail,
+          savedCode.code,
+          publicUrl,
+          tenant,
+          request.customMessage,
+        );
+        emailSent = true;
+        this.logger.log(
+          `Email de invitación enviado a ${request.recipientEmail} para código ${savedCode.code}`,
+        );
+      } catch (error) {
+        // Log error pero no fallar la creación del código
+        this.logger.error(
+          `Error al enviar email de invitación a ${request.recipientEmail}:`,
+          error,
+        );
+        // emailSent permanece false
+      }
+    }
+
     // Retornar response DTO
     return new CreateInvitationCodeResponse(
       savedCode.id,
@@ -103,6 +141,8 @@ export class CreateInvitationCodeHandler {
       savedCode.createdBy,
       savedCode.createdAt,
       savedCode.updatedAt,
+      publicUrl,
+      emailSent,
     );
   }
 }
