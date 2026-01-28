@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ITransactionRepository, Transaction } from '@libs/domain';
+import { ITransactionRepository, Transaction, RecentTransaction } from '@libs/domain';
 import { TransactionEntity } from '../entities/transaction.entity';
 import { TransactionMapper } from '../mappers/transaction.mapper';
+import { CustomerMembershipEntity } from '../entities/customer-membership.entity';
 
 /**
  * Implementación del repositorio de Transaction usando TypeORM
@@ -83,5 +84,50 @@ export class TransactionRepository implements ITransactionRepository {
     return this.transactionRepository.count({
       where: { userId },
     });
+  }
+
+  async getStatsByTenantId(tenantId: number): Promise<{
+    pointsEarned: number;
+    pointsRedeemed: number;
+    totalRedemptions: number;
+  }> {
+    const result = await this.transactionRepository
+      .createQueryBuilder('transaction')
+      .innerJoin(CustomerMembershipEntity, 'membership', 'membership.id = transaction.membershipId')
+      .select([
+        'SUM(CASE WHEN transaction.type = :earnType AND transaction.status = :completedStatus THEN transaction.points ELSE 0 END) as pointsEarned',
+        'SUM(CASE WHEN transaction.type = :redeemType AND transaction.status = :completedStatus THEN ABS(transaction.points) ELSE 0 END) as pointsRedeemed',
+        'COUNT(CASE WHEN transaction.type = :redeemType AND transaction.status = :completedStatus THEN 1 END) as totalRedemptions',
+      ])
+      .where('membership.tenantId = :tenantId', { tenantId })
+      .setParameter('earnType', 'earn')
+      .setParameter('redeemType', 'redeem')
+      .setParameter('completedStatus', 'completed')
+      .getRawOne();
+
+    return {
+      pointsEarned: parseInt(result?.pointsEarned || '0', 10),
+      pointsRedeemed: parseInt(result?.pointsRedeemed || '0', 10),
+      totalRedemptions: parseInt(result?.totalRedemptions || '0', 10),
+    };
+  }
+
+  async getRecentTransactionsByTenantId(tenantId: number, limit: number): Promise<RecentTransaction[]> {
+    const entities = await this.transactionRepository
+      .createQueryBuilder('transaction')
+      .innerJoin(CustomerMembershipEntity, 'membership', 'membership.id = transaction.membershipId')
+      .where('membership.tenantId = :tenantId', { tenantId })
+      .andWhere('transaction.status = :status', { status: 'completed' })
+      .orderBy('transaction.createdAt', 'DESC')
+      .limit(limit)
+      .getMany();
+
+    return entities.map((entity) => ({
+      id: entity.id,
+      type: entity.type,
+      points: entity.points,
+      description: entity.description,
+      createdAt: entity.createdAt,
+    }));
   }
 }

@@ -66,6 +66,18 @@ export class TenantRepository implements ITenantRepository {
     return tenantEntities.map((entity) => TenantMapper.toDomain(entity, entity.features));
   }
 
+  async findAllActive(): Promise<Tenant[]> {
+    const tenantEntities = await this.tenantRepository.find({
+      where: { status: 'active' },
+      relations: ['features'],
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+
+    return tenantEntities.map((entity) => TenantMapper.toDomain(entity, entity.features));
+  }
+
   async delete(id: number): Promise<void> {
     await this.tenantRepository.delete(id);
   }

@@ -1,4 +1,5 @@
 import { Reward } from '../entities/reward.entity';
+import { TopReward } from '../entities/tenant-analytics.entity';
 
 /**
  * Interfaz del repositorio de Reward
@@ -39,4 +40,9 @@ export interface IRewardRepository {
    * Elimina una recompensa por su ID
    */
   delete(id: number): Promise<void>;
+
+  /**
+   * Obtiene top rewards por número de redemptions
+   */
+  getTopRewardsByTenantId(tenantId: number, limit: number): Promise<TopReward[]>;
 }

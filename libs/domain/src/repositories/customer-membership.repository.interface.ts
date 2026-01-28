@@ -1,4 +1,5 @@
 import { CustomerMembership } from '../entities/customer-membership.entity';
+import { TopCustomer } from '../entities/tenant-analytics.entity';
 
 /**
  * Interfaz del repositorio de CustomerMembership
@@ -57,6 +58,11 @@ export interface ICustomerMembershipRepository {
   countByTenantId(tenantId: number): Promise<number>;
 
   /**
+   * Cuenta customers activos de un tenant
+   */
+  countByTenantIdAndStatus(tenantId: number, status: 'active' | 'inactive'): Promise<number>;
+
+  /**
    * Busca memberships de un usuario filtradas por status
    */
   findByUserIdAndStatus(
@@ -81,4 +87,9 @@ export interface ICustomerMembershipRepository {
     partnerId: number,
     status?: 'active' | 'inactive' | 'suspended',
   ): Promise<CustomerMembership[]>;
+
+  /**
+   * Obtiene top customers por puntos totales
+   */
+  getTopCustomersByTenantId(tenantId: number, limit: number): Promise<TopCustomer[]>;
 }

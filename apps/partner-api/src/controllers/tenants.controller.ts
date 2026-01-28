@@ -45,6 +45,9 @@ import {
   DeleteTenantHandler,
   DeleteTenantRequest,
   DeleteTenantResponse,
+  GetTenantDashboardStatsHandler,
+  GetTenantDashboardStatsRequest,
+  GetTenantDashboardStatsResponse,
   JwtPayload,
 } from '@libs/application';
 import { IUserRepository, ITenantRepository, PartnerLimits } from '@libs/domain';
@@ -102,6 +105,7 @@ export class TenantsController {
     private readonly getTenantsByPartnerHandler: GetTenantsByPartnerHandler,
     private readonly updateTenantHandler: UpdateTenantHandler,
     private readonly deleteTenantHandler: DeleteTenantHandler,
+    private readonly getTenantDashboardStatsHandler: GetTenantDashboardStatsHandler,
     private readonly s3Service: S3Service,
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
@@ -189,6 +193,49 @@ export class TenantsController {
     request.tenantId = id;
 
     return this.getTenantHandler.execute(request);
+  }
+
+  @Get(':id/dashboard/stats')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Obtener estadísticas del dashboard de un tenant',
+    description:
+      'Obtiene estadísticas agregadas del tenant para visualización en dashboard: métricas de customers, puntos, redemptions, top rewards, top customers y transacciones recientes. El tenant debe pertenecer al partner del usuario autenticado.',
+  })
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    description: 'ID del tenant',
+    example: 1,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Estadísticas obtenidas exitosamente',
+    type: GetTenantDashboardStatsResponse,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos o el tenant no pertenece a su partner',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Tenant no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  async getTenantDashboardStats(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() _user: JwtPayload, // eslint-disable-line @typescript-eslint/no-unused-vars
+  ): Promise<GetTenantDashboardStatsResponse> {
+    const request = new GetTenantDashboardStatsRequest();
+    request.tenantId = id;
+
+    return this.getTenantDashboardStatsHandler.execute(request);
   }
 
   @Post()

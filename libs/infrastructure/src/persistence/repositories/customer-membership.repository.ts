@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ICustomerMembershipRepository, CustomerMembership } from '@libs/domain';
+import { ICustomerMembershipRepository, CustomerMembership, TopCustomer } from '@libs/domain';
 import { CustomerMembershipEntity } from '../entities/customer-membership.entity';
 import { CustomerMembershipMapper } from '../mappers/customer-membership.mapper';
+import { TransactionEntity } from '../entities/transaction.entity';
 
 /**
  * Implementación del repositorio de customer memberships usando TypeORM
@@ -230,5 +231,41 @@ export class CustomerMembershipRepository implements ICustomerMembershipReposito
     const membershipEntities = await queryBuilder.getMany();
 
     return membershipEntities.map((entity) => CustomerMembershipMapper.toDomain(entity));
+  }
+
+  async countByTenantIdAndStatus(tenantId: number, status: 'active' | 'inactive'): Promise<number> {
+    return this.membershipRepository.count({
+      where: { tenantId, status },
+    });
+  }
+
+  async getTopCustomersByTenantId(tenantId: number, limit: number): Promise<TopCustomer[]> {
+    const results = await this.membershipRepository
+      .createQueryBuilder('membership')
+      .leftJoin(
+        TransactionEntity,
+        'transaction',
+        'transaction.membershipId = membership.id AND transaction.type = :redeemType AND transaction.status = :completedStatus',
+        { redeemType: 'redeem', completedStatus: 'completed' },
+      )
+      .select([
+        'membership.userId as userId',
+        'membership.id as membershipId',
+        'membership.points as points',
+        'COUNT(DISTINCT transaction.id) as totalRedemptions',
+      ])
+      .where('membership.tenantId = :tenantId', { tenantId })
+      .groupBy('membership.id')
+      .orderBy('membership.points', 'DESC')
+      .addOrderBy('totalRedemptions', 'DESC')
+      .limit(limit)
+      .getRawMany();
+
+    return results.map((result) => ({
+      userId: result.userId,
+      membershipId: result.membershipId,
+      points: result.points,
+      totalRedemptions: parseInt(result.totalRedemptions || '0', 10),
+    }));
   }
 }

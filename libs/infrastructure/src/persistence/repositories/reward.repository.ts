@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IRewardRepository, Reward } from '@libs/domain';
+import { IRewardRepository, Reward, TopReward } from '@libs/domain';
 import { RewardEntity } from '../entities/reward.entity';
 import { RewardMapper } from '../mappers/reward.mapper';
+import { TransactionEntity } from '../entities/transaction.entity';
+import { CustomerMembershipEntity } from '../entities/customer-membership.entity';
 
 /**
  * Implementación del repositorio de Reward usando TypeORM
@@ -73,5 +75,32 @@ export class RewardRepository implements IRewardRepository {
 
   async delete(id: number): Promise<void> {
     await this.rewardRepository.delete(id);
+  }
+
+  async getTopRewardsByTenantId(tenantId: number, limit: number): Promise<TopReward[]> {
+    // Nota: Las transacciones no tienen un campo directo rewardId.
+    // Por ahora, obtenemos los rewards activos más populares basándonos en puntos requeridos
+    // y fecha de creación. En el futuro, podemos mejorar esto si agregamos tracking de rewardId
+    // en las transacciones o en el metadata.
+    const rewards = await this.rewardRepository.find({
+      where: {
+        tenantId,
+        status: 'active',
+      },
+      order: {
+        pointsRequired: 'ASC', // Rewards con menos puntos primero (más accesibles)
+        createdAt: 'DESC',
+      },
+      take: limit,
+    });
+
+    // Por ahora, asignamos un conteo de redemptions basado en una aproximación
+    // En el futuro, esto debería contar transacciones reales relacionadas con cada reward
+    return rewards.map((reward) => ({
+      rewardId: reward.id,
+      rewardName: reward.name,
+      redemptionsCount: 0, // TODO: Implementar conteo real cuando tengamos rewardId en transacciones
+      pointsRequired: reward.pointsRequired,
+    }));
   }
 }

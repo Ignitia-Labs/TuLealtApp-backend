@@ -31,6 +31,11 @@ export interface ITenantRepository {
   findAll(): Promise<Tenant[]>;
 
   /**
+   * Obtiene todos los tenants activos
+   */
+  findAllActive(): Promise<Tenant[]>;
+
+  /**
    * Elimina un tenant por su ID
    */
   delete(id: number): Promise<void>;

@@ -69,6 +69,8 @@ import {
   GetTenantsByPartnerHandler,
   UpdateTenantHandler,
   DeleteTenantHandler,
+  GetTenantDashboardStatsHandler,
+  TenantAnalyticsUpdaterService,
   CreateBranchHandler,
   GetBranchHandler,
   GetBranchesByTenantHandler,
@@ -316,6 +318,9 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     GetTenantsByPartnerHandler,
     UpdateTenantHandler,
     DeleteTenantHandler,
+    GetTenantDashboardStatsHandler,
+    // Servicios de aplicación - Tenant Analytics
+    TenantAnalyticsUpdaterService,
     // Handlers de aplicación - Branches
     CreateBranchHandler,
     GetBranchHandler,

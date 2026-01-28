@@ -1,4 +1,5 @@
 import { Transaction } from '../entities/transaction.entity';
+import { RecentTransaction } from '../entities/tenant-analytics.entity';
 
 /**
  * Interfaz del repositorio de Transaction
@@ -42,4 +43,18 @@ export interface ITransactionRepository {
    * Cuenta el total de transacciones de un usuario
    */
   countByUserId(userId: number): Promise<number>;
+
+  /**
+   * Obtiene estadísticas de transacciones por tenantId
+   */
+  getStatsByTenantId(tenantId: number): Promise<{
+    pointsEarned: number;
+    pointsRedeemed: number;
+    totalRedemptions: number;
+  }>;
+
+  /**
+   * Obtiene transacciones recientes por tenantId
+   */
+  getRecentTransactionsByTenantId(tenantId: number, limit: number): Promise<RecentTransaction[]>;
 }

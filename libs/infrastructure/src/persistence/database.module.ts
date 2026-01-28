@@ -38,6 +38,7 @@ import { PartnerRequestEntity } from './entities/partner-request.entity';
 import { PartnerArchiveEntity } from './entities/partner-archive.entity';
 import { CatalogEntity } from './entities/catalog.entity';
 import { CustomerMembershipEntity } from './entities/customer-membership.entity';
+import { TenantAnalyticsEntity } from './entities/tenant-analytics.entity';
 import { GoalEntity } from './entities/goal.entity';
 import { PartnerStaffAssignmentEntity } from './entities/partner-staff-assignment.entity';
 import { CommissionEntity } from './entities/commission.entity';
@@ -77,6 +78,7 @@ import { PartnerRequestRepository } from './repositories/partner-request.reposit
 import { PartnerArchiveRepository } from './repositories/partner-archive.repository';
 import { CatalogRepository } from './repositories/catalog.repository';
 import { CustomerMembershipRepository } from './repositories/customer-membership.repository';
+import { TenantAnalyticsRepository } from './repositories/tenant-analytics.repository';
 import { GoalRepository } from './repositories/goal.repository';
 import { PartnerStaffAssignmentRepository } from './repositories/partner-staff-assignment.repository';
 import { CommissionRepository } from './repositories/commission.repository';
@@ -117,6 +119,7 @@ import {
   IPartnerRequestRepository,
   ICatalogRepository,
   ICustomerMembershipRepository,
+  ITenantAnalyticsRepository,
   IGoalRepository,
   IPartnerStaffAssignmentRepository,
   ICommissionRepository,
@@ -188,6 +191,7 @@ import {
       PartnerArchiveEntity,
       CatalogEntity,
       CustomerMembershipEntity,
+      TenantAnalyticsEntity,
       GoalEntity,
       PartnerStaffAssignmentEntity,
       CommissionEntity,
@@ -330,6 +334,11 @@ import {
       provide: 'ICustomerMembershipRepository',
       useClass: CustomerMembershipRepository,
     },
+    TenantAnalyticsRepository,
+    {
+      provide: 'ITenantAnalyticsRepository',
+      useClass: TenantAnalyticsRepository,
+    },
     GoalRepository,
     {
       provide: 'IGoalRepository',
@@ -424,6 +433,7 @@ import {
     'IPartnerRequestRepository',
     'ICatalogRepository',
     'ICustomerMembershipRepository',
+    'ITenantAnalyticsRepository',
     'IGoalRepository',
     'IPartnerStaffAssignmentRepository',
     'ICommissionRepository',
@@ -463,6 +473,7 @@ import {
     PartnerArchiveRepository,
     CatalogRepository,
     CustomerMembershipRepository,
+    TenantAnalyticsRepository,
     GoalRepository,
     PartnerStaffAssignmentRepository,
     CommissionRepository,

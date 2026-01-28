@@ -17,6 +17,7 @@ import { CustomerTiersController } from './controllers/customer-tiers.controller
 import { ContactInquiryController } from './controllers/contact-inquiry.controller';
 import { PartnerRequestsController } from './controllers/partner-requests.controller';
 import { TransactionsController } from './controllers/transactions.controller';
+import { InvitationCodesController } from './controllers/invitation-codes.controller';
 import { InfrastructureModule } from '@libs/infrastructure';
 import { HealthController, LoggerModule } from '@libs/shared';
 import { PartnerAuthModule } from './auth/partner-auth.module';
@@ -56,6 +57,9 @@ import {
   CreateCustomerForPartnerHandler,
   CreateCustomerMembershipForPartnerHandler,
   GetCustomerByQrHandler,
+  GetCustomerMembershipHandler,
+  UpdateCustomerMembershipHandler,
+  DeleteCustomerMembershipHandler,
   // Transactions Handlers
   EarnPointsHandler,
   RedeemPointsHandler,
@@ -66,6 +70,8 @@ import {
   GetTenantsByPartnerHandler,
   UpdateTenantHandler,
   DeleteTenantHandler,
+  GetTenantDashboardStatsHandler,
+  TenantAnalyticsUpdaterService,
   // Branches Handlers
   CreateBranchHandler,
   GetBranchHandler,
@@ -99,6 +105,14 @@ import {
   CreateContactInquiryHandler,
   // Partner Requests Handlers
   CreatePartnerRequestHandler,
+  // Invitation Codes Handlers
+  CreateInvitationCodeHandler,
+  GetInvitationCodesHandler,
+  GetInvitationCodeHandler,
+  GetInvitationCodeByCodeHandler,
+  UpdateInvitationCodeHandler,
+  DeleteInvitationCodeHandler,
+  UseInvitationCodeHandler,
 } from '@libs/application';
 
 /**
@@ -126,6 +140,7 @@ import {
     ContactInquiryController,
     PartnerRequestsController,
     TransactionsController,
+    InvitationCodesController,
     HealthController,
   ],
   providers: [
@@ -170,6 +185,9 @@ import {
     CreateCustomerForPartnerHandler,
     CreateCustomerMembershipForPartnerHandler,
     GetCustomerByQrHandler,
+    GetCustomerMembershipHandler,
+    UpdateCustomerMembershipHandler,
+    DeleteCustomerMembershipHandler,
     // Transactions Handlers
     EarnPointsHandler,
     RedeemPointsHandler,
@@ -180,6 +198,8 @@ import {
     GetTenantsByPartnerHandler,
     UpdateTenantHandler,
     DeleteTenantHandler,
+    GetTenantDashboardStatsHandler,
+    TenantAnalyticsUpdaterService,
     // Branches Handlers
     CreateBranchHandler,
     GetBranchHandler,
@@ -213,6 +233,14 @@ import {
     CreateContactInquiryHandler,
     // Partner Requests Handlers
     CreatePartnerRequestHandler,
+    // Invitation Codes Handlers
+    CreateInvitationCodeHandler,
+    GetInvitationCodesHandler,
+    GetInvitationCodeHandler,
+    GetInvitationCodeByCodeHandler,
+    UpdateInvitationCodeHandler,
+    DeleteInvitationCodeHandler,
+    UseInvitationCodeHandler,
   ],
 })
 export class PartnerApiModule {}

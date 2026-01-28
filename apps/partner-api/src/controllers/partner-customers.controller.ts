@@ -2,6 +2,8 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
+  Delete,
   Body,
   Param,
   ParseIntPipe,
@@ -35,9 +37,21 @@ import {
   GetCustomerByQrHandler,
   GetCustomerByQrRequest,
   GetCustomerByQrResponse,
+  GetCustomerMembershipHandler,
+  GetCustomerMembershipRequest,
+  GetCustomerMembershipResponse,
+  UpdateCustomerMembershipHandler,
+  UpdateCustomerMembershipRequest,
+  UpdateCustomerMembershipResponse,
+  DeleteCustomerMembershipHandler,
+  DeleteCustomerMembershipRequest,
+  DeleteCustomerMembershipResponse,
+  GetTransactionsHandler,
+  GetTransactionsRequest,
+  GetTransactionsResponse,
   JwtPayload,
 } from '@libs/application';
-import { IUserRepository } from '@libs/domain';
+import { IUserRepository, ICustomerMembershipRepository, ITenantRepository } from '@libs/domain';
 import {
   JwtAuthGuard,
   RolesGuard,
@@ -58,6 +72,10 @@ import {
  * - GET /partner/customers - Listar todos los customers del partner autenticado (con paginación)
  * - POST /partner/customers - Crear un nuevo customer con membership
  * - POST /partner/customers/:userId/memberships - Crear membership para un usuario existente
+ * - GET /partner/customers/:id - Obtener customer por ID (membershipId)
+ * - GET /partner/customers/:id/transactions - Obtener transacciones de un customer
+ * - PATCH /partner/customers/:id - Actualizar customer
+ * - DELETE /partner/customers/:id - Eliminar customer
  */
 @ApiTags('Partner Customers')
 @Controller('customers')
@@ -70,8 +88,16 @@ export class PartnerCustomersController {
     private readonly createCustomerForPartnerHandler: CreateCustomerForPartnerHandler,
     private readonly createCustomerMembershipForPartnerHandler: CreateCustomerMembershipForPartnerHandler,
     private readonly getCustomerByQrHandler: GetCustomerByQrHandler,
+    private readonly getCustomerMembershipHandler: GetCustomerMembershipHandler,
+    private readonly updateCustomerMembershipHandler: UpdateCustomerMembershipHandler,
+    private readonly deleteCustomerMembershipHandler: DeleteCustomerMembershipHandler,
+    private readonly getTransactionsHandler: GetTransactionsHandler,
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
+    @Inject('ICustomerMembershipRepository')
+    private readonly membershipRepository: ICustomerMembershipRepository,
+    @Inject('ITenantRepository')
+    private readonly tenantRepository: ITenantRepository,
   ) {}
 
   @Get()
@@ -473,5 +499,415 @@ export class PartnerCustomersController {
     request.qrCode = qrCode;
 
     return this.getCustomerByQrHandler.execute(request, currentUser.partnerId);
+  }
+
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Obtener customer por ID',
+    description:
+      'Obtiene la información completa de un customer (membership) por su ID. El ID corresponde al membershipId de la relación customer-tenant. El customer debe pertenecer al partner del usuario autenticado.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único de la membership (customer)',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Customer encontrado exitosamente',
+    type: GetCustomerMembershipResponse,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos o el customer no pertenece a tu partner',
+    type: ForbiddenErrorResponseDto,
+    example: {
+      statusCode: 403,
+      message: 'Customer does not belong to your partner',
+      error: 'Forbidden',
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Customer no encontrado',
+    type: NotFoundErrorResponseDto,
+    example: {
+      statusCode: 404,
+      message: 'Membership with ID 1 not found',
+      error: 'Not Found',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async getCustomer(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<GetCustomerMembershipResponse> {
+    // Obtener el partnerId del usuario autenticado
+    const currentUser = await this.userRepository.findById(user.userId);
+    if (!currentUser) {
+      throw new NotFoundException(`User with ID ${user.userId} not found`);
+    }
+
+    if (!currentUser.partnerId) {
+      throw new ForbiddenException('User does not belong to a partner');
+    }
+
+    // Verificar que la membership existe y pertenece al partner
+    const membership = await this.membershipRepository.findById(id);
+    if (!membership) {
+      throw new NotFoundException(`Membership with ID ${id} not found`);
+    }
+
+    // Verificar que el tenant pertenece al partner del usuario autenticado
+    const tenant = await this.tenantRepository.findById(membership.tenantId);
+    if (!tenant) {
+      throw new NotFoundException(`Tenant with ID ${membership.tenantId} not found`);
+    }
+
+    if (tenant.partnerId !== currentUser.partnerId) {
+      throw new ForbiddenException('Customer does not belong to your partner');
+    }
+
+    const request = new GetCustomerMembershipRequest();
+    request.membershipId = id;
+    return this.getCustomerMembershipHandler.execute(request);
+  }
+
+  @Get(':id/transactions')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Obtener transacciones de un customer',
+    description:
+      'Obtiene todas las transacciones de puntos de un customer específico. Permite filtrar por tipo de transacción y paginación. El customer debe pertenecer al partner del usuario autenticado.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único de la membership (customer)',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiQuery({
+    name: 'skip',
+    required: false,
+    type: Number,
+    description: 'Número de registros a saltar (para paginación)',
+    example: 0,
+  })
+  @ApiQuery({
+    name: 'take',
+    required: false,
+    type: Number,
+    description: 'Cantidad de registros a obtener (para paginación)',
+    example: 20,
+  })
+  @ApiQuery({
+    name: 'type',
+    required: false,
+    type: String,
+    enum: ['earn', 'redeem', 'expire', 'adjust'],
+    description: 'Tipo de transacción para filtrar',
+    example: 'earn',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Transacciones obtenidas exitosamente',
+    type: GetTransactionsResponse,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos o el customer no pertenece a tu partner',
+    type: ForbiddenErrorResponseDto,
+    example: {
+      statusCode: 403,
+      message: 'Customer does not belong to your partner',
+      error: 'Forbidden',
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Customer no encontrado',
+    type: NotFoundErrorResponseDto,
+    example: {
+      statusCode: 404,
+      message: 'Membership with ID 1 not found',
+      error: 'Not Found',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async getCustomerTransactions(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseIntPipe) id: number,
+    @Query('skip') skip?: number,
+    @Query('take') take?: number,
+    @Query('type') type?: 'earn' | 'redeem' | 'expire' | 'adjust',
+  ): Promise<GetTransactionsResponse> {
+    // Obtener el partnerId del usuario autenticado
+    const currentUser = await this.userRepository.findById(user.userId);
+    if (!currentUser) {
+      throw new NotFoundException(`User with ID ${user.userId} not found`);
+    }
+
+    if (!currentUser.partnerId) {
+      throw new ForbiddenException('User does not belong to a partner');
+    }
+
+    // Verificar que la membership existe y pertenece al partner
+    const membership = await this.membershipRepository.findById(id);
+    if (!membership) {
+      throw new NotFoundException(`Membership with ID ${id} not found`);
+    }
+
+    // Verificar que el tenant pertenece al partner del usuario autenticado
+    const tenant = await this.tenantRepository.findById(membership.tenantId);
+    if (!tenant) {
+      throw new NotFoundException(`Tenant with ID ${membership.tenantId} not found`);
+    }
+
+    if (tenant.partnerId !== currentUser.partnerId) {
+      throw new ForbiddenException('Customer does not belong to your partner');
+    }
+
+    // Crear request para el handler de transacciones
+    const request = new GetTransactionsRequest();
+    request.userId = membership.userId;
+    request.membershipId = id; // Filtrar por membership específica
+    request.skip = skip ? parseInt(skip.toString(), 10) : undefined;
+    request.take = take ? parseInt(take.toString(), 10) : undefined;
+    request.type = type;
+
+    return this.getTransactionsHandler.execute(request);
+  }
+
+  @Patch(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Actualizar customer',
+    description:
+      'Actualiza parcialmente la información de un customer (membership). Permite actualizar puntos, tier, estado, total gastado, visitas y fecha de última visita. El customer debe pertenecer al partner del usuario autenticado.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único de la membership (customer) a actualizar',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiBody({
+    type: UpdateCustomerMembershipRequest,
+    description: 'Datos a actualizar (todos los campos son opcionales)',
+    examples: {
+      actualizarPuntos: {
+        summary: 'Actualizar puntos',
+        description: 'Actualizar solo los puntos del customer',
+        value: {
+          points: 2500,
+        },
+      },
+      actualizarEstado: {
+        summary: 'Actualizar estado',
+        description: 'Cambiar el estado del customer',
+        value: {
+          status: 'inactive',
+        },
+      },
+      actualizarMultiple: {
+        summary: 'Actualizar múltiples campos',
+        description: 'Actualizar varios campos a la vez',
+        value: {
+          points: 3000,
+          tierId: 2,
+          totalSpent: 5000.5,
+          totalVisits: 35,
+          status: 'active',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Customer actualizado exitosamente',
+    type: UpdateCustomerMembershipResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos de entrada inválidos',
+    type: BadRequestErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos o el customer no pertenece a tu partner',
+    type: ForbiddenErrorResponseDto,
+    example: {
+      statusCode: 403,
+      message: 'Customer does not belong to your partner',
+      error: 'Forbidden',
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Customer no encontrado',
+    type: NotFoundErrorResponseDto,
+    example: {
+      statusCode: 404,
+      message: 'Membership with ID 1 not found',
+      error: 'Not Found',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async updateCustomer(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: Omit<UpdateCustomerMembershipRequest, 'membershipId'>,
+  ): Promise<UpdateCustomerMembershipResponse> {
+    // Obtener el partnerId del usuario autenticado
+    const currentUser = await this.userRepository.findById(user.userId);
+    if (!currentUser) {
+      throw new NotFoundException(`User with ID ${user.userId} not found`);
+    }
+
+    if (!currentUser.partnerId) {
+      throw new ForbiddenException('User does not belong to a partner');
+    }
+
+    // Verificar que la membership existe y pertenece al partner
+    const membership = await this.membershipRepository.findById(id);
+    if (!membership) {
+      throw new NotFoundException(`Membership with ID ${id} not found`);
+    }
+
+    // Verificar que el tenant pertenece al partner del usuario autenticado
+    const tenant = await this.tenantRepository.findById(membership.tenantId);
+    if (!tenant) {
+      throw new NotFoundException(`Tenant with ID ${membership.tenantId} not found`);
+    }
+
+    if (tenant.partnerId !== currentUser.partnerId) {
+      throw new ForbiddenException('Customer does not belong to your partner');
+    }
+
+    const request = new UpdateCustomerMembershipRequest();
+    request.membershipId = id;
+    // Copiar todos los campos del body al request
+    Object.assign(request, body);
+
+    return this.updateCustomerMembershipHandler.execute(request);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Eliminar customer',
+    description:
+      'Elimina una membership (relación customer-tenant). Esta acción elimina la relación del customer con el tenant específico y decrementa el contador de customers en la suscripción del partner. El customer debe pertenecer al partner del usuario autenticado. Esta acción es irreversible.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único de la membership (customer) a eliminar',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Customer eliminado exitosamente',
+    type: DeleteCustomerMembershipResponse,
+    example: {
+      membershipId: 1,
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos o el customer no pertenece a tu partner',
+    type: ForbiddenErrorResponseDto,
+    example: {
+      statusCode: 403,
+      message: 'Customer does not belong to your partner',
+      error: 'Forbidden',
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Customer no encontrado',
+    type: NotFoundErrorResponseDto,
+    example: {
+      statusCode: 404,
+      message: 'Membership with ID 1 not found',
+      error: 'Not Found',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async deleteCustomer(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<DeleteCustomerMembershipResponse> {
+    // Obtener el partnerId del usuario autenticado
+    const currentUser = await this.userRepository.findById(user.userId);
+    if (!currentUser) {
+      throw new NotFoundException(`User with ID ${user.userId} not found`);
+    }
+
+    if (!currentUser.partnerId) {
+      throw new ForbiddenException('User does not belong to a partner');
+    }
+
+    // Verificar que la membership existe y pertenece al partner
+    const membership = await this.membershipRepository.findById(id);
+    if (!membership) {
+      throw new NotFoundException(`Membership with ID ${id} not found`);
+    }
+
+    // Verificar que el tenant pertenece al partner del usuario autenticado
+    const tenant = await this.tenantRepository.findById(membership.tenantId);
+    if (!tenant) {
+      throw new NotFoundException(`Tenant with ID ${membership.tenantId} not found`);
+    }
+
+    if (tenant.partnerId !== currentUser.partnerId) {
+      throw new ForbiddenException('Customer does not belong to your partner');
+    }
+
+    const request = new DeleteCustomerMembershipRequest();
+    request.membershipId = id;
+    return this.deleteCustomerMembershipHandler.execute(request);
   }
 }
