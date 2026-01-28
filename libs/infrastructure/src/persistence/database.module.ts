@@ -12,7 +12,6 @@ import { PartnerEntity } from './entities/partner.entity';
 import { PartnerSubscriptionEntity } from './entities/partner-subscription.entity';
 import { PartnerSubscriptionUsageEntity } from './entities/partner-subscription-usage.entity';
 import { PartnerLimitsEntity } from './entities/partner-limits.entity';
-import { PartnerStatsEntity } from './entities/partner-stats.entity';
 import { PricingPlanLimitsEntity } from './entities/pricing-plan-limits.entity';
 import { TenantEntity } from './entities/tenant.entity';
 import { TenantFeaturesEntity } from './entities/tenant-features.entity';
@@ -151,7 +150,6 @@ import {
       PartnerSubscriptionEntity,
       PartnerSubscriptionUsageEntity,
       PartnerLimitsEntity,
-      PartnerStatsEntity,
       PricingPlanLimitsEntity,
       TenantEntity,
       TenantFeaturesEntity,

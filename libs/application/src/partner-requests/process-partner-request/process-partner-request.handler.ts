@@ -27,7 +27,6 @@ import {
   TenantEntity,
   TenantFeaturesEntity,
   BranchEntity,
-  PartnerStatsEntity,
   UserEntity,
   TenantMapper,
   BranchMapper,
@@ -418,9 +417,6 @@ export class ProcessPartnerRequestHandler {
     featuresEntity.tenantId = savedTenantEntity.id;
     await manager.save(TenantFeaturesEntity, featuresEntity);
 
-    // Actualizar estadísticas del partner usando manager
-    await this.updatePartnerStatsWithManager(manager, partnerId);
-
     // Incrementar contador de tenants en uso de suscripción
     // Reutilizar subscriptionEntity obtenido anteriormente
     if (subscriptionEntity) {
@@ -513,9 +509,6 @@ export class ProcessPartnerRequestHandler {
     // Guardar usando manager
     const savedBranchEntity = await manager.save(BranchEntity, branchEntity);
 
-    // Actualizar estadísticas del partner usando manager
-    await this.updatePartnerStatsWithManager(manager, tenantEntity.partnerId);
-
     // Incrementar contador de branches en uso de suscripción
     const subscriptionEntity = await manager.findOne(PartnerSubscriptionEntity, {
       where: { partnerId: tenantEntity.partnerId },
@@ -549,53 +542,6 @@ export class ProcessPartnerRequestHandler {
     return savedBranchEntity;
   }
 
-  /**
-   * Actualiza las estadísticas del partner usando el EntityManager de la transacción
-   */
-  private async updatePartnerStatsWithManager(
-    manager: EntityManager,
-    partnerId: number,
-  ): Promise<void> {
-    // Contar tenants del partner
-    const tenantsCount = await manager.count(TenantEntity, {
-      where: { partnerId },
-    });
-
-    // Contar branches de todos los tenants del partner
-    const tenants = await manager.find(TenantEntity, {
-      where: { partnerId },
-      select: ['id'],
-    });
-    const tenantIds = tenants.map((t) => t.id);
-    const branchesCount =
-      tenantIds.length > 0
-        ? await manager.count(BranchEntity, {
-            where: { tenantId: In(tenantIds) },
-          })
-        : 0;
-
-    // Obtener o crear las stats del partner
-    let statsEntity = await manager.findOne(PartnerStatsEntity, {
-      where: { partnerId },
-    });
-
-    if (!statsEntity) {
-      // Crear stats si no existen
-      statsEntity = new PartnerStatsEntity();
-      statsEntity.partnerId = partnerId;
-      statsEntity.tenantsCount = 0;
-      statsEntity.branchesCount = 0;
-      statsEntity.customersCount = 0;
-      statsEntity.rewardsCount = 0;
-    }
-
-    // Actualizar los conteos
-    statsEntity.tenantsCount = tenantsCount;
-    statsEntity.branchesCount = branchesCount;
-    // customersCount y rewardsCount se mantienen (se actualizarán por otros procesos)
-
-    await manager.save(PartnerStatsEntity, statsEntity);
-  }
 
   /**
    * Crea un usuario partner usando el EntityManager de la transacción

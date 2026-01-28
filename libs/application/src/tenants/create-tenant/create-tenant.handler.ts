@@ -94,9 +94,6 @@ export class CreateTenantHandler {
     featuresEntity.tenantId = savedTenant.id;
     await this.featuresRepository.save(featuresEntity);
 
-    // Actualizar las estadísticas del partner
-    await this.partnerRepository.updateStats(savedTenant.partnerId);
-
     // Recalcular subscription usage del partner afectado
     // Usar recálculo completo para asegurar que funcione incluso si no hay suscripción activa
     await SubscriptionUsageHelper.recalculateUsageForPartner(

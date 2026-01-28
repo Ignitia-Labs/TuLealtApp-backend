@@ -46,9 +46,6 @@ export class DeleteTenantHandler {
     // Eliminar el tenant (las características se eliminan en cascada por la relación)
     await this.tenantRepository.delete(request.tenantId);
 
-    // Actualizar las estadísticas del partner
-    await this.partnerRepository.updateStats(partnerId);
-
     // Recalcular subscription usage del partner afectado
     // Usar recálculo completo para asegurar que funcione incluso si no hay suscripción activa
     await SubscriptionUsageHelper.recalculateUsageForPartner(

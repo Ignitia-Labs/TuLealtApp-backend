@@ -1,8 +1,7 @@
-import { Partner, PartnerSubscription, PartnerLimits, PartnerStats } from '@libs/domain';
+import { Partner, PartnerSubscription, PartnerLimits } from '@libs/domain';
 import { PartnerEntity } from '../entities/partner.entity';
 import { PartnerSubscriptionEntity } from '../entities/partner-subscription.entity';
 import { PartnerLimitsEntity } from '../entities/partner-limits.entity';
-import { PartnerStatsEntity } from '../entities/partner-stats.entity';
 
 /**
  * Mapper para convertir entre entidades de dominio y entidades de persistencia de Partner
@@ -15,7 +14,7 @@ export class PartnerMapper {
     persistenceEntity: PartnerEntity,
     subscription?: PartnerSubscriptionEntity | null,
     limits?: PartnerLimitsEntity | null,
-    stats?: PartnerStatsEntity | null,
+    stats?: any | null, // Mantenido para compatibilidad pero ya no se usa
   ): Partner {
     return Partner.create(
       persistenceEntity.name || '',
@@ -218,37 +217,4 @@ export class PartnerMapper {
     return entity;
   }
 
-  /**
-   * Convierte una entidad de persistencia de estadísticas a entidad de dominio
-   */
-  static statsToDomain(persistenceEntity: PartnerStatsEntity): PartnerStats {
-    return PartnerStats.create(
-      persistenceEntity.partnerId,
-      persistenceEntity.tenantsCount,
-      persistenceEntity.branchesCount,
-      persistenceEntity.customersCount,
-      persistenceEntity.rewardsCount,
-      persistenceEntity.id,
-    );
-  }
-
-  /**
-   * Convierte una entidad de dominio de estadísticas a entidad de persistencia
-   */
-  static statsToPersistence(domainEntity: PartnerStats): PartnerStatsEntity {
-    const entity = new PartnerStatsEntity();
-    if (domainEntity.id > 0) {
-      entity.id = domainEntity.id;
-    }
-    entity.partnerId = domainEntity.partnerId;
-    entity.tenantsCount = domainEntity.tenantsCount;
-    entity.branchesCount = domainEntity.branchesCount;
-    entity.customersCount = domainEntity.customersCount;
-    entity.rewardsCount = domainEntity.rewardsCount;
-    if (domainEntity.id > 0) {
-      entity.createdAt = domainEntity.createdAt;
-      entity.updatedAt = domainEntity.updatedAt;
-    }
-    return entity;
-  }
 }

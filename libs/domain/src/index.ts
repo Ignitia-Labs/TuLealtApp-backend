@@ -12,7 +12,6 @@ export * from './entities/partner.entity';
 export * from './entities/partner-subscription.entity';
 export * from './entities/partner-subscription-usage.entity';
 export * from './entities/partner-limits.entity';
-export * from './entities/partner-stats.entity';
 export * from './entities/tenant.entity';
 export * from './entities/tenant-features.entity';
 export * from './entities/branch.entity';

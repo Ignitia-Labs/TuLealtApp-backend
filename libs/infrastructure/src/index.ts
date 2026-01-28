@@ -21,7 +21,6 @@ export * from './persistence/entities/partner.entity';
 export * from './persistence/entities/partner-subscription.entity';
 export * from './persistence/entities/partner-subscription-usage.entity';
 export * from './persistence/entities/partner-limits.entity';
-export * from './persistence/entities/partner-stats.entity';
 export * from './persistence/entities/pricing-plan-limits.entity';
 export * from './persistence/entities/tenant.entity';
 export * from './persistence/entities/tenant-features.entity';

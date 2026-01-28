@@ -77,9 +77,6 @@ export class CreateBranchHandler {
     // Guardar la branch (la BD asignará el ID automáticamente)
     const savedBranch = await this.branchRepository.save(branch);
 
-    // Actualizar las estadísticas del partner
-    await this.partnerRepository.updateStats(tenant.partnerId);
-
     // Recalcular subscription usage del partner afectado
     // Usar recálculo completo para asegurar que funcione incluso si no hay suscripción activa
     await SubscriptionUsageHelper.recalculateUsageForPartner(

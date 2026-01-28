@@ -7,7 +7,6 @@ import {
   Partner,
   PartnerSubscription,
   PartnerLimits,
-  PartnerStats,
   SubscriptionStatus,
   BillingFrequency,
 } from '@libs/domain';
@@ -18,7 +17,6 @@ import { Repository } from 'typeorm';
 import {
   PartnerSubscriptionEntity,
   PartnerLimitsEntity,
-  PartnerStatsEntity,
   PartnerEntity,
 } from '@libs/infrastructure';
 import { PartnerMapper } from '@libs/infrastructure';
@@ -45,8 +43,6 @@ export class CreatePartnerHandler {
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
     @InjectRepository(PartnerLimitsEntity)
     private readonly limitsRepository: Repository<PartnerLimitsEntity>,
-    @InjectRepository(PartnerStatsEntity)
-    private readonly statsRepository: Repository<PartnerStatsEntity>,
     @InjectRepository(PartnerEntity)
     private readonly partnerEntityRepository: Repository<PartnerEntity>,
     @InjectRepository(PartnerSubscriptionUsageEntity)
@@ -296,11 +292,8 @@ export class CreatePartnerHandler {
     limitsEntity.partnerId = savedPartner.id;
     await this.limitsRepository.save(limitsEntity);
 
-    // Crear y guardar las estadísticas iniciales
-    const stats = PartnerStats.create(savedPartner.id);
-    const statsEntity = PartnerMapper.statsToPersistence(stats);
-    statsEntity.partnerId = savedPartner.id;
-    await this.statsRepository.save(statsEntity);
+    // Nota: Las estadísticas se crean automáticamente cuando se crea la suscripción
+    // a través de SubscriptionUsageHelper.createUsageForSubscription
 
     // Retornar response DTO
     return new CreatePartnerResponse(

@@ -9,7 +9,11 @@ import { Repository } from 'typeorm';
 import { IPartnerRepository } from '@libs/domain';
 import { GetPartnerRequest } from './get-partner.request';
 import { GetPartnerResponse } from './get-partner.response';
-import { PartnerEntity, PartnerMapper } from '@libs/infrastructure';
+import {
+  PartnerEntity,
+  PartnerMapper,
+  PartnerSubscriptionUsageEntity,
+} from '@libs/infrastructure';
 import { PartnerSubscriptionSwaggerDto } from '../dto/partner-subscription-swagger.dto';
 import { PartnerLimitsSwaggerDto } from '../dto/partner-limits-swagger.dto';
 import { PartnerStatsSwaggerDto } from '../dto/partner-stats-swagger.dto';
@@ -24,6 +28,8 @@ export class GetPartnerHandler {
     private readonly partnerRepository: IPartnerRepository,
     @InjectRepository(PartnerEntity)
     private readonly partnerEntityRepository: Repository<PartnerEntity>,
+    @InjectRepository(PartnerSubscriptionUsageEntity)
+    private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
   ) {}
 
   async execute(request: GetPartnerRequest): Promise<GetPartnerResponse> {
@@ -35,7 +41,7 @@ export class GetPartnerHandler {
       try {
         partnerEntity = await this.partnerEntityRepository.findOne({
           where: { id: request.partnerId },
-          relations: ['subscription', 'limits', 'stats'],
+          relations: ['subscription', 'subscription.usage', 'limits'],
         });
       } catch (relationError) {
         console.warn(
@@ -57,7 +63,6 @@ export class GetPartnerHandler {
         `[GetPartnerHandler] Subscription: ${partnerEntity.subscription ? 'existe' : 'null'}`,
       );
       console.log(`[GetPartnerHandler] Limits: ${partnerEntity.limits ? 'existe' : 'null'}`);
-      console.log(`[GetPartnerHandler] Stats: ${partnerEntity.stats ? 'existe' : 'null'}`);
 
       let partner;
       try {
@@ -65,7 +70,7 @@ export class GetPartnerHandler {
           partnerEntity,
           partnerEntity.subscription || null,
           partnerEntity.limits || null,
-          partnerEntity.stats || null,
+          null, // stats ya no se usa
         );
         console.log(`[GetPartnerHandler] Partner mapeado exitosamente`);
       } catch (mapperError) {
@@ -190,18 +195,33 @@ export class GetPartnerHandler {
         }
       }
 
-      // Mapear stats con validación
+      // Mapear stats desde partner_subscription_usage
       let statsDto: PartnerStatsSwaggerDto | null = null;
-      if (partnerEntity.stats) {
+      if (partnerEntity.subscription?.id) {
         try {
-          statsDto = {
-            tenantsCount: Number(partnerEntity.stats.tenantsCount) || 0,
-            branchesCount: Number(partnerEntity.stats.branchesCount) || 0,
-            customersCount: Number(partnerEntity.stats.customersCount) || 0,
-            rewardsCount: Number(partnerEntity.stats.rewardsCount) || 0,
-          };
+          // Obtener usage desde la relación o desde el repositorio
+          let usageEntity: PartnerSubscriptionUsageEntity | null = null;
+          
+          // Intentar obtener desde la relación primero
+          if (partnerEntity.subscription.usage) {
+            usageEntity = partnerEntity.subscription.usage;
+          } else {
+            // Si no está cargado, buscar desde el repositorio
+            usageEntity = await this.usageRepository.findOne({
+              where: { partnerSubscriptionId: partnerEntity.subscription.id },
+            });
+          }
+
+          if (usageEntity) {
+            statsDto = {
+              tenantsCount: Number(usageEntity.tenantsCount) || 0,
+              branchesCount: Number(usageEntity.branchesCount) || 0,
+              customersCount: Number(usageEntity.customersCount) || 0,
+              rewardsCount: Number(usageEntity.rewardsCount) || 0,
+            };
+          }
         } catch (statsError) {
-          console.error('Error al mapear stats:', statsError);
+          console.error('Error al mapear stats desde subscription usage:', statsError);
           statsDto = null;
         }
       }

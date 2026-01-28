@@ -12,7 +12,6 @@ import {
 } from 'typeorm';
 import { PartnerSubscriptionEntity } from './partner-subscription.entity';
 import { PartnerLimitsEntity } from './partner-limits.entity';
-import { PartnerStatsEntity } from './partner-stats.entity';
 import { TenantEntity } from './tenant.entity';
 import { CurrencyEntity } from './currency.entity';
 import { CountryEntity } from './country.entity';
@@ -125,12 +124,6 @@ export class PartnerEntity {
     eager: false,
   })
   limits: PartnerLimitsEntity | null;
-
-  @OneToOne(() => PartnerStatsEntity, (stats) => stats.partner, {
-    cascade: false,
-    eager: false,
-  })
-  stats: PartnerStatsEntity | null;
 
   @OneToMany(() => TenantEntity, (tenant) => tenant.partner, {
     cascade: false,

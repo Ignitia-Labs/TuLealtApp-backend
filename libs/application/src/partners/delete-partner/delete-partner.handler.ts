@@ -49,7 +49,7 @@ export class DeletePartnerHandler {
       try {
         partnerEntity = await this.partnerEntityRepository.findOne({
           where: { id: request.partnerId },
-          relations: ['subscription', 'limits', 'stats', 'country'],
+          relations: ['subscription', 'limits', 'country'],
         });
       } catch (relationError) {
         console.warn(
@@ -197,22 +197,7 @@ export class DeletePartnerHandler {
                 : new Date().toISOString(),
             }
           : null,
-        stats: partnerEntity.stats
-          ? {
-              id: partnerEntity.stats.id,
-              partnerId: partnerEntity.stats.partnerId,
-              tenantsCount: partnerEntity.stats.tenantsCount || 0,
-              branchesCount: partnerEntity.stats.branchesCount || 0,
-              customersCount: partnerEntity.stats.customersCount || 0,
-              rewardsCount: partnerEntity.stats.rewardsCount || 0,
-              createdAt: partnerEntity.stats.createdAt
-                ? partnerEntity.stats.createdAt.toISOString()
-                : new Date().toISOString(),
-              updatedAt: partnerEntity.stats.updatedAt
-                ? partnerEntity.stats.updatedAt.toISOString()
-                : new Date().toISOString(),
-            }
-          : null,
+        stats: null, // stats ya no se archiva - se obtiene desde partner_subscription_usage
         tenants: tenantEntities.map((tenantEntity) => {
           const tenantBranches = branchEntities.filter((b) => b.tenantId === tenantEntity.id);
           return {

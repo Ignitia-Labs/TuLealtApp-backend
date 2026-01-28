@@ -5,8 +5,11 @@ import { IPartnerRepository } from '@libs/domain';
 import { GetPartnersRequest } from './get-partners.request';
 import { GetPartnersResponse } from './get-partners.response';
 import { GetPartnerResponse } from '../get-partner/get-partner.response';
-import { PartnerEntity } from '@libs/infrastructure';
-import { PartnerMapper } from '@libs/infrastructure';
+import {
+  PartnerEntity,
+  PartnerMapper,
+  PartnerSubscriptionUsageEntity,
+} from '@libs/infrastructure';
 import { PartnerSubscriptionSwaggerDto } from '../dto/partner-subscription-swagger.dto';
 import { PartnerLimitsSwaggerDto } from '../dto/partner-limits-swagger.dto';
 import { PartnerStatsSwaggerDto } from '../dto/partner-stats-swagger.dto';
@@ -21,11 +24,13 @@ export class GetPartnersHandler {
     private readonly partnerRepository: IPartnerRepository,
     @InjectRepository(PartnerEntity)
     private readonly partnerEntityRepository: Repository<PartnerEntity>,
+    @InjectRepository(PartnerSubscriptionUsageEntity)
+    private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
   ) {}
 
   async execute(request: GetPartnersRequest): Promise<GetPartnersResponse> {
     const partnerEntities = await this.partnerEntityRepository.find({
-      relations: ['subscription', 'limits', 'stats'],
+      relations: ['subscription', 'subscription.usage', 'limits'],
       order: {
         createdAt: 'DESC',
       },
@@ -37,13 +42,14 @@ export class GetPartnersHandler {
       : partnerEntities.filter((entity) => entity.status === 'active');
 
     // Convertir a DTOs de respuesta
-    const partnerResponses = filteredEntities.map((partnerEntity) => {
-      const partner = PartnerMapper.toDomain(
-        partnerEntity,
-        partnerEntity.subscription,
-        partnerEntity.limits,
-        partnerEntity.stats,
-      );
+    const partnerResponses = await Promise.all(
+      filteredEntities.map(async (partnerEntity) => {
+        const partner = PartnerMapper.toDomain(
+          partnerEntity,
+          partnerEntity.subscription,
+          partnerEntity.limits,
+          null, // stats ya no se usa
+        );
 
       // Mapear subscription con todos los campos
       const subscriptionDto: PartnerSubscriptionSwaggerDto | null = partnerEntity.subscription
@@ -102,15 +108,30 @@ export class GetPartnersHandler {
           }
         : null;
 
-      // Mapear stats
-      const statsDto: PartnerStatsSwaggerDto | null = partnerEntity.stats
-        ? {
-            tenantsCount: partnerEntity.stats.tenantsCount,
-            branchesCount: partnerEntity.stats.branchesCount,
-            customersCount: partnerEntity.stats.customersCount,
-            rewardsCount: partnerEntity.stats.rewardsCount,
-          }
-        : null;
+      // Mapear stats desde partner_subscription_usage
+      let statsDto: PartnerStatsSwaggerDto | null = null;
+      if (partnerEntity.subscription?.id) {
+        // Intentar obtener desde la relación primero
+        let usageEntity: PartnerSubscriptionUsageEntity | null = null;
+        
+        if (partnerEntity.subscription.usage) {
+          usageEntity = partnerEntity.subscription.usage;
+        } else {
+          // Si no está cargado, buscar desde el repositorio
+          usageEntity = await this.usageRepository.findOne({
+            where: { partnerSubscriptionId: partnerEntity.subscription.id },
+          });
+        }
+
+        if (usageEntity) {
+          statsDto = {
+            tenantsCount: Number(usageEntity.tenantsCount) || 0,
+            branchesCount: Number(usageEntity.branchesCount) || 0,
+            customersCount: Number(usageEntity.customersCount) || 0,
+            rewardsCount: Number(usageEntity.rewardsCount) || 0,
+          };
+        }
+      }
 
       return new GetPartnerResponse(
         partner.id,
@@ -142,7 +163,8 @@ export class GetPartnersHandler {
         limitsDto,
         statsDto,
       );
-    });
+      }),
+    );
 
     return new GetPartnersResponse(partnerResponses);
   }
