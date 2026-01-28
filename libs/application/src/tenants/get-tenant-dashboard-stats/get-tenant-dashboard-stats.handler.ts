@@ -44,19 +44,7 @@ export class GetTenantDashboardStatsHandler {
 
     if (!analytics) {
       // Si aún no existe después de calcular, retornar valores por defecto
-      return new GetTenantDashboardStatsResponse(
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        [],
-        [],
-        [],
-        new Date(),
-      );
+      return new GetTenantDashboardStatsResponse(0, 0, 0, 0, 0, 0, 0, [], [], [], new Date());
     }
 
     return new GetTenantDashboardStatsResponse(

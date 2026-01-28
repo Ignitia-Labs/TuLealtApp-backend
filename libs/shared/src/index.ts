@@ -49,6 +49,7 @@ export * from './utils/qr-code.util';
 export * from './utils/partner-code.util';
 export * from './utils/quick-search-code.util';
 export * from './utils/invitation-code.util';
+export * from './utils/invitation-url.util';
 export * from './utils/math.util';
 export * from './utils/subscription-event.util';
 export * from './utils/color.util';

@@ -1,11 +1,4 @@
-import {
-  IsOptional,
-  IsNumber,
-  IsDateString,
-  IsEnum,
-  Min,
-  IsInt,
-} from 'class-validator';
+import { IsOptional, IsNumber, IsDateString, IsEnum, Min, IsInt } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
@@ -13,7 +6,8 @@ import { ApiProperty } from '@nestjs/swagger';
  */
 export class UpdateInvitationCodeRequest {
   @ApiProperty({
-    description: 'ID de la branch (opcional). Si se proporciona, el código estará asociado a esta branch específica',
+    description:
+      'ID de la branch (opcional). Si se proporciona, el código estará asociado a esta branch específica',
     example: 5,
     type: Number,
     required: false,

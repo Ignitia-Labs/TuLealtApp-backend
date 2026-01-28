@@ -46,6 +46,9 @@ import {
   UseInvitationCodeHandler,
   UseInvitationCodeRequest,
   UseInvitationCodeResponse,
+  SendInvitationEmailHandler,
+  SendInvitationEmailRequest,
+  SendInvitationEmailResponse,
   JwtPayload,
 } from '@libs/application';
 import { IUserRepository, ITenantRepository } from '@libs/domain';
@@ -88,6 +91,7 @@ export class InvitationCodesController {
     private readonly updateInvitationCodeHandler: UpdateInvitationCodeHandler,
     private readonly deleteInvitationCodeHandler: DeleteInvitationCodeHandler,
     private readonly useInvitationCodeHandler: UseInvitationCodeHandler,
+    private readonly sendInvitationEmailHandler: SendInvitationEmailHandler,
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
     @Inject('ITenantRepository')
@@ -471,13 +475,68 @@ export class InvitationCodesController {
     return this.useInvitationCodeHandler.execute(request);
   }
 
+  @Post('invitation-codes/:id/send-email')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Re-enviar email de invitación',
+    description:
+      'Re-envía el email de invitación con magic link para un código de invitación existente. El tenant del código debe pertenecer al partner del usuario autenticado.',
+  })
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    description: 'ID del código de invitación',
+    example: 1,
+  })
+  @ApiBody({
+    type: SendInvitationEmailRequest,
+    description: 'Datos para re-enviar el email de invitación',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Email re-enviado exitosamente',
+    type: SendInvitationEmailResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos de entrada inválidos',
+    type: BadRequestErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos o el tenant no pertenece a su partner',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Código no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  async sendInvitationEmail(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() request: SendInvitationEmailRequest,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<SendInvitationEmailResponse> {
+    // Primero obtener el código para validar ownership
+    const getRequest = new GetInvitationCodeRequest();
+    getRequest.id = id;
+    const code = await this.getInvitationCodeHandler.execute(getRequest);
+
+    // Validar ownership del tenant del código
+    await this.validateTenantOwnership(code.tenantId, user);
+
+    return this.sendInvitationEmailHandler.execute(id, request);
+  }
+
   /**
    * Valida que el tenant pertenezca al partner del usuario autenticado
    */
-  private async validateTenantOwnership(
-    tenantId: number,
-    user: JwtPayload,
-  ): Promise<void> {
+  private async validateTenantOwnership(tenantId: number, user: JwtPayload): Promise<void> {
     const tenant = await this.tenantRepository.findById(tenantId);
     if (!tenant) {
       throw new NotFoundException(`Tenant with ID ${tenantId} not found`);

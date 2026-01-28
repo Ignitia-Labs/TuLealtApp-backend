@@ -13,9 +13,7 @@ export class DeleteInvitationCodeHandler {
     private readonly invitationCodeRepository: IInvitationCodeRepository,
   ) {}
 
-  async execute(
-    request: DeleteInvitationCodeRequest,
-  ): Promise<DeleteInvitationCodeResponse> {
+  async execute(request: DeleteInvitationCodeRequest): Promise<DeleteInvitationCodeResponse> {
     // Verificar que el código existe
     const code = await this.invitationCodeRepository.findById(request.id);
 
@@ -26,9 +24,6 @@ export class DeleteInvitationCodeHandler {
     // Eliminar el código
     await this.invitationCodeRepository.delete(request.id);
 
-    return new DeleteInvitationCodeResponse(
-      'Invitation code deleted successfully',
-      request.id,
-    );
+    return new DeleteInvitationCodeResponse('Invitation code deleted successfully', request.id);
   }
 }

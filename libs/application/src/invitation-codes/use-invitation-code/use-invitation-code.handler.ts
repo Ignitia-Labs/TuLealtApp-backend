@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  Inject,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
 import { IInvitationCodeRepository } from '@libs/domain';
 import { UseInvitationCodeRequest } from './use-invitation-code.request';
 import { UseInvitationCodeResponse } from './use-invitation-code.response';
@@ -19,9 +14,7 @@ export class UseInvitationCodeHandler {
     private readonly invitationCodeRepository: IInvitationCodeRepository,
   ) {}
 
-  async execute(
-    request: UseInvitationCodeRequest,
-  ): Promise<UseInvitationCodeResponse> {
+  async execute(request: UseInvitationCodeRequest): Promise<UseInvitationCodeResponse> {
     // Buscar el código
     const code = await this.invitationCodeRepository.findById(request.id);
 

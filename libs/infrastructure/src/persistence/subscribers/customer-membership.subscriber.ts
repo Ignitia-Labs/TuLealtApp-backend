@@ -1,10 +1,4 @@
-import {
-  EventSubscriber,
-  EntitySubscriberInterface,
-  RemoveEvent,
-  Repository,
-  In,
-} from 'typeorm';
+import { EventSubscriber, EntitySubscriberInterface, RemoveEvent, Repository, In } from 'typeorm';
 import { CustomerMembershipEntity } from '../entities/customer-membership.entity';
 import { PartnerSubscriptionUsageEntity } from '../entities/partner-subscription-usage.entity';
 import { PartnerSubscriptionEntity } from '../entities/partner-subscription.entity';
@@ -34,7 +28,6 @@ import { TenantEntity } from '../entities/tenant.entity';
 export class CustomerMembershipSubscriber
   implements EntitySubscriberInterface<CustomerMembershipEntity>
 {
-
   /**
    * Wrapper para obtener subscriptionId desde tenantId usando repositorios de TypeORM directamente
    * Esto evita la necesidad de inyectar el TenantRepository de dominio
@@ -190,8 +183,7 @@ export class CustomerMembershipSubscriber
       // Obtener repositorios necesarios desde el connection del evento
       // Esto evita necesidad de inyectar DataSource
       const connection = event.manager.connection;
-      const subscriptionRepository =
-        connection.getRepository(PartnerSubscriptionEntity);
+      const subscriptionRepository = connection.getRepository(PartnerSubscriptionEntity);
       const usageRepository = connection.getRepository(PartnerSubscriptionUsageEntity);
       const tenantRepository = connection.getRepository(TenantEntity);
 
