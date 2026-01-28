@@ -50,6 +50,10 @@ export class UpdatePartnerUserPasswordHandler {
     const savedUser = await this.userRepository.update(updatedUser);
 
     // Retornar response DTO
-    return new UpdatePartnerUserPasswordResponse(savedUser.id, savedUser.email, savedUser.updatedAt);
+    return new UpdatePartnerUserPasswordResponse(
+      savedUser.id,
+      savedUser.email,
+      savedUser.updatedAt,
+    );
   }
 }

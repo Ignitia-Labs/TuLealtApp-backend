@@ -47,18 +47,14 @@ export class RecalculateSubscriptionUsageHandler {
 
     // Si se proporciona partnerSubscriptionId, recalcular solo esa suscripción
     if (request.partnerSubscriptionId) {
-      this.logger.log(
-        `Recalculating usage for subscription ${request.partnerSubscriptionId}`,
-      );
+      this.logger.log(`Recalculating usage for subscription ${request.partnerSubscriptionId}`);
 
       const subscription = await this.subscriptionRepository.findOne({
         where: { id: request.partnerSubscriptionId },
       });
 
       if (!subscription) {
-        throw new Error(
-          `Subscription with ID ${request.partnerSubscriptionId} not found`,
-        );
+        throw new Error(`Subscription with ID ${request.partnerSubscriptionId} not found`);
       }
 
       await SubscriptionUsageHelper.recalculateUsageForSubscription(

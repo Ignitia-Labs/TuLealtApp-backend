@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { InfrastructureModule } from '@libs/infrastructure';
-import { HealthController } from '@libs/shared';
+import { HealthController, LoggerModule } from '@libs/shared';
 import { CustomerAuthModule } from './auth/customer-auth.module';
 import { PricingController } from './controllers/pricing.controller';
 import { CustomerMembershipsController } from './controllers/customer-memberships.controller';
@@ -23,7 +23,7 @@ import {
  * Configura todos los controladores y servicios necesarios
  */
 @Module({
-  imports: [InfrastructureModule, CustomerAuthModule],
+  imports: [InfrastructureModule, CustomerAuthModule, LoggerModule],
   controllers: [
     PricingController,
     CustomerMembershipsController,

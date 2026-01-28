@@ -9,11 +9,7 @@ import { Repository } from 'typeorm';
 import { IPartnerRepository } from '@libs/domain';
 import { GetPartnerRequest } from './get-partner.request';
 import { GetPartnerResponse } from './get-partner.response';
-import {
-  PartnerEntity,
-  PartnerMapper,
-  PartnerSubscriptionUsageEntity,
-} from '@libs/infrastructure';
+import { PartnerEntity, PartnerMapper, PartnerSubscriptionUsageEntity } from '@libs/infrastructure';
 import { PartnerSubscriptionSwaggerDto } from '../dto/partner-subscription-swagger.dto';
 import { PartnerLimitsSwaggerDto } from '../dto/partner-limits-swagger.dto';
 import { PartnerStatsSwaggerDto } from '../dto/partner-stats-swagger.dto';
@@ -201,7 +197,7 @@ export class GetPartnerHandler {
         try {
           // Obtener usage desde la relación o desde el repositorio
           let usageEntity: PartnerSubscriptionUsageEntity | null = null;
-          
+
           // Intentar obtener desde la relación primero
           if (partnerEntity.subscription.usage) {
             usageEntity = partnerEntity.subscription.usage;

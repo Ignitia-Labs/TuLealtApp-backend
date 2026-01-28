@@ -53,3 +53,7 @@ export * from './utils/subscription-event.util';
 export * from './utils/color.util';
 export * from './utils/password.util';
 export * from './utils/name.util';
+
+// Logger
+export * from './logger/file-logger.service';
+export * from './logger/logger.module';

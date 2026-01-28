@@ -26,7 +26,9 @@ export const dataSourceOptions: DataSourceOptions = {
   entities: ['libs/infrastructure/src/persistence/entities/**/*.entity.ts'],
   migrations: ['libs/infrastructure/src/persistence/migrations/**/*.ts'],
   synchronize: false, // Nunca usar synchronize en migraciones
-  logging: process.env.NODE_ENV !== 'production',
+  // Desactivar completamente el logging de TypeORM en producción
+  logging: process.env.NODE_ENV === 'production' ? false : ['error', 'warn', 'schema', 'migration'],
+  logger: process.env.NODE_ENV === 'production' ? undefined : 'advanced-console',
   migrationsTableName: 'migrations',
   migrationsRun: false,
 };

@@ -7,7 +7,8 @@ import { ApiProperty } from '@nestjs/swagger';
  */
 export class RecalculateSubscriptionUsageRequest {
   @ApiProperty({
-    description: 'ID del partner para recalcular su uso de suscripción. Si no se proporciona, se recalcularán todos los partners activos.',
+    description:
+      'ID del partner para recalcular su uso de suscripción. Si no se proporciona, se recalcularán todos los partners activos.',
     example: 1,
     type: Number,
     required: false,
@@ -19,7 +20,8 @@ export class RecalculateSubscriptionUsageRequest {
   partnerId?: number;
 
   @ApiProperty({
-    description: 'ID de la suscripción para recalcular su uso. Si se proporciona, se recalculará solo esta suscripción. Tiene prioridad sobre partnerId.',
+    description:
+      'ID de la suscripción para recalcular su uso. Si se proporciona, se recalculará solo esta suscripción. Tiene prioridad sobre partnerId.',
     example: 1,
     type: Number,
     required: false,

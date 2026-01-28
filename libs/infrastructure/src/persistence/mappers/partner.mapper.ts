@@ -216,5 +216,4 @@ export class PartnerMapper {
     }
     return entity;
   }
-
 }

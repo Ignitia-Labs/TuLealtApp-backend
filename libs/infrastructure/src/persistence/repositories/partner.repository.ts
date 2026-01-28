@@ -95,8 +95,8 @@ export class PartnerRepository implements IPartnerRepository {
       },
     });
 
-    return partnerEntities.map((entity) =>
-      PartnerMapper.toDomain(entity, entity.subscription, entity.limits, null), // stats ya no se usa
+    return partnerEntities.map(
+      (entity) => PartnerMapper.toDomain(entity, entity.subscription, entity.limits, null), // stats ya no se usa
     );
   }
 

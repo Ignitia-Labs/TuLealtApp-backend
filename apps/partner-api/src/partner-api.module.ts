@@ -18,7 +18,7 @@ import { ContactInquiryController } from './controllers/contact-inquiry.controll
 import { PartnerRequestsController } from './controllers/partner-requests.controller';
 import { TransactionsController } from './controllers/transactions.controller';
 import { InfrastructureModule } from '@libs/infrastructure';
-import { HealthController } from '@libs/shared';
+import { HealthController, LoggerModule } from '@libs/shared';
 import { PartnerAuthModule } from './auth/partner-auth.module';
 import {
   GetPricingPlansHandler,
@@ -106,7 +106,7 @@ import {
  * Configura todos los controladores y servicios necesarios
  */
 @Module({
-  imports: [InfrastructureModule, PartnerAuthModule],
+  imports: [InfrastructureModule, PartnerAuthModule, LoggerModule],
   controllers: [
     PricingController,
     ProfilesController,

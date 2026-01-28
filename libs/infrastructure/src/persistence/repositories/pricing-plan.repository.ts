@@ -62,7 +62,7 @@ export class PricingPlanRepository implements IPricingPlanRepository {
   async save(plan: PricingPlan): Promise<PricingPlan> {
     const planEntity = PricingPlanMapper.toPersistence(plan);
     const savedEntity = await this.pricingPlanRepository.save(planEntity);
-    
+
     // Recargar con todas las relaciones para asegurar que tenemos los datos actualizados
     const reloadedEntity = await this.pricingPlanRepository.findOne({
       where: { id: savedEntity.id },

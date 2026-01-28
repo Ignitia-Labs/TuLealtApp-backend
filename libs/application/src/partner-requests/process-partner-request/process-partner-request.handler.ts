@@ -207,9 +207,7 @@ export class ProcessPartnerRequestHandler {
 
     // Intentar obtener los límites del plan si existe planId
     if (updatedPartnerRequest.planId) {
-      const pricingPlan = await this.pricingPlanRepository.findById(
-        updatedPartnerRequest.planId,
-      );
+      const pricingPlan = await this.pricingPlanRepository.findById(updatedPartnerRequest.planId);
       if (pricingPlan && pricingPlan.limits) {
         planLimits = {
           maxTenants: pricingPlan.limits.maxTenants,
@@ -225,18 +223,15 @@ export class ProcessPartnerRequestHandler {
 
     // Usar límites del plan como referencia, pero permitir sobrescribir con valores del request
     // Si no hay plan o no tiene límites, usar valores por defecto
-    createPartnerRequest.limitsMaxTenants =
-      request.limitsMaxTenants ?? planLimits?.maxTenants ?? 5;
+    createPartnerRequest.limitsMaxTenants = request.limitsMaxTenants ?? planLimits?.maxTenants ?? 5;
     createPartnerRequest.limitsMaxBranches =
       request.limitsMaxBranches ?? planLimits?.maxBranches ?? 20;
     createPartnerRequest.limitsMaxCustomers =
       request.limitsMaxCustomers ?? planLimits?.maxCustomers ?? 5000;
     createPartnerRequest.limitsMaxRewards =
       request.limitsMaxRewards ?? planLimits?.maxRewards ?? 50;
-    createPartnerRequest.limitsMaxAdmins =
-      request.limitsMaxAdmins ?? planLimits?.maxAdmins ?? -1;
-    createPartnerRequest.limitsStorageGB =
-      request.limitsStorageGB ?? planLimits?.storageGB ?? -1;
+    createPartnerRequest.limitsMaxAdmins = request.limitsMaxAdmins ?? planLimits?.maxAdmins ?? -1;
+    createPartnerRequest.limitsStorageGB = request.limitsStorageGB ?? planLimits?.storageGB ?? -1;
     createPartnerRequest.limitsApiCallsPerMonth =
       request.limitsApiCallsPerMonth ?? planLimits?.apiCallsPerMonth ?? -1;
 
@@ -547,7 +542,6 @@ export class ProcessPartnerRequestHandler {
 
     return savedBranchEntity;
   }
-
 
   /**
    * Crea un usuario partner usando el EntityManager de la transacción

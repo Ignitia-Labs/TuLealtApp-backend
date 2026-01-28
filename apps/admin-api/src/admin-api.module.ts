@@ -223,7 +223,7 @@ import {
   SubscriptionUsageModule,
 } from '@libs/application';
 import { InfrastructureModule, StorageModule } from '@libs/infrastructure';
-import { HealthController } from '@libs/shared';
+import { HealthController, LoggerModule } from '@libs/shared';
 import { AdminAuthModule } from './auth/admin-auth.module';
 
 /**
@@ -237,6 +237,7 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     StorageModule,
     AdminAuthModule,
     SubscriptionUsageModule,
+    LoggerModule,
   ],
   controllers: [
     UsersController,

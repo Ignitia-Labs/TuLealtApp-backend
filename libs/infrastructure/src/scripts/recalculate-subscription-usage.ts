@@ -136,10 +136,9 @@ Ejemplos:
         console.log(`Tenants en BD: ${tenantsCount[0]?.count || 0}`);
 
         // Obtener tenant IDs
-        const tenants = await dataSource.query(
-          'SELECT id FROM tenants WHERE partnerId = ?',
-          [request.partnerId],
-        );
+        const tenants = await dataSource.query('SELECT id FROM tenants WHERE partnerId = ?', [
+          request.partnerId,
+        ]);
         const tenantIds = tenants.map((t: any) => t.id);
         console.log(`Tenant IDs: [${tenantIds.join(', ')}]`);
 
@@ -157,10 +156,9 @@ Ejemplos:
         console.log(`Total branches en BD: ${totalBranches}`);
 
         // Obtener límites del partner
-        const limits = await dataSource.query(
-          'SELECT * FROM partner_limits WHERE partnerId = ?',
-          [request.partnerId],
-        );
+        const limits = await dataSource.query('SELECT * FROM partner_limits WHERE partnerId = ?', [
+          request.partnerId,
+        ]);
         if (limits.length > 0) {
           const limit = limits[0];
           console.log(`\nLímites del partner:`);
@@ -177,7 +175,7 @@ Ejemplos:
           'SELECT id, status FROM partner_subscriptions WHERE partnerId = ? AND status = ? ORDER BY createdAt DESC LIMIT 1',
           [request.partnerId, 'active'],
         );
-        
+
         // Si no hay activa, buscar la más reciente sin importar status
         if (!subscription || subscription.length === 0) {
           subscription = await dataSource.query(
@@ -224,9 +222,7 @@ Ejemplos:
     if (result.results.length > 0) {
       console.log('📋 Resultados detallados:');
       console.log('─'.repeat(80));
-      console.log(
-        'Partner ID | Subscription ID | Tenants | Branches | Customers | Rewards',
-      );
+      console.log('Partner ID | Subscription ID | Tenants | Branches | Customers | Rewards');
       console.log('─'.repeat(80));
 
       for (const res of result.results) {

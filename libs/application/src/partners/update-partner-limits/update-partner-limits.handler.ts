@@ -70,7 +70,7 @@ export class UpdatePartnerLimitsHandler {
         request.storageGB !== undefined ? request.storageGB : (limitsEntity.storageGB ?? -1),
         request.apiCallsPerMonth !== undefined
           ? request.apiCallsPerMonth
-          : limitsEntity.apiCallsPerMonth ?? -1,
+          : (limitsEntity.apiCallsPerMonth ?? -1),
         limitsEntity.id,
       );
 

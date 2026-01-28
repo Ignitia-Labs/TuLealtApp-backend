@@ -36,7 +36,10 @@ export const getDatabaseConfig = (): TypeOrmModuleOptions => {
     database: process.env.DB_NAME || 'tulealtapp',
     entities: [UserEntity],
     synchronize, // Por defecto false - solo activar explícitamente con DB_SYNCHRONIZE=true
-    logging: !isProduction, // Logging en desarrollo
+    // Desactivar completamente el logging de TypeORM en producción
+    // En desarrollo se muestran las queries, en producción no se muestran nada
+    logging: isProduction ? false : ['error', 'warn', 'schema', 'migration'],
+    logger: isProduction ? undefined : 'advanced-console',
     retryAttempts: 3,
     retryDelay: 3000,
     autoLoadEntities: true,

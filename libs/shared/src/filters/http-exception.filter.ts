@@ -1,11 +1,18 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { FileLoggerService } from '../logger/file-logger.service';
 
 /**
  * Filtro global para manejar excepciones HTTP
  */
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
+  private fileLogger?: FileLoggerService;
+
+  constructor(fileLogger?: FileLoggerService) {
+    this.fileLogger = fileLogger;
+  }
+
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -28,15 +35,28 @@ export class HttpExceptionFilter implements ExceptionFilter {
       message = exception.message;
     }
 
-    // Loggear errores HTTP para debugging (excepto 404 que son comunes)
+    // Loggear errores HTTP (solo errores 5xx se registran en archivo en producción)
     if (status >= 500) {
-      console.error('[HttpExceptionFilter] Error HTTP:', {
-        status,
-        path: request.url,
-        method: request.method,
-        message,
-        stack: exception.stack,
-      });
+      const messageStr = Array.isArray(message) ? message.join(', ') : message;
+      if (this.fileLogger) {
+        this.fileLogger.logHttpException(
+          status,
+          request.url,
+          request.method,
+          messageStr,
+          exception.stack,
+          request.body,
+        );
+      } else {
+        // Fallback si el logger no está disponible
+        console.error('[HttpExceptionFilter] Error HTTP:', {
+          status,
+          path: request.url,
+          method: request.method,
+          message,
+          stack: exception.stack,
+        });
+      }
     }
 
     // Construir respuesta de error
@@ -65,6 +85,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
  */
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
+  private fileLogger?: FileLoggerService;
+
+  constructor(fileLogger?: FileLoggerService) {
+    this.fileLogger = fileLogger;
+  }
+
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -76,23 +102,28 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const message =
       exception instanceof HttpException ? exception.message : 'Internal server error';
 
-    // Loggear el error completo para debugging
-    console.error('========================================');
-    console.error('[AllExceptionsFilter] Error capturado:');
-    console.error('Path:', request.url);
-    console.error('Method:', request.method);
-    console.error('Status:', status);
-    console.error('Message:', message);
-
-    if (exception instanceof Error) {
-      console.error('Error name:', exception.name);
-      console.error('Error message:', exception.message);
-      console.error('Error stack:', exception.stack);
+    // Registrar excepción no controlada en archivo (producción) o consola (desarrollo)
+    if (this.fileLogger) {
+      this.fileLogger.logUnhandledException(exception, request.url, request.method, status);
     } else {
-      console.error('Exception type:', typeof exception);
-      console.error('Exception:', JSON.stringify(exception, null, 2));
+      // Fallback si el logger no está disponible
+      console.error('========================================');
+      console.error('[AllExceptionsFilter] Error capturado:');
+      console.error('Path:', request.url);
+      console.error('Method:', request.method);
+      console.error('Status:', status);
+      console.error('Message:', message);
+
+      if (exception instanceof Error) {
+        console.error('Error name:', exception.name);
+        console.error('Error message:', exception.message);
+        console.error('Error stack:', exception.stack);
+      } else {
+        console.error('Exception type:', typeof exception);
+        console.error('Exception:', JSON.stringify(exception, null, 2));
+      }
+      console.error('========================================');
     }
-    console.error('========================================');
 
     response.status(status).json({
       statusCode: status,

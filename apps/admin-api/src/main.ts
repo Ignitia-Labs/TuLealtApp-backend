@@ -2,7 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AdminApiModule } from './admin-api.module';
-import { HttpExceptionFilter, AllExceptionsFilter } from '@libs/shared';
+import {
+  HttpExceptionFilter,
+  AllExceptionsFilter,
+  FileLoggerService,
+  LoggerModule,
+} from '@libs/shared';
 import { S3Service } from '@libs/infrastructure';
 
 /**
@@ -10,6 +15,15 @@ import { S3Service } from '@libs/infrastructure';
  */
 async function bootstrap() {
   const app = await NestFactory.create(AdminApiModule);
+
+  // Obtener FileLoggerService del contenedor de la aplicación
+  let fileLogger: FileLoggerService | undefined;
+  try {
+    fileLogger = app.get(FileLoggerService, { strict: false });
+  } catch (error) {
+    // Si no está disponible, continuar sin logging a archivo
+    console.warn('FileLoggerService no disponible, usando logging en consola');
+  }
 
   // Configuración de CORS
   app.enableCors({
@@ -37,8 +51,8 @@ async function bootstrap() {
     }),
   );
 
-  // Filtros globales de excepciones
-  app.useGlobalFilters(new AllExceptionsFilter(), new HttpExceptionFilter());
+  // Filtros globales de excepciones con FileLoggerService
+  app.useGlobalFilters(new AllExceptionsFilter(fileLogger), new HttpExceptionFilter(fileLogger));
 
   // Configuración de Swagger
   const config = new DocumentBuilder()
