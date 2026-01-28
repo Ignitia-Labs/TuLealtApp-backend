@@ -5,6 +5,7 @@ import { CustomerAuthModule } from './auth/customer-auth.module';
 import { PricingController } from './controllers/pricing.controller';
 import { CustomerMembershipsController } from './controllers/customer-memberships.controller';
 import { CustomerPartnersController } from './controllers/customer-partners.controller';
+import { CurrenciesController } from './controllers/currencies.controller';
 import {
   GetPricingPlansHandler,
   GetPricingPlanByIdHandler,
@@ -13,6 +14,8 @@ import {
   GetCustomerMembershipsHandler,
   GetCustomerMembershipHandler,
   GetCustomerPartnersHandler,
+  GetCurrenciesHandler,
+  GetCountriesHandler,
 } from '@libs/application';
 
 /**
@@ -25,6 +28,7 @@ import {
     PricingController,
     CustomerMembershipsController,
     CustomerPartnersController,
+    CurrenciesController,
     HealthController,
   ],
   providers: [
@@ -38,6 +42,9 @@ import {
     GetCustomerMembershipHandler,
     // Handlers de aplicación - Customer Partners
     GetCustomerPartnersHandler,
+    // Handlers de aplicación - Currencies & Countries
+    GetCurrenciesHandler,
+    GetCountriesHandler,
   ],
 })
 export class CustomerApiModule {}

@@ -60,6 +60,48 @@ export class ProcessPartnerRequestResponse {
   })
   branchQuickSearchCode: string;
 
+  @ApiProperty({
+    description: 'ID del tenant creado',
+    example: 1,
+    type: Number,
+  })
+  tenantId: number;
+
+  @ApiProperty({
+    description: 'ID de la sucursal creada',
+    example: 1,
+    type: Number,
+  })
+  branchId: number;
+
+  @ApiProperty({
+    description: 'ID del usuario creado',
+    example: 1,
+    type: Number,
+  })
+  userId: number;
+
+  @ApiProperty({
+    description: 'Email del usuario creado',
+    example: 'roberto@cocinasol.gt',
+    type: String,
+  })
+  userEmail: string;
+
+  @ApiProperty({
+    description: 'Nombre completo del usuario creado',
+    example: 'Roberto Méndez',
+    type: String,
+  })
+  userName: string;
+
+  @ApiProperty({
+    description: 'Contraseña temporal generada para el usuario (debe ser comunicada al usuario)',
+    example: 'Abc123Xyz789',
+    type: String,
+  })
+  userPassword: string;
+
   constructor(
     partnerId: number,
     requestId: number,
@@ -69,6 +111,12 @@ export class ProcessPartnerRequestResponse {
     partnerDomain: string,
     tenantQuickSearchCode: string,
     branchQuickSearchCode: string,
+    tenantId: number,
+    branchId: number,
+    userId: number,
+    userEmail: string,
+    userName: string,
+    userPassword: string,
   ) {
     this.partnerId = partnerId;
     this.requestId = requestId;
@@ -78,5 +126,11 @@ export class ProcessPartnerRequestResponse {
     this.partnerDomain = partnerDomain;
     this.tenantQuickSearchCode = tenantQuickSearchCode;
     this.branchQuickSearchCode = branchQuickSearchCode;
+    this.tenantId = tenantId;
+    this.branchId = branchId;
+    this.userId = userId;
+    this.userEmail = userEmail;
+    this.userName = userName;
+    this.userPassword = userPassword;
   }
 }

@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Body,
   Param,
   Query,
@@ -29,6 +30,9 @@ import {
   GetPartnerUsersHandler,
   GetPartnerUsersRequest,
   GetPartnerUsersResponse,
+  UpdatePartnerUserPasswordHandler,
+  UpdatePartnerUserPasswordRequest,
+  UpdatePartnerUserPasswordResponse,
 } from '@libs/application';
 import {
   UnauthorizedErrorResponseDto,
@@ -51,6 +55,7 @@ import {
  * - POST /admin/partner-users - Crear un usuario PARTNER
  * - POST /admin/partner-users/staff - Crear un usuario PARTNER_STAFF
  * - GET /admin/partner-users/partner/:partnerId - Obtener usuarios de un partner
+ * - PATCH /admin/partner-users/:userId/password - Actualizar contraseña de un usuario de partner
  */
 @ApiTags('Partner Users')
 @Controller('partner-users')
@@ -62,6 +67,7 @@ export class PartnerUsersController {
     private readonly createPartnerUserHandler: CreatePartnerUserHandler,
     private readonly createPartnerStaffUserHandler: CreatePartnerStaffUserHandler,
     private readonly getPartnerUsersHandler: GetPartnerUsersHandler,
+    private readonly updatePartnerUserPasswordHandler: UpdatePartnerUserPasswordHandler,
   ) {}
 
   @Post()
@@ -410,5 +416,88 @@ export class PartnerUsersController {
       request.includeInactive = includeInactive === 'true';
     }
     return this.getPartnerUsersHandler.execute(request);
+  }
+
+  @Patch(':userId/password')
+  @HttpCode(HttpStatus.OK)
+  @Permissions('admin.users.update')
+  @ApiOperation({
+    summary: 'Actualizar contraseña de un usuario de partner',
+    description:
+      'Permite a un administrador actualizar la contraseña de un usuario PARTNER o PARTNER_STAFF sin requerir la contraseña actual. Útil para resetear contraseñas olvidadas o asignar nuevas contraseñas.',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'ID único del usuario cuya contraseña se actualizará',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiBody({
+    type: UpdatePartnerUserPasswordRequest,
+    description: 'Nueva contraseña para el usuario',
+    examples: {
+      example1: {
+        summary: 'Actualizar contraseña',
+        value: {
+          newPassword: 'NewSecurePass123!',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Contraseña actualizada exitosamente',
+    type: UpdatePartnerUserPasswordResponse,
+    example: {
+      message: 'Contraseña actualizada exitosamente',
+      userId: 1,
+      userEmail: 'partner@example.com',
+      updatedAt: '2024-01-20T14:45:00.000Z',
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos inválidos o el usuario no es un usuario de partner',
+    type: BadRequestErrorResponseDto,
+    example: {
+      statusCode: 400,
+      message: 'User with ID 1 is not a partner user (must have role PARTNER or PARTNER_STAFF)',
+      error: 'Bad Request',
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos suficientes',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuario no encontrado',
+    type: NotFoundErrorResponseDto,
+    example: {
+      statusCode: 404,
+      message: 'User with ID 1 not found',
+      error: 'Not Found',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async updatePartnerUserPassword(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() body: Omit<UpdatePartnerUserPasswordRequest, 'userId'>,
+  ): Promise<UpdatePartnerUserPasswordResponse> {
+    const request = new UpdatePartnerUserPasswordRequest();
+    request.userId = userId;
+    request.newPassword = body.newPassword;
+    return this.updatePartnerUserPasswordHandler.execute(request);
   }
 }

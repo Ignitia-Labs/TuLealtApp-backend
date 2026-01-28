@@ -660,7 +660,7 @@ export class PartnerRequestsController {
   @ApiOperation({
     summary: 'Procesar solicitud de partner',
     description:
-      'Procesa una solicitud de partner convirtiéndola en un partner activo. Crea el partner con sus suscripción, límites y estadísticas iniciales, y marca la solicitud como "enrolled".',
+      'Procesa una solicitud de partner convirtiéndola en un partner activo. Crea el partner con sus suscripción, límites y estadísticas iniciales, crea el tenant y la sucursal principal, crea el primer usuario partner con contraseña temporal, y marca la solicitud como "enrolled". La respuesta incluye los datos del usuario creado y su contraseña temporal para que el admin pueda comunicarla al usuario.',
   })
   @ApiParam({
     name: 'id',
@@ -739,6 +739,14 @@ export class PartnerRequestsController {
       partnerName: 'Restaurante La Cocina del Sol',
       partnerEmail: 'roberto@cocinasol.gt',
       partnerDomain: 'cocinasol.gt',
+      tenantQuickSearchCode: 'TENANT-ABC234',
+      branchQuickSearchCode: 'BRANCH-ABC234',
+      tenantId: 1,
+      branchId: 1,
+      userId: 1,
+      userEmail: 'roberto@cocinasol.gt',
+      userName: 'Roberto Méndez',
+      userPassword: 'Abc123Xyz789',
     },
   })
   @ApiResponse({

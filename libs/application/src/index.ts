@@ -79,6 +79,10 @@ export * from './users/update-partner-user-assignment/update-partner-user-assign
 export * from './users/update-partner-user-assignment/update-partner-user-assignment.request';
 export * from './users/update-partner-user-assignment/update-partner-user-assignment.response';
 
+export * from './users/update-partner-user-password/update-partner-user-password.handler';
+export * from './users/update-partner-user-password/update-partner-user-password.request';
+export * from './users/update-partner-user-password/update-partner-user-password.response';
+
 // Auth Handlers
 export * from './auth/authenticate-user/authenticate-user.handler';
 export * from './auth/authenticate-user/authenticate-user.request';

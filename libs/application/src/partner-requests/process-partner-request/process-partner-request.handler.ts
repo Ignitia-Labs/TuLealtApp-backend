@@ -300,7 +300,7 @@ export class ProcessPartnerRequestHandler {
       );
 
       // Crear usuario partner automáticamente
-      await this.createPartnerUserWithManager(
+      const { user: createdUser, temporaryPassword } = await this.createPartnerUserWithManager(
         manager,
         createPartnerResponse.id,
         updatedPartnerRequest,
@@ -321,6 +321,12 @@ export class ProcessPartnerRequestHandler {
         createPartnerResponse.domain,
         tenantEntity.quickSearchCode,
         branchEntity.quickSearchCode,
+        tenantEntity.id,
+        branchEntity.id,
+        createdUser.id,
+        createdUser.email,
+        createdUser.name,
+        temporaryPassword,
       );
     });
   }
@@ -545,12 +551,13 @@ export class ProcessPartnerRequestHandler {
 
   /**
    * Crea un usuario partner usando el EntityManager de la transacción
+   * Retorna el usuario creado y la contraseña temporal generada
    */
   private async createPartnerUserWithManager(
     manager: EntityManager,
     partnerId: number,
     partnerRequest: any,
-  ): Promise<UserEntity> {
+  ): Promise<{ user: UserEntity; temporaryPassword: string }> {
     // Validar que el partner exista
     const partnerEntity = await manager.findOne(PartnerEntity, {
       where: { id: partnerId },
@@ -605,6 +612,6 @@ export class ProcessPartnerRequestHandler {
     // Guardar usando manager
     const savedUserEntity = await manager.save(UserEntity, userEntity);
 
-    return savedUserEntity;
+    return { user: savedUserEntity, temporaryPassword };
   }
 }

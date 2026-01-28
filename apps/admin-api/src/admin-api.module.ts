@@ -218,6 +218,7 @@ import {
   CreatePartnerUserHandler,
   CreatePartnerStaffUserHandler,
   GetPartnerUsersHandler,
+  UpdatePartnerUserPasswordHandler,
   SubscriptionUsageModule,
 } from '@libs/application';
 import { InfrastructureModule, StorageModule } from '@libs/infrastructure';
@@ -488,6 +489,7 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     CreatePartnerUserHandler,
     CreatePartnerStaffUserHandler,
     GetPartnerUsersHandler,
+    UpdatePartnerUserPasswordHandler,
   ],
 })
 export class AdminApiModule {}
