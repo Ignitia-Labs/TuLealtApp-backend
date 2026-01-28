@@ -311,6 +311,10 @@ export class EmailService {
     } catch (error) {
       this.logger.error('Error al verificar conexión SMTP:', error);
       return false;
+    }
+  }
+
+  /**
    * Envía un email de invitación con magic link para registro
    */
   async sendInvitationEmail(
