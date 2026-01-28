@@ -112,7 +112,10 @@ export class TransactionRepository implements ITransactionRepository {
     };
   }
 
-  async getRecentTransactionsByTenantId(tenantId: number, limit: number): Promise<RecentTransaction[]> {
+  async getRecentTransactionsByTenantId(
+    tenantId: number,
+    limit: number,
+  ): Promise<RecentTransaction[]> {
     const entities = await this.transactionRepository
       .createQueryBuilder('transaction')
       .innerJoin(CustomerMembershipEntity, 'membership', 'membership.id = transaction.membershipId')

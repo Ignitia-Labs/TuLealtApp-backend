@@ -50,7 +50,10 @@ async function bootstrap() {
         console.log(`  ✅ Tenant ${tenant.id} actualizado`);
       } catch (error) {
         errorCount++;
-        console.error(`  ❌ Error en tenant ${tenant.id}:`, error instanceof Error ? error.message : String(error));
+        console.error(
+          `  ❌ Error en tenant ${tenant.id}:`,
+          error instanceof Error ? error.message : String(error),
+        );
       }
     }
 

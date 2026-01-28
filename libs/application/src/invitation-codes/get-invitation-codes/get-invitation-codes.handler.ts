@@ -16,9 +16,7 @@ export class GetInvitationCodesHandler {
     private readonly tenantRepository: ITenantRepository,
   ) {}
 
-  async execute(
-    request: GetInvitationCodesRequest,
-  ): Promise<GetInvitationCodesResponse> {
+  async execute(request: GetInvitationCodesRequest): Promise<GetInvitationCodesResponse> {
     // Validar que el tenant existe
     const tenant = await this.tenantRepository.findById(request.tenantId);
     if (!tenant) {
@@ -28,9 +26,7 @@ export class GetInvitationCodesHandler {
     // Obtener códigos según los filtros
     let codes;
     if (request.status === 'active') {
-      codes = await this.invitationCodeRepository.findActiveByTenantId(
-        request.tenantId,
-      );
+      codes = await this.invitationCodeRepository.findActiveByTenantId(request.tenantId);
     } else {
       codes = await this.invitationCodeRepository.findByTenantId(request.tenantId);
     }

@@ -474,10 +474,7 @@ export class InvitationCodesController {
   /**
    * Valida que el tenant pertenezca al partner del usuario autenticado
    */
-  private async validateTenantOwnership(
-    tenantId: number,
-    user: JwtPayload,
-  ): Promise<void> {
+  private async validateTenantOwnership(tenantId: number, user: JwtPayload): Promise<void> {
     const tenant = await this.tenantRepository.findById(tenantId);
     if (!tenant) {
       throw new NotFoundException(`Tenant with ID ${tenantId} not found`);

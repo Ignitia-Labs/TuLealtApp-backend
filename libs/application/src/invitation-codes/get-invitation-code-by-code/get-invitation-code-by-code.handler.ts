@@ -13,9 +13,7 @@ export class GetInvitationCodeByCodeHandler {
     private readonly invitationCodeRepository: IInvitationCodeRepository,
   ) {}
 
-  async execute(
-    request: GetInvitationCodeByCodeRequest,
-  ): Promise<GetInvitationCodeByCodeResponse> {
+  async execute(request: GetInvitationCodeByCodeRequest): Promise<GetInvitationCodeByCodeResponse> {
     const code = await this.invitationCodeRepository.findByCode(request.code);
 
     if (!code) {

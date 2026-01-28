@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  Inject,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
 import {
   IInvitationCodeRepository,
   ITenantRepository,

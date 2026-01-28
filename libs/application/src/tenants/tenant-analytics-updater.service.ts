@@ -82,7 +82,10 @@ export class TenantAnalyticsUpdaterService {
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Error crítico en actualización automática de analytics: ${errorMessage}`, error);
+      this.logger.error(
+        `Error crítico en actualización automática de analytics: ${errorMessage}`,
+        error,
+      );
     }
   }
 
@@ -104,7 +107,9 @@ export class TenantAnalyticsUpdaterService {
       });
 
       const duration = Date.now() - startTime;
-      this.logger.debug(`Analytics del tenant ${tenantId} actualizado exitosamente en ${duration}ms`);
+      this.logger.debug(
+        `Analytics del tenant ${tenantId} actualizado exitosamente en ${duration}ms`,
+      );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.error(
