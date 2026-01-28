@@ -57,7 +57,7 @@ import {
  * Controlador para gestionar comisiones
  */
 @ApiTags('Commissions')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @Controller('admin/commissions')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('ADMIN')

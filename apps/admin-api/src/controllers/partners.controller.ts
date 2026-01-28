@@ -435,7 +435,7 @@ export class PartnersController {
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Actualizar partner',
     description:
@@ -582,7 +582,7 @@ export class PartnersController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Eliminar partner',
     description:
@@ -645,7 +645,7 @@ export class PartnersController {
     },
   })
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   async deletePartner(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: JwtPayload,

@@ -8,6 +8,7 @@ import { PricingPeriodEntity } from '../entities/pricing-period.entity';
 import { PricingPromotionEntity } from '../entities/pricing-promotion.entity';
 import { PricingFeatureEntity } from '../entities/pricing-feature.entity';
 import { LegacyPromotionEntity } from '../entities/legacy-promotion.entity';
+import { PricingPlanLimitsEntity } from '../entities/pricing-plan-limits.entity';
 
 /**
  * Implementación del repositorio de planes de precios usando TypeORM
@@ -23,7 +24,7 @@ export class PricingPlanRepository implements IPricingPlanRepository {
   async findById(id: number): Promise<PricingPlan | null> {
     const planEntity = await this.pricingPlanRepository.findOne({
       where: { id },
-      relations: ['pricingPeriods', 'promotions', 'features', 'legacyPromotion'],
+      relations: ['pricingPeriods', 'promotions', 'features', 'legacyPromotion', 'limits'],
     });
 
     if (!planEntity) {
@@ -36,7 +37,7 @@ export class PricingPlanRepository implements IPricingPlanRepository {
   async findBySlug(slug: string): Promise<PricingPlan | null> {
     const planEntity = await this.pricingPlanRepository.findOne({
       where: { slug },
-      relations: ['pricingPeriods', 'promotions', 'features', 'legacyPromotion'],
+      relations: ['pricingPeriods', 'promotions', 'features', 'legacyPromotion', 'limits'],
     });
 
     if (!planEntity) {
@@ -49,7 +50,7 @@ export class PricingPlanRepository implements IPricingPlanRepository {
   async findAll(includeInactive = false): Promise<PricingPlan[]> {
     const planEntities = await this.pricingPlanRepository.find({
       where: includeInactive ? {} : { status: 'active' as const },
-      relations: ['pricingPeriods', 'promotions', 'features', 'legacyPromotion'],
+      relations: ['pricingPeriods', 'promotions', 'features', 'legacyPromotion', 'limits'],
       order: {
         order: 'ASC',
       },
@@ -61,7 +62,18 @@ export class PricingPlanRepository implements IPricingPlanRepository {
   async save(plan: PricingPlan): Promise<PricingPlan> {
     const planEntity = PricingPlanMapper.toPersistence(plan);
     const savedEntity = await this.pricingPlanRepository.save(planEntity);
-    return PricingPlanMapper.toDomain(savedEntity);
+    
+    // Recargar con todas las relaciones para asegurar que tenemos los datos actualizados
+    const reloadedEntity = await this.pricingPlanRepository.findOne({
+      where: { id: savedEntity.id },
+      relations: ['pricingPeriods', 'promotions', 'features', 'legacyPromotion', 'limits'],
+    });
+
+    if (!reloadedEntity) {
+      throw new Error(`Failed to reload pricing plan with ID ${savedEntity.id}`);
+    }
+
+    return PricingPlanMapper.toDomain(reloadedEntity);
   }
 
   async update(plan: PricingPlan): Promise<PricingPlan> {
@@ -70,7 +82,7 @@ export class PricingPlanRepository implements IPricingPlanRepository {
       // Cargar la entidad existente con todas sus relaciones
       const existingEntity = await manager.findOne(PricingPlanEntity, {
         where: { id: plan.id },
-        relations: ['pricingPeriods', 'promotions', 'features', 'legacyPromotion'],
+        relations: ['pricingPeriods', 'promotions', 'features', 'legacyPromotion', 'limits'],
       });
 
       if (!existingEntity) {
@@ -93,6 +105,12 @@ export class PricingPlanRepository implements IPricingPlanRepository {
         await manager.remove(LegacyPromotionEntity, existingEntity.legacyPromotion);
         existingEntity.legacyPromotion = null;
       }
+      // Solo eliminar limits si el nuevo valor es null
+      // Si tiene valor, se actualizará en el mapper
+      if (existingEntity.limits && !plan.limits) {
+        await manager.remove(PricingPlanLimitsEntity, existingEntity.limits);
+        existingEntity.limits = null;
+      }
 
       // Actualizar la entidad existente con los nuevos datos
       const updatedEntity = PricingPlanMapper.updatePersistence(existingEntity, plan);
@@ -103,7 +121,7 @@ export class PricingPlanRepository implements IPricingPlanRepository {
       // Recargar con todas las relaciones para asegurar que tenemos los datos actualizados
       const reloadedEntity = await manager.findOne(PricingPlanEntity, {
         where: { id: savedEntity.id },
-        relations: ['pricingPeriods', 'promotions', 'features', 'legacyPromotion'],
+        relations: ['pricingPeriods', 'promotions', 'features', 'legacyPromotion', 'limits'],
       });
 
       if (!reloadedEntity) {

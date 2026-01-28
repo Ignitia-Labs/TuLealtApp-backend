@@ -106,7 +106,7 @@ export class CustomerAuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Obtener perfil del cliente autenticado' })
   @ApiResponse({
     status: 200,

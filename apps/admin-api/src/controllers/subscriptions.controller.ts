@@ -89,7 +89,7 @@ export class SubscriptionsController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener todas las suscripciones',
     description: 'Obtiene una lista paginada de todas las suscripciones con filtros opcionales',
@@ -229,7 +229,7 @@ export class SubscriptionsController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Crear una nueva suscripción',
     description: 'Crea una nueva suscripción para un partner',
@@ -316,7 +316,7 @@ export class SubscriptionsController {
   @Post(':id/events')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener eventos de una suscripción específica',
     description:
@@ -380,7 +380,7 @@ export class SubscriptionsController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener suscripción por ID',
     description: 'Obtiene los detalles de una suscripción específica',
@@ -482,7 +482,7 @@ export class SubscriptionsController {
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Actualizar suscripción',
     description: 'Actualiza una suscripción existente (actualización parcial)',
@@ -568,7 +568,7 @@ export class SubscriptionsController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Eliminar suscripción',
     description: 'Elimina una suscripción del sistema',
@@ -639,7 +639,7 @@ export class SubscriptionsController {
   @Get('stats')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener estadísticas de suscripciones',
     description: 'Obtiene estadísticas agregadas de suscripciones para un período determinado',
@@ -697,7 +697,7 @@ export class SubscriptionsController {
   @Post('events')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener eventos de suscripciones',
     description:
@@ -741,7 +741,7 @@ export class SubscriptionsController {
   @Get('stats/compare')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Comparar estadísticas de suscripciones entre períodos',
     description:
@@ -809,7 +809,7 @@ export class SubscriptionsController {
   @Get('stats/timeseries')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener series temporales de estadísticas',
     description: 'Obtiene estadísticas de suscripciones agrupadas por período temporal',

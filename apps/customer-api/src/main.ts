@@ -44,11 +44,27 @@ async function bootstrap() {
     .setTitle('Customer API')
     .setDescription('API para clientes del sistema')
     .setVersion('1.0')
-    .addBearerAuth()
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Ingresa el token JWT obtenido del endpoint de login',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('customer/docs', app, document);
+  SwaggerModule.setup('customer/docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+      tagsSorter: 'alpha',
+      operationsSorter: 'alpha',
+    },
+  });
 
   const port = process.env.PORT || 3002;
   await app.listen(port);

@@ -71,7 +71,7 @@ export class TenantsController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Listar tenants por partner',
     description:
@@ -333,7 +333,7 @@ export class TenantsController {
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Actualizar tenant',
     description:
@@ -464,7 +464,7 @@ export class TenantsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Eliminar tenant',
     description:

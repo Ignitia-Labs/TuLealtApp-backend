@@ -61,7 +61,7 @@ export class RewardsController {
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Crear una nueva recompensa',
     description: 'Crea una nueva recompensa en el sistema. Requiere permisos de administrador.',
@@ -173,7 +173,7 @@ export class RewardsController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener todas las recompensas',
     description:
@@ -282,7 +282,7 @@ export class RewardsController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener una recompensa por ID',
     description: 'Obtiene los detalles de una recompensa específica por su ID.',

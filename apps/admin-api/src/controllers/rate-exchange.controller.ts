@@ -30,7 +30,7 @@ import {
 @Controller('pricing/rate-exchange')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('ADMIN')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 export class RateExchangeController {
   constructor(
     private readonly getRateExchangeHandler: GetRateExchangeHandler,

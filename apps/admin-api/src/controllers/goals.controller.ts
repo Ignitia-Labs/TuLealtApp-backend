@@ -69,7 +69,7 @@ export class GoalsController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener todas las metas',
     description: 'Obtiene una lista paginada de todas las metas',
@@ -117,7 +117,7 @@ export class GoalsController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Crear una nueva meta',
     description: 'Crea una nueva meta de suscripción',
@@ -153,7 +153,7 @@ export class GoalsController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener meta por ID',
     description: 'Obtiene los detalles de una meta específica con cálculo de progreso',
@@ -193,7 +193,7 @@ export class GoalsController {
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Actualizar meta',
     description: 'Actualiza una meta existente (actualización parcial)',
@@ -244,7 +244,7 @@ export class GoalsController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Eliminar meta',
     description: 'Elimina una meta del sistema',
@@ -284,7 +284,7 @@ export class GoalsController {
   @Get(':id/progress')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener progreso detallado de una meta',
     description: 'Obtiene información detallada del progreso, proyección y tendencia de una meta',

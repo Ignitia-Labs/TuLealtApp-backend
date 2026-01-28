@@ -67,7 +67,7 @@ export class BillingCyclesController {
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'STAFF')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Crear un nuevo ciclo de facturación',
     description:
@@ -191,7 +191,7 @@ export class BillingCyclesController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'STAFF')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Generar ciclo de facturación automáticamente',
     description:
@@ -263,7 +263,7 @@ export class BillingCyclesController {
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'STAFF')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener un ciclo de facturación por ID',
     description: 'Obtiene la información detallada de un ciclo de facturación específico.',
@@ -340,7 +340,7 @@ export class BillingCyclesController {
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'STAFF')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener múltiples ciclos de facturación',
     description:
@@ -440,7 +440,7 @@ export class BillingCyclesController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Generar ciclo de facturación manualmente',
     description:
@@ -500,7 +500,7 @@ export class BillingCyclesController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Ejecutar generación automática de ciclos manualmente',
     description:
@@ -541,7 +541,7 @@ export class BillingCyclesController {
   @Get(':id/payments')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'STAFF')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener payments aplicados a un billing cycle',
     description:
@@ -579,7 +579,7 @@ export class BillingCyclesController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Eliminar ciclo de facturación',
     description:

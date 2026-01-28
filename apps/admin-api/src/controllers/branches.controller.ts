@@ -71,7 +71,7 @@ export class BranchesController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Listar branches por tenant',
     description:
@@ -306,7 +306,7 @@ export class BranchesController {
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Actualizar branch',
     description:
@@ -428,7 +428,7 @@ export class BranchesController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Eliminar branch',
     description: 'Elimina una branch del sistema.',

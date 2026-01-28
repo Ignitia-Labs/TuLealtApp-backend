@@ -4,6 +4,7 @@ import { PricingPeriodEntity } from '../entities/pricing-period.entity';
 import { PricingPromotionEntity } from '../entities/pricing-promotion.entity';
 import { PricingFeatureEntity } from '../entities/pricing-feature.entity';
 import { LegacyPromotionEntity } from '../entities/legacy-promotion.entity';
+import { PricingPlanLimitsMapper } from './pricing-plan-limits.mapper';
 
 /**
  * Mapper para convertir entre entidades de dominio y entidades de persistencia
@@ -69,6 +70,11 @@ export class PricingPlanMapper {
         }
       : null;
 
+    // Convertir limits
+    const limits = persistenceEntity.limits
+      ? PricingPlanLimitsMapper.toDomain(persistenceEntity.limits)
+      : null;
+
     return new PricingPlan(
       persistenceEntity.id,
       persistenceEntity.name,
@@ -87,6 +93,7 @@ export class PricingPlanMapper {
       persistenceEntity.order,
       persistenceEntity.trialDays ?? 14,
       persistenceEntity.popular ?? false,
+      limits,
       persistenceEntity.createdAt,
       persistenceEntity.updatedAt,
     );
@@ -164,6 +171,19 @@ export class PricingPlanMapper {
       entity.legacyPromotion = legacyPromo;
     } else {
       entity.legacyPromotion = null;
+    }
+
+    // Convertir limits
+    // Nota: pricingPlanId se asignará automáticamente cuando se guarde el plan (TypeORM cascade)
+    if (domainEntity.limits) {
+      const limitsEntity = PricingPlanLimitsMapper.toPersistence(domainEntity.limits);
+      // Si el plan ya tiene ID, asignarlo; si no, TypeORM lo asignará después del save
+      if (domainEntity.id > 0) {
+        limitsEntity.pricingPlanId = domainEntity.id;
+      }
+      entity.limits = limitsEntity;
+    } else {
+      entity.limits = null;
     }
 
     return entity;
@@ -264,6 +284,16 @@ export class PricingPlanMapper {
     } else {
       // Eliminar promoción si es null
       existingEntity.legacyPromotion = null;
+    }
+
+    // Manejar limits: actualizar si existe, crear si no existe, eliminar si es null
+    if (domainEntity.limits) {
+      const limitsEntity = PricingPlanLimitsMapper.toPersistence(domainEntity.limits);
+      limitsEntity.pricingPlanId = existingEntity.id;
+      existingEntity.limits = limitsEntity;
+    } else {
+      // Eliminar limits si es null
+      existingEntity.limits = null;
     }
 
     return existingEntity;

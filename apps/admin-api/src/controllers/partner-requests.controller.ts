@@ -98,7 +98,7 @@ export class PartnerRequestsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Crear solicitud de partner',
     description:
@@ -176,7 +176,7 @@ export class PartnerRequestsController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener todas las solicitudes de partners',
     description:
@@ -236,7 +236,7 @@ export class PartnerRequestsController {
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener solicitud de partner por ID',
     description: 'Obtiene los detalles completos de una solicitud de partner por su ID.',
@@ -284,7 +284,7 @@ export class PartnerRequestsController {
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Actualizar solicitud de partner',
     description:
@@ -376,7 +376,7 @@ export class PartnerRequestsController {
 
   @Patch(':id/status')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Actualizar estado de solicitud',
     description:
@@ -470,7 +470,7 @@ export class PartnerRequestsController {
 
   @Patch(':id/notes')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Agregar o actualizar notas de solicitud',
     description:
@@ -532,7 +532,7 @@ export class PartnerRequestsController {
 
   @Patch(':id/assign-user')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Asignar usuario a solicitud',
     description:
@@ -603,7 +603,7 @@ export class PartnerRequestsController {
 
   @Patch(':id/reject')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Rechazar solicitud de partner',
     description:
@@ -656,7 +656,7 @@ export class PartnerRequestsController {
 
   @Post(':id/process')
   @HttpCode(HttpStatus.CREATED)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Procesar solicitud de partner',
     description:
@@ -776,7 +776,7 @@ export class PartnerRequestsController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Eliminar solicitud de partner',
     description:

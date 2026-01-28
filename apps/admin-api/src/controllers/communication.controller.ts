@@ -76,7 +76,7 @@ import { JwtAuthGuard, RolesGuard, Roles } from '@libs/shared';
 @Controller('communication')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('ADMIN', 'WEBMASTER')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 export class CommunicationController {
   constructor(
     // Template Handlers

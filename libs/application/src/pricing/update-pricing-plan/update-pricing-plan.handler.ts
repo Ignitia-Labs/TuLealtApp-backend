@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
-import { IPricingPlanRepository, PricingPlan } from '@libs/domain';
+import { IPricingPlanRepository, PricingPlan, PricingPlanLimits } from '@libs/domain';
 import { UpdatePricingPlanRequest } from './update-pricing-plan.request';
 import { UpdatePricingPlanResponse } from './update-pricing-plan.response';
 
@@ -73,6 +73,21 @@ export class UpdatePricingPlanHandler {
       request.order !== undefined ? request.order : existingPlan.order,
       request.trialDays !== undefined ? request.trialDays : existingPlan.trialDays,
       request.popular !== undefined ? request.popular : existingPlan.popular,
+      request.limits !== undefined
+        ? request.limits
+          ? PricingPlanLimits.create(
+              existingPlan.id,
+              request.limits.maxTenants ?? -1,
+              request.limits.maxBranches ?? -1,
+              request.limits.maxCustomers ?? -1,
+              request.limits.maxRewards ?? -1,
+              request.limits.maxAdmins ?? -1,
+              request.limits.storageGB ?? -1,
+              request.limits.apiCallsPerMonth ?? -1,
+              existingPlan.limits?.id,
+            )
+          : null
+        : existingPlan.limits,
       existingPlan.createdAt,
       new Date(), // updatedAt se actualiza automáticamente
     );

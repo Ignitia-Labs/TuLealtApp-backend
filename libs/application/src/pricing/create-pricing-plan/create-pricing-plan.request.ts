@@ -130,6 +130,78 @@ class LegacyPromotionDto {
   validUntil?: string;
 }
 
+class PricingPlanLimitsDto {
+  @ApiProperty({
+    example: 1,
+    description: 'Máximo número de tenants (-1 para ilimitado)',
+    required: false,
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  maxTenants?: number;
+
+  @ApiProperty({
+    example: 5,
+    description: 'Máximo número de branches (-1 para ilimitado)',
+    required: false,
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  maxBranches?: number;
+
+  @ApiProperty({
+    example: 1000,
+    description: 'Máximo número de customers (-1 para ilimitado)',
+    required: false,
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  maxCustomers?: number;
+
+  @ApiProperty({
+    example: 50,
+    description: 'Máximo número de rewards (-1 para ilimitado)',
+    required: false,
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  maxRewards?: number;
+
+  @ApiProperty({
+    example: 3,
+    description: 'Máximo número de admins (-1 para ilimitado)',
+    required: false,
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  maxAdmins?: number;
+
+  @ApiProperty({
+    example: 10,
+    description: 'Almacenamiento en GB (-1 para ilimitado)',
+    required: false,
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  storageGB?: number;
+
+  @ApiProperty({
+    example: 10000,
+    description: 'Llamadas API por mes (-1 para ilimitado)',
+    required: false,
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  apiCallsPerMonth?: number;
+}
+
 /**
  * DTO de request para crear un plan de precios
  */
@@ -214,4 +286,14 @@ export class CreatePricingPlanRequest {
   @Min(0)
   @IsNotEmpty()
   order: number;
+
+  @ApiProperty({
+    type: PricingPlanLimitsDto,
+    description: 'Límites del plan de precios',
+    required: false,
+  })
+  @ValidateNested()
+  @Type(() => PricingPlanLimitsDto)
+  @IsOptional()
+  limits?: PricingPlanLimitsDto;
 }

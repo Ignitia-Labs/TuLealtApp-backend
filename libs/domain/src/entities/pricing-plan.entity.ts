@@ -4,6 +4,8 @@
  * No depende de frameworks ni librerías externas
  */
 
+import { PricingPlanLimits } from './pricing-plan-limits.entity';
+
 export interface PricingFeature {
   id: string;
   text: string;
@@ -60,6 +62,7 @@ export class PricingPlan {
     public readonly order: number,
     public readonly trialDays: number, // Días de prueba gratuita
     public readonly popular: boolean, // Si es el plan más popular
+    public readonly limits: PricingPlanLimits | null, // Límites del plan de precios
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
   ) {}
@@ -85,6 +88,7 @@ export class PricingPlan {
     order: number,
     trialDays: number = 14,
     popular: boolean = false,
+    limits: PricingPlanLimits | null = null,
     id?: number,
   ): PricingPlan {
     const now = new Date();
@@ -106,6 +110,7 @@ export class PricingPlan {
       order,
       trialDays,
       popular,
+      limits,
       now,
       now,
     );
@@ -140,6 +145,7 @@ export class PricingPlan {
       this.order,
       this.trialDays,
       this.popular,
+      this.limits,
       this.createdAt,
       new Date(),
     );
@@ -167,6 +173,7 @@ export class PricingPlan {
       this.order,
       this.trialDays,
       this.popular,
+      this.limits,
       this.createdAt,
       new Date(),
     );

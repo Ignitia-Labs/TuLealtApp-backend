@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException, Inject } from '@nestjs/common';
-import { IPricingPlanRepository, PricingPlan } from '@libs/domain';
+import { IPricingPlanRepository, PricingPlan, PricingPlanLimits } from '@libs/domain';
 import { CreatePricingPlanRequest } from './create-pricing-plan.request';
 import { CreatePricingPlanResponse } from './create-pricing-plan.response';
 
@@ -46,6 +46,20 @@ export class CreatePricingPlanHandler {
         }
       : null;
 
+    // Crear limits si se proporcionan
+    const limits = request.limits
+      ? PricingPlanLimits.create(
+          0, // pricingPlanId se asignará después de crear el plan
+          request.limits.maxTenants ?? -1,
+          request.limits.maxBranches ?? -1,
+          request.limits.maxCustomers ?? -1,
+          request.limits.maxRewards ?? -1,
+          request.limits.maxAdmins ?? -1,
+          request.limits.storageGB ?? -1,
+          request.limits.apiCallsPerMonth ?? -1,
+        )
+      : null;
+
     // Crear la entidad de dominio sin ID (la BD lo generará automáticamente)
     const plan = PricingPlan.create(
       request.name,
@@ -62,6 +76,9 @@ export class CreatePricingPlanHandler {
       request.status,
       promotion,
       request.order,
+      undefined, // trialDays (default)
+      undefined, // popular (default)
+      limits,
     );
 
     // Guardar usando el repositorio (la BD asignará el ID automáticamente)

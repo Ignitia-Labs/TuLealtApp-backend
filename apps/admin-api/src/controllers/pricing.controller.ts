@@ -75,7 +75,7 @@ import {
 @Controller('pricing')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('ADMIN')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 export class PricingController {
   constructor(
     private readonly getPricingPlansHandler: GetPricingPlansHandler,

@@ -81,7 +81,7 @@ export class AdminAuthController {
   @Get('me')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Obtener perfil del administrador autenticado' })
   @ApiResponse({
     status: 200,
@@ -129,7 +129,7 @@ export class AdminAuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Actualizar perfil del administrador autenticado',
     description:
@@ -225,7 +225,7 @@ export class AdminAuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Actualizar contraseña del administrador autenticado',
     description:

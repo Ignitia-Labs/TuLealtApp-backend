@@ -83,7 +83,7 @@ export class UsersController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Crear un nuevo usuario',
     description: 'Crea un nuevo usuario en el sistema. Requiere permisos de administrador.',
@@ -169,7 +169,7 @@ export class UsersController {
   @Get('admin-staff')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener usuarios con roles ADMIN o STAFF',
     description:
@@ -272,7 +272,7 @@ export class UsersController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener perfil de usuario por ID',
     description: 'Obtiene los detalles completos del perfil de un usuario específico por su ID.',
@@ -361,7 +361,7 @@ export class UsersController {
   @Patch(':id/lock')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Bloquear un usuario',
     description:
@@ -446,7 +446,7 @@ export class UsersController {
   @Patch(':id/unlock')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Desbloquear un usuario',
     description:
@@ -506,7 +506,7 @@ export class UsersController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Eliminar un usuario',
     description:
@@ -574,7 +574,7 @@ export class UsersController {
   @Get(':id/history')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener historial de cambios de un usuario',
     description:
@@ -672,7 +672,7 @@ export class UsersController {
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Actualizar perfil de usuario',
     description:
@@ -783,7 +783,7 @@ export class UsersController {
   @Patch(':id/partner-assignment')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Actualizar asignación de tenant y branch a usuario partner',
     description:

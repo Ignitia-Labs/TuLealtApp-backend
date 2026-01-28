@@ -59,7 +59,7 @@ export class NotificationsController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener notificaciones de un usuario',
     description:
@@ -176,7 +176,7 @@ export class NotificationsController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Marcar notificación como leída',
     description: 'Marca una notificación específica como leída.',
@@ -264,7 +264,7 @@ export class NotificationsController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Marcar todas las notificaciones como leídas',
     description: 'Marca todas las notificaciones de un usuario como leídas.',

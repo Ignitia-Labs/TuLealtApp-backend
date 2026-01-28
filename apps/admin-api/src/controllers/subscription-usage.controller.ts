@@ -59,7 +59,7 @@ export class SubscriptionUsageController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Crear registro de uso de suscripción',
     description: 'Crea un nuevo registro de uso para una suscripción',
@@ -157,7 +157,7 @@ export class SubscriptionUsageController {
   @Get(':subscriptionId')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener uso de suscripción',
     description: 'Obtiene el registro de uso de una suscripción específica',
@@ -235,7 +235,7 @@ export class SubscriptionUsageController {
   @Patch(':subscriptionId')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Actualizar uso de suscripción',
     description: 'Actualiza el registro de uso de una suscripción',
@@ -336,7 +336,7 @@ export class SubscriptionUsageController {
   @Delete(':subscriptionId')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Eliminar uso de suscripción',
     description: 'Elimina el registro de uso de una suscripción',

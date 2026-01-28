@@ -50,7 +50,7 @@ import {
  * Controlador para gestionar asignaciones de usuarios STAFF a partners
  */
 @ApiTags('Partner Staff Assignments')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @Controller('admin/partner-staff-assignments')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('ADMIN')

@@ -45,7 +45,7 @@ export class TransactionsController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Obtener transacciones de un usuario',
     description: 'Obtiene el historial de transacciones de puntos de un usuario específico.',

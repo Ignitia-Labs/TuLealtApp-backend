@@ -3,6 +3,7 @@ import { PricingFeatureSwaggerDto } from './pricing-feature-swagger.dto';
 import { PricingPeriodSwaggerDto } from './pricing-period-swagger.dto';
 import { PricingPromotionsSwaggerDto } from './pricing-promotions-swagger.dto';
 import { PricingPromotionSwaggerDto } from './pricing-promotion-swagger.dto';
+import { PricingPlanLimitsSwaggerDto } from './pricing-plan-limits-swagger.dto';
 
 /**
  * DTO para documentación Swagger de PricingPlan
@@ -84,6 +85,14 @@ export class PricingPlanSwaggerDto {
 
   @ApiProperty({ example: 1, description: 'Orden de visualización' })
   order: number;
+
+  @ApiProperty({
+    description: 'Límites del plan de precios',
+    type: PricingPlanLimitsSwaggerDto,
+    nullable: true,
+    required: false,
+  })
+  limits?: PricingPlanLimitsSwaggerDto | null;
 
   @ApiProperty({
     example: '2024-01-01T00:00:00.000Z',

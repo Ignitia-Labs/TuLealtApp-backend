@@ -61,7 +61,7 @@ type MulterFile = {
 @Controller('upload')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('ADMIN')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 export class UploadController {
   constructor(
     private readonly s3Service: S3Service,
