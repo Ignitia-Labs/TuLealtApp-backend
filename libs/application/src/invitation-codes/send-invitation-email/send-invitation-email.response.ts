@@ -32,12 +32,7 @@ export class SendInvitationEmailResponse {
   })
   publicUrl: string;
 
-  constructor(
-    id: number,
-    recipientEmail: string,
-    emailSent: boolean,
-    publicUrl: string,
-  ) {
+  constructor(id: number, recipientEmail: string, emailSent: boolean, publicUrl: string) {
     this.id = id;
     this.recipientEmail = recipientEmail;
     this.emailSent = emailSent;

@@ -110,19 +110,36 @@ export class CreateCustomerMembershipHandler {
     const savedMembership = await this.membershipRepository.save(membership);
 
     // Incrementar el contador de customers en el uso de suscripción
+    console.log(
+      `[CreateCustomerMembershipHandler] Attempting to update subscription usage for tenantId ${savedMembership.tenantId}, membershipId ${savedMembership.id}`,
+    );
+
     const subscriptionId = await SubscriptionUsageHelper.getSubscriptionIdFromTenantId(
       savedMembership.tenantId,
       this.tenantRepository,
       this.subscriptionRepository,
     );
+
     if (subscriptionId) {
-      await SubscriptionUsageHelper.incrementCustomersCount(subscriptionId, this.usageRepository);
       console.log(
-        `[CreateCustomerMembershipHandler] Incremented customers count for subscription ${subscriptionId} (tenantId: ${savedMembership.tenantId}, membershipId: ${savedMembership.id})`,
+        `[CreateCustomerMembershipHandler] Found subscription ${subscriptionId} for tenantId ${savedMembership.tenantId}. Incrementing customers count...`,
       );
+      try {
+        await SubscriptionUsageHelper.incrementCustomersCount(subscriptionId, this.usageRepository);
+        console.log(
+          `[CreateCustomerMembershipHandler] ✓ Successfully incremented customers count for subscription ${subscriptionId} (tenantId: ${savedMembership.tenantId}, membershipId: ${savedMembership.id})`,
+        );
+      } catch (error) {
+        console.error(
+          `[CreateCustomerMembershipHandler] ✗ Error incrementing customers count for subscription ${subscriptionId}:`,
+          error,
+        );
+        // No lanzar error para no interrumpir la creación de la membership
+        // pero registrar el error para debugging
+      }
     } else {
       console.warn(
-        `[CreateCustomerMembershipHandler] Could not find subscription for tenantId ${savedMembership.tenantId}. Subscription usage not updated.`,
+        `[CreateCustomerMembershipHandler] ⚠ Could not find subscription for tenantId ${savedMembership.tenantId}. Subscription usage not updated.`,
       );
     }
 

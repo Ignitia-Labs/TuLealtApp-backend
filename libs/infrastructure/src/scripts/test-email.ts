@@ -93,7 +93,6 @@ async function testEmailService() {
 
     console.log('✨ Prueba completada exitosamente!');
     process.exit(0);
-
   } catch (error) {
     console.error('\n❌ Error durante la prueba:');
     console.error(error);

@@ -6,6 +6,7 @@ import { PricingController } from './controllers/pricing.controller';
 import { CustomerMembershipsController } from './controllers/customer-memberships.controller';
 import { CustomerPartnersController } from './controllers/customer-partners.controller';
 import { CurrenciesController } from './controllers/currencies.controller';
+import { InvitationCodesController } from './controllers/invitation-codes.controller';
 import {
   GetPricingPlansHandler,
   GetPricingPlanByIdHandler,
@@ -16,6 +17,7 @@ import {
   GetCustomerPartnersHandler,
   GetCurrenciesHandler,
   GetCountriesHandler,
+  ValidateInvitationCodeHandler,
 } from '@libs/application';
 
 /**
@@ -29,6 +31,7 @@ import {
     CustomerMembershipsController,
     CustomerPartnersController,
     CurrenciesController,
+    InvitationCodesController,
     HealthController,
   ],
   providers: [
@@ -45,6 +48,8 @@ import {
     // Handlers de aplicación - Currencies & Countries
     GetCurrenciesHandler,
     GetCountriesHandler,
+    // Handlers de aplicación - Invitation Codes
+    ValidateInvitationCodeHandler,
   ],
 })
 export class CustomerApiModule {}

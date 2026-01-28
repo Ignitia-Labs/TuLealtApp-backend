@@ -1,4 +1,14 @@
-import { IsOptional, IsNumber, IsDateString, IsEnum, Min, IsInt, IsString, IsEmail, IsBoolean } from 'class-validator';
+import {
+  IsOptional,
+  IsNumber,
+  IsDateString,
+  IsEnum,
+  Min,
+  IsInt,
+  IsString,
+  IsEmail,
+  IsBoolean,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /**
@@ -63,7 +73,8 @@ export class CreateInvitationCodeRequest {
   expiresAt?: string | null;
 
   @ApiPropertyOptional({
-    description: 'Email del destinatario al que se enviará la invitación. Si se proporciona, se enviará un email automáticamente con el magic link.',
+    description:
+      'Email del destinatario al que se enviará la invitación. Si se proporciona, se enviará un email automáticamente con el magic link.',
     example: 'customer@example.com',
     type: String,
   })
@@ -72,7 +83,8 @@ export class CreateInvitationCodeRequest {
   recipientEmail?: string;
 
   @ApiPropertyOptional({
-    description: 'Indica si se debe enviar el email automáticamente. Por defecto es true si se proporciona recipientEmail.',
+    description:
+      'Indica si se debe enviar el email automáticamente. Por defecto es true si se proporciona recipientEmail.',
     example: true,
     type: Boolean,
     default: true,

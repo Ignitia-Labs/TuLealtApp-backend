@@ -74,10 +74,7 @@ export class EmailService {
         : undefined;
 
     // En desarrollo con GreenMail, aceptar certificados autofirmados
-    const tls =
-      this.isDevelopment && isGreenMail
-        ? { rejectUnauthorized: false }
-        : undefined;
+    const tls = this.isDevelopment && isGreenMail ? { rejectUnauthorized: false } : undefined;
 
     return {
       host,

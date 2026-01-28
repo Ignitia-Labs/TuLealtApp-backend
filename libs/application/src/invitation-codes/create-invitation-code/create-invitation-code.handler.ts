@@ -95,11 +95,10 @@ export class CreateInvitationCodeHandler {
 
     // Construir URL pública (magic link)
     const publicUrl = buildInvitationUrl(savedCode.code);
+    console.log('🚀 ~ CreateInvitationCodeHandler ~ execute ~ publicUrl:', publicUrl);
 
     // Determinar si se debe enviar email
-    const shouldSendEmail =
-      request.recipientEmail &&
-      (request.sendEmail !== false); // Por defecto true si hay email
+    const shouldSendEmail = request.recipientEmail && request.sendEmail !== false; // Por defecto true si hay email
 
     let emailSent = false;
 

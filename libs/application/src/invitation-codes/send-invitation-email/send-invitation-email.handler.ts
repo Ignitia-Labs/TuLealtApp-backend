@@ -1,8 +1,5 @@
 import { Injectable, Inject, NotFoundException, Logger } from '@nestjs/common';
-import {
-  IInvitationCodeRepository,
-  ITenantRepository,
-} from '@libs/domain';
+import { IInvitationCodeRepository, ITenantRepository } from '@libs/domain';
 import { SendInvitationEmailRequest } from './send-invitation-email.request';
 import { SendInvitationEmailResponse } from './send-invitation-email.response';
 import { buildInvitationUrl } from '@libs/shared';

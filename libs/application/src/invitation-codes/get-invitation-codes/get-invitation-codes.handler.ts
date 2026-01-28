@@ -49,27 +49,25 @@ export class GetInvitationCodesHandler {
     }
 
     // Convertir a DTOs de respuesta
-    const codeResponses = codes.map(
-      (code) => {
-        // Construir URL pública (magic link) para cada código
-        const publicUrl = buildInvitationUrl(code.code);
-        return new GetInvitationCodeResponse(
-          code.id,
-          code.code,
-          code.tenantId,
-          code.branchId,
-          code.type,
-          code.maxUses,
-          code.currentUses,
-          code.expiresAt,
-          code.status,
-          code.createdBy,
-          code.createdAt,
-          code.updatedAt,
-          publicUrl,
-        );
-      },
-    );
+    const codeResponses = codes.map((code) => {
+      // Construir URL pública (magic link) para cada código
+      const publicUrl = buildInvitationUrl(code.code);
+      return new GetInvitationCodeResponse(
+        code.id,
+        code.code,
+        code.tenantId,
+        code.branchId,
+        code.type,
+        code.maxUses,
+        code.currentUses,
+        code.expiresAt,
+        code.status,
+        code.createdBy,
+        code.createdAt,
+        code.updatedAt,
+        publicUrl,
+      );
+    });
 
     return new GetInvitationCodesResponse(codeResponses, codeResponses.length);
   }

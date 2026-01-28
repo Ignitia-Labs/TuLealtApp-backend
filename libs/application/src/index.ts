@@ -672,6 +672,9 @@ export * from './invitation-codes/use-invitation-code/use-invitation-code.respon
 export * from './invitation-codes/send-invitation-email/send-invitation-email.handler';
 export * from './invitation-codes/send-invitation-email/send-invitation-email.request';
 export * from './invitation-codes/send-invitation-email/send-invitation-email.response';
+export * from './invitation-codes/validate-invitation-code/validate-invitation-code.handler';
+export * from './invitation-codes/validate-invitation-code/validate-invitation-code.request';
+export * from './invitation-codes/validate-invitation-code/validate-invitation-code.response';
 
 // Permissions Services
 export * from './permissions/permission.service';

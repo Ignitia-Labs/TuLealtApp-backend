@@ -167,15 +167,25 @@ export class RegisterUserHandler {
           createMembershipRequest.points = 0;
           createMembershipRequest.status = 'active';
 
+          console.log(
+            `[RegisterUserHandler] Creating membership for user ${result.id}, tenant ${resolvedTenantId}, branch ${resolvedBranchId || 'none'}`,
+          );
+
           const membershipResult =
             await this.createCustomerMembershipHandler.execute(createMembershipRequest);
           membership = membershipResult.membership;
+
+          console.log(
+            `[RegisterUserHandler] Membership created successfully: ${membership.id}. Subscription usage should be updated.`,
+          );
         } catch (error) {
-          // Si falla la creación de la membership, no fallamos el registro del usuario
-          // pero registramos el error para debugging
-          console.error('Error creating automatic membership:', error);
-          // Podríamos lanzar el error si queremos que el registro falle si no se puede crear la membership
-          // throw error;
+          // Si falla la creación de la membership, lanzar el error para que el registro falle
+          // Esto asegura que el subscription usage se actualice correctamente
+          console.error(
+            `[RegisterUserHandler] Error creating automatic membership for user ${result.id}, tenant ${resolvedTenantId}:`,
+            error,
+          );
+          throw error; // Lanzar error para que el registro falle si no se puede crear la membership
         }
       }
     } catch (error) {

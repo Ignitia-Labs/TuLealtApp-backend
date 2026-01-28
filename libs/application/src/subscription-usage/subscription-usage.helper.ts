@@ -63,13 +63,32 @@ export class SubscriptionUsageHelper {
     subscriptionRepository: Repository<PartnerSubscriptionEntity>,
   ): Promise<number | null> {
     try {
+      console.log(
+        `[SubscriptionUsageHelper] Searching for subscription with partnerId ${partnerId} and status in ['active', 'trialing', 'past_due']`,
+      );
+
       // Obtener todas las suscripciones válidas en una sola query
       const validSubscriptions = await subscriptionRepository.find({
         where: { partnerId, status: In(['active', 'trialing', 'past_due']) },
         order: { createdAt: 'DESC' },
       });
 
+      console.log(
+        `[SubscriptionUsageHelper] Found ${validSubscriptions.length} valid subscription(s) for partnerId ${partnerId}`,
+      );
+
+      if (validSubscriptions.length > 0) {
+        validSubscriptions.forEach((sub, index) => {
+          console.log(
+            `[SubscriptionUsageHelper] Subscription ${index + 1}: id=${sub.id}, status=${sub.status}, createdAt=${sub.createdAt}`,
+          );
+        });
+      }
+
       if (validSubscriptions.length === 0) {
+        console.warn(
+          `[SubscriptionUsageHelper] No valid subscriptions found for partnerId ${partnerId}`,
+        );
         return null;
       }
 
@@ -90,9 +109,17 @@ export class SubscriptionUsageHelper {
         return b.createdAt.getTime() - a.createdAt.getTime();
       });
 
-      return validSubscriptions[0].id;
+      const selectedSubscriptionId = validSubscriptions[0].id;
+      console.log(
+        `[SubscriptionUsageHelper] Selected subscription ${selectedSubscriptionId} (status: ${validSubscriptions[0].status}) for partnerId ${partnerId}`,
+      );
+
+      return selectedSubscriptionId;
     } catch (error) {
-      console.error(`Error getting subscription ID for partner ${partnerId}:`, error);
+      console.error(
+        `[SubscriptionUsageHelper] Error getting subscription ID for partner ${partnerId}:`,
+        error,
+      );
       return null;
     }
   }
@@ -107,14 +134,24 @@ export class SubscriptionUsageHelper {
     subscriptionRepository: Repository<PartnerSubscriptionEntity>,
   ): Promise<number | null> {
     try {
+      console.log(`[SubscriptionUsageHelper] Getting subscription ID for tenantId ${tenantId}`);
+
       const tenant = await tenantRepository.findById(tenantId);
       if (!tenant) {
+        console.warn(`[SubscriptionUsageHelper] Tenant ${tenantId} not found`);
         return null;
       }
 
+      console.log(
+        `[SubscriptionUsageHelper] Tenant ${tenantId} belongs to partnerId ${tenant.partnerId}`,
+      );
+
       return this.getSubscriptionIdFromPartnerId(tenant.partnerId, subscriptionRepository);
     } catch (error) {
-      console.error(`Error getting subscription ID for tenant ${tenantId}:`, error);
+      console.error(
+        `[SubscriptionUsageHelper] Error getting subscription ID for tenant ${tenantId}:`,
+        error,
+      );
       return null;
     }
   }
@@ -235,19 +272,28 @@ export class SubscriptionUsageHelper {
     usageRepository: Repository<PartnerSubscriptionUsageEntity>,
   ): Promise<void> {
     try {
+      console.log(
+        `[SubscriptionUsageHelper] Incrementing customers count for subscription ${subscriptionId}`,
+      );
+
       // Asegurar que el registro de uso existe
       await this.ensureUsageRecordExists(subscriptionId, usageRepository);
 
-      await usageRepository.increment(
+      const result = await usageRepository.increment(
         { partnerSubscriptionId: subscriptionId },
         'customersCount',
         1,
       );
+
+      console.log(
+        `[SubscriptionUsageHelper] ✓ Incremented customers count for subscription ${subscriptionId}. Affected rows: ${result.affected || 0}`,
+      );
     } catch (error) {
       console.error(
-        `Error incrementing customers count for subscription ${subscriptionId}:`,
+        `[SubscriptionUsageHelper] ✗ Error incrementing customers count for subscription ${subscriptionId}:`,
         error,
       );
+      throw error; // Lanzar error para que el llamador pueda manejarlo
     }
   }
 
@@ -549,13 +595,17 @@ export class SubscriptionUsageHelper {
     usageRepository: Repository<PartnerSubscriptionUsageEntity>,
   ): Promise<void> {
     try {
+      console.log(
+        `[SubscriptionUsageHelper] Ensuring usage record exists for subscription ${subscriptionId}`,
+      );
+
       const existingUsage = await usageRepository.findOne({
         where: { partnerSubscriptionId: subscriptionId },
       });
 
       if (!existingUsage) {
         console.log(
-          `[SubscriptionUsageHelper] Creating usage record for subscription ${subscriptionId}`,
+          `[SubscriptionUsageHelper] Usage record not found. Creating new usage record for subscription ${subscriptionId}`,
         );
         // Crear nuevo registro de uso con valores iniciales en 0
         const usage = PartnerSubscriptionUsage.create(
@@ -569,19 +619,19 @@ export class SubscriptionUsageHelper {
         const usageEntity = PartnerSubscriptionUsageMapper.toPersistence(usage);
         const saved = await usageRepository.save(usageEntity);
         console.log(
-          `[SubscriptionUsageHelper] Created usage record with ID ${saved.id} for subscription ${subscriptionId}`,
+          `[SubscriptionUsageHelper] ✓ Created usage record with ID ${saved.id} for subscription ${subscriptionId}`,
         );
       } else {
         console.log(
-          `[SubscriptionUsageHelper] Usage record already exists for subscription ${subscriptionId}`,
+          `[SubscriptionUsageHelper] ✓ Usage record already exists for subscription ${subscriptionId} (id: ${existingUsage.id}, customersCount: ${existingUsage.customersCount})`,
         );
       }
     } catch (error) {
       console.error(
-        `[SubscriptionUsageHelper] Error ensuring usage record exists for subscription ${subscriptionId}:`,
+        `[SubscriptionUsageHelper] ✗ Error ensuring usage record exists for subscription ${subscriptionId}:`,
         error,
       );
-      // No lanzar excepción para no interrumpir el flujo principal
+      throw error; // Lanzar error para que el llamador pueda manejarlo
     }
   }
 }
