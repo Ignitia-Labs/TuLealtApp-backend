@@ -6,23 +6,6 @@
 // Users Handlers
 export * from './users/create-user/create-user.handler';
 export * from './users/create-user/create-user.request';
-
-// Rewards Handlers
-export * from './rewards/create-reward/create-reward.handler';
-export * from './rewards/create-reward/create-reward.request';
-export * from './rewards/create-reward/create-reward.response';
-export * from './rewards/get-rewards/get-rewards.handler';
-export * from './rewards/get-rewards/get-rewards.request';
-export * from './rewards/get-rewards/get-rewards.response';
-export * from './rewards/get-reward/get-reward.handler';
-export * from './rewards/get-reward/get-reward.request';
-export * from './rewards/get-reward/get-reward.response';
-export * from './rewards/update-reward/update-reward.handler';
-export * from './rewards/update-reward/update-reward.request';
-export * from './rewards/update-reward/update-reward.response';
-export * from './rewards/delete-reward/delete-reward.handler';
-export * from './rewards/delete-reward/delete-reward.request';
-export * from './rewards/delete-reward/delete-reward.response';
 export * from './users/create-user/create-user.response';
 
 export * from './users/get-user-profile/get-user-profile.handler';
@@ -304,28 +287,6 @@ export * from './countries/get-countries/get-countries.response';
 // Countries DTOs for Swagger
 export * from './countries/dto/country-swagger.dto';
 
-// Rewards Handlers
-export * from './rewards/create-reward/create-reward.handler';
-export * from './rewards/create-reward/create-reward.request';
-export * from './rewards/create-reward/create-reward.response';
-export * from './rewards/get-rewards/get-rewards.handler';
-export * from './rewards/get-rewards/get-rewards.request';
-export * from './rewards/get-rewards/get-rewards.response';
-export * from './rewards/get-reward/get-reward.handler';
-export * from './rewards/get-reward/get-reward.request';
-export * from './rewards/get-reward/get-reward.response';
-
-// Transactions Handlers
-export * from './transactions/get-transactions/get-transactions.handler';
-export * from './transactions/get-transactions/get-transactions.request';
-export * from './transactions/get-transactions/get-transactions.response';
-export * from './transactions/earn-points/earn-points.handler';
-export * from './transactions/earn-points/earn-points.request';
-export * from './transactions/earn-points/earn-points.response';
-export * from './transactions/redeem-points/redeem-points.handler';
-export * from './transactions/redeem-points/redeem-points.request';
-export * from './transactions/redeem-points/redeem-points.response';
-
 // Notifications Handlers
 export * from './notifications/get-notifications/get-notifications.handler';
 export * from './notifications/get-notifications/get-notifications.request';
@@ -435,26 +396,6 @@ export * from './catalogs/delete-catalog/delete-catalog.response';
 
 // Catalogs DTOs for Swagger
 export * from './catalogs/dto/catalog-swagger.dto';
-
-// Points Rules Handlers
-export * from './points-rules/get-points-rules/get-points-rules.handler';
-export * from './points-rules/get-points-rules/get-points-rules.request';
-export * from './points-rules/get-points-rules/get-points-rules.response';
-export * from './points-rules/get-points-rule/get-points-rule.handler';
-export * from './points-rules/get-points-rule/get-points-rule.request';
-export * from './points-rules/get-points-rule/get-points-rule.response';
-export * from './points-rules/create-points-rule/create-points-rule.handler';
-export * from './points-rules/create-points-rule/create-points-rule.request';
-export * from './points-rules/create-points-rule/create-points-rule.response';
-export * from './points-rules/update-points-rule/update-points-rule.handler';
-export * from './points-rules/update-points-rule/update-points-rule.request';
-export * from './points-rules/update-points-rule/update-points-rule.response';
-export * from './points-rules/delete-points-rule/delete-points-rule.handler';
-export * from './points-rules/delete-points-rule/delete-points-rule.request';
-export * from './points-rules/delete-points-rule/delete-points-rule.response';
-
-// Points Rules DTOs for Swagger
-export * from './points-rules/dto/points-rule.dto';
 
 // Customer Tiers Handlers
 export * from './customer-tiers/get-customer-tiers/get-customer-tiers.handler';

@@ -4,8 +4,6 @@ import {
   ITenantRepository,
   ITenantAnalyticsRepository,
   ICustomerMembershipRepository,
-  ITransactionRepository,
-  IRewardRepository,
   TenantAnalytics,
 } from '@libs/domain';
 
@@ -24,10 +22,6 @@ export class TenantAnalyticsUpdaterService {
     private readonly analyticsRepository: ITenantAnalyticsRepository,
     @Inject('ICustomerMembershipRepository')
     private readonly membershipRepository: ICustomerMembershipRepository,
-    @Inject('ITransactionRepository')
-    private readonly transactionRepository: ITransactionRepository,
-    @Inject('IRewardRepository')
-    private readonly rewardRepository: IRewardRepository,
   ) {}
 
   /**
@@ -135,28 +129,24 @@ export class TenantAnalyticsUpdaterService {
     const memberships = await this.membershipRepository.findByTenantId(tenantId);
     const totalPoints = memberships.reduce((sum, m) => sum + m.points, 0);
 
-    // 3. Métricas de Transacciones (usando queries optimizadas)
-    const transactionStats = await this.transactionRepository.getStatsByTenantId(tenantId);
-    const pointsEarned = transactionStats.pointsEarned;
-    const pointsRedeemed = transactionStats.pointsRedeemed;
-    const totalRedemptions = transactionStats.totalRedemptions;
+    // Métricas de transacciones y rewards eliminadas - ya no están disponibles
+    const pointsEarned = 0;
+    const pointsRedeemed = 0;
+    const totalRedemptions = 0;
 
     const avgPointsPerCustomer = TenantAnalytics.calculateAvgPointsPerCustomer(
       totalPoints,
       totalCustomers,
     );
 
-    // 4. Top Rewards (por número de redemptions)
-    const topRewards = await this.rewardRepository.getTopRewardsByTenantId(tenantId, 10);
+    // Top Rewards eliminado - ya no están disponibles
+    const topRewards: any[] = [];
 
-    // 5. Top Customers (por puntos totales)
+    // 3. Top Customers (por puntos totales)
     const topCustomers = await this.membershipRepository.getTopCustomersByTenantId(tenantId, 10);
 
-    // 6. Recent Transactions (últimas 20)
-    const recentTransactions = await this.transactionRepository.getRecentTransactionsByTenantId(
-      tenantId,
-      20,
-    );
+    // Recent Transactions eliminado - ya no están disponibles
+    const recentTransactions: any[] = [];
 
     return TenantAnalytics.create(
       tenantId,

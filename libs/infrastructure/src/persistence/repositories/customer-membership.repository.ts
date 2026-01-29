@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { ICustomerMembershipRepository, CustomerMembership, TopCustomer } from '@libs/domain';
 import { CustomerMembershipEntity } from '../entities/customer-membership.entity';
 import { CustomerMembershipMapper } from '../mappers/customer-membership.mapper';
-import { TransactionEntity } from '../entities/transaction.entity';
 
 /**
  * Implementación del repositorio de customer memberships usando TypeORM
@@ -240,24 +239,16 @@ export class CustomerMembershipRepository implements ICustomerMembershipReposito
   }
 
   async getTopCustomersByTenantId(tenantId: number, limit: number): Promise<TopCustomer[]> {
+    // Transacciones eliminadas - retornar solo por puntos
     const results = await this.membershipRepository
       .createQueryBuilder('membership')
-      .leftJoin(
-        TransactionEntity,
-        'transaction',
-        'transaction.membershipId = membership.id AND transaction.type = :redeemType AND transaction.status = :completedStatus',
-        { redeemType: 'redeem', completedStatus: 'completed' },
-      )
       .select([
         'membership.userId as userId',
         'membership.id as membershipId',
         'membership.points as points',
-        'COUNT(DISTINCT transaction.id) as totalRedemptions',
       ])
       .where('membership.tenantId = :tenantId', { tenantId })
-      .groupBy('membership.id')
       .orderBy('membership.points', 'DESC')
-      .addOrderBy('totalRedemptions', 'DESC')
       .limit(limit)
       .getRawMany();
 
@@ -265,7 +256,7 @@ export class CustomerMembershipRepository implements ICustomerMembershipReposito
       userId: result.userId,
       membershipId: result.membershipId,
       points: result.points,
-      totalRedemptions: parseInt(result.totalRedemptions || '0', 10),
+      totalRedemptions: 0, // Ya no hay transacciones disponibles
     }));
   }
 }

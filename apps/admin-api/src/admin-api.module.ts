@@ -8,8 +8,6 @@ import { TenantsController } from './controllers/tenants.controller';
 import { BranchesController } from './controllers/branches.controller';
 import { UploadController } from './controllers/upload.controller';
 import { CurrenciesController } from './controllers/currencies.controller';
-import { RewardsController } from './controllers/rewards.controller';
-import { TransactionsController } from './controllers/transactions.controller';
 import { NotificationsController } from './controllers/notifications.controller';
 import { PartnerRequestsController } from './controllers/partner-requests.controller';
 import { SubscriptionsController } from './controllers/subscriptions.controller';
@@ -17,7 +15,6 @@ import { SubscriptionUsageController } from './controllers/subscription-usage.co
 import { GoalsController } from './controllers/goals.controller';
 import { PartnerLimitsController } from './controllers/partner-limits.controller';
 import { CatalogsController } from './controllers/catalogs.controller';
-import { PointsRulesController } from './controllers/points-rules.controller';
 import { CustomerTiersController } from './controllers/customer-tiers.controller';
 import { CustomerMembershipsController } from './controllers/customer-memberships.controller';
 import { BillingCyclesController } from './controllers/billing-cycles.controller';
@@ -76,13 +73,9 @@ import {
   GetBranchesByTenantHandler,
   UpdateBranchHandler,
   DeleteBranchHandler,
-  GetCurrenciesHandler,
-  GetCountriesHandler,
-  CreateRewardHandler,
-  GetRewardsHandler,
-  GetRewardHandler,
-  GetTransactionsHandler,
-  GetNotificationsHandler,
+    GetCurrenciesHandler,
+    GetCountriesHandler,
+    GetNotificationsHandler,
   MarkNotificationReadHandler,
   MarkAllNotificationsReadHandler,
   CreatePartnerRequestHandler,
@@ -118,13 +111,8 @@ import {
   GetCatalogHandler,
   CreateCatalogHandler,
   UpdateCatalogHandler,
-  DeleteCatalogHandler,
-  GetPointsRulesHandler,
-  GetPointsRuleHandler,
-  CreatePointsRuleHandler,
-  UpdatePointsRuleHandler,
-  DeletePointsRuleHandler,
-  GetCustomerTiersHandler,
+    DeleteCatalogHandler,
+    GetCustomerTiersHandler,
   GetCustomerTierHandler,
   CreateCustomerTierHandler,
   UpdateCustomerTierHandler,
@@ -250,15 +238,12 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     BranchesController,
     UploadController,
     CurrenciesController,
-    RewardsController,
-    TransactionsController,
     NotificationsController,
     PartnerRequestsController,
     SubscriptionsController,
     SubscriptionUsageController,
     PartnerLimitsController,
     CatalogsController,
-    PointsRulesController,
     CustomerTiersController,
     CustomerMembershipsController,
     BillingCyclesController,
@@ -331,12 +316,6 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     GetCurrenciesHandler,
     // Handlers de aplicación - Countries
     GetCountriesHandler,
-    // Handlers de aplicación - Rewards
-    CreateRewardHandler,
-    GetRewardsHandler,
-    GetRewardHandler,
-    // Handlers de aplicación - Transactions
-    GetTransactionsHandler,
     // Handlers de aplicación - Notifications
     GetNotificationsHandler,
     MarkNotificationReadHandler,
@@ -379,12 +358,6 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     CreateCatalogHandler,
     UpdateCatalogHandler,
     DeleteCatalogHandler,
-    // Handlers de aplicación - Points Rules
-    GetPointsRulesHandler,
-    GetPointsRuleHandler,
-    CreatePointsRuleHandler,
-    UpdatePointsRuleHandler,
-    DeletePointsRuleHandler,
     // Handlers de aplicación - Customer Tiers
     GetCustomerTiersHandler,
     GetCustomerTierHandler,

@@ -3,13 +3,11 @@ import {
   Column,
   PrimaryGeneratedColumn,
   ManyToOne,
-  OneToMany,
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { TenantEntity } from './tenant.entity';
-import { RewardTierEntity } from './reward-tier.entity';
 
 /**
  * Entidad de persistencia para CustomerTier
@@ -58,13 +56,6 @@ export class CustomerTierEntity {
 
   @Column('varchar', { length: 20, default: 'active' })
   status: 'active' | 'inactive';
-
-  // Relations
-  @OneToMany(() => RewardTierEntity, (rewardTier) => rewardTier.tier, {
-    cascade: true,
-    eager: false,
-  })
-  rewardTiers: RewardTierEntity[];
 
   @CreateDateColumn()
   createdAt: Date;

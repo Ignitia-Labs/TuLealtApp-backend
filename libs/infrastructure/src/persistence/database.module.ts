@@ -18,10 +18,6 @@ import { TenantFeaturesEntity } from './entities/tenant-features.entity';
 import { BranchEntity } from './entities/branch.entity';
 import { CurrencyEntity } from './entities/currency.entity';
 import { CountryEntity } from './entities/country.entity';
-import { RewardEntity } from './entities/reward.entity';
-import { RewardTierEntity } from './entities/reward-tier.entity';
-import { TransactionEntity } from './entities/transaction.entity';
-import { PointsRuleEntity } from './entities/points-rule.entity';
 import { CustomerTierEntity } from './entities/customer-tier.entity';
 import { NotificationEntity } from './entities/notification.entity';
 import { InvitationCodeEntity } from './entities/invitation-code.entity';
@@ -60,9 +56,6 @@ import { TenantRepository } from './repositories/tenant.repository';
 import { BranchRepository } from './repositories/branch.repository';
 import { CurrencyRepository } from './repositories/currency.repository';
 import { CountryRepository } from './repositories/country.repository';
-import { RewardRepository } from './repositories/reward.repository';
-import { TransactionRepository } from './repositories/transaction.repository';
-import { PointsRuleRepository } from './repositories/points-rule.repository';
 import { CustomerTierRepository } from './repositories/customer-tier.repository';
 import { NotificationRepository } from './repositories/notification.repository';
 import { InvitationCodeRepository } from './repositories/invitation-code.repository';
@@ -102,9 +95,6 @@ import {
   IBranchRepository,
   ICurrencyRepository,
   ICountryRepository,
-  IRewardRepository,
-  ITransactionRepository,
-  IPointsRuleRepository,
   ICustomerTierRepository,
   INotificationRepository,
   IInvitationCodeRepository,
@@ -170,11 +160,6 @@ import {
       BranchEntity,
       CurrencyEntity,
       CountryEntity,
-      RewardEntity,
-      RewardTierEntity,
-      CustomerTierEntity,
-      TransactionEntity,
-      PointsRuleEntity,
       CustomerTierEntity,
       NotificationEntity,
       InvitationCodeEntity,
@@ -247,21 +232,6 @@ import {
     {
       provide: 'ICountryRepository',
       useClass: CountryRepository,
-    },
-    RewardRepository,
-    {
-      provide: 'IRewardRepository',
-      useClass: RewardRepository,
-    },
-    TransactionRepository,
-    {
-      provide: 'ITransactionRepository',
-      useClass: TransactionRepository,
-    },
-    PointsRuleRepository,
-    {
-      provide: 'IPointsRuleRepository',
-      useClass: PointsRuleRepository,
     },
     CustomerTierRepository,
     {
@@ -416,9 +386,6 @@ import {
     'IBranchRepository',
     'ICurrencyRepository',
     'ICountryRepository',
-    'IRewardRepository',
-    'ITransactionRepository',
-    'IPointsRuleRepository',
     'ICustomerTierRepository',
     'INotificationRepository',
     'IInvitationCodeRepository',
@@ -455,9 +422,6 @@ import {
     BranchRepository,
     CurrencyRepository,
     CountryRepository,
-    RewardRepository,
-    TransactionRepository,
-    PointsRuleRepository,
     CustomerTierRepository,
     NotificationRepository,
     InvitationCodeRepository,

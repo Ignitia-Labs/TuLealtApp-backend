@@ -11,12 +11,9 @@ import { TenantsController } from './controllers/tenants.controller';
 import { BranchesController } from './controllers/branches.controller';
 import { CurrenciesController } from './controllers/currencies.controller';
 import { RateExchangeController } from './controllers/rate-exchange.controller';
-import { PointsRulesController } from './controllers/points-rules.controller';
-import { RewardsController } from './controllers/rewards.controller';
 import { CustomerTiersController } from './controllers/customer-tiers.controller';
 import { ContactInquiryController } from './controllers/contact-inquiry.controller';
 import { PartnerRequestsController } from './controllers/partner-requests.controller';
-import { TransactionsController } from './controllers/transactions.controller';
 import { InvitationCodesController } from './controllers/invitation-codes.controller';
 import { InfrastructureModule } from '@libs/infrastructure';
 import { HealthController, LoggerModule } from '@libs/shared';
@@ -60,10 +57,6 @@ import {
   GetCustomerMembershipHandler,
   UpdateCustomerMembershipHandler,
   DeleteCustomerMembershipHandler,
-  // Transactions Handlers
-  EarnPointsHandler,
-  RedeemPointsHandler,
-  GetTransactionsHandler,
   // Tenants Handlers
   CreateTenantHandler,
   GetTenantHandler,
@@ -84,17 +77,6 @@ import {
   GetCountriesHandler,
   // Rate Exchange Handlers
   GetRateExchangeHandler,
-  // Points Rules Handlers
-  GetPointsRulesHandler,
-  CreatePointsRuleHandler,
-  UpdatePointsRuleHandler,
-  DeletePointsRuleHandler,
-  // Rewards Handlers
-  GetRewardsHandler,
-  GetRewardHandler,
-  CreateRewardHandler,
-  UpdateRewardHandler,
-  DeleteRewardHandler,
   // Customer Tiers Handlers
   GetCustomerTiersHandler,
   GetCustomerTierHandler,
@@ -135,12 +117,9 @@ import {
     BranchesController,
     CurrenciesController,
     RateExchangeController,
-    PointsRulesController,
-    RewardsController,
     CustomerTiersController,
     ContactInquiryController,
     PartnerRequestsController,
-    TransactionsController,
     InvitationCodesController,
     HealthController,
   ],
@@ -189,10 +168,6 @@ import {
     GetCustomerMembershipHandler,
     UpdateCustomerMembershipHandler,
     DeleteCustomerMembershipHandler,
-    // Transactions Handlers
-    EarnPointsHandler,
-    RedeemPointsHandler,
-    GetTransactionsHandler,
     // Tenants Handlers
     CreateTenantHandler,
     GetTenantHandler,
@@ -213,17 +188,6 @@ import {
     GetCountriesHandler,
     // Rate Exchange Handlers
     GetRateExchangeHandler,
-    // Points Rules Handlers
-    GetPointsRulesHandler,
-    CreatePointsRuleHandler,
-    UpdatePointsRuleHandler,
-    DeletePointsRuleHandler,
-    // Rewards Handlers
-    GetRewardsHandler,
-    GetRewardHandler,
-    CreateRewardHandler,
-    UpdateRewardHandler,
-    DeleteRewardHandler,
     // Customer Tiers Handlers
     GetCustomerTiersHandler,
     GetCustomerTierHandler,
