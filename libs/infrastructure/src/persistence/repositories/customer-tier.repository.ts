@@ -7,6 +7,9 @@ import { CustomerTierMapper } from '../mappers/customer-tier.mapper';
 
 /**
  * Implementación del repositorio de CustomerTier usando TypeORM
+ *
+ * NOTA: Actualizado para usar tablas relacionales en lugar de JSON.
+ * Las relaciones (benefits) se cargan con LEFT JOIN cuando es necesario.
  */
 @Injectable()
 export class CustomerTierRepository implements ICustomerTierRepository {
@@ -18,6 +21,7 @@ export class CustomerTierRepository implements ICustomerTierRepository {
   async findById(id: number): Promise<CustomerTier | null> {
     const entity = await this.customerTierRepository.findOne({
       where: { id },
+      relations: ['benefitsRelation'],
     });
 
     if (!entity) {
@@ -30,6 +34,7 @@ export class CustomerTierRepository implements ICustomerTierRepository {
   async findByTenantId(tenantId: number): Promise<CustomerTier[]> {
     const entities = await this.customerTierRepository.find({
       where: { tenantId },
+      relations: ['benefitsRelation'],
       order: { priority: 'ASC' },
     });
 
@@ -39,6 +44,7 @@ export class CustomerTierRepository implements ICustomerTierRepository {
   async findActiveByTenantId(tenantId: number): Promise<CustomerTier[]> {
     const entities = await this.customerTierRepository.find({
       where: { tenantId, status: 'active' },
+      relations: ['benefitsRelation'],
       order: { priority: 'ASC' },
     });
 
@@ -48,6 +54,7 @@ export class CustomerTierRepository implements ICustomerTierRepository {
   async findByPoints(tenantId: number, points: number): Promise<CustomerTier | null> {
     const entities = await this.customerTierRepository.find({
       where: { tenantId, status: 'active' },
+      relations: ['benefitsRelation'],
       order: { priority: 'ASC' },
     });
 
@@ -58,13 +65,27 @@ export class CustomerTierRepository implements ICustomerTierRepository {
   async save(tier: CustomerTier): Promise<CustomerTier> {
     const entity = CustomerTierMapper.toPersistence(tier);
     const savedEntity = await this.customerTierRepository.save(entity);
-    return CustomerTierMapper.toDomain(savedEntity);
+
+    // Cargar relaciones después de guardar para el mapper
+    const entityWithRelations = await this.customerTierRepository.findOne({
+      where: { id: savedEntity.id },
+      relations: ['benefitsRelation'],
+    });
+
+    return CustomerTierMapper.toDomain(entityWithRelations || savedEntity);
   }
 
   async update(tier: CustomerTier): Promise<CustomerTier> {
     const entity = CustomerTierMapper.toPersistence(tier);
     const updatedEntity = await this.customerTierRepository.save(entity);
-    return CustomerTierMapper.toDomain(updatedEntity);
+
+    // Cargar relaciones después de actualizar para el mapper
+    const entityWithRelations = await this.customerTierRepository.findOne({
+      where: { id: updatedEntity.id },
+      relations: ['benefitsRelation'],
+    });
+
+    return CustomerTierMapper.toDomain(entityWithRelations || updatedEntity);
   }
 
   async delete(id: number): Promise<void> {

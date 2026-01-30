@@ -16,6 +16,12 @@ export class PartnerSubscriptionUsageMapper {
       persistenceEntity.branchesCount,
       persistenceEntity.customersCount,
       persistenceEntity.rewardsCount,
+      persistenceEntity.loyaltyProgramsCount ?? 0,
+      persistenceEntity.loyaltyProgramsBaseCount ?? 0,
+      persistenceEntity.loyaltyProgramsPromoCount ?? 0,
+      persistenceEntity.loyaltyProgramsPartnerCount ?? 0,
+      persistenceEntity.loyaltyProgramsSubscriptionCount ?? 0,
+      persistenceEntity.loyaltyProgramsExperimentalCount ?? 0,
       persistenceEntity.createdAt,
       persistenceEntity.updatedAt,
     );
@@ -37,6 +43,12 @@ export class PartnerSubscriptionUsageMapper {
     entity.branchesCount = domainEntity.branchesCount;
     entity.customersCount = domainEntity.customersCount;
     entity.rewardsCount = domainEntity.rewardsCount;
+    entity.loyaltyProgramsCount = domainEntity.loyaltyProgramsCount;
+    entity.loyaltyProgramsBaseCount = domainEntity.loyaltyProgramsBaseCount;
+    entity.loyaltyProgramsPromoCount = domainEntity.loyaltyProgramsPromoCount;
+    entity.loyaltyProgramsPartnerCount = domainEntity.loyaltyProgramsPartnerCount;
+    entity.loyaltyProgramsSubscriptionCount = domainEntity.loyaltyProgramsSubscriptionCount;
+    entity.loyaltyProgramsExperimentalCount = domainEntity.loyaltyProgramsExperimentalCount;
     entity.createdAt = domainEntity.createdAt;
     entity.updatedAt = domainEntity.updatedAt;
     return entity;

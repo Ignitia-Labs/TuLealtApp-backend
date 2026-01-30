@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
 import {
   ICustomerMembershipRepository,
   ITenantRepository,
@@ -41,26 +41,16 @@ export class UpdateCustomerMembershipHandler {
     let updatedMembership = membership;
 
     if (request.points !== undefined) {
-      // Actualizar puntos y recalcular tier automáticamente usando el helper
-      if (request.points > membership.points) {
-        updatedMembership = await TierCalculatorHelper.addPointsAndRecalculateTier(
-          membership,
-          request.points - membership.points,
-          this.tierRepository,
-        );
-      } else if (request.points < membership.points) {
-        updatedMembership = await TierCalculatorHelper.subtractPointsAndRecalculateTier(
-          membership,
-          membership.points - request.points,
-          this.tierRepository,
-        );
-      } else {
-        // Si los puntos son iguales, solo recalcular tier por si acaso cambió la configuración
-        updatedMembership = await TierCalculatorHelper.recalculateTier(
-          membership,
-          this.tierRepository,
-        );
-      }
+      // DEPRECATED: Actualización directa de puntos no está permitida
+      // Los puntos son una proyección del ledger (points_transactions) y solo se actualizan
+      // automáticamente cuando se crean transacciones en el ledger.
+      // Para cambiar puntos, use el sistema de ledger con PointsTransaction.
+      throw new BadRequestException(
+        'DEPRECATED: Actualización directa de puntos no está permitida. ' +
+          'El campo `points` es una proyección calculada desde el ledger (points_transactions). ' +
+          'Para cambiar puntos, use el sistema de ledger creando transacciones PointsTransaction. ' +
+          'El campo `points` en este request será removido en una versión futura.',
+      );
     }
 
     if (request.tierId !== undefined) {

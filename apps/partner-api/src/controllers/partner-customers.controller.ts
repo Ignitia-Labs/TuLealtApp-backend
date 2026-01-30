@@ -23,6 +23,7 @@ import {
   ApiBody,
   ApiParam,
   ApiBearerAuth,
+  ApiExtraModels,
 } from '@nestjs/swagger';
 import {
   GetPartnerCustomersHandler,
@@ -46,6 +47,15 @@ import {
   DeleteCustomerMembershipHandler,
   DeleteCustomerMembershipRequest,
   DeleteCustomerMembershipResponse,
+  GetCustomerPointsTransactionsHandler,
+  GetCustomerPointsTransactionsRequest,
+  GetPointsTransactionsResponse,
+  CreatePointsAdjustmentHandler,
+  CreatePointsAdjustmentRequest,
+  CreatePointsAdjustmentResponse,
+  CreatePointsReversalHandler,
+  CreatePointsReversalRequest,
+  CreatePointsReversalResponse,
   JwtPayload,
 } from '@libs/application';
 import { IUserRepository, ICustomerMembershipRepository, ITenantRepository } from '@libs/domain';
@@ -72,8 +82,17 @@ import {
  * - GET /partner/customers/:id - Obtener customer por ID (membershipId)
  * - PATCH /partner/customers/:id - Actualizar customer
  * - DELETE /partner/customers/:id - Eliminar customer
+ * - GET /partner/customers/:id/points-transactions - Obtener historial de transacciones
+ * - POST /partner/customers/:id/points/adjustment - Crear ajuste manual de puntos
+ * - POST /partner/customers/:id/points/reversal - Revertir transacción de puntos
  */
 @ApiTags('Partner Customers')
+@ApiExtraModels(
+  CreatePointsAdjustmentRequest,
+  CreatePointsAdjustmentResponse,
+  CreatePointsReversalRequest,
+  CreatePointsReversalResponse,
+)
 @Controller('customers')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('PARTNER', 'PARTNER_STAFF')
@@ -87,6 +106,9 @@ export class PartnerCustomersController {
     private readonly getCustomerMembershipHandler: GetCustomerMembershipHandler,
     private readonly updateCustomerMembershipHandler: UpdateCustomerMembershipHandler,
     private readonly deleteCustomerMembershipHandler: DeleteCustomerMembershipHandler,
+    private readonly getCustomerPointsTransactionsHandler: GetCustomerPointsTransactionsHandler,
+    private readonly createPointsAdjustmentHandler: CreatePointsAdjustmentHandler,
+    private readonly createPointsReversalHandler: CreatePointsReversalHandler,
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
     @Inject('ICustomerMembershipRepository')
@@ -789,5 +811,266 @@ export class PartnerCustomersController {
     const request = new DeleteCustomerMembershipRequest();
     request.membershipId = id;
     return this.deleteCustomerMembershipHandler.execute(request);
+  }
+
+  @Get(':id/points-transactions')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Obtener historial de transacciones de puntos de un customer',
+    description:
+      'Obtiene el historial completo de transacciones de puntos de un customer (membership). El customer debe pertenecer al partner del usuario autenticado.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único de la membership (customer)',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiQuery({
+    name: 'type',
+    enum: ['EARNING', 'REDEEM', 'ADJUSTMENT', 'REVERSAL', 'EXPIRATION', 'all'],
+    required: false,
+    description: 'Filtrar por tipo de transacción',
+  })
+  @ApiQuery({
+    name: 'fromDate',
+    required: false,
+    type: String,
+    description: 'Fecha de inicio (ISO 8601)',
+  })
+  @ApiQuery({
+    name: 'toDate',
+    required: false,
+    type: String,
+    description: 'Fecha de fin (ISO 8601)',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Número de página',
+    default: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Elementos por página',
+    default: 20,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Historial de transacciones obtenido exitosamente',
+    type: GetPointsTransactionsResponse,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos o el customer no pertenece a tu partner',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Customer no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  async getCustomerPointsTransactions(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseIntPipe) id: number,
+    @Query('type') type?: string,
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ): Promise<GetPointsTransactionsResponse> {
+    // Obtener el partnerId del usuario autenticado
+    const currentUser = await this.userRepository.findById(user.userId);
+    if (!currentUser) {
+      throw new NotFoundException(`User with ID ${user.userId} not found`);
+    }
+
+    if (!currentUser.partnerId) {
+      throw new ForbiddenException('User does not belong to a partner');
+    }
+
+    const request = new GetCustomerPointsTransactionsRequest();
+    request.membershipId = id;
+    request.type = (type as any) || 'all';
+    request.fromDate = fromDate;
+    request.toDate = toDate;
+    request.page = page || 1;
+    request.limit = limit || 20;
+
+    return this.getCustomerPointsTransactionsHandler.execute(request, currentUser.partnerId);
+  }
+
+  @Post(':id/points/adjustment')
+  @HttpCode(HttpStatus.CREATED)
+  @Roles('PARTNER', 'ADMIN') // Solo PARTNER o ADMIN pueden crear ajustes
+  @ApiOperation({
+    summary: 'Crear ajuste manual de puntos',
+    description:
+      'Crea un ajuste manual de puntos para un customer. Solo usuarios con rol PARTNER o ADMIN pueden crear ajustes. El customer debe pertenecer al partner del usuario autenticado.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único de la membership (customer)',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiBody({
+    type: CreatePointsAdjustmentRequest,
+    description: 'Datos del ajuste de puntos',
+    examples: {
+      agregarPuntos: {
+        summary: 'Agregar puntos',
+        description: 'Ejemplo de ajuste para agregar puntos',
+        value: {
+          pointsDelta: 100,
+          reasonCode: 'BONUS_BIRTHDAY',
+          metadata: {
+            birthdayMonth: 1,
+          },
+        },
+      },
+      quitarPuntos: {
+        summary: 'Quitar puntos',
+        description: 'Ejemplo de ajuste para quitar puntos',
+        value: {
+          pointsDelta: -50,
+          reasonCode: 'PENALTY',
+          metadata: {
+            reason: 'Policy violation',
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Ajuste creado exitosamente',
+    type: CreatePointsAdjustmentResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos inválidos o el ajuste resultaría en balance negativo',
+    type: BadRequestErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos o el customer no pertenece a tu partner',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Customer no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  async createPointsAdjustment(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: CreatePointsAdjustmentRequest,
+  ): Promise<CreatePointsAdjustmentResponse> {
+    body.membershipId = id;
+    const createdBy = `USER_${user.userId}`;
+
+    // Obtener el partnerId del usuario autenticado
+    const currentUser = await this.userRepository.findById(user.userId);
+    if (!currentUser) {
+      throw new NotFoundException(`User with ID ${user.userId} not found`);
+    }
+    if (!currentUser.partnerId) {
+      throw new ForbiddenException('User does not belong to a partner');
+    }
+
+    return this.createPointsAdjustmentHandler.execute(body, currentUser.partnerId, createdBy);
+  }
+
+  @Post(':id/points/reversal')
+  @HttpCode(HttpStatus.CREATED)
+  @Roles('PARTNER', 'ADMIN') // Solo PARTNER o ADMIN pueden crear reversiones
+  @ApiOperation({
+    summary: 'Revertir transacción de puntos',
+    description:
+      'Crea una reversión de una transacción de puntos existente. Solo usuarios con rol PARTNER o ADMIN pueden crear reversiones. El customer debe pertenecer al partner del usuario autenticado.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único de la membership (customer)',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiBody({
+    type: CreatePointsReversalRequest,
+    description: 'Datos de la reversión',
+    examples: {
+      reversionRefund: {
+        summary: 'Reversión por reembolso',
+        description: 'Ejemplo de reversión por reembolso',
+        value: {
+          transactionId: 1001,
+          reasonCode: 'REFUND',
+          metadata: {
+            refundReason: 'Customer requested refund',
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Reversión creada exitosamente',
+    type: CreatePointsReversalResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos inválidos o la transacción ya fue revertida',
+    type: BadRequestErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos o el customer no pertenece a tu partner',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Customer o transacción no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  async createPointsReversal(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: CreatePointsReversalRequest,
+  ): Promise<CreatePointsReversalResponse> {
+    body.membershipId = id;
+    const createdBy = `USER_${user.userId}`;
+
+    // Obtener el partnerId del usuario autenticado
+    const currentUser = await this.userRepository.findById(user.userId);
+    if (!currentUser) {
+      throw new NotFoundException(`User with ID ${user.userId} not found`);
+    }
+    if (!currentUser.partnerId) {
+      throw new ForbiddenException('User does not belong to a partner');
+    }
+
+    return this.createPointsReversalHandler.execute(body, currentUser.partnerId, createdBy);
   }
 }

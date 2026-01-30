@@ -1,4 +1,14 @@
-import { IsEmail, IsString, MinLength, IsOptional, IsNumber, IsIn } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  IsOptional,
+  IsNumber,
+  IsIn,
+  IsArray,
+  ArrayMinSize,
+  IsEnum,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -92,16 +102,6 @@ export class UpdatePartnerRequest {
   @IsString()
   @IsOptional()
   category?: string;
-
-  @ApiProperty({
-    description: 'Tipo de recompensa',
-    example: 'Por monto de compra',
-    type: String,
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  rewardType?: string;
 
   @ApiProperty({
     description: 'ID de la moneda',

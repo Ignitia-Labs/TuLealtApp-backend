@@ -1,7 +1,6 @@
-import { Partner, PartnerSubscription, PartnerLimits } from '@libs/domain';
+import { Partner, PartnerSubscription } from '@libs/domain';
 import { PartnerEntity } from '../entities/partner.entity';
 import { PartnerSubscriptionEntity } from '../entities/partner-subscription.entity';
-import { PartnerLimitsEntity } from '../entities/partner-limits.entity';
 
 /**
  * Mapper para convertir entre entidades de dominio y entidades de persistencia de Partner
@@ -13,7 +12,7 @@ export class PartnerMapper {
   static toDomain(
     persistenceEntity: PartnerEntity,
     subscription?: PartnerSubscriptionEntity | null,
-    limits?: PartnerLimitsEntity | null,
+    limits?: null, // Deprecated: limits ya no se usa, se obtiene desde pricing_plan_limits
     stats?: any | null, // Mantenido para compatibilidad pero ya no se usa
   ): Partner {
     return Partner.create(
@@ -25,7 +24,6 @@ export class PartnerMapper {
       persistenceEntity.city || '',
       persistenceEntity.plan || '',
       persistenceEntity.category || '',
-      persistenceEntity.rewardType || '',
       persistenceEntity.currencyId || 0,
       persistenceEntity.businessName || '',
       persistenceEntity.taxId || '',
@@ -67,7 +65,6 @@ export class PartnerMapper {
     entity.branchesNumber = domainEntity.branchesNumber;
     entity.website = domainEntity.website;
     entity.socialMedia = domainEntity.socialMedia;
-    entity.rewardType = domainEntity.rewardType;
     // currencyId es INTEGER tanto en dominio como en BD
     entity.currencyId = domainEntity.currencyId || 0;
     entity.businessName = domainEntity.businessName;
@@ -177,43 +174,6 @@ export class PartnerMapper {
     return entity;
   }
 
-  /**
-   * Convierte una entidad de persistencia de límites a entidad de dominio
-   */
-  static limitsToDomain(persistenceEntity: PartnerLimitsEntity): PartnerLimits {
-    return PartnerLimits.create(
-      persistenceEntity.partnerId,
-      persistenceEntity.maxTenants,
-      persistenceEntity.maxBranches,
-      persistenceEntity.maxCustomers,
-      persistenceEntity.maxRewards,
-      persistenceEntity.maxAdmins ?? -1,
-      persistenceEntity.storageGB ?? -1,
-      persistenceEntity.apiCallsPerMonth ?? -1,
-      persistenceEntity.id,
-    );
-  }
-
-  /**
-   * Convierte una entidad de dominio de límites a entidad de persistencia
-   */
-  static limitsToPersistence(domainEntity: PartnerLimits): PartnerLimitsEntity {
-    const entity = new PartnerLimitsEntity();
-    if (domainEntity.id > 0) {
-      entity.id = domainEntity.id;
-    }
-    entity.partnerId = domainEntity.partnerId;
-    entity.maxTenants = domainEntity.maxTenants;
-    entity.maxBranches = domainEntity.maxBranches;
-    entity.maxCustomers = domainEntity.maxCustomers;
-    entity.maxRewards = domainEntity.maxRewards;
-    entity.maxAdmins = domainEntity.maxAdmins;
-    entity.storageGB = domainEntity.storageGB;
-    entity.apiCallsPerMonth = domainEntity.apiCallsPerMonth;
-    if (domainEntity.id > 0) {
-      entity.createdAt = domainEntity.createdAt;
-      entity.updatedAt = domainEntity.updatedAt;
-    }
-    return entity;
-  }
+  // Métodos limitsToDomain y limitsToPersistence eliminados
+  // Los límites ahora se obtienen desde pricing_plan_limits a través de la suscripción
 }

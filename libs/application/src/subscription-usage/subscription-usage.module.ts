@@ -5,8 +5,9 @@ import {
   PartnerSubscriptionEntity,
   TenantEntity,
   BranchEntity,
-  PartnerLimitsEntity,
   CustomerMembershipEntity,
+  LoyaltyProgramEntity,
+  RewardRuleEntity,
 } from '@libs/infrastructure';
 import { SubscriptionUsageService } from './subscription-usage.service';
 import { RecalculateSubscriptionUsageHandler } from './recalculate-subscription-usage/recalculate-subscription-usage.handler';
@@ -22,8 +23,9 @@ import { RecalculateSubscriptionUsageHandler } from './recalculate-subscription-
       PartnerSubscriptionEntity,
       TenantEntity,
       BranchEntity,
-      PartnerLimitsEntity,
       CustomerMembershipEntity,
+      LoyaltyProgramEntity,
+      RewardRuleEntity,
     ]),
   ],
   providers: [SubscriptionUsageService, RecalculateSubscriptionUsageHandler],

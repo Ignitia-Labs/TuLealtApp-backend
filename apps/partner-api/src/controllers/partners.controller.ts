@@ -109,7 +109,6 @@ export class PartnersController {
       branchesNumber: 5,
       website: 'https://abc-comercial.com',
       socialMedia: '@abccomercial',
-      rewardType: 'points',
       currencyId: 1,
       businessName: 'Grupo Comercial ABC S.A.',
       taxId: '12345678-9',

@@ -7,8 +7,10 @@ import { GetPartnerWithTenantsAndBranchesResponse } from './get-partner-with-ten
 import { TenantWithBranchesDto } from './get-partner-with-tenants-and-branches.response';
 import { GetTenantResponse } from '../../tenants/get-tenant/get-tenant.response';
 import { GetBranchResponse } from '../../branches/get-branch/get-branch.response';
-import { TenantFeaturesEntity, PartnerLimitsEntity } from '@libs/infrastructure';
+import { TenantFeaturesEntity, PartnerSubscriptionEntity } from '@libs/infrastructure';
 import { PartnerLimitsSwaggerDto } from '../dto/partner-limits-swagger.dto';
+import { IPricingPlanRepository } from '@libs/domain';
+import { SubscriptionUsageHelper } from '@libs/application';
 
 /**
  * Handler para el caso de uso de obtener un partner con sus tenants y branches
@@ -22,10 +24,12 @@ export class GetPartnerWithTenantsAndBranchesHandler {
     private readonly tenantRepository: ITenantRepository,
     @Inject('IBranchRepository')
     private readonly branchRepository: IBranchRepository,
+    @Inject('IPricingPlanRepository')
+    private readonly pricingPlanRepository: IPricingPlanRepository,
     @InjectRepository(TenantFeaturesEntity)
     private readonly featuresRepository: Repository<TenantFeaturesEntity>,
-    @InjectRepository(PartnerLimitsEntity)
-    private readonly limitsRepository: Repository<PartnerLimitsEntity>,
+    @InjectRepository(PartnerSubscriptionEntity)
+    private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
   ) {}
 
   async execute(
@@ -130,27 +134,35 @@ export class GetPartnerWithTenantsAndBranchesHandler {
       return new TenantWithBranchesDto(tenantResponse, branches);
     });
 
-    // Obtener los límites del partner
+    // Obtener límites desde pricing_plan_limits
     let limitsDto: PartnerLimitsSwaggerDto | null = null;
     try {
-      const limitsEntity = await this.limitsRepository.findOne({
-        where: { partnerId: partner.id },
-      });
+      const planLimits = await SubscriptionUsageHelper.getPlanLimitsForPartner(
+        request.partnerId,
+        this.subscriptionRepository,
+        this.pricingPlanRepository,
+      );
 
-      if (limitsEntity) {
+      if (planLimits) {
         limitsDto = {
-          maxTenants: Number(limitsEntity.maxTenants) || 0,
-          maxBranches: Number(limitsEntity.maxBranches) || 0,
-          maxCustomers: Number(limitsEntity.maxCustomers) || 0,
-          maxRewards: Number(limitsEntity.maxRewards) || 0,
-          maxAdmins: Number(limitsEntity.maxAdmins ?? -1),
-          storageGB: Number(limitsEntity.storageGB ?? -1),
-          apiCallsPerMonth: Number(limitsEntity.apiCallsPerMonth ?? -1),
+          maxTenants: planLimits.maxTenants ?? -1,
+          maxBranches: planLimits.maxBranches ?? -1,
+          maxCustomers: planLimits.maxCustomers ?? -1,
+          maxRewards: planLimits.maxRewards ?? -1,
+          maxAdmins: planLimits.maxAdmins ?? -1,
+          storageGB: planLimits.storageGB ?? -1,
+          apiCallsPerMonth: planLimits.apiCallsPerMonth ?? -1,
+          maxLoyaltyPrograms: planLimits.maxLoyaltyPrograms ?? -1,
+          maxLoyaltyProgramsBase: planLimits.maxLoyaltyProgramsBase ?? -1,
+          maxLoyaltyProgramsPromo: planLimits.maxLoyaltyProgramsPromo ?? -1,
+          maxLoyaltyProgramsPartner: planLimits.maxLoyaltyProgramsPartner ?? -1,
+          maxLoyaltyProgramsSubscription: planLimits.maxLoyaltyProgramsSubscription ?? -1,
+          maxLoyaltyProgramsExperimental: planLimits.maxLoyaltyProgramsExperimental ?? -1,
         };
       }
     } catch (error) {
       // Si hay error al obtener límites, continuar sin ellos (no crítico)
-      console.error('Error al obtener límites del partner:', error);
+      console.error('Error al obtener límites desde pricing plan:', error);
       limitsDto = null;
     }
 
@@ -169,7 +181,6 @@ export class GetPartnerWithTenantsAndBranchesHandler {
       partner.branchesNumber,
       partner.website,
       partner.socialMedia,
-      partner.rewardType,
       partner.currencyId,
       partner.businessName,
       partner.taxId,

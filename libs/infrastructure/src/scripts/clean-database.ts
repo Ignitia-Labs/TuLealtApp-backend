@@ -60,12 +60,38 @@ async function cleanDatabase() {
     await queryRunner.connect();
 
     try {
-      // Obtener todas las tablas (excepto migrations)
+      // Obtener el nombre del esquema actual
+      const currentDatabase = await queryRunner.query('SELECT DATABASE() as db');
+      const currentDbName = currentDatabase[0]?.db || dbName;
+
+      // Obtener solo las tablas del esquema actual usando SQL directo
       console.log('📋 Obteniendo lista de tablas...');
-      const tables = await queryRunner.getTables();
-      const tablesToClean = tables.filter(
-        (table) => table.name !== 'migrations' && !table.name.startsWith('migrations'),
+      const tableResults = await queryRunner.query(
+        `SELECT TABLE_NAME as tableName
+         FROM INFORMATION_SCHEMA.TABLES
+         WHERE TABLE_SCHEMA = ?
+           AND TABLE_TYPE = 'BASE TABLE'
+         ORDER BY TABLE_NAME`,
+        [currentDbName],
       );
+
+      // Filtrar tablas: excluir migrations y tablas del sistema
+      const tablesToClean = tableResults
+        .map((row: any) => row.tableName)
+        .filter((tableName: string) => {
+          // Excluir tabla migrations
+          if (tableName === 'migrations' || tableName.startsWith('migrations')) {
+            return false;
+          }
+
+          // Excluir tablas del sistema (por si acaso)
+          const systemSchemas = ['information_schema', 'mysql', 'performance_schema', 'sys'];
+          if (systemSchemas.some((schema) => tableName.toLowerCase().includes(schema))) {
+            return false;
+          }
+
+          return true;
+        });
 
       console.log(`📊 Encontradas ${tablesToClean.length} tablas para limpiar\n`);
 
@@ -81,13 +107,13 @@ async function cleanDatabase() {
 
       // Limpiar cada tabla
       let cleanedCount = 0;
-      for (const table of tablesToClean) {
+      for (const tableName of tablesToClean) {
         try {
-          await queryRunner.query(`TRUNCATE TABLE \`${table.name}\``);
+          await queryRunner.query(`TRUNCATE TABLE \`${tableName}\``);
           cleanedCount++;
-          console.log(`  ✓ ${table.name}`);
+          console.log(`  ✓ ${tableName}`);
         } catch (error: any) {
-          console.log(`  ⚠️  ${table.name}: ${error.message}`);
+          console.log(`  ⚠️  ${tableName}: ${error.message}`);
         }
       }
 

@@ -52,4 +52,46 @@ export class PartnerLimitsSwaggerDto {
     type: Number,
   })
   apiCallsPerMonth: number;
+
+  @ApiProperty({
+    example: 5,
+    description: 'Número máximo total de loyalty programs permitidos (-1 para ilimitado)',
+    type: Number,
+  })
+  maxLoyaltyPrograms: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'Número máximo de loyalty programs tipo BASE permitidos (-1 para ilimitado)',
+    type: Number,
+  })
+  maxLoyaltyProgramsBase: number;
+
+  @ApiProperty({
+    example: 3,
+    description: 'Número máximo de loyalty programs tipo PROMO permitidos (-1 para ilimitado)',
+    type: Number,
+  })
+  maxLoyaltyProgramsPromo: number;
+
+  @ApiProperty({
+    example: 0,
+    description: 'Número máximo de loyalty programs tipo PARTNER permitidos (-1 para ilimitado)',
+    type: Number,
+  })
+  maxLoyaltyProgramsPartner: number;
+
+  @ApiProperty({
+    example: 0,
+    description: 'Número máximo de loyalty programs tipo SUBSCRIPTION permitidos (-1 para ilimitado)',
+    type: Number,
+  })
+  maxLoyaltyProgramsSubscription: number;
+
+  @ApiProperty({
+    example: 0,
+    description: 'Número máximo de loyalty programs tipo EXPERIMENTAL permitidos (-1 para ilimitado)',
+    type: Number,
+  })
+  maxLoyaltyProgramsExperimental: number;
 }

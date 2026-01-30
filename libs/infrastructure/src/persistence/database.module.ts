@@ -11,7 +11,6 @@ import { RateExchangeEntity } from './entities/rate-exchange.entity';
 import { PartnerEntity } from './entities/partner.entity';
 import { PartnerSubscriptionEntity } from './entities/partner-subscription.entity';
 import { PartnerSubscriptionUsageEntity } from './entities/partner-subscription-usage.entity';
-import { PartnerLimitsEntity } from './entities/partner-limits.entity';
 import { PricingPlanLimitsEntity } from './entities/pricing-plan-limits.entity';
 import { TenantEntity } from './entities/tenant.entity';
 import { TenantFeaturesEntity } from './entities/tenant-features.entity';
@@ -48,6 +47,29 @@ import { PermissionEntity } from './entities/permission.entity';
 import { UserPermissionEntity } from './entities/user-permission.entity';
 import { ProfilePermissionEntity } from './entities/profile-permission.entity';
 import { UserChangeHistoryEntity } from './entities/user-change-history.entity';
+import { PointsTransactionEntity } from './entities/points-transaction.entity';
+import { LoyaltyProgramEntity } from './entities/loyalty-program.entity';
+import { EnrollmentEntity } from './entities/enrollment.entity';
+import { RewardRuleEntity } from './entities/reward-rule.entity';
+import { RewardRuleEligibilityEntity } from './entities/reward-rule-eligibility.entity';
+import { RewardRuleEligibilityMembershipStatusEntity } from './entities/reward-rule-eligibility-membership-status.entity';
+import { RewardRuleEligibilityFlagEntity } from './entities/reward-rule-eligibility-flag.entity';
+import { RewardRuleEligibilityCategoryIdEntity } from './entities/reward-rule-eligibility-category-id.entity';
+import { RewardRuleEligibilitySkuEntity } from './entities/reward-rule-eligibility-sku.entity';
+import { RewardRulePointsFormulaEntity } from './entities/reward-rule-points-formula.entity';
+import { RewardRulePointsTableEntryEntity } from './entities/reward-rule-points-table-entry.entity';
+import { RewardRulePointsFormulaBonusEntity } from './entities/reward-rule-points-formula-bonus.entity';
+import { LoyaltyProgramEarningDomainEntity } from './entities/loyalty-program-earning-domain.entity';
+import { UserRoleEntity } from './entities/user-role.entity';
+import { UserProfileDataEntity } from './entities/user-profile-data.entity';
+import { CustomerTierBenefitEntity } from './entities/customer-tier-benefit.entity';
+import { TierBenefitExclusiveRewardEntity } from './entities/tier-benefit-exclusive-reward.entity';
+import { TierBenefitCategoryBenefitEntity } from './entities/tier-benefit-category-benefit.entity';
+import { TierBenefitCategoryExclusiveRewardEntity } from './entities/tier-benefit-category-exclusive-reward.entity';
+import { TierPolicyEntity } from './entities/tier-policy.entity';
+import { TierStatusEntity } from './entities/tier-status.entity';
+import { TierBenefitEntity } from './entities/tier-benefit.entity';
+import { ReferralEntity } from './entities/referral.entity';
 import { UserRepository } from './repositories/user.repository';
 import { PricingPlanRepository } from './repositories/pricing-plan.repository';
 import { RateExchangeRepository } from './repositories/rate-exchange.repository';
@@ -85,6 +107,14 @@ import { PermissionRepository } from './repositories/permission.repository';
 import { UserPermissionRepository } from './repositories/user-permission.repository';
 import { ProfilePermissionRepository } from './repositories/profile-permission.repository';
 import { UserChangeHistoryRepository } from './repositories/user-change-history.repository';
+import { PointsTransactionRepository } from './repositories/points-transaction.repository';
+import { LoyaltyProgramRepository } from './repositories/loyalty-program.repository';
+import { EnrollmentRepository } from './repositories/enrollment.repository';
+import { RewardRuleRepository } from './repositories/reward-rule.repository';
+import { TierPolicyRepository } from './repositories/tier-policy.repository';
+import { TierStatusRepository } from './repositories/tier-status.repository';
+import { TierBenefitRepository } from './repositories/tier-benefit.repository';
+import { ReferralRepository } from './repositories/referral.repository';
 import { CustomerMembershipSubscriber } from './subscribers/customer-membership.subscriber';
 import {
   IUserRepository,
@@ -123,6 +153,14 @@ import {
   IUserPermissionRepository,
   IProfilePermissionRepository,
   IUserChangeHistoryRepository,
+  IPointsTransactionRepository,
+  ILoyaltyProgramRepository,
+  IEnrollmentRepository,
+  IRewardRuleRepository,
+  ITierPolicyRepository,
+  ITierStatusRepository,
+  ITierBenefitRepository,
+  IReferralRepository,
 } from '@libs/domain';
 
 /**
@@ -153,7 +191,6 @@ import {
       PartnerEntity,
       PartnerSubscriptionEntity,
       PartnerSubscriptionUsageEntity,
-      PartnerLimitsEntity,
       PricingPlanLimitsEntity,
       TenantEntity,
       TenantFeaturesEntity,
@@ -190,6 +227,29 @@ import {
       UserPermissionEntity,
       ProfilePermissionEntity,
       UserChangeHistoryEntity,
+      PointsTransactionEntity,
+      LoyaltyProgramEntity,
+      EnrollmentEntity,
+      RewardRuleEntity,
+      RewardRuleEligibilityEntity,
+      RewardRuleEligibilityMembershipStatusEntity,
+      RewardRuleEligibilityFlagEntity,
+      RewardRuleEligibilityCategoryIdEntity,
+      RewardRuleEligibilitySkuEntity,
+      RewardRulePointsFormulaEntity,
+      RewardRulePointsTableEntryEntity,
+      RewardRulePointsFormulaBonusEntity,
+      LoyaltyProgramEarningDomainEntity,
+      UserRoleEntity,
+      UserProfileDataEntity,
+      CustomerTierBenefitEntity,
+      TierBenefitExclusiveRewardEntity,
+      TierBenefitCategoryBenefitEntity,
+      TierBenefitCategoryExclusiveRewardEntity,
+      TierPolicyEntity,
+      TierStatusEntity,
+      TierBenefitEntity,
+      ReferralEntity,
     ]),
   ],
   providers: [
@@ -374,6 +434,46 @@ import {
       provide: 'IUserChangeHistoryRepository',
       useClass: UserChangeHistoryRepository,
     },
+    PointsTransactionRepository,
+    {
+      provide: 'IPointsTransactionRepository',
+      useClass: PointsTransactionRepository,
+    },
+    LoyaltyProgramRepository,
+    {
+      provide: 'ILoyaltyProgramRepository',
+      useClass: LoyaltyProgramRepository,
+    },
+    EnrollmentRepository,
+    {
+      provide: 'IEnrollmentRepository',
+      useClass: EnrollmentRepository,
+    },
+    RewardRuleRepository,
+    {
+      provide: 'IRewardRuleRepository',
+      useClass: RewardRuleRepository,
+    },
+    TierPolicyRepository,
+    {
+      provide: 'ITierPolicyRepository',
+      useClass: TierPolicyRepository,
+    },
+    TierStatusRepository,
+    {
+      provide: 'ITierStatusRepository',
+      useClass: TierStatusRepository,
+    },
+    TierBenefitRepository,
+    {
+      provide: 'ITierBenefitRepository',
+      useClass: TierBenefitRepository,
+    },
+    ReferralRepository,
+    {
+      provide: 'IReferralRepository',
+      useClass: ReferralRepository,
+    },
     // TypeORM Subscribers se registran en la configuración de TypeORM
     // para evitar dependencias circulares
   ],
@@ -414,6 +514,14 @@ import {
     'IUserPermissionRepository',
     'IProfilePermissionRepository',
     'IUserChangeHistoryRepository',
+    'IPointsTransactionRepository',
+    'ILoyaltyProgramRepository',
+    'IEnrollmentRepository',
+    'IRewardRuleRepository',
+    'ITierPolicyRepository',
+    'ITierStatusRepository',
+    'ITierBenefitRepository',
+    'IReferralRepository',
     UserRepository,
     PricingPlanRepository,
     RateExchangeRepository,
@@ -451,6 +559,13 @@ import {
     UserPermissionRepository,
     ProfilePermissionRepository,
     UserChangeHistoryRepository,
+    PointsTransactionRepository,
+    LoyaltyProgramRepository,
+    EnrollmentRepository,
+    RewardRuleRepository,
+    TierPolicyRepository,
+    TierStatusRepository,
+    TierBenefitRepository,
     TypeOrmModule,
   ],
 })

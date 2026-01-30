@@ -6,10 +6,16 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IPartnerRepository } from '@libs/domain';
+import { IPartnerRepository, IPricingPlanRepository } from '@libs/domain';
 import { GetPartnerRequest } from './get-partner.request';
 import { GetPartnerResponse } from './get-partner.response';
-import { PartnerEntity, PartnerMapper, PartnerSubscriptionUsageEntity } from '@libs/infrastructure';
+import {
+  PartnerEntity,
+  PartnerMapper,
+  PartnerSubscriptionUsageEntity,
+  PartnerSubscriptionEntity,
+} from '@libs/infrastructure';
+import { SubscriptionUsageHelper } from '@libs/application';
 import { PartnerSubscriptionSwaggerDto } from '../dto/partner-subscription-swagger.dto';
 import { PartnerLimitsSwaggerDto } from '../dto/partner-limits-swagger.dto';
 import { PartnerStatsSwaggerDto } from '../dto/partner-stats-swagger.dto';
@@ -22,8 +28,12 @@ export class GetPartnerHandler {
   constructor(
     @Inject('IPartnerRepository')
     private readonly partnerRepository: IPartnerRepository,
+    @Inject('IPricingPlanRepository')
+    private readonly pricingPlanRepository: IPricingPlanRepository,
     @InjectRepository(PartnerEntity)
     private readonly partnerEntityRepository: Repository<PartnerEntity>,
+    @InjectRepository(PartnerSubscriptionEntity)
+    private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
     @InjectRepository(PartnerSubscriptionUsageEntity)
     private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
   ) {}
@@ -37,7 +47,7 @@ export class GetPartnerHandler {
       try {
         partnerEntity = await this.partnerEntityRepository.findOne({
           where: { id: request.partnerId },
-          relations: ['subscription', 'subscription.usage', 'limits'],
+          relations: ['subscription', 'subscription.usage'],
         });
       } catch (relationError) {
         console.warn(
@@ -58,14 +68,13 @@ export class GetPartnerHandler {
       console.log(
         `[GetPartnerHandler] Subscription: ${partnerEntity.subscription ? 'existe' : 'null'}`,
       );
-      console.log(`[GetPartnerHandler] Limits: ${partnerEntity.limits ? 'existe' : 'null'}`);
 
       let partner;
       try {
         partner = PartnerMapper.toDomain(
           partnerEntity,
           partnerEntity.subscription || null,
-          partnerEntity.limits || null,
+          null, // limits ya no se usa, se obtiene desde pricing_plan_limits
           null, // stats ya no se usa
         );
         console.log(`[GetPartnerHandler] Partner mapeado exitosamente`);
@@ -172,21 +181,36 @@ export class GetPartnerHandler {
         }
       }
 
-      // Mapear limits con validación
+      // Mapear limits desde pricing_plan_limits
       let limitsDto: PartnerLimitsSwaggerDto | null = null;
-      if (partnerEntity.limits) {
+      if (partnerEntity.subscription?.planId) {
         try {
-          limitsDto = {
-            maxTenants: Number(partnerEntity.limits.maxTenants) || 0,
-            maxBranches: Number(partnerEntity.limits.maxBranches) || 0,
-            maxCustomers: Number(partnerEntity.limits.maxCustomers) || 0,
-            maxRewards: Number(partnerEntity.limits.maxRewards) || 0,
-            maxAdmins: Number(partnerEntity.limits.maxAdmins ?? -1),
-            storageGB: Number(partnerEntity.limits.storageGB ?? -1),
-            apiCallsPerMonth: Number(partnerEntity.limits.apiCallsPerMonth ?? -1),
-          };
+          // Obtener límites desde pricing_plan_limits
+          const planLimits = await SubscriptionUsageHelper.getPlanLimitsForPartner(
+            partnerEntity.id,
+            this.subscriptionRepository,
+            this.pricingPlanRepository,
+          );
+
+          if (planLimits) {
+            limitsDto = {
+              maxTenants: planLimits.maxTenants ?? -1,
+              maxBranches: planLimits.maxBranches ?? -1,
+              maxCustomers: planLimits.maxCustomers ?? -1,
+              maxRewards: planLimits.maxRewards ?? -1,
+              maxAdmins: planLimits.maxAdmins ?? -1,
+              storageGB: planLimits.storageGB ?? -1,
+              apiCallsPerMonth: planLimits.apiCallsPerMonth ?? -1,
+              maxLoyaltyPrograms: planLimits.maxLoyaltyPrograms ?? -1,
+              maxLoyaltyProgramsBase: planLimits.maxLoyaltyProgramsBase ?? -1,
+              maxLoyaltyProgramsPromo: planLimits.maxLoyaltyProgramsPromo ?? -1,
+              maxLoyaltyProgramsPartner: planLimits.maxLoyaltyProgramsPartner ?? -1,
+              maxLoyaltyProgramsSubscription: planLimits.maxLoyaltyProgramsSubscription ?? -1,
+              maxLoyaltyProgramsExperimental: planLimits.maxLoyaltyProgramsExperimental ?? -1,
+            };
+          }
         } catch (limitsError) {
-          console.error('Error al mapear limits:', limitsError);
+          console.error('Error al obtener límites desde pricing plan:', limitsError);
           limitsDto = null;
         }
       }
@@ -214,6 +238,12 @@ export class GetPartnerHandler {
               branchesCount: Number(usageEntity.branchesCount) || 0,
               customersCount: Number(usageEntity.customersCount) || 0,
               rewardsCount: Number(usageEntity.rewardsCount) || 0,
+              loyaltyProgramsCount: Number(usageEntity.loyaltyProgramsCount) || 0,
+              loyaltyProgramsBaseCount: Number(usageEntity.loyaltyProgramsBaseCount) || 0,
+              loyaltyProgramsPromoCount: Number(usageEntity.loyaltyProgramsPromoCount) || 0,
+              loyaltyProgramsPartnerCount: Number(usageEntity.loyaltyProgramsPartnerCount) || 0,
+              loyaltyProgramsSubscriptionCount: Number(usageEntity.loyaltyProgramsSubscriptionCount) || 0,
+              loyaltyProgramsExperimentalCount: Number(usageEntity.loyaltyProgramsExperimentalCount) || 0,
             };
           }
         } catch (statsError) {
@@ -242,7 +272,6 @@ export class GetPartnerHandler {
           partner.branchesNumber || 0,
           partner.website || null,
           partner.socialMedia || null,
-          partner.rewardType || '',
           partner.currencyId || 0,
           partner.businessName || '',
           partner.taxId || '',

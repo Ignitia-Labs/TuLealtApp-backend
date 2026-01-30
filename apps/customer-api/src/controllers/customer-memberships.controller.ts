@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Param,
   Query,
   HttpCode,
@@ -23,6 +24,33 @@ import {
   GetCustomerMembershipHandler,
   GetCustomerMembershipRequest,
   GetCustomerMembershipResponse,
+  GetPointsBalanceHandler,
+  GetPointsBalanceRequest,
+  GetPointsBalanceResponse,
+  GetPointsTransactionsHandler,
+  GetPointsTransactionsRequest,
+  GetPointsTransactionsResponse,
+  GetCustomerLoyaltyProgramsHandler,
+  GetCustomerLoyaltyProgramsRequest,
+  GetCustomerLoyaltyProgramsResponse,
+  EnrollInProgramHandler,
+  EnrollInProgramRequest,
+  EnrollInProgramResponse,
+  GetCurrentTierHandler,
+  GetCurrentTierRequest,
+  GetCurrentTierResponse,
+  GetTierHistoryHandler,
+  GetTierHistoryRequest,
+  GetTierHistoryResponse,
+  GetReferralCodeHandler,
+  GetReferralCodeRequest,
+  GetReferralCodeResponse,
+  GetReferralsHandler,
+  GetReferralsRequest,
+  GetReferralsResponse,
+  GetActivityHandler,
+  GetActivityRequest,
+  GetActivityResponse,
 } from '@libs/application';
 import { ICustomerMembershipRepository } from '@libs/domain';
 import {
@@ -30,6 +58,7 @@ import {
   UnauthorizedErrorResponseDto,
   ForbiddenErrorResponseDto,
   InternalServerErrorResponseDto,
+  BadRequestErrorResponseDto,
   JwtAuthGuard,
   MembershipOwnershipGuard,
   CurrentUser,
@@ -54,6 +83,15 @@ export class CustomerMembershipsController {
   constructor(
     private readonly getCustomerMembershipsHandler: GetCustomerMembershipsHandler,
     private readonly getCustomerMembershipHandler: GetCustomerMembershipHandler,
+    private readonly getPointsBalanceHandler: GetPointsBalanceHandler,
+    private readonly getPointsTransactionsHandler: GetPointsTransactionsHandler,
+    private readonly getCustomerLoyaltyProgramsHandler: GetCustomerLoyaltyProgramsHandler,
+    private readonly enrollInProgramHandler: EnrollInProgramHandler,
+    private readonly getCurrentTierHandler: GetCurrentTierHandler,
+    private readonly getTierHistoryHandler: GetTierHistoryHandler,
+    private readonly getReferralCodeHandler: GetReferralCodeHandler,
+    private readonly getReferralsHandler: GetReferralsHandler,
+    private readonly getActivityHandler: GetActivityHandler,
     @Inject('ICustomerMembershipRepository')
     private readonly membershipRepository: ICustomerMembershipRepository,
   ) {}
@@ -194,5 +232,350 @@ export class CustomerMembershipsController {
     const request = new GetCustomerMembershipRequest();
     request.membershipId = id;
     return this.getCustomerMembershipHandler.execute(request, user.userId, user.roles);
+  }
+
+  @Get(':id/points/balance')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(MembershipOwnershipGuard)
+  @ApiOperation({
+    summary: 'Obtener balance de puntos',
+    description: 'Obtiene el balance actual de puntos de una membership',
+  })
+  @ApiParam({ name: 'id', type: Number, description: 'ID de la membership' })
+  @ApiResponse({
+    status: 200,
+    description: 'Balance de puntos obtenido exitosamente',
+    type: GetPointsBalanceResponse,
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado', type: UnauthorizedErrorResponseDto })
+  @ApiResponse({ status: 403, description: 'No autorizado', type: ForbiddenErrorResponseDto })
+  @ApiResponse({
+    status: 404,
+    description: 'Membership no encontrada',
+    type: NotFoundErrorResponseDto,
+  })
+  async getPointsBalance(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<GetPointsBalanceResponse> {
+    const request = new GetPointsBalanceRequest();
+    request.membershipId = id;
+    return this.getPointsBalanceHandler.execute(request, user.userId);
+  }
+
+  @Get(':id/points/transactions')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(MembershipOwnershipGuard)
+  @ApiOperation({
+    summary: 'Obtener historial de transacciones de puntos',
+    description: 'Obtiene el historial de transacciones de puntos de una membership',
+  })
+  @ApiParam({ name: 'id', type: Number, description: 'ID de la membership' })
+  @ApiQuery({
+    name: 'type',
+    enum: ['EARNING', 'REDEEM', 'ADJUSTMENT', 'REVERSAL', 'EXPIRATION', 'all'],
+    required: false,
+    description: 'Filtrar por tipo de transacción',
+  })
+  @ApiQuery({
+    name: 'fromDate',
+    required: false,
+    type: String,
+    description: 'Fecha de inicio (ISO 8601)',
+  })
+  @ApiQuery({
+    name: 'toDate',
+    required: false,
+    type: String,
+    description: 'Fecha de fin (ISO 8601)',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Número de página',
+    default: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Elementos por página',
+    default: 20,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Historial de transacciones obtenido exitosamente',
+    type: GetPointsTransactionsResponse,
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado', type: UnauthorizedErrorResponseDto })
+  @ApiResponse({ status: 403, description: 'No autorizado', type: ForbiddenErrorResponseDto })
+  @ApiResponse({
+    status: 404,
+    description: 'Membership no encontrada',
+    type: NotFoundErrorResponseDto,
+  })
+  async getPointsTransactions(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('type') type?: string,
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @CurrentUser() user?: JwtPayload,
+  ): Promise<GetPointsTransactionsResponse> {
+    const request = new GetPointsTransactionsRequest();
+    request.membershipId = id;
+    request.type = (type as any) || 'all';
+    request.fromDate = fromDate;
+    request.toDate = toDate;
+    request.page = page || 1;
+    request.limit = limit || 20;
+    return this.getPointsTransactionsHandler.execute(request, user!.userId);
+  }
+
+  @Get(':id/loyalty-programs')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(MembershipOwnershipGuard)
+  @ApiOperation({
+    summary: 'Listar programas de lealtad disponibles',
+    description: 'Obtiene todos los programas de lealtad disponibles para la membership',
+  })
+  @ApiParam({ name: 'id', type: Number, description: 'ID de la membership' })
+  @ApiQuery({
+    name: 'status',
+    enum: ['active', 'inactive', 'all'],
+    required: false,
+    description: 'Filtrar por status del programa',
+  })
+  @ApiQuery({
+    name: 'enrolled',
+    enum: ['true', 'false', 'all'],
+    required: false,
+    description: 'Filtrar por si está inscrito',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Programas de lealtad obtenidos exitosamente',
+    type: GetCustomerLoyaltyProgramsResponse,
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado', type: UnauthorizedErrorResponseDto })
+  @ApiResponse({ status: 403, description: 'No autorizado', type: ForbiddenErrorResponseDto })
+  @ApiResponse({
+    status: 404,
+    description: 'Membership no encontrada',
+    type: NotFoundErrorResponseDto,
+  })
+  async getLoyaltyPrograms(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('status') status?: string,
+    @Query('enrolled') enrolled?: string,
+    @CurrentUser() user?: JwtPayload,
+  ): Promise<GetCustomerLoyaltyProgramsResponse> {
+    const request = new GetCustomerLoyaltyProgramsRequest();
+    request.membershipId = id;
+    request.status = (status as any) || 'active';
+    request.enrolled = (enrolled as any) || 'all';
+    return this.getCustomerLoyaltyProgramsHandler.execute(request, user!.userId);
+  }
+
+  @Post(':id/loyalty-programs/:programId/enroll')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(MembershipOwnershipGuard)
+  @ApiOperation({
+    summary: 'Inscribirse en programa de lealtad',
+    description: 'Inscribe al customer en un programa de lealtad',
+  })
+  @ApiParam({ name: 'id', type: Number, description: 'ID de la membership' })
+  @ApiParam({ name: 'programId', type: Number, description: 'ID del programa' })
+  @ApiResponse({
+    status: 201,
+    description: 'Customer inscrito exitosamente',
+    type: EnrollInProgramResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos inválidos o ya está inscrito',
+    type: BadRequestErrorResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado', type: UnauthorizedErrorResponseDto })
+  @ApiResponse({ status: 403, description: 'No autorizado', type: ForbiddenErrorResponseDto })
+  @ApiResponse({
+    status: 404,
+    description: 'Membership o programa no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  async enrollInProgram(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('programId', ParseIntPipe) programId: number,
+    @CurrentUser() user?: JwtPayload,
+  ): Promise<EnrollInProgramResponse> {
+    const request = new EnrollInProgramRequest();
+    request.membershipId = id;
+    request.programId = programId;
+    return this.enrollInProgramHandler.execute(request, user!.userId);
+  }
+
+  @Get(':id/tier')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(MembershipOwnershipGuard)
+  @ApiOperation({
+    summary: 'Obtener tier actual',
+    description: 'Obtiene información del tier actual del customer',
+  })
+  @ApiParam({ name: 'id', type: Number, description: 'ID de la membership' })
+  @ApiResponse({
+    status: 200,
+    description: 'Tier actual obtenido exitosamente',
+    type: GetCurrentTierResponse,
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado', type: UnauthorizedErrorResponseDto })
+  @ApiResponse({ status: 403, description: 'No autorizado', type: ForbiddenErrorResponseDto })
+  @ApiResponse({
+    status: 404,
+    description: 'Membership no encontrada',
+    type: NotFoundErrorResponseDto,
+  })
+  async getCurrentTier(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user?: JwtPayload,
+  ): Promise<GetCurrentTierResponse> {
+    const request = new GetCurrentTierRequest();
+    request.membershipId = id;
+    return this.getCurrentTierHandler.execute(request, user!.userId);
+  }
+
+  @Get(':id/tier/history')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(MembershipOwnershipGuard)
+  @ApiOperation({
+    summary: 'Obtener historial de tiers',
+    description: 'Obtiene el historial de cambios de tier',
+  })
+  @ApiParam({ name: 'id', type: Number, description: 'ID de la membership' })
+  @ApiResponse({
+    status: 200,
+    description: 'Historial de tiers obtenido exitosamente',
+    type: GetTierHistoryResponse,
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado', type: UnauthorizedErrorResponseDto })
+  @ApiResponse({ status: 403, description: 'No autorizado', type: ForbiddenErrorResponseDto })
+  @ApiResponse({
+    status: 404,
+    description: 'Membership no encontrada',
+    type: NotFoundErrorResponseDto,
+  })
+  async getTierHistory(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user?: JwtPayload,
+  ): Promise<GetTierHistoryResponse> {
+    const request = new GetTierHistoryRequest();
+    request.membershipId = id;
+    return this.getTierHistoryHandler.execute(request, user!.userId);
+  }
+
+  @Get(':id/referral-code')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(MembershipOwnershipGuard)
+  @ApiOperation({
+    summary: 'Obtener código de referido',
+    description: 'Obtiene o genera el código de referido del customer',
+  })
+  @ApiParam({ name: 'id', type: Number, description: 'ID de la membership' })
+  @ApiResponse({
+    status: 200,
+    description: 'Código de referido obtenido exitosamente',
+    type: GetReferralCodeResponse,
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado', type: UnauthorizedErrorResponseDto })
+  @ApiResponse({ status: 403, description: 'No autorizado', type: ForbiddenErrorResponseDto })
+  @ApiResponse({
+    status: 404,
+    description: 'Membership no encontrada',
+    type: NotFoundErrorResponseDto,
+  })
+  async getReferralCode(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user?: JwtPayload,
+  ): Promise<GetReferralCodeResponse> {
+    const request = new GetReferralCodeRequest();
+    request.membershipId = id;
+    return this.getReferralCodeHandler.execute(request, user!.userId);
+  }
+
+  @Get(':id/referrals')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(MembershipOwnershipGuard)
+  @ApiOperation({
+    summary: 'Listar referidos',
+    description: 'Obtiene la lista de referidos del customer',
+  })
+  @ApiParam({ name: 'id', type: Number, description: 'ID de la membership' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de referidos obtenida exitosamente',
+    type: GetReferralsResponse,
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado', type: UnauthorizedErrorResponseDto })
+  @ApiResponse({ status: 403, description: 'No autorizado', type: ForbiddenErrorResponseDto })
+  @ApiResponse({
+    status: 404,
+    description: 'Membership no encontrada',
+    type: NotFoundErrorResponseDto,
+  })
+  async getReferrals(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user?: JwtPayload,
+  ): Promise<GetReferralsResponse> {
+    const request = new GetReferralsRequest();
+    request.membershipId = id;
+    return this.getReferralsHandler.execute(request, user!.userId);
+  }
+
+  @Get(':id/activity')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(MembershipOwnershipGuard)
+  @ApiOperation({
+    summary: 'Obtener actividad reciente',
+    description: 'Obtiene actividad reciente (transacciones, cambios de tier, etc.)',
+  })
+  @ApiParam({ name: 'id', type: Number, description: 'ID de la membership' })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Número de elementos',
+    default: 10,
+  })
+  @ApiQuery({
+    name: 'type',
+    enum: ['transactions', 'tier_changes', 'all'],
+    required: false,
+    description: 'Tipo de actividad',
+    default: 'all',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Actividad reciente obtenida exitosamente',
+    type: GetActivityResponse,
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado', type: UnauthorizedErrorResponseDto })
+  @ApiResponse({ status: 403, description: 'No autorizado', type: ForbiddenErrorResponseDto })
+  @ApiResponse({
+    status: 404,
+    description: 'Membership no encontrada',
+    type: NotFoundErrorResponseDto,
+  })
+  async getActivity(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('limit') limit?: number,
+    @Query('type') type?: string,
+    @CurrentUser() user?: JwtPayload,
+  ): Promise<GetActivityResponse> {
+    const request = new GetActivityRequest();
+    request.membershipId = id;
+    request.limit = limit || 10;
+    request.type = (type as any) || 'all';
+    return this.getActivityHandler.execute(request, user!.userId);
   }
 }

@@ -24,7 +24,6 @@ export class GetPartnersResponse {
         branchesNumber: 5,
         website: 'https://abc-comercial.com',
         socialMedia: '@abccomercial',
-        rewardType: 'Por monto de compra',
         currencyId: 8,
         businessName: 'Grupo Comercial ABC S.A. de C.V.',
         taxId: 'RFC-ABC-123456',

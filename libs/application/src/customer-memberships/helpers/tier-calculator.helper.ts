@@ -1,4 +1,9 @@
-import { CustomerMembership, ICustomerTierRepository } from '@libs/domain';
+import {
+  CustomerMembership,
+  ICustomerTierRepository,
+  ICustomerMembershipRepository,
+} from '@libs/domain';
+import { BalanceProjectionService } from '../../loyalty/balance-projection.service';
 
 /**
  * Helper para recalcular el tier de una membership basado en sus puntos actuales
@@ -30,7 +35,34 @@ export class TierCalculatorHelper {
   }
 
   /**
+   * Recalcula el tier de una membership basado en el balance del ledger
+   * Este es el método recomendado para recalcular tiers después de cambios en el ledger
+   *
+   * @param membershipId - ID de la membership a actualizar
+   * @param balanceProjectionService - Servicio para calcular balance desde ledger
+   * @param membershipRepository - Repositorio de memberships
+   * @param tierRepository - Repositorio para buscar tiers
+   * @returns La membership actualizada con tier correcto basado en balance del ledger
+   */
+  static async recalculateTierFromLedger(
+    membershipId: number,
+    balanceProjectionService: BalanceProjectionService,
+    membershipRepository: ICustomerMembershipRepository,
+    tierRepository: ICustomerTierRepository,
+  ): Promise<CustomerMembership> {
+    // 1. Recalcular balance desde ledger
+    const updatedMembership = await balanceProjectionService.recalculateBalance(membershipId);
+
+    // 2. Recalcular tier basado en el balance proyectado
+    return this.recalculateTier(updatedMembership, tierRepository);
+  }
+
+  /**
    * Agrega puntos a una membership y recalcula el tier automáticamente
+   *
+   * @deprecated Este método está deprecado. Los puntos deben actualizarse a través del ledger (PointsTransaction).
+   * Este método será removido en una versión futura. Use el sistema de ledger + BalanceProjectionService.
+   * @see PointsTransaction
    *
    * @param membership - La membership a actualizar
    * @param points - Cantidad de puntos a agregar
@@ -51,6 +83,10 @@ export class TierCalculatorHelper {
 
   /**
    * Resta puntos de una membership y recalcula el tier automáticamente
+   *
+   * @deprecated Este método está deprecado. Los puntos deben actualizarse a través del ledger (PointsTransaction).
+   * Este método será removido en una versión futura. Use el sistema de ledger + BalanceProjectionService.
+   * @see PointsTransaction
    *
    * @param membership - La membership a actualizar
    * @param points - Cantidad de puntos a restar

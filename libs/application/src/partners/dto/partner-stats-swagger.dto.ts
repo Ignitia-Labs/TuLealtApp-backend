@@ -31,4 +31,46 @@ export class PartnerStatsSwaggerDto {
     type: Number,
   })
   rewardsCount: number;
+
+  @ApiProperty({
+    example: 5,
+    description: 'Número total actual de loyalty programs',
+    type: Number,
+  })
+  loyaltyProgramsCount: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'Número actual de loyalty programs tipo BASE',
+    type: Number,
+  })
+  loyaltyProgramsBaseCount: number;
+
+  @ApiProperty({
+    example: 3,
+    description: 'Número actual de loyalty programs tipo PROMO',
+    type: Number,
+  })
+  loyaltyProgramsPromoCount: number;
+
+  @ApiProperty({
+    example: 0,
+    description: 'Número actual de loyalty programs tipo PARTNER',
+    type: Number,
+  })
+  loyaltyProgramsPartnerCount: number;
+
+  @ApiProperty({
+    example: 0,
+    description: 'Número actual de loyalty programs tipo SUBSCRIPTION',
+    type: Number,
+  })
+  loyaltyProgramsSubscriptionCount: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'Número actual de loyalty programs tipo EXPERIMENTAL',
+    type: Number,
+  })
+  loyaltyProgramsExperimentalCount: number;
 }

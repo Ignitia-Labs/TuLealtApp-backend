@@ -57,10 +57,11 @@ export class GetMessageHandler {
             select: ['id', 'name'],
           })
         : Promise.resolve([]),
-      // Obtener sender
+      // Obtener sender con roles
       this.userEntityRepository.findOne({
         where: { id: message.senderId },
-        select: ['id', 'name', 'roles'],
+        relations: ['rolesRelation'],
+        select: ['id', 'name'],
       }),
       // Obtener template si existe
       message.templateId
@@ -73,7 +74,7 @@ export class GetMessageHandler {
 
     const partnerNames = partnerEntities.map((p) => p.name);
     const senderName = senderEntity?.name || 'Unknown';
-    const senderRole = senderEntity?.roles?.[0] || 'unknown';
+    const senderRole = senderEntity?.rolesRelation?.[0]?.role || 'unknown';
     const templateName = templateEntity?.name || null;
 
     // Obtener estadísticas de entrega

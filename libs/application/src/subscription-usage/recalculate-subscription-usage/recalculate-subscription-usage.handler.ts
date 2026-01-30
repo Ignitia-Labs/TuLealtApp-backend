@@ -6,8 +6,9 @@ import {
   PartnerSubscriptionEntity,
   TenantEntity,
   BranchEntity,
-  PartnerLimitsEntity,
   CustomerMembershipEntity,
+  LoyaltyProgramEntity,
+  RewardRuleEntity,
 } from '@libs/infrastructure';
 import { SubscriptionUsageHelper } from '../subscription-usage.helper';
 import { RecalculateSubscriptionUsageRequest } from './recalculate-subscription-usage.request';
@@ -32,8 +33,10 @@ export class RecalculateSubscriptionUsageHandler {
     private readonly branchRepository: Repository<BranchEntity>,
     @InjectRepository(CustomerMembershipEntity)
     private readonly customerMembershipRepository: Repository<CustomerMembershipEntity>,
-    @InjectRepository(PartnerLimitsEntity)
-    private readonly limitsRepository: Repository<PartnerLimitsEntity>,
+    @InjectRepository(LoyaltyProgramEntity)
+    private readonly loyaltyProgramRepository: Repository<LoyaltyProgramEntity>,
+    @InjectRepository(RewardRuleEntity)
+    private readonly rewardRuleRepository: Repository<RewardRuleEntity>,
   ) {}
 
   async execute(
@@ -46,6 +49,12 @@ export class RecalculateSubscriptionUsageHandler {
       branchesCount: number;
       customersCount: number;
       rewardsCount: number;
+      loyaltyProgramsCount: number;
+      loyaltyProgramsBaseCount: number;
+      loyaltyProgramsPromoCount: number;
+      loyaltyProgramsPartnerCount: number;
+      loyaltyProgramsSubscriptionCount: number;
+      loyaltyProgramsExperimentalCount: number;
     }> = [];
 
     // Si se proporciona partnerSubscriptionId, recalcular solo esa suscripción
@@ -67,6 +76,8 @@ export class RecalculateSubscriptionUsageHandler {
         this.branchRepository,
         this.customerMembershipRepository,
         subscription.partnerId,
+        this.loyaltyProgramRepository,
+        this.rewardRuleRepository,
       );
 
       // Obtener el resultado actualizado
@@ -74,20 +85,11 @@ export class RecalculateSubscriptionUsageHandler {
         where: { partnerSubscriptionId: request.partnerSubscriptionId },
       });
 
-      // Obtener límites del partner
-      const limitsEntity = await this.limitsRepository.findOne({
-        where: { partnerId: subscription.partnerId },
-      });
-
       if (usageEntity) {
         this.logger.log(
           `Partner ${subscription.partnerId} - Usage: tenants=${usageEntity.tenantsCount}, branches=${usageEntity.branchesCount}, customers=${usageEntity.customersCount}`,
         );
-        if (limitsEntity) {
-          this.logger.log(
-            `Partner ${subscription.partnerId} - Limits: maxTenants=${limitsEntity.maxTenants}, maxBranches=${limitsEntity.maxBranches}`,
-          );
-        }
+        // Los límites ahora se obtienen desde pricing_plan_limits a través de la suscripción
 
         results.push({
           partnerId: subscription.partnerId,
@@ -96,6 +98,12 @@ export class RecalculateSubscriptionUsageHandler {
           branchesCount: usageEntity.branchesCount,
           customersCount: usageEntity.customersCount,
           rewardsCount: usageEntity.rewardsCount,
+          loyaltyProgramsCount: usageEntity.loyaltyProgramsCount ?? 0,
+          loyaltyProgramsBaseCount: usageEntity.loyaltyProgramsBaseCount ?? 0,
+          loyaltyProgramsPromoCount: usageEntity.loyaltyProgramsPromoCount ?? 0,
+          loyaltyProgramsPartnerCount: usageEntity.loyaltyProgramsPartnerCount ?? 0,
+          loyaltyProgramsSubscriptionCount: usageEntity.loyaltyProgramsSubscriptionCount ?? 0,
+          loyaltyProgramsExperimentalCount: usageEntity.loyaltyProgramsExperimentalCount ?? 0,
         });
       }
     }
@@ -112,6 +120,8 @@ export class RecalculateSubscriptionUsageHandler {
         this.branchRepository,
         this.customerMembershipRepository,
         true, // allowAnyStatus = true para recálculo manual
+        this.loyaltyProgramRepository,
+        this.rewardRuleRepository,
       );
 
       // Obtener el resultado actualizado (buscar cualquier suscripción, no solo activa)
@@ -133,20 +143,11 @@ export class RecalculateSubscriptionUsageHandler {
           where: { partnerSubscriptionId: subscription.id },
         });
 
-        // Obtener límites del partner
-        const limitsEntity = await this.limitsRepository.findOne({
-          where: { partnerId: request.partnerId },
-        });
-
         if (usageEntity) {
           this.logger.log(
             `Partner ${request.partnerId} - Usage: tenants=${usageEntity.tenantsCount}, branches=${usageEntity.branchesCount}`,
           );
-          if (limitsEntity) {
-            this.logger.log(
-              `Partner ${request.partnerId} - Limits: maxTenants=${limitsEntity.maxTenants}, maxBranches=${limitsEntity.maxBranches}`,
-            );
-          }
+          // Los límites ahora se obtienen desde pricing_plan_limits a través de la suscripción
 
           results.push({
             partnerId: request.partnerId,
@@ -155,6 +156,12 @@ export class RecalculateSubscriptionUsageHandler {
             branchesCount: usageEntity.branchesCount,
             customersCount: usageEntity.customersCount,
             rewardsCount: usageEntity.rewardsCount,
+            loyaltyProgramsCount: usageEntity.loyaltyProgramsCount ?? 0,
+            loyaltyProgramsBaseCount: usageEntity.loyaltyProgramsBaseCount ?? 0,
+            loyaltyProgramsPromoCount: usageEntity.loyaltyProgramsPromoCount ?? 0,
+            loyaltyProgramsPartnerCount: usageEntity.loyaltyProgramsPartnerCount ?? 0,
+            loyaltyProgramsSubscriptionCount: usageEntity.loyaltyProgramsSubscriptionCount ?? 0,
+            loyaltyProgramsExperimentalCount: usageEntity.loyaltyProgramsExperimentalCount ?? 0,
           });
         }
       }
@@ -212,6 +219,8 @@ export class RecalculateSubscriptionUsageHandler {
             this.branchRepository,
             this.customerMembershipRepository,
             subscription.partnerId,
+            this.loyaltyProgramRepository,
+            this.rewardRuleRepository,
           );
 
           // Obtener el resultado actualizado
@@ -219,20 +228,11 @@ export class RecalculateSubscriptionUsageHandler {
             where: { partnerSubscriptionId: subscription.id },
           });
 
-          // Obtener límites del partner
-          const limitsEntity = await this.limitsRepository.findOne({
-            where: { partnerId: subscription.partnerId },
-          });
-
           if (usageEntity) {
             this.logger.log(
               `Partner ${subscription.partnerId} - Usage: tenants=${usageEntity.tenantsCount}, branches=${usageEntity.branchesCount}`,
             );
-            if (limitsEntity) {
-              this.logger.log(
-                `Partner ${subscription.partnerId} - Limits: maxTenants=${limitsEntity.maxTenants}, maxBranches=${limitsEntity.maxBranches}`,
-              );
-            }
+            // Los límites ahora se obtienen desde pricing_plan_limits a través de la suscripción
 
             results.push({
               partnerId: subscription.partnerId,
@@ -241,6 +241,12 @@ export class RecalculateSubscriptionUsageHandler {
               branchesCount: usageEntity.branchesCount,
               customersCount: usageEntity.customersCount,
               rewardsCount: usageEntity.rewardsCount,
+              loyaltyProgramsCount: usageEntity.loyaltyProgramsCount ?? 0,
+              loyaltyProgramsBaseCount: usageEntity.loyaltyProgramsBaseCount ?? 0,
+              loyaltyProgramsPromoCount: usageEntity.loyaltyProgramsPromoCount ?? 0,
+              loyaltyProgramsPartnerCount: usageEntity.loyaltyProgramsPartnerCount ?? 0,
+              loyaltyProgramsSubscriptionCount: usageEntity.loyaltyProgramsSubscriptionCount ?? 0,
+              loyaltyProgramsExperimentalCount: usageEntity.loyaltyProgramsExperimentalCount ?? 0,
             });
           }
         } catch (error) {

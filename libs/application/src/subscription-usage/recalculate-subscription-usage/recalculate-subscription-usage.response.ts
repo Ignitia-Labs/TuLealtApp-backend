@@ -30,6 +30,12 @@ export class RecalculateSubscriptionUsageResponse {
         branchesCount: 12,
         customersCount: 2345,
         rewardsCount: 15,
+        loyaltyProgramsCount: 5,
+        loyaltyProgramsBaseCount: 1,
+        loyaltyProgramsPromoCount: 3,
+        loyaltyProgramsPartnerCount: 0,
+        loyaltyProgramsSubscriptionCount: 0,
+        loyaltyProgramsExperimentalCount: 1,
       },
     ],
   })
@@ -40,6 +46,12 @@ export class RecalculateSubscriptionUsageResponse {
     branchesCount: number;
     customersCount: number;
     rewardsCount: number;
+    loyaltyProgramsCount: number;
+    loyaltyProgramsBaseCount: number;
+    loyaltyProgramsPromoCount: number;
+    loyaltyProgramsPartnerCount: number;
+    loyaltyProgramsSubscriptionCount: number;
+    loyaltyProgramsExperimentalCount: number;
   }>;
 
   constructor(
@@ -52,6 +64,12 @@ export class RecalculateSubscriptionUsageResponse {
       branchesCount: number;
       customersCount: number;
       rewardsCount: number;
+      loyaltyProgramsCount: number;
+      loyaltyProgramsBaseCount: number;
+      loyaltyProgramsPromoCount: number;
+      loyaltyProgramsPartnerCount: number;
+      loyaltyProgramsSubscriptionCount: number;
+      loyaltyProgramsExperimentalCount: number;
     }>,
   ) {
     this.message = message;

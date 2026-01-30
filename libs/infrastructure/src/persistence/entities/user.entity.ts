@@ -3,6 +3,7 @@ import {
   Column,
   PrimaryGeneratedColumn,
   ManyToOne,
+  OneToMany,
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
@@ -11,10 +12,15 @@ import {
 import { PartnerEntity } from './partner.entity';
 import { TenantEntity } from './tenant.entity';
 import { BranchEntity } from './branch.entity';
+import { UserRoleEntity } from './user-role.entity';
+import { UserProfileDataEntity } from './user-profile-data.entity';
 
 /**
  * Entidad de persistencia para User
  * Mapea la entidad de dominio User a la tabla de base de datos
+ *
+ * NOTA: Los campos JSON se mantienen temporalmente para compatibilidad durante la migración.
+ * Las nuevas tablas relacionadas son la fuente de verdad después de migrar los datos.
  */
 @Entity('users')
 @Index('IDX_USERS_EMAIL', ['email'])
@@ -39,14 +45,18 @@ export class UserEntity {
   @Column('varchar', { length: 50 })
   phone: string;
 
-  @Column('json', { nullable: true })
-  profile: Record<string, any> | null;
-
   @Column('varchar', { length: 255 })
   passwordHash: string;
 
-  @Column('json')
-  roles: string[];
+  // ============================================================================
+  // Relaciones con Tablas Relacionadas (Fuente de Verdad - Columnas JSON eliminadas)
+  // ============================================================================
+
+  @OneToMany(() => UserRoleEntity, (userRole) => userRole.user, { cascade: true })
+  rolesRelation: UserRoleEntity[];
+
+  @OneToMany(() => UserProfileDataEntity, (profileData) => profileData.user, { cascade: true })
+  profileDataRelation: UserProfileDataEntity[];
 
   @Column('boolean', { default: true })
   isActive: boolean; // Mantener para compatibilidad

@@ -57,6 +57,12 @@ export class CreatePricingPlanHandler {
           request.limits.maxAdmins ?? -1,
           request.limits.storageGB ?? -1,
           request.limits.apiCallsPerMonth ?? -1,
+          request.limits.maxLoyaltyPrograms ?? -1,
+          request.limits.maxLoyaltyProgramsBase ?? -1,
+          request.limits.maxLoyaltyProgramsPromo ?? -1,
+          request.limits.maxLoyaltyProgramsPartner ?? -1,
+          request.limits.maxLoyaltyProgramsSubscription ?? -1,
+          request.limits.maxLoyaltyProgramsExperimental ?? -1,
         )
       : null;
 

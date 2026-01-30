@@ -68,6 +68,15 @@ export class CatalogSeed extends BaseSeed {
         { value: 'personalizado', label: 'Personalizado' },
       ];
 
+      // LOYALTY_PROGRAM_TYPES - Tipos de programas de lealtad disponibles
+      const LOYALTY_PROGRAM_TYPES = [
+        { value: 'BASE', label: 'Programa Base' },
+        { value: 'PROMO', label: 'Programa Promocional' },
+        { value: 'PARTNER', label: 'Programa de Partner' },
+        { value: 'SUBSCRIPTION', label: 'Programa de Suscripción' },
+        { value: 'EXPERIMENTAL', label: 'Programa Experimental' },
+      ];
+
       // PAYMENT_METHODS - Métodos de pago
       const PAYMENT_METHODS = [
         { value: 'tarjeta-credito', label: 'Tarjeta de crédito' },
@@ -216,6 +225,48 @@ export class CatalogSeed extends BaseSeed {
           } else {
             this.log(
               `- Catálogo ya existe: REWARD_TYPES - ${rewardType.label} (ID: ${existingCatalog.id}, slug: ${existingCatalog.slug})`,
+            );
+          }
+        }
+        displayOrder++;
+      }
+
+      // Procesar LOYALTY_PROGRAM_TYPES
+      displayOrder = 1;
+      for (const programType of LOYALTY_PROGRAM_TYPES) {
+        const key = `LOYALTY_PROGRAM_TYPES:${programType.value}`;
+        const existingCatalog = existingCatalogsMap.get(key.toLowerCase());
+
+        if (!existingCatalog) {
+          const catalog = Catalog.create(
+            'LOYALTY_PROGRAM_TYPES',
+            programType.label,
+            programType.value,
+            displayOrder,
+            true,
+          );
+          const savedCatalog = await this.catalogRepository.save(catalog);
+          existingCatalogsMap.set(key.toLowerCase(), savedCatalog);
+          this.log(
+            `✓ Catálogo creado: LOYALTY_PROGRAM_TYPES - ${programType.label} (slug: ${programType.value}, ID: ${savedCatalog.id})`,
+          );
+        } else {
+          // Verificar si necesita actualización
+          if (
+            existingCatalog.value !== programType.label ||
+            existingCatalog.slug !== programType.value
+          ) {
+            const updatedCatalog = existingCatalog.updateValue(
+              programType.label,
+              programType.value,
+            );
+            await this.catalogRepository.update(updatedCatalog);
+            this.log(
+              `✓ Catálogo actualizado: LOYALTY_PROGRAM_TYPES - ${programType.label} (ID: ${existingCatalog.id}, slug: ${programType.value})`,
+            );
+          } else {
+            this.log(
+              `- Catálogo ya existe: LOYALTY_PROGRAM_TYPES - ${programType.label} (ID: ${existingCatalog.id}, slug: ${existingCatalog.slug})`,
             );
           }
         }

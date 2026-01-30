@@ -3,21 +3,28 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IUserRepository, User } from '@libs/domain';
 import { UserEntity } from '../entities/user.entity';
+import { UserRoleEntity } from '../entities/user-role.entity';
 import { UserMapper } from '../mappers/user.mapper';
 
 /**
  * Implementación del repositorio de usuarios usando TypeORM
+ *
+ * NOTA: Actualizado para usar tablas relacionales en lugar de JSON_CONTAINS.
+ * Las relaciones (roles, profileData) se cargan con LEFT JOIN cuando es necesario.
  */
 @Injectable()
 export class UserRepository implements IUserRepository {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(UserRoleEntity)
+    private readonly userRoleRepository: Repository<UserRoleEntity>,
   ) {}
 
   async findById(id: number): Promise<User | null> {
     const userEntity = await this.userRepository.findOne({
       where: { id },
+      relations: ['rolesRelation', 'profileDataRelation'],
     });
 
     if (!userEntity) {
@@ -30,6 +37,7 @@ export class UserRepository implements IUserRepository {
   async findByEmail(email: string): Promise<User | null> {
     const userEntity = await this.userRepository.findOne({
       where: { email },
+      relations: ['rolesRelation', 'profileDataRelation'],
     });
 
     if (!userEntity) {
@@ -43,6 +51,7 @@ export class UserRepository implements IUserRepository {
     const userEntities = await this.userRepository.find({
       skip,
       take,
+      relations: ['rolesRelation', 'profileDataRelation'],
       order: {
         createdAt: 'DESC',
       },
@@ -52,15 +61,47 @@ export class UserRepository implements IUserRepository {
   }
 
   async save(user: User): Promise<User> {
-    const userEntity = UserMapper.toPersistence(user);
-    const savedEntity = await this.userRepository.save(userEntity);
-    return UserMapper.toDomain(savedEntity);
+    const entity = UserMapper.toPersistence(user);
+    const savedEntity = await this.userRepository.save(entity);
+
+    // Cargar relaciones después de guardar para el mapper
+    const entityWithRelations = await this.userRepository.findOne({
+      where: { id: savedEntity.id },
+      relations: ['rolesRelation', 'profileDataRelation'],
+    });
+
+    return UserMapper.toDomain(entityWithRelations || savedEntity);
   }
 
   async update(user: User): Promise<User> {
-    const userEntity = UserMapper.toPersistence(user);
-    const updatedEntity = await this.userRepository.save(userEntity);
-    return UserMapper.toDomain(updatedEntity);
+    // Cargar el usuario existente con sus roles para poder eliminarlos
+    const existingEntity = await this.userRepository.findOne({
+      where: { id: user.id },
+      relations: ['rolesRelation', 'profileDataRelation'],
+    });
+
+    if (!existingEntity) {
+      throw new Error(`User with ID ${user.id} not found`);
+    }
+
+    // Eliminar roles existentes antes de insertar los nuevos
+    if (existingEntity.rolesRelation && existingEntity.rolesRelation.length > 0) {
+      await this.userRoleRepository.remove(existingEntity.rolesRelation);
+    }
+
+    // Convertir a entidad de persistencia (esto creará nuevos roles sin IDs)
+    const entity = UserMapper.toPersistence(user);
+
+    // Guardar el usuario con los nuevos roles
+    const updatedEntity = await this.userRepository.save(entity);
+
+    // Cargar relaciones después de actualizar para el mapper
+    const entityWithRelations = await this.userRepository.findOne({
+      where: { id: updatedEntity.id },
+      relations: ['rolesRelation', 'profileDataRelation'],
+    });
+
+    return UserMapper.toDomain(entityWithRelations || updatedEntity);
   }
 
   async delete(id: number): Promise<void> {
@@ -73,26 +114,13 @@ export class UserRepository implements IUserRepository {
 
   async findByRoles(roles: string[], skip = 0, take = 100): Promise<User[]> {
     // Buscar usuarios que tengan al menos uno de los roles especificados
-    // Los roles están almacenados como JSON array en la columna roles
-    // Usamos JSON_CONTAINS que es específico de MySQL/MariaDB
+    // Usamos JOIN con la tabla user_roles en lugar de JSON_CONTAINS
     const queryBuilder = this.userRepository
       .createQueryBuilder('user')
-      .where('user.isActive = :isActive', { isActive: true });
-
-    // Construir condiciones OR para cada rol
-    const roleConditions = roles
-      .map((role, index) => `JSON_CONTAINS(user.roles, :role${index})`)
-      .join(' OR ');
-
-    const roleParams = roles.reduce(
-      (acc, role, index) => {
-        acc[`role${index}`] = JSON.stringify(role);
-        return acc;
-      },
-      {} as Record<string, string>,
-    );
-
-    queryBuilder.andWhere(`(${roleConditions})`, roleParams);
+      .leftJoinAndSelect('user.rolesRelation', 'userRole')
+      .leftJoinAndSelect('user.profileDataRelation', 'profileData')
+      .where('user.isActive = :isActive', { isActive: true })
+      .andWhere('userRole.role IN (:...roles)', { roles });
 
     const userEntities = await queryBuilder
       .orderBy('user.createdAt', 'DESC')
@@ -105,25 +133,13 @@ export class UserRepository implements IUserRepository {
 
   async countByRoles(roles: string[]): Promise<number> {
     // Contar usuarios que tengan al menos uno de los roles especificados
-    const queryBuilder = this.userRepository
+    // Usamos JOIN con la tabla user_roles en lugar de JSON_CONTAINS
+    return await this.userRepository
       .createQueryBuilder('user')
-      .where('user.isActive = :isActive', { isActive: true });
-
-    const roleConditions = roles
-      .map((role, index) => `JSON_CONTAINS(user.roles, :role${index})`)
-      .join(' OR ');
-
-    const roleParams = roles.reduce(
-      (acc, role, index) => {
-        acc[`role${index}`] = JSON.stringify(role);
-        return acc;
-      },
-      {} as Record<string, string>,
-    );
-
-    queryBuilder.andWhere(`(${roleConditions})`, roleParams);
-
-    return queryBuilder.getCount();
+      .innerJoin('user.rolesRelation', 'userRole')
+      .where('user.isActive = :isActive', { isActive: true })
+      .andWhere('userRole.role IN (:...roles)', { roles })
+      .getCount();
   }
 
   async findByPartnerIdAndRoles(
@@ -136,6 +152,8 @@ export class UserRepository implements IUserRepository {
     // Buscar usuarios que pertenezcan al partner y tengan al menos uno de los roles especificados
     const queryBuilder = this.userRepository
       .createQueryBuilder('user')
+      .leftJoinAndSelect('user.rolesRelation', 'userRole')
+      .leftJoinAndSelect('user.profileDataRelation', 'profileData')
       .where('user.partnerId = :partnerId', { partnerId });
 
     // Solo filtrar por isActive si includeInactive es false
@@ -143,20 +161,7 @@ export class UserRepository implements IUserRepository {
       queryBuilder.andWhere('user.isActive = :isActive', { isActive: true });
     }
 
-    // Construir condiciones OR para cada rol
-    const roleConditions = roles
-      .map((role, index) => `JSON_CONTAINS(user.roles, :role${index})`)
-      .join(' OR ');
-
-    const roleParams = roles.reduce(
-      (acc, role, index) => {
-        acc[`role${index}`] = JSON.stringify(role);
-        return acc;
-      },
-      {} as Record<string, string>,
-    );
-
-    queryBuilder.andWhere(`(${roleConditions})`, roleParams);
+    queryBuilder.andWhere('userRole.role IN (:...roles)', { roles });
 
     const userEntities = await queryBuilder
       .orderBy('user.createdAt', 'DESC')
@@ -175,6 +180,7 @@ export class UserRepository implements IUserRepository {
     // Contar usuarios que pertenezcan al partner y tengan al menos uno de los roles especificados
     const queryBuilder = this.userRepository
       .createQueryBuilder('user')
+      .innerJoin('user.rolesRelation', 'userRole')
       .where('user.partnerId = :partnerId', { partnerId });
 
     // Solo filtrar por isActive si includeInactive es false
@@ -182,19 +188,7 @@ export class UserRepository implements IUserRepository {
       queryBuilder.andWhere('user.isActive = :isActive', { isActive: true });
     }
 
-    const roleConditions = roles
-      .map((role, index) => `JSON_CONTAINS(user.roles, :role${index})`)
-      .join(' OR ');
-
-    const roleParams = roles.reduce(
-      (acc, role, index) => {
-        acc[`role${index}`] = JSON.stringify(role);
-        return acc;
-      },
-      {} as Record<string, string>,
-    );
-
-    queryBuilder.andWhere(`(${roleConditions})`, roleParams);
+    queryBuilder.andWhere('userRole.role IN (:...roles)', { roles });
 
     return queryBuilder.getCount();
   }

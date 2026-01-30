@@ -6,10 +6,13 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IPartnerRepository } from '@libs/domain';
+import { IPartnerRepository, IPricingPlanRepository } from '@libs/domain';
 import { GetPartnerLimitsRequest } from './get-partner-limits.request';
 import { GetPartnerLimitsResponse } from './get-partner-limits.response';
-import { PartnerLimitsEntity, PartnerMapper } from '@libs/infrastructure';
+import {
+  PartnerSubscriptionEntity,
+} from '@libs/infrastructure';
+import { SubscriptionUsageHelper } from '@libs/application';
 import { PartnerLimitsSwaggerDto } from '../dto/partner-limits-swagger.dto';
 
 /**
@@ -20,8 +23,10 @@ export class GetPartnerLimitsHandler {
   constructor(
     @Inject('IPartnerRepository')
     private readonly partnerRepository: IPartnerRepository,
-    @InjectRepository(PartnerLimitsEntity)
-    private readonly limitsRepository: Repository<PartnerLimitsEntity>,
+    @Inject('IPricingPlanRepository')
+    private readonly pricingPlanRepository: IPricingPlanRepository,
+    @InjectRepository(PartnerSubscriptionEntity)
+    private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
   ) {}
 
   async execute(request: GetPartnerLimitsRequest): Promise<GetPartnerLimitsResponse> {
@@ -32,32 +37,43 @@ export class GetPartnerLimitsHandler {
         throw new NotFoundException(`Partner with ID ${request.partnerId} not found`);
       }
 
-      // Buscar los límites del partner
-      const limitsEntity = await this.limitsRepository.findOne({
-        where: { partnerId: request.partnerId },
-      });
+      // Obtener límites desde pricing_plan_limits
+      const planLimits = await SubscriptionUsageHelper.getPlanLimitsForPartner(
+        request.partnerId,
+        this.subscriptionRepository,
+        this.pricingPlanRepository,
+      );
 
-      if (!limitsEntity) {
-        throw new NotFoundException(`Limits for partner with ID ${request.partnerId} not found`);
+      if (!planLimits) {
+        throw new NotFoundException(
+          `Pricing plan limits not found for partner with ID ${request.partnerId}. Please ensure the partner has an active subscription.`,
+        );
       }
 
       // Mapear a DTO de Swagger
       const limitsDto: PartnerLimitsSwaggerDto = {
-        maxTenants: Number(limitsEntity.maxTenants) || 0,
-        maxBranches: Number(limitsEntity.maxBranches) || 0,
-        maxCustomers: Number(limitsEntity.maxCustomers) || 0,
-        maxRewards: Number(limitsEntity.maxRewards) || 0,
-        maxAdmins: Number(limitsEntity.maxAdmins ?? -1),
-        storageGB: Number(limitsEntity.storageGB ?? -1),
-        apiCallsPerMonth: Number(limitsEntity.apiCallsPerMonth ?? -1),
+        maxTenants: planLimits.maxTenants,
+        maxBranches: planLimits.maxBranches,
+        maxCustomers: planLimits.maxCustomers,
+        maxRewards: planLimits.maxRewards,
+        maxAdmins: planLimits.maxAdmins ?? -1,
+        storageGB: planLimits.storageGB ?? -1,
+        apiCallsPerMonth: planLimits.apiCallsPerMonth ?? -1,
+        maxLoyaltyPrograms: planLimits.maxLoyaltyPrograms ?? -1,
+        maxLoyaltyProgramsBase: planLimits.maxLoyaltyProgramsBase ?? -1,
+        maxLoyaltyProgramsPromo: planLimits.maxLoyaltyProgramsPromo ?? -1,
+        maxLoyaltyProgramsPartner: planLimits.maxLoyaltyProgramsPartner ?? -1,
+        maxLoyaltyProgramsSubscription: planLimits.maxLoyaltyProgramsSubscription ?? -1,
+        maxLoyaltyProgramsExperimental: planLimits.maxLoyaltyProgramsExperimental ?? -1,
       };
 
+      // Usar planLimits.id como id y pricingPlanId como partnerId para mantener compatibilidad con la respuesta
       return new GetPartnerLimitsResponse(
-        limitsEntity.id,
-        limitsEntity.partnerId,
+        planLimits.id,
+        planLimits.pricingPlanId,
         limitsDto,
-        limitsEntity.createdAt,
-        limitsEntity.updatedAt,
+        planLimits.createdAt,
+        planLimits.updatedAt,
       );
     } catch (error) {
       if (error instanceof NotFoundException) {

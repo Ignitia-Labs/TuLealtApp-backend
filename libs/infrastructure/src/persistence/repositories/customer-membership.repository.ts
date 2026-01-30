@@ -94,6 +94,45 @@ export class CustomerMembershipRepository implements ICustomerMembershipReposito
   }
 
   async save(membership: CustomerMembership): Promise<CustomerMembership> {
+    // ⚠️ VALIDACIÓN CRÍTICA: No permitir actualización directa de points
+    // El campo points es una proyección calculada desde el ledger
+    // Solo se puede actualizar vía updateBalanceFromLedger()
+    if (membership.id > 0) {
+      // Es una actualización, verificar si se está intentando cambiar points
+      const existingEntity = await this.membershipRepository.findOne({
+        where: { id: membership.id },
+      });
+
+      if (existingEntity && existingEntity.points !== membership.points) {
+        // Se está intentando actualizar points directamente
+        // Ignorar el cambio y usar el valor actual de la BD
+        console.warn(
+          `⚠️ Attempted direct update of points for membership ${membership.id}. ` +
+            `Ignoring points change. Use updateBalanceFromLedger() instead.`,
+        );
+        // Crear nueva instancia con points de la BD usando el mapper
+        const existingMembership = CustomerMembershipMapper.toDomain(existingEntity);
+        const correctedMembership = CustomerMembership.create(
+          membership.userId,
+          membership.tenantId,
+          membership.registrationBranchId,
+          existingMembership.points, // Usar points de la BD, no del objeto entrante
+          membership.tierId,
+          membership.totalSpent,
+          membership.totalVisits,
+          membership.lastVisit,
+          membership.joinedDate,
+          membership.qrCode,
+          membership.status,
+          membership.id,
+        );
+        const membershipEntity = CustomerMembershipMapper.toPersistence(correctedMembership);
+        const savedEntity = await this.membershipRepository.save(membershipEntity);
+        return CustomerMembershipMapper.toDomain(savedEntity);
+      }
+    }
+
+    // Para nuevas memberships o actualizaciones sin cambio de points, proceder normalmente
     const membershipEntity = CustomerMembershipMapper.toPersistence(membership);
     const savedEntity = await this.membershipRepository.save(membershipEntity);
     return CustomerMembershipMapper.toDomain(savedEntity);
@@ -236,6 +275,40 @@ export class CustomerMembershipRepository implements ICustomerMembershipReposito
     return this.membershipRepository.count({
       where: { tenantId, status },
     });
+  }
+
+  /**
+   * Actualiza el balance de una membership desde el ledger
+   * Este es el ÚNICO método permitido para actualizar customer_memberships.points
+   */
+  async updateBalanceFromLedger(
+    membershipId: number,
+    balance: number,
+  ): Promise<CustomerMembership> {
+    // Obtener membership actual
+    const existingEntity = await this.membershipRepository.findOne({
+      where: { id: membershipId },
+    });
+
+    if (!existingEntity) {
+      throw new Error(`Membership with ID ${membershipId} not found`);
+    }
+
+    // Actualizar solo el campo points usando UPDATE directo
+    await this.membershipRepository.update(membershipId, {
+      points: Math.max(0, Math.round(balance)), // Asegurar que sea entero no negativo
+    });
+
+    // Retornar membership actualizada
+    const updatedEntity = await this.membershipRepository.findOne({
+      where: { id: membershipId },
+    });
+
+    if (!updatedEntity) {
+      throw new Error(`Membership with ID ${membershipId} not found after update`);
+    }
+
+    return CustomerMembershipMapper.toDomain(updatedEntity);
   }
 
   async getTopCustomersByTenantId(tenantId: number, limit: number): Promise<TopCustomer[]> {

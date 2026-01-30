@@ -12,9 +12,7 @@ import { MigrationInterface, QueryRunner, Table } from 'typeorm';
  * IMPORTANTE: Esta migración elimina las tablas y todos sus datos.
  * Los datos históricos se perderán permanentemente.
  */
-export class RemovePointsRulesRewardsTransactionsTables1784000000000
-  implements MigrationInterface
-{
+export class RemovePointsRulesRewardsTransactionsTables1784000000000 implements MigrationInterface {
   name = 'RemovePointsRulesRewardsTransactionsTables1784000000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -24,9 +22,7 @@ export class RemovePointsRulesRewardsTransactionsTables1784000000000
     const transactionsTable = await queryRunner.getTable('transactions');
     if (transactionsTable) {
       // Obtener conteo antes de eliminar (para logging)
-      const countResult = await queryRunner.query(
-        'SELECT COUNT(*) as count FROM transactions',
-      );
+      const countResult = await queryRunner.query('SELECT COUNT(*) as count FROM transactions');
       const count = parseInt(countResult[0]?.count || '0', 10);
       console.log(`📊 Total registros en transactions antes de eliminar: ${count}`);
 
@@ -64,9 +60,7 @@ export class RemovePointsRulesRewardsTransactionsTables1784000000000
     const rewardTiersTable = await queryRunner.getTable('reward_tiers');
     if (rewardTiersTable) {
       // Obtener conteo antes de eliminar (para logging)
-      const countResult = await queryRunner.query(
-        'SELECT COUNT(*) as count FROM reward_tiers',
-      );
+      const countResult = await queryRunner.query('SELECT COUNT(*) as count FROM reward_tiers');
       const count = parseInt(countResult[0]?.count || '0', 10);
       console.log(`📊 Total registros en reward_tiers antes de eliminar: ${count}`);
 
@@ -104,9 +98,7 @@ export class RemovePointsRulesRewardsTransactionsTables1784000000000
     const rewardsTable = await queryRunner.getTable('rewards');
     if (rewardsTable) {
       // Obtener conteo antes de eliminar (para logging)
-      const countResult = await queryRunner.query(
-        'SELECT COUNT(*) as count FROM rewards',
-      );
+      const countResult = await queryRunner.query('SELECT COUNT(*) as count FROM rewards');
       const count = parseInt(countResult[0]?.count || '0', 10);
       console.log(`📊 Total registros en rewards antes de eliminar: ${count}`);
 
@@ -144,9 +136,7 @@ export class RemovePointsRulesRewardsTransactionsTables1784000000000
     const pointsRulesTable = await queryRunner.getTable('points_rules');
     if (pointsRulesTable) {
       // Obtener conteo antes de eliminar (para logging)
-      const countResult = await queryRunner.query(
-        'SELECT COUNT(*) as count FROM points_rules',
-      );
+      const countResult = await queryRunner.query('SELECT COUNT(*) as count FROM points_rules');
       const count = parseInt(countResult[0]?.count || '0', 10);
       console.log(`📊 Total registros en points_rules antes de eliminar: ${count}`);
 

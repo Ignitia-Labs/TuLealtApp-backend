@@ -92,4 +92,14 @@ export interface ICustomerMembershipRepository {
    * Obtiene top customers por puntos totales
    */
   getTopCustomersByTenantId(tenantId: number, limit: number): Promise<TopCustomer[]>;
+
+  /**
+   * Actualiza el balance de una membership desde el ledger
+   * Este es el ÚNICO método permitido para actualizar customer_memberships.points
+   * El campo points es una proyección calculada desde el ledger, no debe actualizarse directamente
+   * @param membershipId ID de la membership
+   * @param balance Balance calculado desde el ledger
+   * @returns Membership actualizada con el nuevo balance
+   */
+  updateBalanceFromLedger(membershipId: number, balance: number): Promise<CustomerMembership>;
 }

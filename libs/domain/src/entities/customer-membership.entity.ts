@@ -2,6 +2,11 @@
  * Entidad de dominio CustomerMembership
  * Representa la membresía de un customer en un tenant específico
  * No depende de frameworks ni librerías externas
+ *
+ * IMPORTANTE: El campo `points` es una PROYECCIÓN calculada desde el ledger (points_transactions).
+ * NO debe actualizarse directamente. Todos los cambios de puntos deben pasar por el ledger
+ * usando transacciones PointsTransaction. Este campo se mantiene para performance y compatibilidad
+ * con queries existentes, pero la fuente de verdad es el ledger.
  */
 export class CustomerMembership {
   constructor(
@@ -9,6 +14,11 @@ export class CustomerMembership {
     public readonly userId: number,
     public readonly tenantId: number,
     public readonly registrationBranchId: number | null,
+    /**
+     * Proyección calculada desde points_transactions ledger.
+     * SOLO LECTURA - NO actualizar directamente.
+     * Usar PointsTransaction para cambios de puntos.
+     */
     public readonly points: number,
     public readonly tierId: number | null,
     public readonly totalSpent: number,
@@ -67,6 +77,9 @@ export class CustomerMembership {
 
   /**
    * Método de dominio para agregar puntos a la membership
+   * @deprecated Este método está deprecado. Los puntos deben actualizarse a través del ledger (PointsTransaction).
+   * Este método será removido en una versión futura. Use el sistema de ledger para cambios de puntos.
+   * @see PointsTransaction
    */
   addPoints(amount: number): CustomerMembership {
     const newPoints = Math.max(0, this.points + amount);
@@ -90,6 +103,9 @@ export class CustomerMembership {
 
   /**
    * Método de dominio para restar puntos de la membership
+   * @deprecated Este método está deprecado. Los puntos deben actualizarse a través del ledger (PointsTransaction).
+   * Este método será removido en una versión futura. Use el sistema de ledger para cambios de puntos.
+   * @see PointsTransaction
    */
   subtractPoints(amount: number): CustomerMembership {
     const newPoints = Math.max(0, this.points - amount);

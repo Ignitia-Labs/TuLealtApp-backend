@@ -112,13 +112,6 @@ export class GetPartnerResponse {
   socialMedia: string | null;
 
   @ApiProperty({
-    description: 'Tipo de recompensa',
-    example: 'Por monto de compra',
-    type: String,
-  })
-  rewardType: string;
-
-  @ApiProperty({
     description: 'ID de la moneda',
     example: 8,
     type: Number,
@@ -224,7 +217,6 @@ export class GetPartnerResponse {
     branchesNumber: number,
     website: string | null,
     socialMedia: string | null,
-    rewardType: string,
     currencyId: number,
     businessName: string,
     taxId: string,
@@ -253,7 +245,6 @@ export class GetPartnerResponse {
     this.branchesNumber = branchesNumber;
     this.website = website;
     this.socialMedia = socialMedia;
-    this.rewardType = rewardType;
     this.currencyId = currencyId;
     this.businessName = businessName;
     this.taxId = taxId;

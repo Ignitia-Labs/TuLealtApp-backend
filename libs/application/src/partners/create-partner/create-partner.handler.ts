@@ -6,7 +6,6 @@ import {
   ICountryRepository,
   Partner,
   PartnerSubscription,
-  PartnerLimits,
   SubscriptionStatus,
   BillingFrequency,
 } from '@libs/domain';
@@ -16,7 +15,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
   PartnerSubscriptionEntity,
-  PartnerLimitsEntity,
   PartnerEntity,
 } from '@libs/infrastructure';
 import { PartnerMapper } from '@libs/infrastructure';
@@ -41,8 +39,6 @@ export class CreatePartnerHandler {
     private readonly countryRepository: ICountryRepository,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
-    @InjectRepository(PartnerLimitsEntity)
-    private readonly limitsRepository: Repository<PartnerLimitsEntity>,
     @InjectRepository(PartnerEntity)
     private readonly partnerEntityRepository: Repository<PartnerEntity>,
     @InjectRepository(PartnerSubscriptionUsageEntity)
@@ -72,7 +68,6 @@ export class CreatePartnerHandler {
       request.city,
       request.plan,
       request.category,
-      request.rewardType,
       request.currencyId,
       request.businessName,
       request.taxId,
@@ -277,22 +272,9 @@ export class CreatePartnerHandler {
       this.usageRepository,
     );
 
-    // Crear y guardar los límites
-    const limits = PartnerLimits.create(
-      savedPartner.id,
-      request.limitsMaxTenants,
-      request.limitsMaxBranches,
-      request.limitsMaxCustomers,
-      request.limitsMaxRewards,
-      request.limitsMaxAdmins ?? -1,
-      request.limitsStorageGB ?? -1,
-      request.limitsApiCallsPerMonth ?? -1,
-    );
-    const limitsEntity = PartnerMapper.limitsToPersistence(limits);
-    limitsEntity.partnerId = savedPartner.id;
-    await this.limitsRepository.save(limitsEntity);
-
-    // Nota: Las estadísticas se crean automáticamente cuando se crea la suscripción
+    // Obtener límites de loyalty programs del plan si existe
+    // Nota: Los límites ahora se obtienen desde pricing_plan_limits a través de la suscripción.
+    // No se crea partner_limits. Las estadísticas se crean automáticamente cuando se crea la suscripción
     // a través de SubscriptionUsageHelper.createUsageForSubscription
 
     // Retornar response DTO

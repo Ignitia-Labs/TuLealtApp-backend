@@ -2,6 +2,11 @@
  * Entidad de dominio Tenant
  * Representa un tenant (negocio) en el dominio
  * No depende de frameworks ni librerías externas
+ *
+ * IMPORTANTE: Los campos `pointsExpireDays` y `minPointsToRedeem` son valores por defecto
+ * para programas de lealtad base. Los programas específicos (LoyaltyProgram) pueden
+ * sobrescribir estos valores. Use `LoyaltyProgramConfigResolver` para resolver el valor
+ * correcto considerando la precedencia: LoyaltyProgram > Tenant.
  */
 export class Tenant {
   constructor(
@@ -15,7 +20,19 @@ export class Tenant {
     public readonly currencyId: number,
     public readonly primaryColor: string,
     public readonly secondaryColor: string,
+    /**
+     * Días hasta que expiren los puntos (valor por defecto para programas base)
+     * Los programas específicos (LoyaltyProgram) pueden sobrescribir este valor
+     * mediante expirationPolicy.daysToExpire
+     * @see LoyaltyProgram.expirationPolicy
+     */
     public readonly pointsExpireDays: number,
+    /**
+     * Puntos mínimos para canjear (valor por defecto para programas base)
+     * Los programas específicos (LoyaltyProgram) pueden sobrescribir este valor
+     * mediante minPointsToRedeem
+     * @see LoyaltyProgram.minPointsToRedeem
+     */
     public readonly minPointsToRedeem: number,
     public readonly quickSearchCode: string,
     public readonly status: 'active' | 'inactive' | 'suspended',

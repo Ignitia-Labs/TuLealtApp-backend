@@ -77,13 +77,19 @@ export class UpdatePricingPlanHandler {
         ? request.limits
           ? PricingPlanLimits.create(
               existingPlan.id,
-              request.limits.maxTenants ?? -1,
-              request.limits.maxBranches ?? -1,
-              request.limits.maxCustomers ?? -1,
-              request.limits.maxRewards ?? -1,
-              request.limits.maxAdmins ?? -1,
-              request.limits.storageGB ?? -1,
-              request.limits.apiCallsPerMonth ?? -1,
+              request.limits.maxTenants ?? existingPlan.limits?.maxTenants ?? -1,
+              request.limits.maxBranches ?? existingPlan.limits?.maxBranches ?? -1,
+              request.limits.maxCustomers ?? existingPlan.limits?.maxCustomers ?? -1,
+              request.limits.maxRewards ?? existingPlan.limits?.maxRewards ?? -1,
+              request.limits.maxAdmins ?? existingPlan.limits?.maxAdmins ?? -1,
+              request.limits.storageGB ?? existingPlan.limits?.storageGB ?? -1,
+              request.limits.apiCallsPerMonth ?? existingPlan.limits?.apiCallsPerMonth ?? -1,
+              request.limits.maxLoyaltyPrograms ?? existingPlan.limits?.maxLoyaltyPrograms ?? -1,
+              request.limits.maxLoyaltyProgramsBase ?? existingPlan.limits?.maxLoyaltyProgramsBase ?? -1,
+              request.limits.maxLoyaltyProgramsPromo ?? existingPlan.limits?.maxLoyaltyProgramsPromo ?? -1,
+              request.limits.maxLoyaltyProgramsPartner ?? existingPlan.limits?.maxLoyaltyProgramsPartner ?? -1,
+              request.limits.maxLoyaltyProgramsSubscription ?? existingPlan.limits?.maxLoyaltyProgramsSubscription ?? -1,
+              request.limits.maxLoyaltyProgramsExperimental ?? existingPlan.limits?.maxLoyaltyProgramsExperimental ?? -1,
               existingPlan.limits?.id,
             )
           : null

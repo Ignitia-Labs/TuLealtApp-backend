@@ -1,11 +1,17 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IPartnerRepository } from '@libs/domain';
+import { IPartnerRepository, IPricingPlanRepository } from '@libs/domain';
 import { GetPartnersRequest } from './get-partners.request';
 import { GetPartnersResponse } from './get-partners.response';
 import { GetPartnerResponse } from '../get-partner/get-partner.response';
-import { PartnerEntity, PartnerMapper, PartnerSubscriptionUsageEntity } from '@libs/infrastructure';
+import {
+  PartnerEntity,
+  PartnerMapper,
+  PartnerSubscriptionUsageEntity,
+  PartnerSubscriptionEntity,
+} from '@libs/infrastructure';
+import { SubscriptionUsageHelper } from '@libs/application';
 import { PartnerSubscriptionSwaggerDto } from '../dto/partner-subscription-swagger.dto';
 import { PartnerLimitsSwaggerDto } from '../dto/partner-limits-swagger.dto';
 import { PartnerStatsSwaggerDto } from '../dto/partner-stats-swagger.dto';
@@ -18,15 +24,19 @@ export class GetPartnersHandler {
   constructor(
     @Inject('IPartnerRepository')
     private readonly partnerRepository: IPartnerRepository,
+    @Inject('IPricingPlanRepository')
+    private readonly pricingPlanRepository: IPricingPlanRepository,
     @InjectRepository(PartnerEntity)
     private readonly partnerEntityRepository: Repository<PartnerEntity>,
+    @InjectRepository(PartnerSubscriptionEntity)
+    private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
     @InjectRepository(PartnerSubscriptionUsageEntity)
     private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
   ) {}
 
   async execute(request: GetPartnersRequest): Promise<GetPartnersResponse> {
     const partnerEntities = await this.partnerEntityRepository.find({
-      relations: ['subscription', 'subscription.usage', 'limits'],
+      relations: ['subscription', 'subscription.usage'],
       order: {
         createdAt: 'DESC',
       },
@@ -43,7 +53,7 @@ export class GetPartnersHandler {
         const partner = PartnerMapper.toDomain(
           partnerEntity,
           partnerEntity.subscription,
-          partnerEntity.limits,
+          null, // limits ya no se usa, se obtiene desde pricing_plan_limits
           null, // stats ya no se usa
         );
 
@@ -91,18 +101,41 @@ export class GetPartnersHandler {
             }
           : null;
 
-        // Mapear limits
-        const limitsDto: PartnerLimitsSwaggerDto | null = partnerEntity.limits
-          ? {
-              maxTenants: partnerEntity.limits.maxTenants,
-              maxBranches: partnerEntity.limits.maxBranches,
-              maxCustomers: partnerEntity.limits.maxCustomers,
-              maxRewards: partnerEntity.limits.maxRewards,
-              maxAdmins: partnerEntity.limits.maxAdmins ?? -1,
-              storageGB: partnerEntity.limits.storageGB ?? -1,
-              apiCallsPerMonth: partnerEntity.limits.apiCallsPerMonth ?? -1,
+        // Mapear limits desde pricing_plan_limits
+        let limitsDto: PartnerLimitsSwaggerDto | null = null;
+        if (partnerEntity.subscription?.planId) {
+          try {
+            const planLimits = await SubscriptionUsageHelper.getPlanLimitsForPartner(
+              partnerEntity.id,
+              this.subscriptionRepository,
+              this.pricingPlanRepository,
+            );
+
+            if (planLimits) {
+              limitsDto = {
+                maxTenants: planLimits.maxTenants ?? -1,
+                maxBranches: planLimits.maxBranches ?? -1,
+                maxCustomers: planLimits.maxCustomers ?? -1,
+                maxRewards: planLimits.maxRewards ?? -1,
+                maxAdmins: planLimits.maxAdmins ?? -1,
+                storageGB: planLimits.storageGB ?? -1,
+                apiCallsPerMonth: planLimits.apiCallsPerMonth ?? -1,
+                maxLoyaltyPrograms: planLimits.maxLoyaltyPrograms ?? -1,
+                maxLoyaltyProgramsBase: planLimits.maxLoyaltyProgramsBase ?? -1,
+                maxLoyaltyProgramsPromo: planLimits.maxLoyaltyProgramsPromo ?? -1,
+                maxLoyaltyProgramsPartner: planLimits.maxLoyaltyProgramsPartner ?? -1,
+                maxLoyaltyProgramsSubscription: planLimits.maxLoyaltyProgramsSubscription ?? -1,
+                maxLoyaltyProgramsExperimental: planLimits.maxLoyaltyProgramsExperimental ?? -1,
+              };
             }
-          : null;
+          } catch (limitsError) {
+            console.error(
+              `Error al obtener límites desde pricing plan para partner ${partnerEntity.id}:`,
+              limitsError,
+            );
+            limitsDto = null;
+          }
+        }
 
         // Mapear stats desde partner_subscription_usage
         let statsDto: PartnerStatsSwaggerDto | null = null;
@@ -125,6 +158,12 @@ export class GetPartnersHandler {
               branchesCount: Number(usageEntity.branchesCount) || 0,
               customersCount: Number(usageEntity.customersCount) || 0,
               rewardsCount: Number(usageEntity.rewardsCount) || 0,
+              loyaltyProgramsCount: Number(usageEntity.loyaltyProgramsCount) || 0,
+              loyaltyProgramsBaseCount: Number(usageEntity.loyaltyProgramsBaseCount) || 0,
+              loyaltyProgramsPromoCount: Number(usageEntity.loyaltyProgramsPromoCount) || 0,
+              loyaltyProgramsPartnerCount: Number(usageEntity.loyaltyProgramsPartnerCount) || 0,
+              loyaltyProgramsSubscriptionCount: Number(usageEntity.loyaltyProgramsSubscriptionCount) || 0,
+              loyaltyProgramsExperimentalCount: Number(usageEntity.loyaltyProgramsExperimentalCount) || 0,
             };
           }
         }
@@ -144,7 +183,6 @@ export class GetPartnersHandler {
           partner.branchesNumber,
           partner.website,
           partner.socialMedia,
-          partner.rewardType,
           partner.currencyId || 0,
           partner.businessName,
           partner.taxId,

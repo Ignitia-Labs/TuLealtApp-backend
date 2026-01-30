@@ -93,7 +93,7 @@ export class CreatePartnerRequest {
   category: string;
 
   @ApiProperty({
-    description: 'Tipo de recompensa',
+    description: 'Tipo de recompensa (mantener por compatibilidad temporal)',
     example: 'Por monto de compra',
     type: String,
   })

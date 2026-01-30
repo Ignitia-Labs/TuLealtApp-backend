@@ -52,7 +52,6 @@ export class CreatePartnerRequestHandler {
       request.city,
       request.plan,
       request.category,
-      request.rewardType,
       request.currencyId,
       request.businessName,
       request.taxId,

@@ -12,7 +12,11 @@ import {
   JwtPayload,
 } from '@libs/application';
 import { IUserRepository, ITenantRepository, IBranchRepository, User } from '@libs/domain';
-import { PartnerLimitsEntity } from '@libs/infrastructure';
+import {
+  PartnerSubscriptionEntity,
+  PartnerSubscriptionUsageEntity,
+} from '@libs/infrastructure';
+import { IPricingPlanRepository } from '@libs/domain';
 
 describe('BranchesController', () => {
   let controller: BranchesController;
@@ -24,7 +28,9 @@ describe('BranchesController', () => {
   let userRepository: jest.Mocked<IUserRepository>;
   let tenantRepository: jest.Mocked<ITenantRepository>;
   let branchRepository: jest.Mocked<IBranchRepository>;
-  let partnerLimitsRepository: jest.Mocked<Repository<PartnerLimitsEntity>>;
+  let subscriptionRepository: jest.Mocked<Repository<PartnerSubscriptionEntity>>;
+  let usageRepository: jest.Mocked<Repository<PartnerSubscriptionUsageEntity>>;
+  let pricingPlanRepository: jest.Mocked<IPricingPlanRepository>;
 
   const mockUser: JwtPayload = {
     userId: 1,
@@ -63,16 +69,45 @@ describe('BranchesController', () => {
     name: 'Test Tenant',
   };
 
-  const mockPartnerLimitsEntity: PartnerLimitsEntity = {
+  const mockSubscriptionEntity: PartnerSubscriptionEntity = {
     id: 1,
     partnerId: 1,
+    planId: '1',
+    planType: 'conecta',
+    status: 'active',
+    billingFrequency: 'monthly',
+    billingAmount: 100,
+    usage: {
+      id: 1,
+      partnerSubscriptionId: 1,
+      tenantsCount: 2,
+      branchesCount: 5,
+      customersCount: 100,
+      rewardsCount: 10,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as PartnerSubscriptionUsageEntity,
+  } as PartnerSubscriptionEntity;
+
+  const mockPricingPlanLimits = {
+    id: 1,
+    pricingPlanId: 1,
     maxTenants: 5,
     maxBranches: 20,
     maxCustomers: 5000,
     maxRewards: 50,
+    maxAdmins: -1,
+    storageGB: -1,
+    apiCallsPerMonth: -1,
+    maxLoyaltyPrograms: -1,
+    maxLoyaltyProgramsBase: -1,
+    maxLoyaltyProgramsPromo: -1,
+    maxLoyaltyProgramsPartner: -1,
+    maxLoyaltyProgramsSubscription: -1,
+    maxLoyaltyProgramsExperimental: -1,
     createdAt: new Date(),
     updatedAt: new Date(),
-  } as PartnerLimitsEntity;
+  };
 
   beforeEach(async () => {
     const mockCreateBranchHandler = {
@@ -108,8 +143,16 @@ describe('BranchesController', () => {
       findByTenantId: jest.fn(),
     };
 
-    const mockPartnerLimitsRepository = {
+    const mockSubscriptionRepository = {
       findOne: jest.fn(),
+    };
+
+    const mockUsageRepository = {
+      findOne: jest.fn(),
+    };
+
+    const mockPricingPlanRepository = {
+      findById: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -148,8 +191,16 @@ describe('BranchesController', () => {
           useValue: mockBranchRepository,
         },
         {
-          provide: getRepositoryToken(PartnerLimitsEntity),
-          useValue: mockPartnerLimitsRepository,
+          provide: 'IPricingPlanRepository',
+          useValue: mockPricingPlanRepository,
+        },
+        {
+          provide: getRepositoryToken(PartnerSubscriptionEntity),
+          useValue: mockSubscriptionRepository,
+        },
+        {
+          provide: getRepositoryToken(PartnerSubscriptionUsageEntity),
+          useValue: mockUsageRepository,
         },
       ],
     }).compile();
@@ -163,7 +214,9 @@ describe('BranchesController', () => {
     userRepository = module.get('IUserRepository');
     tenantRepository = module.get('ITenantRepository');
     branchRepository = module.get('IBranchRepository');
-    partnerLimitsRepository = module.get(getRepositoryToken(PartnerLimitsEntity));
+    pricingPlanRepository = module.get('IPricingPlanRepository');
+    subscriptionRepository = module.get(getRepositoryToken(PartnerSubscriptionEntity));
+    usageRepository = module.get(getRepositoryToken(PartnerSubscriptionUsageEntity));
   });
 
   afterEach(() => {
@@ -240,7 +293,12 @@ describe('BranchesController', () => {
 
       userRepository.findById.mockResolvedValue(mockUserEntity);
       tenantRepository.findById.mockResolvedValue(mockTenant as any);
-      partnerLimitsRepository.findOne.mockResolvedValue(mockPartnerLimitsEntity);
+      subscriptionRepository.findOne.mockResolvedValue(mockSubscriptionEntity);
+      pricingPlanRepository.findById.mockResolvedValue({
+        id: 1,
+        limits: mockPricingPlanLimits,
+      } as any);
+      usageRepository.findOne.mockResolvedValue(mockSubscriptionEntity.usage);
       tenantRepository.findByPartnerId.mockResolvedValue([mockTenant] as any);
       branchRepository.findByTenantId.mockResolvedValue([]); // No existing branches
       createBranchHandler.execute.mockResolvedValue(mockResponse as any);
@@ -249,9 +307,8 @@ describe('BranchesController', () => {
 
       expect(userRepository.findById).toHaveBeenCalledWith(mockUser.userId);
       expect(tenantRepository.findById).toHaveBeenCalledWith(1);
-      expect(partnerLimitsRepository.findOne).toHaveBeenCalledWith({
-        where: { partnerId: 1 },
-      });
+      expect(subscriptionRepository.findOne).toHaveBeenCalled();
+      expect(pricingPlanRepository.findById).toHaveBeenCalled();
       expect(createBranchHandler.execute).toHaveBeenCalledWith({
         ...createRequest,
         tenantId: 1,
@@ -264,7 +321,12 @@ describe('BranchesController', () => {
 
       userRepository.findById.mockResolvedValue(mockUserEntity);
       tenantRepository.findById.mockResolvedValue(mockTenant as any);
-      partnerLimitsRepository.findOne.mockResolvedValue(mockPartnerLimitsEntity);
+      subscriptionRepository.findOne.mockResolvedValue(mockSubscriptionEntity);
+      pricingPlanRepository.findById.mockResolvedValue({
+        id: 1,
+        limits: mockPricingPlanLimits,
+      } as any);
+      usageRepository.findOne.mockResolvedValue(mockSubscriptionEntity.usage);
       tenantRepository.findByPartnerId.mockResolvedValue([mockTenant] as any);
       branchRepository.findByTenantId.mockResolvedValue(existingBranches as any);
 
@@ -293,10 +355,14 @@ describe('BranchesController', () => {
 
       userRepository.findById.mockResolvedValue(mockUserEntity);
       tenantRepository.findById.mockResolvedValue(tenant1 as any);
-      partnerLimitsRepository.findOne.mockResolvedValue({
-        ...mockPartnerLimitsEntity,
-        maxBranches: 25, // Allow more
-      });
+      subscriptionRepository.findOne.mockResolvedValue(mockSubscriptionEntity);
+      pricingPlanRepository.findById.mockResolvedValue({
+        id: 1,
+        limits: {
+          ...mockPricingPlanLimits,
+          maxBranches: 25, // Allow more
+        },
+      } as any);
       tenantRepository.findByPartnerId.mockResolvedValue([tenant1, tenant2] as any);
       branchRepository.findByTenantId
         .mockResolvedValueOnce(branchesTenant1 as any)
@@ -311,12 +377,15 @@ describe('BranchesController', () => {
       expect(result).toEqual(mockResponse);
     });
 
-    it('should allow creation when maxBranches is 999 (unlimited)', async () => {
+    it('should allow creation when maxBranches is -1 (unlimited)', async () => {
       const unlimitedLimits = {
-        ...mockPartnerLimitsEntity,
-        maxBranches: 999,
+        ...mockPricingPlanLimits,
+        maxBranches: -1, // Unlimited
       };
-      const existingBranches = Array(100).fill({ id: 1, tenantId: 1 }); // 100 branches
+      const usageWithManyBranches = {
+        ...mockSubscriptionEntity.usage,
+        branchesCount: 100, // Many branches but unlimited
+      } as PartnerSubscriptionUsageEntity;
       const mockResponse = {
         id: 1,
         tenantId: 1,
@@ -328,9 +397,12 @@ describe('BranchesController', () => {
 
       userRepository.findById.mockResolvedValue(mockUserEntity);
       tenantRepository.findById.mockResolvedValue(mockTenant as any);
-      partnerLimitsRepository.findOne.mockResolvedValue(unlimitedLimits);
-      tenantRepository.findByPartnerId.mockResolvedValue([mockTenant] as any);
-      branchRepository.findByTenantId.mockResolvedValue(existingBranches as any);
+      subscriptionRepository.findOne.mockResolvedValue(mockSubscriptionEntity);
+      pricingPlanRepository.findById.mockResolvedValue({
+        id: 1,
+        limits: unlimitedLimits,
+      } as any);
+      usageRepository.findOne.mockResolvedValue(usageWithManyBranches);
       createBranchHandler.execute.mockResolvedValue(mockResponse as any);
 
       const result = await controller.createBranch(1, createRequest as any, mockUser);
@@ -386,12 +458,19 @@ describe('BranchesController', () => {
         createdAt: new Date(),
       };
 
+      const otherPartnerSubscription = {
+        ...mockSubscriptionEntity,
+        partnerId: 2,
+      } as PartnerSubscriptionEntity;
+
       userRepository.findById.mockResolvedValue(mockAdminUserEntity);
       tenantRepository.findById.mockResolvedValue(otherTenant as any);
-      partnerLimitsRepository.findOne.mockResolvedValue({
-        ...mockPartnerLimitsEntity,
-        partnerId: 2,
-      });
+      subscriptionRepository.findOne.mockResolvedValue(otherPartnerSubscription);
+      pricingPlanRepository.findById.mockResolvedValue({
+        id: 1,
+        limits: mockPricingPlanLimits,
+      } as any);
+      usageRepository.findOne.mockResolvedValue(mockSubscriptionEntity.usage);
       tenantRepository.findByPartnerId.mockResolvedValue([otherTenant] as any);
       branchRepository.findByTenantId.mockResolvedValue([]);
       createBranchHandler.execute.mockResolvedValue(mockResponse as any);

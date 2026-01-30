@@ -60,13 +60,27 @@ export class PartnerRequestRepository implements IPartnerRequestRepository {
   async save(request: PartnerRequest): Promise<PartnerRequest> {
     const entity = PartnerRequestMapper.toPersistence(request);
     const savedEntity = await this.partnerRequestRepository.save(entity);
-    return PartnerRequestMapper.toDomain(savedEntity);
+    // Recargar entidad
+    const reloadedEntity = await this.partnerRequestRepository.findOne({
+      where: { id: savedEntity.id },
+    });
+    if (!reloadedEntity) {
+      throw new Error(`Failed to reload partner request with ID ${savedEntity.id}`);
+    }
+    return PartnerRequestMapper.toDomain(reloadedEntity);
   }
 
   async update(request: PartnerRequest): Promise<PartnerRequest> {
     const entity = PartnerRequestMapper.toPersistence(request);
     const updatedEntity = await this.partnerRequestRepository.save(entity);
-    return PartnerRequestMapper.toDomain(updatedEntity);
+    // Recargar entidad
+    const reloadedEntity = await this.partnerRequestRepository.findOne({
+      where: { id: updatedEntity.id },
+    });
+    if (!reloadedEntity) {
+      throw new Error(`Failed to reload partner request with ID ${updatedEntity.id}`);
+    }
+    return PartnerRequestMapper.toDomain(reloadedEntity);
   }
 
   async delete(id: number): Promise<void> {

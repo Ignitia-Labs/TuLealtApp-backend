@@ -199,6 +199,66 @@ class PricingPlanLimitsDto {
   @IsNumber()
   @IsOptional()
   apiCallsPerMonth?: number;
+
+  @ApiProperty({
+    example: 5,
+    description: 'Máximo número total de loyalty programs (-1 para ilimitado)',
+    required: false,
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  maxLoyaltyPrograms?: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'Máximo número de loyalty programs tipo BASE (-1 para ilimitado)',
+    required: false,
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  maxLoyaltyProgramsBase?: number;
+
+  @ApiProperty({
+    example: 3,
+    description: 'Máximo número de loyalty programs tipo PROMO (-1 para ilimitado)',
+    required: false,
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  maxLoyaltyProgramsPromo?: number;
+
+  @ApiProperty({
+    example: 2,
+    description: 'Máximo número de loyalty programs tipo PARTNER (-1 para ilimitado)',
+    required: false,
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  maxLoyaltyProgramsPartner?: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'Máximo número de loyalty programs tipo SUBSCRIPTION (-1 para ilimitado)',
+    required: false,
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  maxLoyaltyProgramsSubscription?: number;
+
+  @ApiProperty({
+    example: 0,
+    description: 'Máximo número de loyalty programs tipo EXPERIMENTAL (-1 para ilimitado)',
+    required: false,
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  maxLoyaltyProgramsExperimental?: number;
 }
 
 /**

@@ -15,12 +15,21 @@ export class UpdateCustomerMembershipRequest {
   @Min(1)
   membershipId: number;
 
+  /**
+   * @deprecated Este campo está deprecado. Los puntos NO deben actualizarse directamente.
+   * Los puntos son una proyección calculada desde el ledger (points_transactions).
+   * Para cambiar puntos, use el sistema de ledger con PointsTransaction.
+   * Este campo será removido en una versión futura.
+   * @see PointsTransaction
+   */
   @ApiProperty({
-    description: 'Puntos a actualizar (opcional)',
+    description:
+      'DEPRECATED: Puntos a actualizar (opcional). NO USE ESTE CAMPO. Los puntos se actualizan automáticamente desde el ledger.',
     example: 2000,
     type: Number,
     minimum: 0,
     required: false,
+    deprecated: true,
   })
   @IsNumber()
   @IsOptional()

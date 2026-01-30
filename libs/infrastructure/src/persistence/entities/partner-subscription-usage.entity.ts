@@ -40,6 +40,24 @@ export class PartnerSubscriptionUsageEntity {
   @Column('int', { default: 0 })
   rewardsCount: number;
 
+  @Column('int', { default: 0 })
+  loyaltyProgramsCount: number;
+
+  @Column('int', { default: 0 })
+  loyaltyProgramsBaseCount: number;
+
+  @Column('int', { default: 0 })
+  loyaltyProgramsPromoCount: number;
+
+  @Column('int', { default: 0 })
+  loyaltyProgramsPartnerCount: number;
+
+  @Column('int', { default: 0 })
+  loyaltyProgramsSubscriptionCount: number;
+
+  @Column('int', { default: 0 })
+  loyaltyProgramsExperimentalCount: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

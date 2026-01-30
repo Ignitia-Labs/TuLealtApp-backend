@@ -49,6 +49,24 @@ export class PricingPlanLimitsEntity {
   @Column('int')
   apiCallsPerMonth: number; // -1 para ilimitado
 
+  @Column('int')
+  maxLoyaltyPrograms: number; // -1 para ilimitado
+
+  @Column('int')
+  maxLoyaltyProgramsBase: number; // -1 para ilimitado
+
+  @Column('int')
+  maxLoyaltyProgramsPromo: number; // -1 para ilimitado
+
+  @Column('int')
+  maxLoyaltyProgramsPartner: number; // -1 para ilimitado
+
+  @Column('int')
+  maxLoyaltyProgramsSubscription: number; // -1 para ilimitado
+
+  @Column('int')
+  maxLoyaltyProgramsExperimental: number; // -1 para ilimitado
+
   @CreateDateColumn()
   createdAt: Date;
 

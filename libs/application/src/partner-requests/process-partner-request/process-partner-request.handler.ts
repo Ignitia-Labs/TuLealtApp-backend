@@ -141,7 +141,6 @@ export class ProcessPartnerRequestHandler {
     createPartnerRequest.branchesNumber = updatedPartnerRequest.branchesNumber;
     createPartnerRequest.website = updatedPartnerRequest.website;
     createPartnerRequest.socialMedia = updatedPartnerRequest.socialMedia;
-    createPartnerRequest.rewardType = updatedPartnerRequest.rewardType;
     // currencyId es number tanto en dominio como en request
     createPartnerRequest.currencyId = updatedPartnerRequest.currencyId;
     createPartnerRequest.businessName = updatedPartnerRequest.businessName;
@@ -203,6 +202,12 @@ export class ProcessPartnerRequestHandler {
       maxAdmins: number;
       storageGB: number;
       apiCallsPerMonth: number;
+      maxLoyaltyPrograms: number;
+      maxLoyaltyProgramsBase: number;
+      maxLoyaltyProgramsPromo: number;
+      maxLoyaltyProgramsPartner: number;
+      maxLoyaltyProgramsSubscription: number;
+      maxLoyaltyProgramsExperimental: number;
     } | null = null;
 
     // Intentar obtener los límites del plan si existe planId
@@ -217,6 +222,12 @@ export class ProcessPartnerRequestHandler {
           maxAdmins: pricingPlan.limits.maxAdmins,
           storageGB: pricingPlan.limits.storageGB,
           apiCallsPerMonth: pricingPlan.limits.apiCallsPerMonth,
+          maxLoyaltyPrograms: pricingPlan.limits.maxLoyaltyPrograms,
+          maxLoyaltyProgramsBase: pricingPlan.limits.maxLoyaltyProgramsBase,
+          maxLoyaltyProgramsPromo: pricingPlan.limits.maxLoyaltyProgramsPromo,
+          maxLoyaltyProgramsPartner: pricingPlan.limits.maxLoyaltyProgramsPartner,
+          maxLoyaltyProgramsSubscription: pricingPlan.limits.maxLoyaltyProgramsSubscription,
+          maxLoyaltyProgramsExperimental: pricingPlan.limits.maxLoyaltyProgramsExperimental,
         };
       }
     }
@@ -234,6 +245,9 @@ export class ProcessPartnerRequestHandler {
     createPartnerRequest.limitsStorageGB = request.limitsStorageGB ?? planLimits?.storageGB ?? -1;
     createPartnerRequest.limitsApiCallsPerMonth =
       request.limitsApiCallsPerMonth ?? planLimits?.apiCallsPerMonth ?? -1;
+
+    // Los límites de loyalty programs se transferirán automáticamente desde el plan en CreatePartnerHandler
+    // No se exponen en el request para simplificar, se toman directamente del plan
 
     // Envolver toda la lógica en una transacción para garantizar atomicidad
     return await this.dataSource.transaction(async (manager) => {

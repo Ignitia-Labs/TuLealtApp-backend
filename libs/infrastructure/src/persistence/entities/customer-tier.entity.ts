@@ -3,11 +3,13 @@ import {
   Column,
   PrimaryGeneratedColumn,
   ManyToOne,
+  OneToMany,
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { TenantEntity } from './tenant.entity';
+import { CustomerTierBenefitEntity } from './customer-tier-benefit.entity';
 
 /**
  * Entidad de persistencia para CustomerTier
@@ -42,11 +44,15 @@ export class CustomerTierEntity {
   @Column('varchar', { length: 7 })
   color: string;
 
-  @Column('json')
-  benefits: string[];
-
   @Column('decimal', { precision: 5, scale: 2, nullable: true })
   multiplier: number | null; // Multiplicador de puntos (ej: 1.05 = 5% bonus)
+
+  // ============================================================================
+  // Relación con Tabla Relacionada
+  // ============================================================================
+
+  @OneToMany(() => CustomerTierBenefitEntity, (benefit) => benefit.tier, { cascade: true })
+  benefitsRelation: CustomerTierBenefitEntity[];
 
   @Column('varchar', { length: 255, nullable: true })
   icon: string | null; // Nombre del icono o URL

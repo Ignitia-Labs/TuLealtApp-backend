@@ -12,7 +12,11 @@ import {
   JwtPayload,
 } from '@libs/application';
 import { IUserRepository, ITenantRepository, User } from '@libs/domain';
-import { PartnerLimitsEntity } from '@libs/infrastructure';
+import {
+  PartnerSubscriptionEntity,
+  PartnerSubscriptionUsageEntity,
+} from '@libs/infrastructure';
+import { IPricingPlanRepository } from '@libs/domain';
 
 describe('TenantsController', () => {
   let controller: TenantsController;
@@ -23,7 +27,9 @@ describe('TenantsController', () => {
   let deleteTenantHandler: jest.Mocked<DeleteTenantHandler>;
   let userRepository: jest.Mocked<IUserRepository>;
   let tenantRepository: jest.Mocked<ITenantRepository>;
-  let partnerLimitsRepository: jest.Mocked<Repository<PartnerLimitsEntity>>;
+  let subscriptionRepository: jest.Mocked<Repository<PartnerSubscriptionEntity>>;
+  let usageRepository: jest.Mocked<Repository<PartnerSubscriptionUsageEntity>>;
+  let pricingPlanRepository: jest.Mocked<IPricingPlanRepository>;
 
   const mockUser: JwtPayload = {
     userId: 1,
@@ -49,16 +55,45 @@ describe('TenantsController', () => {
     1, // id
   );
 
-  const mockPartnerLimitsEntity: PartnerLimitsEntity = {
+  const mockSubscriptionEntity: PartnerSubscriptionEntity = {
     id: 1,
     partnerId: 1,
+    planId: '1',
+    planType: 'conecta',
+    status: 'active',
+    billingFrequency: 'monthly',
+    billingAmount: 100,
+    usage: {
+      id: 1,
+      partnerSubscriptionId: 1,
+      tenantsCount: 2,
+      branchesCount: 5,
+      customersCount: 100,
+      rewardsCount: 10,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as PartnerSubscriptionUsageEntity,
+  } as PartnerSubscriptionEntity;
+
+  const mockPricingPlanLimits = {
+    id: 1,
+    pricingPlanId: 1,
     maxTenants: 5,
     maxBranches: 20,
     maxCustomers: 5000,
     maxRewards: 50,
+    maxAdmins: -1,
+    storageGB: -1,
+    apiCallsPerMonth: -1,
+    maxLoyaltyPrograms: -1,
+    maxLoyaltyProgramsBase: -1,
+    maxLoyaltyProgramsPromo: -1,
+    maxLoyaltyProgramsPartner: -1,
+    maxLoyaltyProgramsSubscription: -1,
+    maxLoyaltyProgramsExperimental: -1,
     createdAt: new Date(),
     updatedAt: new Date(),
-  } as PartnerLimitsEntity;
+  };
 
   beforeEach(async () => {
     const mockCreateTenantHandler = {
@@ -90,8 +125,16 @@ describe('TenantsController', () => {
       findById: jest.fn(),
     };
 
-    const mockPartnerLimitsRepository = {
+    const mockSubscriptionRepository = {
       findOne: jest.fn(),
+    };
+
+    const mockUsageRepository = {
+      findOne: jest.fn(),
+    };
+
+    const mockPricingPlanRepository = {
+      findById: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -126,8 +169,16 @@ describe('TenantsController', () => {
           useValue: mockTenantRepository,
         },
         {
-          provide: getRepositoryToken(PartnerLimitsEntity),
-          useValue: mockPartnerLimitsRepository,
+          provide: 'IPricingPlanRepository',
+          useValue: mockPricingPlanRepository,
+        },
+        {
+          provide: getRepositoryToken(PartnerSubscriptionEntity),
+          useValue: mockSubscriptionRepository,
+        },
+        {
+          provide: getRepositoryToken(PartnerSubscriptionUsageEntity),
+          useValue: mockUsageRepository,
         },
       ],
     }).compile();
@@ -140,7 +191,9 @@ describe('TenantsController', () => {
     deleteTenantHandler = module.get(DeleteTenantHandler);
     userRepository = module.get('IUserRepository');
     tenantRepository = module.get('ITenantRepository');
-    partnerLimitsRepository = module.get(getRepositoryToken(PartnerLimitsEntity));
+    pricingPlanRepository = module.get('IPricingPlanRepository');
+    subscriptionRepository = module.get(getRepositoryToken(PartnerSubscriptionEntity));
+    usageRepository = module.get(getRepositoryToken(PartnerSubscriptionUsageEntity));
   });
 
   afterEach(() => {
@@ -212,17 +265,19 @@ describe('TenantsController', () => {
       };
 
       userRepository.findById.mockResolvedValue(mockUserEntity);
-      partnerLimitsRepository.findOne.mockResolvedValue(mockPartnerLimitsEntity);
-      tenantRepository.findByPartnerId.mockResolvedValue([]); // No existing tenants
+      subscriptionRepository.findOne.mockResolvedValue(mockSubscriptionEntity);
+      pricingPlanRepository.findById.mockResolvedValue({
+        id: 1,
+        limits: mockPricingPlanLimits,
+      } as any);
+      usageRepository.findOne.mockResolvedValue(mockSubscriptionEntity.usage);
       createTenantHandler.execute.mockResolvedValue(mockResponse as any);
 
       const result = await controller.createTenant(createRequest as any, mockUser);
 
       expect(userRepository.findById).toHaveBeenCalledWith(mockUser.userId);
-      expect(partnerLimitsRepository.findOne).toHaveBeenCalledWith({
-        where: { partnerId: 1 },
-      });
-      expect(tenantRepository.findByPartnerId).toHaveBeenCalledWith(1);
+      expect(subscriptionRepository.findOne).toHaveBeenCalled();
+      expect(pricingPlanRepository.findById).toHaveBeenCalled();
       expect(createTenantHandler.execute).toHaveBeenCalledWith({
         ...createRequest,
         partnerId: 1,
@@ -231,11 +286,18 @@ describe('TenantsController', () => {
     });
 
     it('should throw BadRequestException when tenant limit is exceeded', async () => {
-      const existingTenants = Array(5).fill({ id: 1, partnerId: 1 }); // 5 tenants (at limit)
+      const usageAtLimit = {
+        ...mockSubscriptionEntity.usage,
+        tenantsCount: 5, // At limit
+      } as PartnerSubscriptionUsageEntity;
 
       userRepository.findById.mockResolvedValue(mockUserEntity);
-      partnerLimitsRepository.findOne.mockResolvedValue(mockPartnerLimitsEntity);
-      tenantRepository.findByPartnerId.mockResolvedValue(existingTenants as any);
+      subscriptionRepository.findOne.mockResolvedValue(mockSubscriptionEntity);
+      pricingPlanRepository.findById.mockResolvedValue({
+        id: 1,
+        limits: mockPricingPlanLimits,
+      } as any);
+      usageRepository.findOne.mockResolvedValue(usageAtLimit);
 
       await expect(controller.createTenant(createRequest as any, mockUser)).rejects.toThrow(
         BadRequestException,
@@ -246,12 +308,15 @@ describe('TenantsController', () => {
       expect(createTenantHandler.execute).not.toHaveBeenCalled();
     });
 
-    it('should allow creation when maxTenants is 999 (unlimited)', async () => {
+    it('should allow creation when maxTenants is -1 (unlimited)', async () => {
       const unlimitedLimits = {
-        ...mockPartnerLimitsEntity,
-        maxTenants: 999,
+        ...mockPricingPlanLimits,
+        maxTenants: -1, // Unlimited
       };
-      const existingTenants = Array(100).fill({ id: 1, partnerId: 1 }); // 100 tenants
+      const usageWithManyTenants = {
+        ...mockSubscriptionEntity.usage,
+        tenantsCount: 100, // Many tenants but unlimited
+      } as PartnerSubscriptionUsageEntity;
       const mockResponse = {
         id: 1,
         partnerId: 1,
@@ -262,8 +327,12 @@ describe('TenantsController', () => {
       };
 
       userRepository.findById.mockResolvedValue(mockUserEntity);
-      partnerLimitsRepository.findOne.mockResolvedValue(unlimitedLimits);
-      tenantRepository.findByPartnerId.mockResolvedValue(existingTenants as any);
+      subscriptionRepository.findOne.mockResolvedValue(mockSubscriptionEntity);
+      pricingPlanRepository.findById.mockResolvedValue({
+        id: 1,
+        limits: unlimitedLimits,
+      } as any);
+      usageRepository.findOne.mockResolvedValue(usageWithManyTenants);
       createTenantHandler.execute.mockResolvedValue(mockResponse as any);
 
       const result = await controller.createTenant(createRequest as any, mockUser);
@@ -274,13 +343,13 @@ describe('TenantsController', () => {
 
     it('should throw NotFoundException if limits not found', async () => {
       userRepository.findById.mockResolvedValue(mockUserEntity);
-      partnerLimitsRepository.findOne.mockResolvedValue(null);
+      subscriptionRepository.findOne.mockResolvedValue(null);
 
       await expect(controller.createTenant(createRequest as any, mockUser)).rejects.toThrow(
         NotFoundException,
       );
       await expect(controller.createTenant(createRequest as any, mockUser)).rejects.toThrow(
-        'Limits for partner',
+        'Pricing plan limits not found',
       );
     });
   });

@@ -53,7 +53,6 @@ export class PartnerRequestsController {
           branchesNumber: 3,
           website: 'https://cocinasol.gt',
           socialMedia: '@cocinadelsolgt',
-          rewardType: 'Por monto de compra',
           currencyId: 8,
           businessName: 'La Cocina del Sol S.A.',
           taxId: '12345678-9',

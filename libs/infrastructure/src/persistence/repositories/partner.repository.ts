@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { IPartnerRepository, Partner } from '@libs/domain';
 import { PartnerEntity } from '../entities/partner.entity';
 import { PartnerSubscriptionEntity } from '../entities/partner-subscription.entity';
-import { PartnerLimitsEntity } from '../entities/partner-limits.entity';
 import { PartnerMapper } from '../mappers/partner.mapper';
 
 /**
@@ -17,26 +16,50 @@ export class PartnerRepository implements IPartnerRepository {
     private readonly partnerRepository: Repository<PartnerEntity>,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
-    @InjectRepository(PartnerLimitsEntity)
-    private readonly limitsRepository: Repository<PartnerLimitsEntity>,
   ) {}
 
   async save(partner: Partner): Promise<Partner> {
     const partnerEntity = PartnerMapper.toPersistence(partner);
     const savedEntity = await this.partnerRepository.save(partnerEntity);
-    return PartnerMapper.toDomain(savedEntity);
+    // Recargar con relaciones
+    const reloadedEntity = await this.partnerRepository.findOne({
+      where: { id: savedEntity.id },
+      relations: ['subscription'],
+    });
+    if (!reloadedEntity) {
+      throw new Error(`Failed to reload partner with ID ${savedEntity.id}`);
+    }
+    return PartnerMapper.toDomain(
+      reloadedEntity,
+      reloadedEntity.subscription,
+      null, // limits ya no se usa, se obtiene desde pricing_plan_limits
+      null,
+    );
   }
 
   async update(partner: Partner): Promise<Partner> {
     const partnerEntity = PartnerMapper.toPersistence(partner);
     const updatedEntity = await this.partnerRepository.save(partnerEntity);
-    return PartnerMapper.toDomain(updatedEntity);
+    // Recargar con relaciones
+    const reloadedEntity = await this.partnerRepository.findOne({
+      where: { id: updatedEntity.id },
+      relations: ['subscription'],
+    });
+    if (!reloadedEntity) {
+      throw new Error(`Failed to reload partner with ID ${updatedEntity.id}`);
+    }
+    return PartnerMapper.toDomain(
+      reloadedEntity,
+      reloadedEntity.subscription,
+      null, // limits ya no se usa, se obtiene desde pricing_plan_limits
+      null,
+    );
   }
 
   async findById(id: number): Promise<Partner | null> {
     const partnerEntity = await this.partnerRepository.findOne({
       where: { id },
-      relations: ['subscription', 'limits'],
+      relations: ['subscription'],
     });
 
     if (!partnerEntity) {
@@ -46,7 +69,7 @@ export class PartnerRepository implements IPartnerRepository {
     return PartnerMapper.toDomain(
       partnerEntity,
       partnerEntity.subscription,
-      partnerEntity.limits,
+      null, // limits ya no se usa, se obtiene desde pricing_plan_limits
       null, // stats ya no se usa
     );
   }
@@ -54,7 +77,7 @@ export class PartnerRepository implements IPartnerRepository {
   async findByEmail(email: string): Promise<Partner | null> {
     const partnerEntity = await this.partnerRepository.findOne({
       where: { email },
-      relations: ['subscription', 'limits'],
+      relations: ['subscription'],
     });
 
     if (!partnerEntity) {
@@ -64,7 +87,7 @@ export class PartnerRepository implements IPartnerRepository {
     return PartnerMapper.toDomain(
       partnerEntity,
       partnerEntity.subscription,
-      partnerEntity.limits,
+      null, // limits ya no se usa, se obtiene desde pricing_plan_limits
       null, // stats ya no se usa
     );
   }
@@ -72,7 +95,7 @@ export class PartnerRepository implements IPartnerRepository {
   async findByDomain(domain: string): Promise<Partner | null> {
     const partnerEntity = await this.partnerRepository.findOne({
       where: { domain },
-      relations: ['subscription', 'limits'],
+      relations: ['subscription'],
     });
 
     if (!partnerEntity) {
@@ -82,21 +105,21 @@ export class PartnerRepository implements IPartnerRepository {
     return PartnerMapper.toDomain(
       partnerEntity,
       partnerEntity.subscription,
-      partnerEntity.limits,
+      null, // limits ya no se usa, se obtiene desde pricing_plan_limits
       null, // stats ya no se usa
     );
   }
 
   async findAll(): Promise<Partner[]> {
     const partnerEntities = await this.partnerRepository.find({
-      relations: ['subscription', 'limits'],
+      relations: ['subscription'],
       order: {
         createdAt: 'DESC',
       },
     });
 
     return partnerEntities.map(
-      (entity) => PartnerMapper.toDomain(entity, entity.subscription, entity.limits, null), // stats ya no se usa
+      (entity) => PartnerMapper.toDomain(entity, entity.subscription, null, null), // limits y stats ya no se usan
     );
   }
 

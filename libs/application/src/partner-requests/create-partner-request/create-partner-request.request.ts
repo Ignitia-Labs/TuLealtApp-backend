@@ -152,15 +152,6 @@ export class CreatePartnerRequestRequest {
   socialMedia?: string | null;
 
   @ApiProperty({
-    description: 'Tipo de recompensa',
-    example: 'Por monto de compra',
-    type: String,
-  })
-  @IsString()
-  @IsNotEmpty()
-  rewardType: string;
-
-  @ApiProperty({
     description: 'ID de la moneda',
     example: 8,
     type: Number,

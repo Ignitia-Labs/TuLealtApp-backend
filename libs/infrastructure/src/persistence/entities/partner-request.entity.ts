@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   Index,
   ManyToOne,
+  OneToMany,
   JoinColumn,
 } from 'typeorm';
 import { CountryEntity } from './country.entity';
@@ -77,9 +78,6 @@ export class PartnerRequestEntity {
 
   @Column('varchar', { length: 255, nullable: true })
   socialMedia: string | null;
-
-  @Column('varchar', { length: 255 })
-  rewardType: string;
 
   @ManyToOne(() => CurrencyEntity, {
     onDelete: 'RESTRICT',

@@ -43,8 +43,12 @@ import {
   DeleteBranchResponse,
   JwtPayload,
 } from '@libs/application';
-import { IUserRepository, ITenantRepository, IBranchRepository, PartnerLimits } from '@libs/domain';
-import { PartnerLimitsEntity, PartnerMapper } from '@libs/infrastructure';
+import { IUserRepository, ITenantRepository, IBranchRepository, IPricingPlanRepository } from '@libs/domain';
+import {
+  PartnerSubscriptionEntity,
+  PartnerSubscriptionUsageEntity,
+} from '@libs/infrastructure';
+import { SubscriptionUsageHelper } from '@libs/application';
 import {
   JwtAuthGuard,
   RolesGuard,
@@ -86,8 +90,12 @@ export class BranchesController {
     private readonly tenantRepository: ITenantRepository,
     @Inject('IBranchRepository')
     private readonly branchRepository: IBranchRepository,
-    @InjectRepository(PartnerLimitsEntity)
-    private readonly partnerLimitsRepository: Repository<PartnerLimitsEntity>,
+    @Inject('IPricingPlanRepository')
+    private readonly pricingPlanRepository: IPricingPlanRepository,
+    @InjectRepository(PartnerSubscriptionEntity)
+    private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
+    @InjectRepository(PartnerSubscriptionUsageEntity)
+    private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
   ) {}
 
   @Get('tenants/:tenantId/branches')
@@ -264,40 +272,30 @@ export class BranchesController {
       }
     }
 
-    // 3. Obtener límites del partner desde partner_limits
-    const limitsEntity = await this.partnerLimitsRepository.findOne({
-      where: { partnerId: tenant.partnerId },
-    });
-
-    if (!limitsEntity) {
-      throw new NotFoundException(`Limits for partner with ID ${tenant.partnerId} not found`);
-    }
-
-    // 4. Contar branches TOTALES del partner (suma de todas las branches de todos sus tenants)
-    const partnerTenants = await this.tenantRepository.findByPartnerId(tenant.partnerId);
-    let totalBranchesCount = 0;
-
-    for (const t of partnerTenants) {
-      const branches = await this.branchRepository.findByTenantId(t.id);
-      totalBranchesCount += branches.length;
-    }
-
-    // 5. Validar límites usando el método de dominio
-    const partnerLimits = PartnerLimits.create(
-      limitsEntity.partnerId,
-      limitsEntity.maxTenants,
-      limitsEntity.maxBranches,
-      limitsEntity.maxCustomers,
-      limitsEntity.maxRewards,
-      limitsEntity.maxAdmins ?? -1,
-      limitsEntity.storageGB ?? -1,
-      limitsEntity.apiCallsPerMonth ?? -1,
-      limitsEntity.id,
+    // 3. Obtener límites del plan desde pricing_plan_limits
+    const planLimits = await SubscriptionUsageHelper.getPlanLimitsForPartner(
+      tenant.partnerId,
+      this.subscriptionRepository,
+      this.pricingPlanRepository,
     );
 
-    if (!partnerLimits.canCreateBranch(totalBranchesCount)) {
+    if (!planLimits) {
+      throw new NotFoundException(
+        `Pricing plan limits not found for partner with ID ${tenant.partnerId}. Please ensure the partner has an active subscription.`,
+      );
+    }
+
+    // 4. Obtener uso actual desde subscription_usage
+    const usage = await SubscriptionUsageHelper.getCurrentUsageForPartner(
+      tenant.partnerId,
+      this.subscriptionRepository,
+      this.usageRepository,
+    );
+
+    // 5. Validar límites usando el método de dominio
+    if (!planLimits.canCreateBranch(usage.branchesCount)) {
       throw new BadRequestException(
-        `Maximum number of branches reached for your plan. Current: ${totalBranchesCount}, Maximum: ${limitsEntity.maxBranches}`,
+        `Maximum number of branches reached for your plan. Current: ${usage.branchesCount}, Maximum: ${planLimits.maxBranches === -1 ? 'unlimited' : planLimits.maxBranches}`,
       );
     }
 

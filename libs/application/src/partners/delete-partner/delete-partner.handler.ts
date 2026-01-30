@@ -49,7 +49,7 @@ export class DeletePartnerHandler {
       try {
         partnerEntity = await this.partnerEntityRepository.findOne({
           where: { id: request.partnerId },
-          relations: ['subscription', 'limits', 'country'],
+          relations: ['subscription', 'country'],
         });
       } catch (relationError) {
         console.warn(
@@ -108,7 +108,6 @@ export class DeletePartnerHandler {
           branchesNumber: partnerEntity.branchesNumber || 0,
           website: partnerEntity.website || null,
           socialMedia: partnerEntity.socialMedia || null,
-          rewardType: partnerEntity.rewardType || '',
           currencyId: partnerEntity.currencyId || 0,
           businessName: partnerEntity.businessName || '',
           taxId: partnerEntity.taxId || '',
@@ -181,22 +180,7 @@ export class DeletePartnerHandler {
                 : new Date().toISOString(),
             }
           : null,
-        limits: partnerEntity.limits
-          ? {
-              id: partnerEntity.limits.id,
-              partnerId: partnerEntity.limits.partnerId,
-              maxTenants: partnerEntity.limits.maxTenants || 0,
-              maxBranches: partnerEntity.limits.maxBranches || 0,
-              maxCustomers: partnerEntity.limits.maxCustomers || 0,
-              maxRewards: partnerEntity.limits.maxRewards || 0,
-              createdAt: partnerEntity.limits.createdAt
-                ? partnerEntity.limits.createdAt.toISOString()
-                : new Date().toISOString(),
-              updatedAt: partnerEntity.limits.updatedAt
-                ? partnerEntity.limits.updatedAt.toISOString()
-                : new Date().toISOString(),
-            }
-          : null,
+        limits: null, // limits ya no se archiva - se obtiene desde pricing_plan_limits a través de la suscripción
         stats: null, // stats ya no se archiva - se obtiene desde partner_subscription_usage
         tenants: tenantEntities.map((tenantEntity) => {
           const tenantBranches = branchEntities.filter((b) => b.tenantId === tenantEntity.id);

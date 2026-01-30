@@ -11,7 +11,6 @@ import {
   Index,
 } from 'typeorm';
 import { PartnerSubscriptionEntity } from './partner-subscription.entity';
-import { PartnerLimitsEntity } from './partner-limits.entity';
 import { TenantEntity } from './tenant.entity';
 import { CurrencyEntity } from './currency.entity';
 import { CountryEntity } from './country.entity';
@@ -77,9 +76,6 @@ export class PartnerEntity {
   @Column('varchar', { length: 255, nullable: true })
   socialMedia: string | null;
 
-  @Column('varchar', { length: 255 })
-  rewardType: string;
-
   @ManyToOne(() => CurrencyEntity, {
     onDelete: 'RESTRICT',
     onUpdate: 'CASCADE',
@@ -119,11 +115,7 @@ export class PartnerEntity {
   })
   subscription: PartnerSubscriptionEntity | null;
 
-  @OneToOne(() => PartnerLimitsEntity, (limits) => limits.partner, {
-    cascade: false,
-    eager: false,
-  })
-  limits: PartnerLimitsEntity | null;
+  // Relación con PartnerLimitsEntity eliminada - los límites ahora se obtienen desde pricing_plan_limits
 
   @OneToMany(() => TenantEntity, (tenant) => tenant.partner, {
     cascade: false,

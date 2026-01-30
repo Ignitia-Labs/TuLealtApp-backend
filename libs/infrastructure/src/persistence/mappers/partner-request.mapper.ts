@@ -10,10 +10,7 @@ export class PartnerRequestMapper {
    */
   static toDomain(persistenceEntity: PartnerRequestEntity): PartnerRequest {
     // currencyId es INTEGER tanto en BD como en dominio
-    return new PartnerRequest(
-      persistenceEntity.id,
-      persistenceEntity.status,
-      persistenceEntity.submittedAt,
+    return PartnerRequest.create(
       persistenceEntity.name,
       persistenceEntity.responsibleName,
       persistenceEntity.email,
@@ -21,27 +18,27 @@ export class PartnerRequestMapper {
       persistenceEntity.countryId,
       persistenceEntity.city,
       persistenceEntity.plan,
-      persistenceEntity.planId,
-      persistenceEntity.billingFrequency,
-      persistenceEntity.logo,
       persistenceEntity.category,
-      persistenceEntity.branchesNumber,
-      persistenceEntity.website,
-      persistenceEntity.socialMedia,
-      persistenceEntity.rewardType,
       persistenceEntity.currencyId || 0,
-      persistenceEntity.subscriptionCurrencyId || null,
-      persistenceEntity.trialDays || null,
       persistenceEntity.businessName,
       persistenceEntity.taxId,
       persistenceEntity.fiscalAddress,
       persistenceEntity.paymentMethod,
       persistenceEntity.billingEmail,
+      persistenceEntity.branchesNumber,
+      persistenceEntity.logo,
+      persistenceEntity.website,
+      persistenceEntity.socialMedia,
       persistenceEntity.notes,
+      persistenceEntity.status,
       persistenceEntity.assignedTo,
-      persistenceEntity.updatedBy,
-      persistenceEntity.lastUpdated,
-      persistenceEntity.source || 'internal', // Por defecto 'internal' para compatibilidad
+      persistenceEntity.submittedAt,
+      persistenceEntity.planId,
+      persistenceEntity.billingFrequency,
+      persistenceEntity.subscriptionCurrencyId || null,
+      persistenceEntity.trialDays || null,
+      persistenceEntity.source || 'internal',
+      persistenceEntity.id,
     );
   }
 
@@ -69,7 +66,6 @@ export class PartnerRequestMapper {
     entity.branchesNumber = domainEntity.branchesNumber;
     entity.website = domainEntity.website;
     entity.socialMedia = domainEntity.socialMedia;
-    entity.rewardType = domainEntity.rewardType;
     // currencyId es INTEGER tanto en dominio como en BD
     entity.currencyId = domainEntity.currencyId || 0;
     entity.subscriptionCurrencyId = domainEntity.subscriptionCurrencyId || null;

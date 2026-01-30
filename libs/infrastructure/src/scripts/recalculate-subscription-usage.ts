@@ -2,7 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { Module } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-import { Logger } from '@nestjs/common';
 import { InfrastructureModule } from '../infrastructure.module';
 import { SubscriptionUsageModule } from '@libs/application';
 import { RecalculateSubscriptionUsageHandler } from '@libs/application';
@@ -49,8 +48,6 @@ if (process.env.NODE_ENV !== 'production') {
  *   npm run script:recalculate-subscription-usage -- --partnerSubscriptionId=1
  */
 async function bootstrap() {
-  const logger = new Logger('RecalculateSubscriptionUsage');
-
   console.log('========================================');
   console.log('🔄 Recálculo de Subscription Usage');
   console.log('========================================\n');
@@ -176,38 +173,120 @@ Ejemplos:
         }
         console.log(`Total customers en BD: ${totalCustomers}`);
 
-        // Obtener límites del partner
-        const limits = await dataSource.query('SELECT * FROM partner_limits WHERE partnerId = ?', [
-          request.partnerId,
-        ]);
-        if (limits.length > 0) {
+        // Contar loyalty programs por tipo de todos los tenants del partner
+        let totalLoyaltyPrograms = 0;
+        let loyaltyProgramsBase = 0;
+        let loyaltyProgramsPromo = 0;
+        let loyaltyProgramsPartner = 0;
+        let loyaltyProgramsSubscription = 0;
+        let loyaltyProgramsExperimental = 0;
+
+        if (tenantIds.length > 0) {
+          const now = new Date();
+          // Construir placeholders para IN clause
+          const placeholders = tenantIds.map(() => '?').join(',');
+          const programs = await dataSource.query(
+            `SELECT type, COUNT(*) as count
+             FROM loyalty_programs
+             WHERE tenantId IN (${placeholders})
+               AND status = 'active'
+               AND (activeFrom IS NULL OR activeFrom <= ?)
+               AND (activeTo IS NULL OR activeTo >= ?)
+             GROUP BY type`,
+            [...tenantIds, now, now],
+          );
+
+          for (const program of programs) {
+            const count = parseInt(program.count || '0', 10);
+            totalLoyaltyPrograms += count;
+
+            switch (program.type) {
+              case 'BASE':
+                loyaltyProgramsBase = count;
+                break;
+              case 'PROMO':
+                loyaltyProgramsPromo = count;
+                break;
+              case 'PARTNER':
+                loyaltyProgramsPartner = count;
+                break;
+              case 'SUBSCRIPTION':
+                loyaltyProgramsSubscription = count;
+                break;
+              case 'EXPERIMENTAL':
+                loyaltyProgramsExperimental = count;
+                break;
+            }
+          }
+
+          console.log(`\nLoyalty Programs en BD:`);
+          console.log(`  - Total: ${totalLoyaltyPrograms}`);
+          console.log(`  - BASE: ${loyaltyProgramsBase}`);
+          console.log(`  - PROMO: ${loyaltyProgramsPromo}`);
+          console.log(`  - PARTNER: ${loyaltyProgramsPartner}`);
+          console.log(`  - SUBSCRIPTION: ${loyaltyProgramsSubscription}`);
+          console.log(`  - EXPERIMENTAL: ${loyaltyProgramsExperimental}`);
+        }
+
+        // Obtener límites desde pricing_plan_limits
+        const subscriptionForLimits = await dataSource.query(
+          'SELECT planId FROM partner_subscriptions WHERE partnerId = ? AND status = ? ORDER BY createdAt DESC LIMIT 1',
+          [request.partnerId, 'active'],
+        );
+
+        let limits = null;
+        if (
+          subscriptionForLimits &&
+          subscriptionForLimits.length > 0 &&
+          subscriptionForLimits[0].planId
+        ) {
+          const planId = parseInt(subscriptionForLimits[0].planId);
+          limits = await dataSource.query(
+            'SELECT * FROM pricing_plan_limits WHERE pricingPlanId = ?',
+            [planId],
+          );
+        }
+
+        if (limits && limits.length > 0) {
           const limit = limits[0];
-          console.log(`\nLímites del partner:`);
+          console.log(`\nLímites del plan (pricing_plan_limits):`);
           console.log(`  - maxTenants: ${limit.maxTenants}`);
           console.log(`  - maxBranches: ${limit.maxBranches}`);
           console.log(`  - maxCustomers: ${limit.maxCustomers}`);
           console.log(`  - maxRewards: ${limit.maxRewards}`);
+          console.log(`  - maxLoyaltyPrograms: ${limit.maxLoyaltyPrograms ?? -1}`);
+          console.log(`  - maxLoyaltyProgramsBase: ${limit.maxLoyaltyProgramsBase ?? -1}`);
+          console.log(`  - maxLoyaltyProgramsPromo: ${limit.maxLoyaltyProgramsPromo ?? -1}`);
+          console.log(`  - maxLoyaltyProgramsPartner: ${limit.maxLoyaltyProgramsPartner ?? -1}`);
+          console.log(
+            `  - maxLoyaltyProgramsSubscription: ${limit.maxLoyaltyProgramsSubscription ?? -1}`,
+          );
+          console.log(
+            `  - maxLoyaltyProgramsExperimental: ${limit.maxLoyaltyProgramsExperimental ?? -1}`,
+          );
         } else {
-          console.log(`\n⚠️  No se encontraron límites para el partner ${request.partnerId}`);
+          console.log(
+            `\n⚠️  No se encontraron límites del plan para el partner ${request.partnerId}`,
+          );
         }
 
         // Obtener uso actual (buscar cualquier suscripción, no solo activa)
-        let subscription = await dataSource.query(
+        let subscriptionForUsage = await dataSource.query(
           'SELECT id, status FROM partner_subscriptions WHERE partnerId = ? AND status = ? ORDER BY createdAt DESC LIMIT 1',
           [request.partnerId, 'active'],
         );
 
         // Si no hay activa, buscar la más reciente sin importar status
-        if (!subscription || subscription.length === 0) {
-          subscription = await dataSource.query(
+        if (!subscriptionForUsage || subscriptionForUsage.length === 0) {
+          subscriptionForUsage = await dataSource.query(
             'SELECT id, status FROM partner_subscriptions WHERE partnerId = ? ORDER BY createdAt DESC LIMIT 1',
             [request.partnerId],
           );
         }
-        if (subscription.length > 0) {
+        if (subscriptionForUsage.length > 0) {
           const usage = await dataSource.query(
             'SELECT * FROM partner_subscription_usage WHERE partnerSubscriptionId = ?',
-            [subscription[0].id],
+            [subscriptionForUsage[0].id],
           );
           if (usage.length > 0) {
             const u = usage[0];
@@ -216,6 +295,16 @@ Ejemplos:
             console.log(`  - branchesCount: ${u.branchesCount}`);
             console.log(`  - customersCount: ${u.customersCount}`);
             console.log(`  - rewardsCount: ${u.rewardsCount}`);
+            console.log(`  - loyaltyProgramsCount: ${u.loyaltyProgramsCount ?? 0}`);
+            console.log(`  - loyaltyProgramsBaseCount: ${u.loyaltyProgramsBaseCount ?? 0}`);
+            console.log(`  - loyaltyProgramsPromoCount: ${u.loyaltyProgramsPromoCount ?? 0}`);
+            console.log(`  - loyaltyProgramsPartnerCount: ${u.loyaltyProgramsPartnerCount ?? 0}`);
+            console.log(
+              `  - loyaltyProgramsSubscriptionCount: ${u.loyaltyProgramsSubscriptionCount ?? 0}`,
+            );
+            console.log(
+              `  - loyaltyProgramsExperimentalCount: ${u.loyaltyProgramsExperimentalCount ?? 0}`,
+            );
           }
         }
 
@@ -242,16 +331,25 @@ Ejemplos:
 
     if (result.results.length > 0) {
       console.log('📋 Resultados detallados:');
-      console.log('─'.repeat(80));
-      console.log('Partner ID | Subscription ID | Tenants | Branches | Customers | Rewards');
-      console.log('─'.repeat(80));
+      console.log('─'.repeat(120));
+      console.log(
+        'Partner ID | Subscription ID | Tenants | Branches | Customers | Rewards | LP Total | LP BASE | LP PROMO | LP PARTNER | LP SUB | LP EXP',
+      );
+      console.log('─'.repeat(120));
 
       for (const res of result.results) {
+        const lpTotal = (res as any).loyaltyProgramsCount ?? 0;
+        const lpBase = (res as any).loyaltyProgramsBaseCount ?? 0;
+        const lpPromo = (res as any).loyaltyProgramsPromoCount ?? 0;
+        const lpPartner = (res as any).loyaltyProgramsPartnerCount ?? 0;
+        const lpSub = (res as any).loyaltyProgramsSubscriptionCount ?? 0;
+        const lpExp = (res as any).loyaltyProgramsExperimentalCount ?? 0;
+
         console.log(
-          `${String(res.partnerId).padEnd(10)} | ${String(res.partnerSubscriptionId).padEnd(15)} | ${String(res.tenantsCount).padEnd(7)} | ${String(res.branchesCount).padEnd(8)} | ${String(res.customersCount).padEnd(9)} | ${res.rewardsCount}`,
+          `${String(res.partnerId).padEnd(10)} | ${String(res.partnerSubscriptionId).padEnd(15)} | ${String(res.tenantsCount).padEnd(7)} | ${String(res.branchesCount).padEnd(8)} | ${String(res.customersCount).padEnd(9)} | ${String(res.rewardsCount).padEnd(7)} | ${String(lpTotal).padEnd(8)} | ${String(lpBase).padEnd(7)} | ${String(lpPromo).padEnd(9)} | ${String(lpPartner).padEnd(10)} | ${String(lpSub).padEnd(6)} | ${lpExp}`,
         );
       }
-      console.log('─'.repeat(80));
+      console.log('─'.repeat(120));
     }
 
     console.log(`\n✅ ${result.message}\n`);

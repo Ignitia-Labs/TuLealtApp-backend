@@ -19,6 +19,12 @@ export class PricingPlanLimitsMapper {
       persistenceEntity.maxAdmins,
       persistenceEntity.storageGB,
       persistenceEntity.apiCallsPerMonth,
+      persistenceEntity.maxLoyaltyPrograms ?? -1,
+      persistenceEntity.maxLoyaltyProgramsBase ?? -1,
+      persistenceEntity.maxLoyaltyProgramsPromo ?? -1,
+      persistenceEntity.maxLoyaltyProgramsPartner ?? -1,
+      persistenceEntity.maxLoyaltyProgramsSubscription ?? -1,
+      persistenceEntity.maxLoyaltyProgramsExperimental ?? -1,
       persistenceEntity.createdAt,
       persistenceEntity.updatedAt,
     );
@@ -43,6 +49,12 @@ export class PricingPlanLimitsMapper {
     entity.maxAdmins = domainEntity.maxAdmins;
     entity.storageGB = domainEntity.storageGB;
     entity.apiCallsPerMonth = domainEntity.apiCallsPerMonth;
+    entity.maxLoyaltyPrograms = domainEntity.maxLoyaltyPrograms;
+    entity.maxLoyaltyProgramsBase = domainEntity.maxLoyaltyProgramsBase;
+    entity.maxLoyaltyProgramsPromo = domainEntity.maxLoyaltyProgramsPromo;
+    entity.maxLoyaltyProgramsPartner = domainEntity.maxLoyaltyProgramsPartner;
+    entity.maxLoyaltyProgramsSubscription = domainEntity.maxLoyaltyProgramsSubscription;
+    entity.maxLoyaltyProgramsExperimental = domainEntity.maxLoyaltyProgramsExperimental;
     entity.createdAt = domainEntity.createdAt;
     entity.updatedAt = domainEntity.updatedAt;
     return entity;

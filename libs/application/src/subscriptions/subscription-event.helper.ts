@@ -1,10 +1,11 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, Optional } from '@nestjs/common';
 import {
   ISubscriptionEventRepository,
   SubscriptionEvent,
   SubscriptionEventType,
   PartnerSubscription,
 } from '@libs/domain';
+import { SubscriptionLoyaltyBridgeService } from '../loyalty/subscription-loyalty-bridge.service';
 
 /**
  * Helper para crear y registrar eventos de suscripción automáticamente
@@ -14,6 +15,8 @@ export class SubscriptionEventHelper {
   constructor(
     @Inject('ISubscriptionEventRepository')
     private readonly subscriptionEventRepository: ISubscriptionEventRepository,
+    @Optional()
+    private readonly subscriptionLoyaltyBridge?: SubscriptionLoyaltyBridgeService,
   ) {}
 
   /**
@@ -42,6 +45,25 @@ export class SubscriptionEventHelper {
     );
 
     await this.subscriptionEventRepository.save(event);
+
+    // Opcional: Si está habilitado el puente de lealtad, convertir a eventos de lealtad
+    // Esto otorga puntos a customers cuando un partner renueva/activa su suscripción
+    // NOTA: Por defecto, los eventos SUBSCRIPTION en lealtad son para suscripciones de customers,
+    // no de partners. Esta integración es opcional y debe habilitarse explícitamente.
+    if (this.subscriptionLoyaltyBridge && (type === 'activated' || type === 'renewed')) {
+      try {
+        await this.subscriptionLoyaltyBridge.processPartnerSubscriptionEvent(
+          subscription.id,
+          type === 'activated' ? 'activated' : 'renewed',
+        );
+      } catch (error) {
+        // Log error pero no fallar el proceso de registro del evento
+        console.warn(
+          `Error processing subscription loyalty event for subscription ${subscription.id}:`,
+          error,
+        );
+      }
+    }
   }
 
   /**

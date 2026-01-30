@@ -15,6 +15,11 @@ import { CustomerTiersController } from './controllers/customer-tiers.controller
 import { ContactInquiryController } from './controllers/contact-inquiry.controller';
 import { PartnerRequestsController } from './controllers/partner-requests.controller';
 import { InvitationCodesController } from './controllers/invitation-codes.controller';
+import { LoyaltyEventsController } from './controllers/loyalty-events.controller';
+import { LoyaltyProgramsController } from './controllers/loyalty-programs.controller';
+import { RewardRulesController } from './controllers/reward-rules.controller';
+import { EnrollmentsController } from './controllers/enrollments.controller';
+import { LoyaltyDashboardController } from './controllers/loyalty-dashboard.controller';
 import { InfrastructureModule } from '@libs/infrastructure';
 import { HealthController, LoggerModule } from '@libs/shared';
 import { PartnerAuthModule } from './auth/partner-auth.module';
@@ -57,6 +62,7 @@ import {
   GetCustomerMembershipHandler,
   UpdateCustomerMembershipHandler,
   DeleteCustomerMembershipHandler,
+  GetCustomerPointsTransactionsHandler,
   // Tenants Handlers
   CreateTenantHandler,
   GetTenantHandler,
@@ -96,6 +102,47 @@ import {
   DeleteInvitationCodeHandler,
   UseInvitationCodeHandler,
   SendInvitationEmailHandler,
+  ProcessLoyaltyEventHandler,
+  // Loyalty Services
+  EventNormalizer,
+  MembershipResolver,
+  ProgramCompatibilityResolver,
+  RewardRuleEvaluator,
+  ConflictResolver,
+  IdempotencyKeyGenerator,
+  BalanceSyncService,
+  BalanceProjectionService,
+  TierChangeService,
+  TierEvaluationService,
+  ReferralService,
+  ExpirationCalculator,
+  LoyaltyProgramConfigResolver,
+  // Loyalty Programs Handlers
+  GetLoyaltyProgramsHandler,
+  GetLoyaltyProgramHandler,
+  CreateLoyaltyProgramHandler,
+  UpdateLoyaltyProgramHandler,
+  DeleteLoyaltyProgramHandler,
+  LoyaltyProgramValidator,
+  // Reward Rules Handlers
+  GetRewardRulesHandler,
+  GetRewardRuleHandler,
+  CreateRewardRuleHandler,
+  UpdateRewardRuleHandler,
+  DeleteRewardRuleHandler,
+  RewardRuleValidator,
+  // Enrollments Handlers
+  GetEnrollmentsHandler,
+  CreateEnrollmentHandler,
+  DeleteEnrollmentHandler,
+  // Loyalty Dashboard Handlers
+  GetLoyaltyDashboardHandler,
+  // Partner Customers Handlers
+  CreatePointsAdjustmentHandler,
+  CreatePointsReversalHandler,
+  // Loyalty Services
+  AdjustmentService,
+  ReversalService,
 } from '@libs/application';
 
 /**
@@ -121,6 +168,11 @@ import {
     ContactInquiryController,
     PartnerRequestsController,
     InvitationCodesController,
+    LoyaltyEventsController,
+    LoyaltyProgramsController,
+    RewardRulesController,
+    EnrollmentsController,
+    LoyaltyDashboardController,
     HealthController,
   ],
   providers: [
@@ -168,6 +220,9 @@ import {
     GetCustomerMembershipHandler,
     UpdateCustomerMembershipHandler,
     DeleteCustomerMembershipHandler,
+    GetCustomerPointsTransactionsHandler,
+    CreatePointsAdjustmentHandler,
+    CreatePointsReversalHandler,
     // Tenants Handlers
     CreateTenantHandler,
     GetTenantHandler,
@@ -207,6 +262,44 @@ import {
     DeleteInvitationCodeHandler,
     UseInvitationCodeHandler,
     SendInvitationEmailHandler,
+    // Loyalty Events Handlers
+    ProcessLoyaltyEventHandler,
+    // Loyalty Services
+    EventNormalizer,
+    MembershipResolver,
+    ProgramCompatibilityResolver,
+    RewardRuleEvaluator,
+    ConflictResolver,
+    IdempotencyKeyGenerator,
+    BalanceSyncService,
+    BalanceProjectionService,
+    TierChangeService,
+    TierEvaluationService,
+    ReferralService,
+    ExpirationCalculator,
+    LoyaltyProgramConfigResolver,
+    AdjustmentService,
+    ReversalService,
+    // Loyalty Programs Handlers
+    GetLoyaltyProgramsHandler,
+    GetLoyaltyProgramHandler,
+    CreateLoyaltyProgramHandler,
+    UpdateLoyaltyProgramHandler,
+    DeleteLoyaltyProgramHandler,
+    LoyaltyProgramValidator,
+    // Reward Rules Handlers
+    GetRewardRulesHandler,
+    GetRewardRuleHandler,
+    CreateRewardRuleHandler,
+    UpdateRewardRuleHandler,
+    DeleteRewardRuleHandler,
+    RewardRuleValidator,
+    // Enrollments Handlers
+    GetEnrollmentsHandler,
+    CreateEnrollmentHandler,
+    DeleteEnrollmentHandler,
+    // Loyalty Dashboard Handlers
+    GetLoyaltyDashboardHandler,
   ],
 })
 export class PartnerApiModule {}

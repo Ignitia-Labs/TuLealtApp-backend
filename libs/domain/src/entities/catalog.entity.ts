@@ -6,6 +6,7 @@
 export type CatalogType =
   | 'BUSINESS_CATEGORIES'
   | 'REWARD_TYPES'
+  | 'LOYALTY_PROGRAM_TYPES'
   | 'PAYMENT_METHODS'
   | 'PAYMENT_CATEGORIES';
 

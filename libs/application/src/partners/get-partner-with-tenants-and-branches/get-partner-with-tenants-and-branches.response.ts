@@ -134,13 +134,6 @@ export class GetPartnerWithTenantsAndBranchesResponse {
   socialMedia: string | null;
 
   @ApiProperty({
-    description: 'Tipo de recompensa',
-    example: 'points',
-    type: String,
-  })
-  rewardType: string;
-
-  @ApiProperty({
     description: 'ID de la moneda',
     example: 1,
     type: Number,
@@ -239,7 +232,6 @@ export class GetPartnerWithTenantsAndBranchesResponse {
     branchesNumber: number,
     website: string | null,
     socialMedia: string | null,
-    rewardType: string,
     currencyId: number,
     businessName: string,
     taxId: string,
@@ -267,7 +259,6 @@ export class GetPartnerWithTenantsAndBranchesResponse {
     this.branchesNumber = branchesNumber;
     this.website = website;
     this.socialMedia = socialMedia;
-    this.rewardType = rewardType;
     this.currencyId = currencyId;
     this.businessName = businessName;
     this.taxId = taxId;

@@ -50,8 +50,13 @@ import {
   GetTenantDashboardStatsResponse,
   JwtPayload,
 } from '@libs/application';
-import { IUserRepository, ITenantRepository, PartnerLimits } from '@libs/domain';
-import { PartnerLimitsEntity, S3Service } from '@libs/infrastructure';
+import { IUserRepository, ITenantRepository, IPricingPlanRepository } from '@libs/domain';
+import {
+  PartnerSubscriptionEntity,
+  PartnerSubscriptionUsageEntity,
+  S3Service,
+} from '@libs/infrastructure';
+import { SubscriptionUsageHelper } from '@libs/application';
 import {
   JwtAuthGuard,
   RolesGuard,
@@ -111,8 +116,12 @@ export class TenantsController {
     private readonly userRepository: IUserRepository,
     @Inject('ITenantRepository')
     private readonly tenantRepository: ITenantRepository,
-    @InjectRepository(PartnerLimitsEntity)
-    private readonly partnerLimitsRepository: Repository<PartnerLimitsEntity>,
+    @Inject('IPricingPlanRepository')
+    private readonly pricingPlanRepository: IPricingPlanRepository,
+    @InjectRepository(PartnerSubscriptionEntity)
+    private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
+    @InjectRepository(PartnerSubscriptionUsageEntity)
+    private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
   ) {}
 
   @Get()
@@ -280,35 +289,30 @@ export class TenantsController {
     }
     const partnerId = userEntity.partnerId;
 
-    // 2. Obtener límites del partner desde partner_limits
-    const limitsEntity = await this.partnerLimitsRepository.findOne({
-      where: { partnerId },
-    });
-
-    if (!limitsEntity) {
-      throw new NotFoundException(`Limits for partner with ID ${partnerId} not found`);
-    }
-
-    // 3. Contar tenants actuales del partner
-    const currentTenants = await this.tenantRepository.findByPartnerId(partnerId);
-    const currentTenantsCount = currentTenants.length;
-
-    // 4. Validar límites usando el método de dominio
-    const partnerLimits = PartnerLimits.create(
-      limitsEntity.partnerId,
-      limitsEntity.maxTenants,
-      limitsEntity.maxBranches,
-      limitsEntity.maxCustomers,
-      limitsEntity.maxRewards,
-      limitsEntity.maxAdmins ?? -1,
-      limitsEntity.storageGB ?? -1,
-      limitsEntity.apiCallsPerMonth ?? -1,
-      limitsEntity.id,
+    // 2. Obtener límites del plan desde pricing_plan_limits
+    const planLimits = await SubscriptionUsageHelper.getPlanLimitsForPartner(
+      partnerId,
+      this.subscriptionRepository,
+      this.pricingPlanRepository,
     );
 
-    if (!partnerLimits.canCreateTenant(currentTenantsCount)) {
+    if (!planLimits) {
+      throw new NotFoundException(
+        `Pricing plan limits not found for partner with ID ${partnerId}. Please ensure the partner has an active subscription.`,
+      );
+    }
+
+    // 3. Obtener uso actual desde subscription_usage
+    const usage = await SubscriptionUsageHelper.getCurrentUsageForPartner(
+      partnerId,
+      this.subscriptionRepository,
+      this.usageRepository,
+    );
+
+    // 4. Validar límites usando el método de dominio
+    if (!planLimits.canCreateTenant(usage.tenantsCount)) {
       throw new BadRequestException(
-        `Maximum number of tenants reached for your plan. Current: ${currentTenantsCount}, Maximum: ${limitsEntity.maxTenants}`,
+        `Maximum number of tenants reached for your plan. Current: ${usage.tenantsCount}, Maximum: ${planLimits.maxTenants === -1 ? 'unlimited' : planLimits.maxTenants}`,
       );
     }
 

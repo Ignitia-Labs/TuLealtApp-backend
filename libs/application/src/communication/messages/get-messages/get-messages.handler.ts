@@ -95,11 +95,15 @@ export class GetMessagesHandler {
       senderIds.length > 0
         ? await this.userEntityRepository.find({
             where: { id: In(senderIds) },
-            select: ['id', 'name', 'roles'],
+            relations: ['rolesRelation'],
+            select: ['id', 'name'],
           })
         : [];
     const usersMap = new Map(
-      userEntities.map((u) => [u.id, { name: u.name, role: u.roles?.[0] || 'unknown' }]),
+      userEntities.map((u) => [
+        u.id,
+        { name: u.name, role: u.rolesRelation?.[0]?.role || 'unknown' },
+      ]),
     );
 
     // Obtener todos los templates en una sola query

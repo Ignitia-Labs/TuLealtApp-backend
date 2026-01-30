@@ -18,6 +18,16 @@ import {
   GetCurrenciesHandler,
   GetCountriesHandler,
   ValidateInvitationCodeHandler,
+  // Customer Loyalty Handlers
+  GetPointsBalanceHandler,
+  GetPointsTransactionsHandler,
+  GetCustomerLoyaltyProgramsHandler,
+  EnrollInProgramHandler,
+  GetCurrentTierHandler,
+  GetTierHistoryHandler,
+  GetReferralCodeHandler,
+  GetReferralsHandler,
+  GetActivityHandler,
 } from '@libs/application';
 
 /**
@@ -50,6 +60,16 @@ import {
     GetCountriesHandler,
     // Handlers de aplicación - Invitation Codes
     ValidateInvitationCodeHandler,
+    // Handlers de aplicación - Customer Loyalty
+    GetPointsBalanceHandler,
+    GetPointsTransactionsHandler,
+    GetCustomerLoyaltyProgramsHandler,
+    EnrollInProgramHandler,
+    GetCurrentTierHandler,
+    GetTierHistoryHandler,
+    GetReferralCodeHandler,
+    GetReferralsHandler,
+    GetActivityHandler,
   ],
 })
 export class CustomerApiModule {}

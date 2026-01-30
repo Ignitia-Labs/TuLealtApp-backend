@@ -1,0 +1,81 @@
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { LoyaltyProgramEntity } from './loyalty-program.entity';
+import { CustomerTierEntity } from './customer-tier.entity';
+import { TierBenefitExclusiveRewardEntity } from './tier-benefit-exclusive-reward.entity';
+import { TierBenefitCategoryBenefitEntity } from './tier-benefit-category-benefit.entity';
+
+/**
+ * Entidad de persistencia para TierBenefit
+ */
+@Entity('tier_benefits')
+export class TierBenefitEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @ManyToOne(() => LoyaltyProgramEntity, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'programId' })
+  program: LoyaltyProgramEntity;
+
+  @Column('int')
+  programId: number;
+
+  @ManyToOne(() => CustomerTierEntity, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'tierId' })
+  tier: CustomerTierEntity;
+
+  @Column('int')
+  tierId: number;
+
+  @Column('decimal', { precision: 5, scale: 2, nullable: true })
+  pointsMultiplier: number | null;
+
+  @Column('int', { nullable: true })
+  cooldownReduction: number | null;
+
+  // ============================================================================
+  // Columnas para higherCaps
+  // ============================================================================
+
+  @Column('int', { nullable: true })
+  higherCapsMaxPointsPerEvent: number | null;
+
+  @Column('int', { nullable: true })
+  higherCapsMaxPointsPerDay: number | null;
+
+  @Column('int', { nullable: true })
+  higherCapsMaxPointsPerMonth: number | null;
+
+  // ============================================================================
+  // Relaciones con Tablas Relacionadas
+  // ============================================================================
+
+  @OneToMany(() => TierBenefitExclusiveRewardEntity, (reward) => reward.tierBenefit, { cascade: true })
+  exclusiveRewardsRelation: TierBenefitExclusiveRewardEntity[];
+
+  @OneToMany(() => TierBenefitCategoryBenefitEntity, (categoryBenefit) => categoryBenefit.tierBenefit, {
+    cascade: true,
+  })
+  categoryBenefitsRelation: TierBenefitCategoryBenefitEntity[];
+
+  @Column('varchar', { length: 20, default: 'active' })
+  status: 'active' | 'inactive';
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+}
