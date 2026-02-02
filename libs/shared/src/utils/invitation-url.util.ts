@@ -15,6 +15,10 @@
  */
 export function buildInvitationUrl(code: string): string {
   const customerUiUrl = process.env.CUSTOMER_UI_URL || 'http://localhost:3003';
+  console.log(
+    '🚀 ~ buildInvitationUrl ~ process.env.CUSTOMER_UI_URL:',
+    process.env.CUSTOMER_UI_URL,
+  );
   // Remover trailing slash si existe
   const baseUrl = customerUiUrl.replace(/\/$/, '');
   // Codificar el código para URL

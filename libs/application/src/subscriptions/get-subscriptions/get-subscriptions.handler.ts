@@ -68,34 +68,10 @@ export class GetSubscriptionsHandler {
             subscription.currency,
           );
 
-        // Buscar el plan de precios para obtener el ID numérico y el slug
-        let planId: number = 0;
-        let planSlug: string = subscription.planId; // Por defecto usar el planId como slug
-
-        // Intentar buscar el plan por ID numérico primero
-        const numericPlanId = parseInt(subscription.planId, 10);
-        if (!isNaN(numericPlanId)) {
-          const plan = await this.pricingPlanRepository.findById(numericPlanId);
-          if (plan) {
-            planId = plan.id;
-            planSlug = plan.slug;
-          }
-        } else {
-          // Si no es numérico, buscar por slug
-          const plan = await this.pricingPlanRepository.findBySlug(subscription.planId);
-          if (plan) {
-            planId = plan.id;
-            planSlug = plan.slug;
-          } else {
-            // Si no se encuentra, intentar buscar sin el prefijo "plan-"
-            const slugWithoutPrefix = subscription.planId.replace(/^plan-/, '');
-            const planBySlug = await this.pricingPlanRepository.findBySlug(slugWithoutPrefix);
-            if (planBySlug) {
-              planId = planBySlug.id;
-              planSlug = planBySlug.slug;
-            }
-          }
-        }
+        // Obtener el plan de precios (planId ahora siempre es numérico)
+        const plan = await this.pricingPlanRepository.findById(subscription.planId);
+        const planId = plan?.id ?? subscription.planId;
+        const planSlug = plan?.slug ?? 'unknown';
 
         return new GetSubscriptionResponse(
           subscription.id,

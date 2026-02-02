@@ -9,6 +9,7 @@ import {
   ValidateNested,
   IsObject,
   IsArray,
+  ValidateIf,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
@@ -160,13 +161,25 @@ export class UpdateLoyaltyProgramRequest {
   @IsEnum(['active', 'inactive', 'draft'])
   status?: LoyaltyProgramStatus;
 
-  @ApiProperty({ example: '2025-06-01T00:00:00Z', required: false })
+  @ApiProperty({
+    example: '2025-06-01T00:00:00Z',
+    required: false,
+    nullable: true,
+    description: 'Fecha de inicio de vigencia. null = siempre vigente (sin fecha de inicio)',
+  })
   @IsOptional()
+  @ValidateIf((o) => o.activeFrom !== null && o.activeFrom !== undefined)
   @IsDateString()
   activeFrom?: Date | null;
 
-  @ApiProperty({ example: '2025-09-30T23:59:59Z', required: false })
+  @ApiProperty({
+    example: '2025-09-30T23:59:59Z',
+    required: false,
+    nullable: true,
+    description: 'Fecha de fin de vigencia. null = siempre vigente (sin fecha de fin)',
+  })
   @IsOptional()
+  @ValidateIf((o) => o.activeTo !== null && o.activeTo !== undefined)
   @IsDateString()
   activeTo?: Date | null;
 }

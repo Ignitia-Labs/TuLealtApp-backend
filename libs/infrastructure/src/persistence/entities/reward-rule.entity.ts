@@ -124,12 +124,14 @@ export class RewardRuleEntity {
   @OneToOne(
     () => RewardRuleEligibilityEntity,
     (eligibility) => eligibility.rewardRule,
+    { cascade: true },
   )
   eligibilityRelation: RewardRuleEligibilityEntity | null;
 
   @OneToOne(
     () => RewardRulePointsFormulaEntity,
     (formula) => formula.rewardRule,
+    { cascade: true },
   )
   pointsFormulaRelation: RewardRulePointsFormulaEntity | null;
 

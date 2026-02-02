@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Delete,
   Param,
   Query,
   HttpCode,
@@ -33,7 +34,15 @@ import {
   GetCustomerLoyaltyProgramsHandler,
   GetCustomerLoyaltyProgramsRequest,
   GetCustomerLoyaltyProgramsResponse,
+  GetMembershipEnrollmentsHandler,
+  GetMembershipEnrollmentsRequest,
+  GetMembershipEnrollmentsResponse,
+  GetUserEnrollmentsHandler,
+  GetUserEnrollmentsRequest,
+  GetUserEnrollmentsResponse,
   EnrollInProgramHandler,
+  UnenrollFromProgramHandler,
+  UnenrollFromProgramRequest,
   EnrollInProgramRequest,
   EnrollInProgramResponse,
   GetCurrentTierHandler,
@@ -86,7 +95,10 @@ export class CustomerMembershipsController {
     private readonly getPointsBalanceHandler: GetPointsBalanceHandler,
     private readonly getPointsTransactionsHandler: GetPointsTransactionsHandler,
     private readonly getCustomerLoyaltyProgramsHandler: GetCustomerLoyaltyProgramsHandler,
+    private readonly getMembershipEnrollmentsHandler: GetMembershipEnrollmentsHandler,
+    private readonly getUserEnrollmentsHandler: GetUserEnrollmentsHandler,
     private readonly enrollInProgramHandler: EnrollInProgramHandler,
+    private readonly unenrollFromProgramHandler: UnenrollFromProgramHandler,
     private readonly getCurrentTierHandler: GetCurrentTierHandler,
     private readonly getTierHistoryHandler: GetTierHistoryHandler,
     private readonly getReferralCodeHandler: GetReferralCodeHandler,
@@ -95,6 +107,36 @@ export class CustomerMembershipsController {
     @Inject('ICustomerMembershipRepository')
     private readonly membershipRepository: ICustomerMembershipRepository,
   ) {}
+
+  @Get('enrollments')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Obtener todos mis enrollments',
+    description:
+      'Obtiene todos los enrollments de todas las memberships del usuario autenticado. Vista consolidada de todas las suscripciones a programas.',
+  })
+  @ApiQuery({
+    name: 'status',
+    enum: ['ACTIVE', 'PAUSED', 'ENDED', 'all'],
+    required: false,
+    description: 'Filtrar por status del enrollment',
+    default: 'all',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Enrollments obtenidos exitosamente',
+    type: GetUserEnrollmentsResponse,
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado', type: UnauthorizedErrorResponseDto })
+  @ApiResponse({ status: 500, description: 'Error interno', type: InternalServerErrorResponseDto })
+  async getMyEnrollments(
+    @Query('status') status?: string,
+    @CurrentUser() user?: JwtPayload,
+  ): Promise<GetUserEnrollmentsResponse> {
+    const request = new GetUserEnrollmentsRequest();
+    request.status = (status as any) || 'all';
+    return this.getUserEnrollmentsHandler.execute(request, user!.userId);
+  }
 
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -379,6 +421,36 @@ export class CustomerMembershipsController {
     return this.getCustomerLoyaltyProgramsHandler.execute(request, user!.userId);
   }
 
+  @Get(':id/enrollments')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(MembershipOwnershipGuard)
+  @ApiOperation({
+    summary: 'Obtener enrollments de una membership',
+    description:
+      'Obtiene todos los enrollments activos de una membership con información detallada del programa',
+  })
+  @ApiParam({ name: 'id', type: Number, description: 'ID de la membership' })
+  @ApiResponse({
+    status: 200,
+    description: 'Enrollments obtenidos exitosamente',
+    type: GetMembershipEnrollmentsResponse,
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado', type: UnauthorizedErrorResponseDto })
+  @ApiResponse({ status: 403, description: 'No autorizado', type: ForbiddenErrorResponseDto })
+  @ApiResponse({
+    status: 404,
+    description: 'Membership no encontrada',
+    type: NotFoundErrorResponseDto,
+  })
+  async getMembershipEnrollments(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user?: JwtPayload,
+  ): Promise<GetMembershipEnrollmentsResponse> {
+    const request = new GetMembershipEnrollmentsRequest();
+    request.membershipId = id;
+    return this.getMembershipEnrollmentsHandler.execute(request, user!.userId);
+  }
+
   @Post(':id/loyalty-programs/:programId/enroll')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(MembershipOwnershipGuard)
@@ -414,6 +486,43 @@ export class CustomerMembershipsController {
     request.membershipId = id;
     request.programId = programId;
     return this.enrollInProgramHandler.execute(request, user!.userId);
+  }
+
+  @Delete(':id/loyalty-programs/:programId/enroll')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(MembershipOwnershipGuard)
+  @ApiOperation({
+    summary: 'Desinscribirse de un programa de lealtad',
+    description:
+      'Desinscribe al customer de un programa de lealtad. No se puede desinscribir del programa BASE.',
+  })
+  @ApiParam({ name: 'id', type: Number, description: 'ID de la membership' })
+  @ApiParam({ name: 'programId', type: Number, description: 'ID del programa' })
+  @ApiResponse({
+    status: 204,
+    description: 'Desinscripción exitosa',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'No se puede desinscribir del BASE o enrollment no activo',
+    type: BadRequestErrorResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado', type: UnauthorizedErrorResponseDto })
+  @ApiResponse({ status: 403, description: 'No autorizado', type: ForbiddenErrorResponseDto })
+  @ApiResponse({
+    status: 404,
+    description: 'Membership, programa o enrollment no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  async unenrollFromProgram(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('programId', ParseIntPipe) programId: number,
+    @CurrentUser() user?: JwtPayload,
+  ): Promise<void> {
+    const request = new UnenrollFromProgramRequest();
+    request.membershipId = id;
+    request.programId = programId;
+    return this.unenrollFromProgramHandler.execute(request, user!.userId);
   }
 
   @Get(':id/tier')

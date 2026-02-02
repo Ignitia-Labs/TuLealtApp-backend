@@ -30,8 +30,8 @@ export class PartnerSubscriptionEntity {
   @Column('int')
   partnerId: number;
 
-  @Column('varchar', { length: 100 })
-  planId: string;
+  @Column('int')
+  planId: number;
 
   @Column('varchar', { length: 20 })
   planType: 'esencia' | 'conecta' | 'inspira';

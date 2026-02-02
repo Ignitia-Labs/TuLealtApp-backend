@@ -37,35 +37,10 @@ export class GetSubscriptionHandler {
       subscription.currency,
     );
 
-    // Optimizado: Buscar el plan de precios intentando todas las variantes en paralelo
-    let planId: number = 0;
-    let planSlug: string = subscription.planId; // Por defecto usar el planId como slug
-
-    const numericPlanId = parseInt(subscription.planId, 10);
-    const slugWithoutPrefix = subscription.planId.replace(/^plan-/, '');
-
-    // Intentar todas las búsquedas posibles en paralelo
-    const planPromises = [
-      // Si es numérico, buscar por ID
-      !isNaN(numericPlanId)
-        ? this.pricingPlanRepository.findById(numericPlanId)
-        : Promise.resolve(null),
-      // Buscar por slug original
-      this.pricingPlanRepository.findBySlug(subscription.planId),
-      // Buscar por slug sin prefijo (solo si es diferente)
-      slugWithoutPrefix !== subscription.planId
-        ? this.pricingPlanRepository.findBySlug(slugWithoutPrefix)
-        : Promise.resolve(null),
-    ];
-
-    const [planById, planBySlug, planBySlugNoPrefix] = await Promise.all(planPromises);
-
-    // Usar el primer plan encontrado (prioridad: ID > slug original > slug sin prefijo)
-    const plan = planById || planBySlug || planBySlugNoPrefix;
-    if (plan) {
-      planId = plan.id;
-      planSlug = plan.slug;
-    }
+    // Obtener el plan de precios (planId ahora siempre es numérico)
+    const plan = await this.pricingPlanRepository.findById(subscription.planId);
+    const planId = plan?.id ?? subscription.planId;
+    const planSlug = plan?.slug ?? 'unknown';
 
     return new GetSubscriptionResponse(
       subscription.id,

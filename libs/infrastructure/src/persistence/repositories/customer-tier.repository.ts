@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ICustomerTierRepository, CustomerTier } from '@libs/domain';
 import { CustomerTierEntity } from '../entities/customer-tier.entity';
+import { CustomerTierBenefitEntity } from '../entities/customer-tier-benefit.entity';
 import { CustomerTierMapper } from '../mappers/customer-tier.mapper';
 
 /**
@@ -64,6 +65,38 @@ export class CustomerTierRepository implements ICustomerTierRepository {
 
   async save(tier: CustomerTier): Promise<CustomerTier> {
     const entity = CustomerTierMapper.toPersistence(tier);
+
+    // Si es una actualización (id > 0), eliminar relaciones existentes solo si se están actualizando
+    if (tier.id > 0) {
+      const existingEntity = await this.customerTierRepository.findOne({
+        where: { id: tier.id },
+        relations: ['benefitsRelation'],
+      });
+
+      if (existingEntity) {
+        // Eliminar benefits existentes solo si vamos a crear nuevos
+        // (si entity.benefitsRelation existe y tiene elementos, significa que el mapper la construyó)
+        if (existingEntity.benefitsRelation && existingEntity.benefitsRelation.length > 0) {
+          if (entity.benefitsRelation && entity.benefitsRelation.length > 0) {
+            // Eliminar todos los benefits antiguos antes de crear nuevos
+            await this.customerTierRepository.manager.delete(
+              CustomerTierBenefitEntity,
+              existingEntity.benefitsRelation.map((b) => b.id),
+            );
+          }
+          // Si no vamos a crear nuevos pero existen antiguos, eliminarlos (caso de eliminación explícita)
+          else if (!entity.benefitsRelation || entity.benefitsRelation.length === 0) {
+            await this.customerTierRepository.manager.delete(
+              CustomerTierBenefitEntity,
+              existingEntity.benefitsRelation.map((b) => b.id),
+            );
+          }
+        }
+      }
+    }
+
+    // Guardar la entidad principal con sus relaciones
+    // TypeORM guardará automáticamente las relaciones OneToMany con cascade: true
     const savedEntity = await this.customerTierRepository.save(entity);
 
     // Cargar relaciones después de guardar para el mapper
@@ -77,6 +110,38 @@ export class CustomerTierRepository implements ICustomerTierRepository {
 
   async update(tier: CustomerTier): Promise<CustomerTier> {
     const entity = CustomerTierMapper.toPersistence(tier);
+
+    // Si es una actualización (id > 0), eliminar relaciones existentes solo si se están actualizando
+    if (tier.id > 0) {
+      const existingEntity = await this.customerTierRepository.findOne({
+        where: { id: tier.id },
+        relations: ['benefitsRelation'],
+      });
+
+      if (existingEntity) {
+        // Eliminar benefits existentes solo si vamos a crear nuevos
+        // (si entity.benefitsRelation existe y tiene elementos, significa que el mapper la construyó)
+        if (existingEntity.benefitsRelation && existingEntity.benefitsRelation.length > 0) {
+          if (entity.benefitsRelation && entity.benefitsRelation.length > 0) {
+            // Eliminar todos los benefits antiguos antes de crear nuevos
+            await this.customerTierRepository.manager.delete(
+              CustomerTierBenefitEntity,
+              existingEntity.benefitsRelation.map((b) => b.id),
+            );
+          }
+          // Si no vamos a crear nuevos pero existen antiguos, eliminarlos (caso de eliminación explícita)
+          else if (!entity.benefitsRelation || entity.benefitsRelation.length === 0) {
+            await this.customerTierRepository.manager.delete(
+              CustomerTierBenefitEntity,
+              existingEntity.benefitsRelation.map((b) => b.id),
+            );
+          }
+        }
+      }
+    }
+
+    // Guardar la entidad principal con sus relaciones
+    // TypeORM guardará automáticamente las relaciones OneToMany con cascade: true
     const updatedEntity = await this.customerTierRepository.save(entity);
 
     // Cargar relaciones después de actualizar para el mapper

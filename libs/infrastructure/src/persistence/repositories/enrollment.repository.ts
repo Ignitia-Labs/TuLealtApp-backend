@@ -34,13 +34,14 @@ export class EnrollmentRepository implements IEnrollmentRepository {
   }
 
   async findActiveByMembershipId(membershipId: number): Promise<Enrollment[]> {
-    const now = new Date();
+    // Usar NOW() de la BD en lugar de new Date() para evitar problemas de timezone
+    // La BD guarda fechas en hora local, así que debemos comparar usando la hora de la BD
     const entities = await this.enrollmentRepository
       .createQueryBuilder('enrollment')
       .where('enrollment.membershipId = :membershipId', { membershipId })
       .andWhere('enrollment.status = :status', { status: 'ACTIVE' })
-      .andWhere('enrollment.effectiveFrom <= :now', { now })
-      .andWhere('(enrollment.effectiveTo IS NULL OR enrollment.effectiveTo >= :now)', { now })
+      .andWhere('enrollment.effectiveFrom <= NOW()')
+      .andWhere('(enrollment.effectiveTo IS NULL OR enrollment.effectiveTo >= NOW())')
       .orderBy('enrollment.createdAt', 'ASC')
       .getMany();
 
@@ -57,13 +58,13 @@ export class EnrollmentRepository implements IEnrollmentRepository {
   }
 
   async findActiveByProgramId(programId: number): Promise<Enrollment[]> {
-    const now = new Date();
+    // Usar NOW() de la BD en lugar de new Date() para evitar problemas de timezone
     const entities = await this.enrollmentRepository
       .createQueryBuilder('enrollment')
       .where('enrollment.programId = :programId', { programId })
       .andWhere('enrollment.status = :status', { status: 'ACTIVE' })
-      .andWhere('enrollment.effectiveFrom <= :now', { now })
-      .andWhere('(enrollment.effectiveTo IS NULL OR enrollment.effectiveTo >= :now)', { now })
+      .andWhere('enrollment.effectiveFrom <= NOW()')
+      .andWhere('(enrollment.effectiveTo IS NULL OR enrollment.effectiveTo >= NOW())')
       .orderBy('enrollment.createdAt', 'ASC')
       .getMany();
 
@@ -89,15 +90,15 @@ export class EnrollmentRepository implements IEnrollmentRepository {
     membershipId: number,
     programType: string,
   ): Promise<Enrollment[]> {
-    const now = new Date();
+    // Usar NOW() de la BD en lugar de new Date() para evitar problemas de timezone
     const entities = await this.enrollmentRepository
       .createQueryBuilder('enrollment')
       .innerJoin('enrollment.program', 'program')
       .where('enrollment.membershipId = :membershipId', { membershipId })
       .andWhere('enrollment.status = :status', { status: 'ACTIVE' })
       .andWhere('program.programType = :programType', { programType })
-      .andWhere('enrollment.effectiveFrom <= :now', { now })
-      .andWhere('(enrollment.effectiveTo IS NULL OR enrollment.effectiveTo >= :now)', { now })
+      .andWhere('enrollment.effectiveFrom <= NOW()')
+      .andWhere('(enrollment.effectiveTo IS NULL OR enrollment.effectiveTo >= NOW())')
       .orderBy('enrollment.createdAt', 'ASC')
       .getMany();
 
@@ -110,13 +111,13 @@ export class EnrollmentRepository implements IEnrollmentRepository {
   }
 
   async countActiveByMembershipId(membershipId: number): Promise<number> {
-    const now = new Date();
+    // Usar NOW() de la BD en lugar de new Date() para evitar problemas de timezone
     return await this.enrollmentRepository
       .createQueryBuilder('enrollment')
       .where('enrollment.membershipId = :membershipId', { membershipId })
       .andWhere('enrollment.status = :status', { status: 'ACTIVE' })
-      .andWhere('enrollment.effectiveFrom <= :now', { now })
-      .andWhere('(enrollment.effectiveTo IS NULL OR enrollment.effectiveTo >= :now)', { now })
+      .andWhere('enrollment.effectiveFrom <= NOW()')
+      .andWhere('(enrollment.effectiveTo IS NULL OR enrollment.effectiveTo >= NOW())')
       .getCount();
   }
 

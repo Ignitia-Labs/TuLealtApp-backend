@@ -24,6 +24,7 @@ export class TenantMapper {
       persistenceEntity.logo,
       persistenceEntity.banner,
       persistenceEntity.status,
+      Number(persistenceEntity.taxPercentage),
       persistenceEntity.id,
     );
   }
@@ -47,6 +48,7 @@ export class TenantMapper {
     entity.secondaryColor = domainEntity.secondaryColor;
     entity.pointsExpireDays = domainEntity.pointsExpireDays;
     entity.minPointsToRedeem = domainEntity.minPointsToRedeem;
+    entity.taxPercentage = domainEntity.taxPercentage;
     entity.quickSearchCode = domainEntity.quickSearchCode;
     entity.status = domainEntity.status;
     if (domainEntity.id > 0) {

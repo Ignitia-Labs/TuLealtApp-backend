@@ -5,10 +5,11 @@ import { ApiProperty } from '@nestjs/swagger';
  */
 export class PartnerSubscriptionSwaggerDto {
   @ApiProperty({
-    example: 'plan-conecta',
+    example: 1,
     description: 'ID del plan de suscripción',
+    type: Number,
   })
-  planId: string;
+  planId: number;
 
   @ApiProperty({
     example: 'conecta',

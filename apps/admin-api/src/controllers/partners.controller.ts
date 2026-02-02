@@ -119,7 +119,7 @@ export class PartnersController {
           billingEmail: 'facturacion@abc-comercial.com',
           domain: 'abc-comercial.com',
           subscription: {
-            planId: 'plan-conecta',
+            planId: 1,
             startDate: '2024-01-01T00:00:00Z',
             renewalDate: '2025-01-01T00:00:00Z',
             status: 'active',
@@ -226,7 +226,7 @@ export class PartnersController {
           paymentMethod: 'Tarjeta de crédito',
           billingEmail: 'facturacion@abc-comercial.com',
           domain: 'abc-comercial.com',
-          subscriptionPlanId: 'plan-conecta',
+          subscriptionPlanId: 1,
           subscriptionStartDate: '2024-01-01T00:00:00Z',
           subscriptionRenewalDate: '2025-01-01T00:00:00Z',
           subscriptionLastPaymentAmount: 99.0,
@@ -316,7 +316,7 @@ export class PartnersController {
       billingEmail: 'facturacion@abc-comercial.com',
       domain: 'abc-comercial.com',
       subscription: {
-        planId: 'plan-conecta',
+        planId: 1,
         startDate: '2024-01-01T00:00:00Z',
         renewalDate: '2025-01-01T00:00:00Z',
         status: 'active',

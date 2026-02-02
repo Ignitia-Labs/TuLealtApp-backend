@@ -7,7 +7,21 @@ import {
   UseGuards,
   BadRequestException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsNumber,
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsDateString,
+  IsArray,
+  ValidateNested,
+  IsEnum,
+  Min,
+  ArrayMinSize,
+  IsObject,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 import {
   ProcessLoyaltyEventHandler,
   ProcessLoyaltyEventResult,
@@ -43,35 +57,252 @@ class ProcessLoyaltyEventResponseDto {
 }
 
 /**
+ * DTO para referencia de membresía
+ */
+class MembershipRefDto {
+  @ApiPropertyOptional({
+    description: 'ID de la membresía',
+    example: 100,
+    type: Number,
+  })
+  @IsNumber()
+  @IsOptional()
+  membershipId?: number | null;
+
+  @ApiPropertyOptional({
+    description: 'ID del cliente',
+    example: 50,
+    type: Number,
+  })
+  @IsNumber()
+  @IsOptional()
+  customerId?: number | null;
+
+  @ApiPropertyOptional({
+    description: 'ID del tenant',
+    example: 1,
+    type: Number,
+  })
+  @IsNumber()
+  @IsOptional()
+  tenantId?: number | null;
+
+  @ApiPropertyOptional({
+    description: 'Código QR de la membresía',
+    example: 'QR-USER-3-TENANT-1-5SO3IT',
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
+  qrCode?: string | null;
+}
+
+/**
+ * DTO para item de compra
+ */
+class PurchaseItemDto {
+  @ApiProperty({
+    description: 'SKU del producto',
+    example: 'PROD-001',
+    type: String,
+  })
+  @IsString()
+  @IsNotEmpty()
+  sku: string;
+
+  @ApiProperty({
+    description: 'Cantidad del producto',
+    example: 2,
+    type: Number,
+    minimum: 1,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  @Min(1)
+  qty: number;
+
+  @ApiProperty({
+    description: 'Precio unitario',
+    example: 75.0,
+    type: Number,
+    minimum: 0,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  @Min(0)
+  unitPrice: number;
+
+  @ApiPropertyOptional({
+    description: 'ID de la categoría',
+    example: 5,
+    type: Number,
+  })
+  @IsNumber()
+  @IsOptional()
+  categoryId?: number | null;
+
+  @ApiPropertyOptional({
+    description: 'Nombre de la categoría',
+    example: 'Electrónica',
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
+  categoryName?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Nombre del producto',
+    example: 'Producto Ejemplo',
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
+  productName?: string | null;
+}
+
+/**
  * DTO para procesar evento de compra
  */
 class ProcessPurchaseEventRequest {
+  @ApiProperty({
+    description: 'ID del tenant',
+    example: 1,
+    type: Number,
+  })
+  @IsNumber()
+  @IsNotEmpty()
   tenantId: number;
+
+  @ApiProperty({
+    description: 'ID único de la orden (sourceEventId)',
+    example: 'FAC-00124',
+    type: String,
+  })
+  @IsString()
+  @IsNotEmpty()
   orderId: string; // sourceEventId
+
+  @ApiProperty({
+    description: 'Fecha y hora en que ocurrió el evento',
+    example: '2026-01-31T02:57:22.591Z',
+    type: Date,
+  })
+  @IsDateString()
+  @IsNotEmpty()
   occurredAt: Date;
-  membershipRef: {
-    membershipId?: number | null;
-    customerId?: number | null;
-    tenantId?: number | null;
-    qrCode?: string | null;
-  };
+
+  @ApiProperty({
+    description: 'Referencia a la membresía del cliente',
+    type: MembershipRefDto,
+  })
+  @ValidateNested()
+  @Type(() => MembershipRefDto)
+  @IsNotEmpty()
+  membershipRef: MembershipRefDto;
+
+  @ApiProperty({
+    description: 'Monto neto (sin impuestos/envío)',
+    example: 100.0,
+    type: Number,
+    minimum: 0,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  @Min(0)
   netAmount: number;
+
+  @ApiProperty({
+    description: 'Monto bruto (con impuestos/envío)',
+    example: 100.0,
+    type: Number,
+    minimum: 0,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  @Min(0)
   grossAmount: number;
+
+  @ApiProperty({
+    description: 'Código de moneda (ISO 4217)',
+    example: 'GTQ',
+    type: String,
+  })
+  @IsString()
+  @IsNotEmpty()
   currency: string;
-  items: Array<{
-    sku: string;
-    qty: number;
-    unitPrice: number;
-    categoryId?: number | null;
-    categoryName?: string | null;
-    productName?: string | null;
-  }>;
+
+  @ApiPropertyOptional({
+    description: 'Items de la compra (opcional - requerido solo para reglas con alcance de categoría/SKU)',
+    type: [PurchaseItemDto],
+    default: [],
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PurchaseItemDto)
+  @IsOptional()
+  items?: PurchaseItemDto[];
+
+  @ApiPropertyOptional({
+    description: 'Método de pago',
+    example: 'cash',
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
   paymentMethod?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Estado del pago',
+    example: 'PAID',
+    enum: ['PAID', 'PENDING', 'REFUNDED', 'CANCELLED'],
+  })
+  @IsEnum(['PAID', 'PENDING', 'REFUNDED', 'CANCELLED'])
+  @IsOptional()
   paymentStatus?: 'PAID' | 'PENDING' | 'REFUNDED' | 'CANCELLED' | null;
+
+  @ApiPropertyOptional({
+    description: 'ID de la tienda',
+    example: 1,
+    type: Number,
+  })
+  @IsNumber()
+  @IsOptional()
   storeId?: number | null;
+
+  @ApiPropertyOptional({
+    description: 'ID de la sucursal',
+    example: 2,
+    type: Number,
+  })
+  @IsNumber()
+  @IsOptional()
   branchId?: number | null;
+
+  @ApiPropertyOptional({
+    description: 'Canal de venta',
+    example: 'in-store',
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
   channel?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'ID de correlación para trazabilidad',
+    example: 'FAC-00124',
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
   correlationId?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Metadatos adicionales',
+    example: { cashierId: 2, transactionReference: 'FAC-00124' },
+    type: Object,
+  })
+  @IsObject()
+  @IsOptional()
   metadata?: Record<string, any> | null;
 }
 
@@ -79,21 +310,105 @@ class ProcessPurchaseEventRequest {
  * DTO para procesar evento de visita
  */
 class ProcessVisitEventRequest {
+  @ApiProperty({
+    description: 'ID del tenant',
+    example: 1,
+    type: Number,
+  })
+  @IsNumber()
+  @IsNotEmpty()
   tenantId: number;
+
+  @ApiProperty({
+    description: 'ID único de la visita (sourceEventId)',
+    example: 'VISIT-2025-01-29-001',
+    type: String,
+  })
+  @IsString()
+  @IsNotEmpty()
   visitId: string; // sourceEventId
+
+  @ApiProperty({
+    description: 'Fecha y hora en que ocurrió el evento',
+    example: '2025-01-29T10:00:00Z',
+    type: Date,
+  })
+  @IsDateString()
+  @IsNotEmpty()
   occurredAt: Date;
-  membershipRef: {
-    membershipId?: number | null;
-    customerId?: number | null;
-    tenantId?: number | null;
-    qrCode?: string | null;
-  };
+
+  @ApiProperty({
+    description: 'Referencia a la membresía del cliente',
+    type: MembershipRefDto,
+  })
+  @ValidateNested()
+  @Type(() => MembershipRefDto)
+  @IsNotEmpty()
+  membershipRef: MembershipRefDto;
+
+  @ApiPropertyOptional({
+    description: 'ID de la tienda',
+    example: 1,
+    type: Number,
+  })
+  @IsNumber()
+  @IsOptional()
   storeId?: number | null;
+
+  @ApiPropertyOptional({
+    description: 'ID de la sucursal',
+    example: 2,
+    type: Number,
+  })
+  @IsNumber()
+  @IsOptional()
   branchId?: number | null;
+
+  @ApiPropertyOptional({
+    description: 'Canal de visita',
+    example: 'in-store',
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
   channel?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Tipo de visita',
+    example: 'walk-in',
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
   visitType?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Duración de la visita en minutos',
+    example: 30,
+    type: Number,
+    minimum: 0,
+  })
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
   durationMinutes?: number | null;
+
+  @ApiPropertyOptional({
+    description: 'ID de correlación para trazabilidad',
+    example: 'CORR-001',
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
   correlationId?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Metadatos adicionales',
+    example: { reason: 'consultation' },
+    type: Object,
+  })
+  @IsObject()
+  @IsOptional()
   metadata?: Record<string, any> | null;
 }
 
@@ -101,22 +416,114 @@ class ProcessVisitEventRequest {
  * DTO para procesar evento personalizado
  */
 class ProcessCustomEventRequest {
+  @ApiProperty({
+    description: 'ID del tenant',
+    example: 1,
+    type: Number,
+  })
+  @IsNumber()
+  @IsNotEmpty()
   tenantId: number;
+
+  @ApiProperty({
+    description: 'ID único del evento (sourceEventId)',
+    example: 'EVENT-2025-01-29-001',
+    type: String,
+  })
+  @IsString()
+  @IsNotEmpty()
   eventId: string; // sourceEventId
+
+  @ApiProperty({
+    description: 'Tipo de evento personalizado (ej: "BIRTHDAY", "ANNIVERSARY")',
+    example: 'BIRTHDAY',
+    type: String,
+  })
+  @IsString()
+  @IsNotEmpty()
   eventType: string; // Tipo personalizado (ej: "BIRTHDAY", "ANNIVERSARY")
+
+  @ApiProperty({
+    description: 'Fecha y hora en que ocurrió el evento',
+    example: '2025-01-29T10:00:00Z',
+    type: Date,
+  })
+  @IsDateString()
+  @IsNotEmpty()
   occurredAt: Date;
-  membershipRef: {
-    membershipId?: number | null;
-    customerId?: number | null;
-    tenantId?: number | null;
-    qrCode?: string | null;
-  };
+
+  @ApiProperty({
+    description: 'Referencia a la membresía del cliente',
+    type: MembershipRefDto,
+  })
+  @ValidateNested()
+  @Type(() => MembershipRefDto)
+  @IsNotEmpty()
+  membershipRef: MembershipRefDto;
+
+  @ApiPropertyOptional({
+    description: 'Monto opcional para eventos con valor',
+    example: 50.0,
+    type: Number,
+    minimum: 0,
+  })
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
   amount?: number | null; // Monto opcional para eventos con valor
+
+  @ApiPropertyOptional({
+    description: 'Código de moneda (ISO 4217)',
+    example: 'GTQ',
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
   currency?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'ID de la tienda',
+    example: 1,
+    type: Number,
+  })
+  @IsNumber()
+  @IsOptional()
   storeId?: number | null;
+
+  @ApiPropertyOptional({
+    description: 'ID de la sucursal',
+    example: 2,
+    type: Number,
+  })
+  @IsNumber()
+  @IsOptional()
   branchId?: number | null;
+
+  @ApiPropertyOptional({
+    description: 'Canal del evento',
+    example: 'mobile',
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
   channel?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'ID de correlación para trazabilidad',
+    example: 'CORR-001',
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
   correlationId?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Metadatos adicionales',
+    example: { celebrationType: 'birthday' },
+    type: Object,
+  })
+  @IsObject()
+  @IsOptional()
   metadata?: Record<string, any> | null;
 }
 
@@ -183,9 +590,8 @@ export class LoyaltyEventsController {
     if (!request.membershipRef) {
       throw new BadRequestException('membershipRef is required');
     }
-    if (!request.items || !Array.isArray(request.items) || request.items.length === 0) {
-      throw new BadRequestException('items array is required and must not be empty');
-    }
+    // Items es opcional - se inicializa como array vacío si no se proporciona
+    // Las reglas BASE_PURCHASE no requieren items, solo las reglas BONUS_CATEGORY/BONUS_SKU
 
     // Construir evento de lealtad
     const loyaltyEvent: Partial<LoyaltyEvent> = {
@@ -199,7 +605,7 @@ export class LoyaltyEventsController {
         netAmount: request.netAmount,
         grossAmount: request.grossAmount,
         currency: request.currency,
-        items: request.items,
+        items: request.items || [], // Inicializar como array vacío si no se proporciona
         paymentMethod: request.paymentMethod || null,
         paymentStatus: request.paymentStatus || null,
         storeId: request.storeId || null,

@@ -49,6 +49,7 @@ export class GetTenantHandler {
       tenant.secondaryColor,
       tenant.pointsExpireDays,
       tenant.minPointsToRedeem,
+      tenant.taxPercentage,
       tenant.quickSearchCode,
       tenant.status,
       tenant.createdAt,

@@ -112,6 +112,16 @@ export class UpdateTenantRequest {
   minPointsToRedeem?: number;
 
   @ApiProperty({
+    description: 'Porcentaje de impuestos aplicable al tenant',
+    example: 12.5,
+    type: Number,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  taxPercentage?: number;
+
+  @ApiProperty({
     description: 'Estado del tenant',
     example: 'active',
     enum: ['active', 'inactive', 'suspended'],

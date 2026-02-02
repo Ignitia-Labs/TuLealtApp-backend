@@ -86,14 +86,69 @@ export class UpdateLoyaltyProgramHandler {
     // Crear nueva versión del programa
     let updatedProgram = existingProgram.createNewVersion(updates);
 
+    // Helper function para determinar el valor final de activeFrom
+    const getFinalActiveFrom = (): Date | null => {
+      if (request.activeFrom === null) {
+        return null; // null explícito = siempre vigente
+      } else if (request.activeFrom !== undefined) {
+        return new Date(request.activeFrom); // Fecha específica proporcionada
+      }
+      return updatedProgram.activeFrom; // undefined = mantener valor existente
+    };
+
+    // Helper function para determinar el valor final de activeTo
+    const getFinalActiveTo = (): Date | null => {
+      if (request.activeTo === null) {
+        return null; // null explícito = siempre vigente
+      } else if (request.activeTo !== undefined) {
+        return new Date(request.activeTo); // Fecha específica proporcionada
+      }
+      return updatedProgram.activeTo; // undefined = mantener valor existente
+    };
+
     // Actualizar status si se proporciona
     if (request.status !== undefined) {
       if (request.status === 'active') {
-        updatedProgram = updatedProgram.activate(request.activeFrom || undefined);
+        // Activar programa: manejar activeFrom explícitamente
+        const activeFromValue =
+          request.activeFrom === null
+            ? null
+            : request.activeFrom !== undefined
+              ? new Date(request.activeFrom)
+              : undefined;
+
+        updatedProgram = updatedProgram.activate(activeFromValue);
+
+        // Si activeTo se proporciona explícitamente (null o fecha), actualizarlo
+        if (request.activeTo !== undefined) {
+          const finalActiveTo = getFinalActiveTo();
+          updatedProgram = new (updatedProgram.constructor as any)(
+            updatedProgram.id,
+            updatedProgram.tenantId,
+            updatedProgram.name,
+            updatedProgram.description,
+            updatedProgram.programType,
+            updatedProgram.earningDomains,
+            updatedProgram.priorityRank,
+            updatedProgram.stacking,
+            updatedProgram.limits,
+            updatedProgram.expirationPolicy,
+            updatedProgram.currency,
+            updatedProgram.minPointsToRedeem,
+            updatedProgram.status,
+            updatedProgram.version,
+            updatedProgram.activeFrom,
+            finalActiveTo,
+            updatedProgram.createdAt,
+            new Date(),
+          );
+        }
       } else if (request.status === 'inactive') {
         updatedProgram = updatedProgram.deactivate();
       } else {
         // draft - crear nueva instancia con status draft
+        const finalActiveFrom = getFinalActiveFrom();
+        const finalActiveTo = getFinalActiveTo();
         updatedProgram = new (updatedProgram.constructor as any)(
           updatedProgram.id,
           updatedProgram.tenantId,
@@ -109,8 +164,8 @@ export class UpdateLoyaltyProgramHandler {
           updatedProgram.minPointsToRedeem,
           'draft',
           updatedProgram.version,
-          request.activeFrom ? new Date(request.activeFrom) : updatedProgram.activeFrom,
-          request.activeTo ? new Date(request.activeTo) : updatedProgram.activeTo,
+          finalActiveFrom,
+          finalActiveTo,
           updatedProgram.createdAt,
           new Date(),
         );
@@ -118,6 +173,8 @@ export class UpdateLoyaltyProgramHandler {
     } else {
       // Actualizar activeFrom/activeTo si se proporcionan sin cambiar status
       if (request.activeFrom !== undefined || request.activeTo !== undefined) {
+        const finalActiveFrom = getFinalActiveFrom();
+        const finalActiveTo = getFinalActiveTo();
         updatedProgram = new (updatedProgram.constructor as any)(
           updatedProgram.id,
           updatedProgram.tenantId,
@@ -133,8 +190,8 @@ export class UpdateLoyaltyProgramHandler {
           updatedProgram.minPointsToRedeem,
           updatedProgram.status,
           updatedProgram.version,
-          request.activeFrom ? new Date(request.activeFrom) : updatedProgram.activeFrom,
-          request.activeTo ? new Date(request.activeTo) : updatedProgram.activeTo,
+          finalActiveFrom,
+          finalActiveTo,
           updatedProgram.createdAt,
           new Date(),
         );

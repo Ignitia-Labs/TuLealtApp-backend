@@ -80,6 +80,7 @@ export class CreateTenantHandler {
       request.logo || null,
       request.banner || null,
       'active',
+      request.taxPercentage || 0,
     );
 
     // Guardar el tenant (la BD asignará el ID automáticamente)

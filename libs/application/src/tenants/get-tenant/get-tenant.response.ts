@@ -92,6 +92,13 @@ export class GetTenantResponse {
   minPointsToRedeem: number;
 
   @ApiProperty({
+    description: 'Porcentaje de impuestos aplicable al tenant',
+    example: 12.5,
+    type: Number,
+  })
+  taxPercentage: number;
+
+  @ApiProperty({
     description: 'Código único de búsqueda rápida del tenant (para QR code)',
     example: 'TENANT-ABC234',
     type: String,
@@ -160,6 +167,7 @@ export class GetTenantResponse {
     secondaryColor: string,
     pointsExpireDays: number,
     minPointsToRedeem: number,
+    taxPercentage: number,
     quickSearchCode: string,
     status: string,
     createdAt: Date,
@@ -181,6 +189,7 @@ export class GetTenantResponse {
     this.secondaryColor = secondaryColor;
     this.pointsExpireDays = pointsExpireDays;
     this.minPointsToRedeem = minPointsToRedeem;
+    this.taxPercentage = taxPercentage;
     this.quickSearchCode = quickSearchCode;
     this.status = status;
     this.createdAt = createdAt;

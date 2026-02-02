@@ -36,35 +36,78 @@ export class RewardRuleEvaluator {
     membership: CustomerMembership,
     tier: CustomerTier | null,
   ): Promise<RuleEvaluationResult[]> {
+    console.log(`[RULE_EVAL] Starting evaluation - programId: ${programId}, eventType: ${event.eventType}, membershipId: ${membership.id}, tierId: ${tier?.id || 'null'}`);
+    
     // 1. Obtener reglas activas del programa que coincidan con el trigger
     const rules = await this.ruleRepository.findActiveByProgramIdAndTrigger(
       programId,
       event.eventType,
     );
 
+    console.log(`[RULE_EVAL] Found ${rules.length} active rules for trigger ${event.eventType}:`, rules.map(r => ({
+      id: r.id,
+      name: r.name,
+      trigger: r.trigger,
+      earningDomain: r.earningDomain,
+      scope: r.scope,
+    })));
+
     if (rules.length === 0) {
+      console.log(`[RULE_EVAL] No active rules found for trigger ${event.eventType}`);
       return [];
     }
 
     // 2. Filtrar reglas por eligibility
-    const eligibleRules = rules.filter((rule) =>
-      this.checkEligibility(rule, event, membership, tier),
-    );
+    const eligibleRules: RewardRule[] = [];
+    const ineligibleRules: Array<{ rule: RewardRule; reason: string }> = [];
+    
+    for (const rule of rules) {
+      const eligibilityResult = this.checkEligibility(rule, event, membership, tier);
+      if (eligibilityResult.passed) {
+        eligibleRules.push(rule);
+      } else {
+        ineligibleRules.push({ rule, reason: eligibilityResult.reason });
+      }
+    }
+
+    console.log(`[RULE_EVAL] Eligibility check - Eligible: ${eligibleRules.length}, Ineligible: ${ineligibleRules.length}`);
+    if (ineligibleRules.length > 0) {
+      console.log(`[RULE_EVAL] Ineligible rules:`, ineligibleRules.map(ir => ({
+        ruleId: ir.rule.id,
+        ruleName: ir.rule.name,
+        reason: ir.reason,
+      })));
+    }
 
     if (eligibleRules.length === 0) {
+      console.log(`[RULE_EVAL] No eligible rules after filtering`);
       return [];
     }
 
     // 2.5. Filtrar reglas por límites de frecuencia y cooldown
     const rulesPassingLimits: RewardRule[] = [];
+    const rulesFailingLimits: Array<{ rule: RewardRule; reason: string }> = [];
+    
     for (const rule of eligibleRules) {
-      const passesLimits = await this.checkFrequencyLimits(rule, event, membership.id);
-      if (passesLimits) {
+      const limitsResult = await this.checkFrequencyLimits(rule, event, membership.id);
+      if (limitsResult.passed) {
         rulesPassingLimits.push(rule);
+      } else {
+        rulesFailingLimits.push({ rule, reason: limitsResult.reason });
       }
     }
 
+    console.log(`[RULE_EVAL] Frequency limits check - Passing: ${rulesPassingLimits.length}, Failing: ${rulesFailingLimits.length}`);
+    if (rulesFailingLimits.length > 0) {
+      console.log(`[RULE_EVAL] Rules failing limits:`, rulesFailingLimits.map(rfl => ({
+        ruleId: rfl.rule.id,
+        ruleName: rfl.rule.name,
+        reason: rfl.reason,
+      })));
+    }
+
     if (rulesPassingLimits.length === 0) {
+      console.log(`[RULE_EVAL] No rules passing frequency limits`);
       return [];
     }
 
@@ -77,17 +120,24 @@ export class RewardRuleEvaluator {
       tierBenefit = await this.tierBenefitRepository.findByProgramIdAndTierId(programId, tier.id);
     }
 
+    console.log(`[RULE_EVAL] Evaluating ${rulesPassingLimits.length} rules for points calculation`);
+    
     for (const rule of rulesPassingLimits) {
       try {
-        let points = this.calculatePoints(rule, event, tier);
+        const basePoints = this.calculatePoints(rule, event, tier);
+        console.log(`[RULE_EVAL] Rule ${rule.id} (${rule.name}) - Base points: ${basePoints}, Formula: ${rule.pointsFormula.type}`);
+        
+        let points = basePoints;
 
         // Aplicar TierBenefits si existe
         if (tierBenefit && tierBenefit.isActive()) {
+          const beforeMultiplier = points;
           points = tierBenefit.applyMultiplier(points);
+          console.log(`[RULE_EVAL] Rule ${rule.id} - Tier benefit applied: ${beforeMultiplier} -> ${points} (multiplier: ${tierBenefit.pointsMultiplier})`);
         }
 
         if (points > 0) {
-          results.push({
+          const evaluation = {
             ruleId: rule.id,
             programId: rule.programId,
             conflictGroup: rule.conflict.conflictGroup,
@@ -102,14 +152,19 @@ export class RewardRuleEvaluator {
               formulaType: rule.pointsFormula.type,
               tierBenefitApplied: tierBenefit ? tierBenefit.pointsMultiplier : null,
             },
-          });
+          };
+          results.push(evaluation);
+          console.log(`[RULE_EVAL] Rule ${rule.id} - Evaluation added:`, evaluation);
+        } else {
+          console.log(`[RULE_EVAL] Rule ${rule.id} - Points <= 0, skipping`);
         }
       } catch (error) {
         // Log error pero continuar con otras reglas
-        console.warn(`Error evaluating rule ${rule.id}:`, error);
+        console.error(`[RULE_EVAL] Error evaluating rule ${rule.id}:`, error);
       }
     }
 
+    console.log(`[RULE_EVAL] Evaluation complete - ${results.length} evaluations returned`);
     return results;
   }
 
@@ -121,25 +176,36 @@ export class RewardRuleEvaluator {
     event: LoyaltyEvent,
     membership: CustomerMembership,
     tier: CustomerTier | null,
-  ): boolean {
+  ): { passed: boolean; reason?: string } {
     const eligibility = rule.eligibility;
 
     // Verificar condiciones de membership
-    if (eligibility.membershipStatus) {
+    // Solo validar si membershipStatus está definido Y tiene elementos
+    // Si está vacío o es null/undefined, no aplicar restricción
+    if (eligibility.membershipStatus && eligibility.membershipStatus.length > 0) {
       if (!eligibility.membershipStatus.includes(membership.status)) {
-        return false;
+        return { 
+          passed: false, 
+          reason: `Membership status '${membership.status}' not in allowed statuses: ${eligibility.membershipStatus.join(', ')}` 
+        };
       }
     }
 
     // Verificar tier
     if (eligibility.minTierId !== null && eligibility.minTierId !== undefined) {
       if (!tier || tier.priority < eligibility.minTierId) {
-        return false;
+        return { 
+          passed: false, 
+          reason: `Tier requirement not met: minTierId=${eligibility.minTierId}, currentTierPriority=${tier?.priority || 'null'}` 
+        };
       }
     }
     if (eligibility.maxTierId !== null && eligibility.maxTierId !== undefined) {
       if (tier && tier.priority > eligibility.maxTierId) {
-        return false;
+        return { 
+          passed: false, 
+          reason: `Tier requirement not met: maxTierId=${eligibility.maxTierId}, currentTierPriority=${tier.priority}` 
+        };
       }
     }
 
@@ -152,7 +218,10 @@ export class RewardRuleEvaluator {
         (Date.now() - membership.joinedDate.getTime()) / (1000 * 60 * 60 * 24),
       );
       if (membershipAgeDays < eligibility.minMembershipAgeDays) {
-        return false;
+        return { 
+          passed: false, 
+          reason: `Membership age requirement not met: minAgeDays=${eligibility.minMembershipAgeDays}, currentAgeDays=${membershipAgeDays}` 
+        };
       }
     }
 
@@ -161,17 +230,26 @@ export class RewardRuleEvaluator {
       const payload = event.payload as any;
       if (eligibility.minAmount !== null && eligibility.minAmount !== undefined) {
         if (payload.netAmount < eligibility.minAmount) {
-          return false;
+          return { 
+            passed: false, 
+            reason: `Min amount not met: required=${eligibility.minAmount}, actual=${payload.netAmount}` 
+          };
         }
       }
       if (eligibility.maxAmount !== null && eligibility.maxAmount !== undefined) {
         if (payload.netAmount > eligibility.maxAmount) {
-          return false;
+          return { 
+            passed: false, 
+            reason: `Max amount exceeded: max=${eligibility.maxAmount}, actual=${payload.netAmount}` 
+          };
         }
       }
       if (eligibility.minItems !== null && eligibility.minItems !== undefined) {
         if (!payload.items || payload.items.length < eligibility.minItems) {
-          return false;
+          return { 
+            passed: false, 
+            reason: `Min items not met: required=${eligibility.minItems}, actual=${payload.items?.length || 0}` 
+          };
         }
       }
       if (eligibility.categoryIds && eligibility.categoryIds.length > 0) {
@@ -183,34 +261,51 @@ export class RewardRuleEvaluator {
           eventCategoryIds.includes(catId),
         );
         if (!hasMatchingCategory) {
-          return false;
+          return { 
+            passed: false, 
+            reason: `Category mismatch: required=${eligibility.categoryIds.join(', ')}, event has=${eventCategoryIds.join(', ') || 'none'}` 
+          };
         }
       }
     }
 
     // Verificar scope para eventos VISIT
-    if (event.eventType === 'VISIT' && 'storeId' in event.payload) {
+    if (event.eventType === 'VISIT') {
       const payload = event.payload as any;
       const scope = rule.scope;
+
+      console.log(`[RULE_EVAL] Checking VISIT scope for rule ${rule.id}:`, {
+        ruleScope: scope,
+        eventPayload: payload,
+      });
 
       // Validar storeId
       if (scope.storeId !== null && scope.storeId !== undefined) {
         if (payload.storeId !== scope.storeId) {
-          return false;
+          return { 
+            passed: false, 
+            reason: `StoreId mismatch: rule requires ${scope.storeId}, event has ${payload.storeId}` 
+          };
         }
       }
 
       // Validar branchId
       if (scope.branchId !== null && scope.branchId !== undefined) {
         if (payload.branchId !== scope.branchId) {
-          return false;
+          return { 
+            passed: false, 
+            reason: `BranchId mismatch: rule requires ${scope.branchId}, event has ${payload.branchId}` 
+          };
         }
       }
 
       // Validar channel
       if (scope.channel !== null && scope.channel !== undefined && scope.channel.trim() !== '') {
         if (payload.channel !== scope.channel) {
-          return false;
+          return { 
+            passed: false, 
+            reason: `Channel mismatch: rule requires '${scope.channel}', event has '${payload.channel}'` 
+          };
         }
       }
     }
@@ -223,21 +318,30 @@ export class RewardRuleEvaluator {
       // Validar storeId
       if (scope.storeId !== null && scope.storeId !== undefined) {
         if (payload.storeId !== scope.storeId) {
-          return false;
+          return { 
+            passed: false, 
+            reason: `StoreId mismatch: rule requires ${scope.storeId}, event has ${payload.storeId}` 
+          };
         }
       }
 
       // Validar branchId
       if (scope.branchId !== null && scope.branchId !== undefined) {
         if (payload.branchId !== scope.branchId) {
-          return false;
+          return { 
+            passed: false, 
+            reason: `BranchId mismatch: rule requires ${scope.branchId}, event has ${payload.branchId}` 
+          };
         }
       }
 
       // Validar channel
       if (scope.channel !== null && scope.channel !== undefined && scope.channel.trim() !== '') {
         if (payload.channel !== scope.channel) {
-          return false;
+          return { 
+            passed: false, 
+            reason: `Channel mismatch: rule requires '${scope.channel}', event has '${payload.channel}'` 
+          };
         }
       }
     }
@@ -250,7 +354,10 @@ export class RewardRuleEvaluator {
       // Nota: Por ahora no hay campo específico en eligibility para subscriptionType,
       // pero se puede agregar en el futuro. Por ahora validamos que el evento tenga subscriptionType válido
       if (!payload.subscriptionType) {
-        return false;
+        return { 
+          passed: false, 
+          reason: `SubscriptionType missing in event payload` 
+        };
       }
 
       // Validar que subscription status sea ACTIVE (si está en metadata)
@@ -264,13 +371,19 @@ export class RewardRuleEvaluator {
 
       // Validar que tenga streakCount válido
       if (!payload.streakCount || payload.streakCount <= 0) {
-        return false;
+        return { 
+          passed: false, 
+          reason: `Invalid streakCount: ${payload.streakCount || 'missing'}` 
+        };
       }
 
       // Validar que tenga streakType válido
       const validStreakTypes = ['VISIT', 'PURCHASE', 'MIXED'];
       if (!payload.streakType || !validStreakTypes.includes(payload.streakType)) {
-        return false;
+        return { 
+          passed: false, 
+          reason: `Invalid streakType: ${payload.streakType || 'missing'}, valid types: ${validStreakTypes.join(', ')}` 
+        };
       }
 
       // Validar periodo si está en eligibility (opcional, por ahora no hay validación específica)
@@ -282,7 +395,10 @@ export class RewardRuleEvaluator {
 
       // Validar que tenga customType
       if (!payload.customType || typeof payload.customType !== 'string') {
-        return false;
+        return { 
+          passed: false, 
+          reason: `CustomType missing or invalid: ${payload.customType || 'missing'}` 
+        };
       }
 
       // Validar flags/tags si están en eligibility
@@ -290,13 +406,19 @@ export class RewardRuleEvaluator {
         // Buscar flags en el payload o metadata del evento
         const eventFlags = payload.flags || event.metadata?.flags || [];
         if (!Array.isArray(eventFlags)) {
-          return false;
+          return { 
+            passed: false, 
+            reason: `Event flags is not an array: ${typeof eventFlags}` 
+          };
         }
 
         // Verificar que al menos uno de los flags requeridos esté presente
         const hasRequiredFlag = eligibility.flags.some((flag) => eventFlags.includes(flag));
         if (!hasRequiredFlag) {
-          return false;
+          return { 
+            passed: false, 
+            reason: `Required flags not found: required=${eligibility.flags.join(', ')}, event has=${eventFlags.join(', ') || 'none'}` 
+          };
         }
       }
 
@@ -305,7 +427,10 @@ export class RewardRuleEvaluator {
         for (const [key, expectedValue] of Object.entries(eligibility.metadata)) {
           const actualValue = payload[key] || event.metadata?.[key];
           if (actualValue !== expectedValue) {
-            return false;
+            return { 
+              passed: false, 
+              reason: `Metadata mismatch for key '${key}': expected=${expectedValue}, actual=${actualValue}` 
+            };
           }
         }
       }
@@ -315,7 +440,10 @@ export class RewardRuleEvaluator {
     if (eligibility.dayOfWeek && eligibility.dayOfWeek.length > 0) {
       const eventDayOfWeek = event.occurredAt.getDay();
       if (!eligibility.dayOfWeek.includes(eventDayOfWeek)) {
-        return false;
+        return { 
+          passed: false, 
+          reason: `Day of week not allowed: event day=${eventDayOfWeek}, allowed days=${eligibility.dayOfWeek.join(', ')}` 
+        };
       }
     }
 
@@ -331,11 +459,14 @@ export class RewardRuleEvaluator {
       const endTime = endHour * 60 + endMinute;
 
       if (eventTime < startTime || eventTime > endTime) {
-        return false;
+        return { 
+          passed: false, 
+          reason: `Time range not allowed: event time=${eventTime}, allowed range=${startTime}-${endTime}` 
+        };
       }
     }
 
-    return true;
+    return { passed: true };
   }
 
   /**
@@ -575,12 +706,12 @@ export class RewardRuleEvaluator {
     rule: RewardRule,
     event: LoyaltyEvent,
     membershipId: number,
-  ): Promise<boolean> {
+  ): Promise<{ passed: boolean; reason?: string }> {
     const limits = rule.limits;
 
     // Si no hay límites definidos, pasar
     if (!limits || (!limits.frequency && !limits.cooldownHours && !limits.perPeriodCap)) {
-      return true;
+      return { passed: true };
     }
 
     const now = event.occurredAt;
@@ -639,7 +770,10 @@ export class RewardRuleEvaluator {
       const hasRecentTransaction = previousTransactions.some((tx) => tx.createdAt >= cooldownStart);
 
       if (hasRecentTransaction) {
-        return false; // Está en cooldown
+        return { 
+          passed: false, 
+          reason: `Cooldown not expired: cooldownHours=${limits.cooldownHours}, found ${previousTransactions.length} recent transactions` 
+        };
       }
     }
 
@@ -647,7 +781,10 @@ export class RewardRuleEvaluator {
     if (limits.frequency && limits.frequency !== 'per-event') {
       // Si hay transacciones en el periodo, rechazar
       if (previousTransactions.length > 0) {
-        return false;
+        return { 
+          passed: false, 
+          reason: `Frequency limit exceeded: frequency=${limits.frequency}, found ${previousTransactions.length} transactions in period` 
+        };
       }
     }
 
@@ -678,7 +815,10 @@ export class RewardRuleEvaluator {
         );
 
         if (renewalTransactions.length > 0) {
-          return false; // Ya hubo una renovación este año
+          return { 
+            passed: false, 
+            reason: `Subscription renewal already exists this year: found ${renewalTransactions.length} renewals` 
+          };
         }
       }
 
@@ -701,7 +841,10 @@ export class RewardRuleEvaluator {
         );
 
         if (startedTransactions.length > 0) {
-          return false; // Ya hubo un inicio para esta suscripción
+          return { 
+            passed: false, 
+            reason: `Subscription start already exists: found ${startedTransactions.length} starts for subscriptionId=${payload.subscriptionId}` 
+          };
         }
       }
 
@@ -725,7 +868,10 @@ export class RewardRuleEvaluator {
           0,
         );
         if (totalPointsThisYear >= limits.perPeriodCap) {
-          return false; // Ya se alcanzó el cap anual
+          return { 
+            passed: false, 
+            reason: `Period cap exceeded: cap=${limits.perPeriodCap}, current=${totalPointsThisYear}` 
+          };
         }
       }
     }
@@ -755,7 +901,10 @@ export class RewardRuleEvaluator {
         );
 
         if (retentionTx.length > 0) {
-          return false; // Ya hubo un evento RETENTION en esta ventana
+          return { 
+            passed: false, 
+            reason: `Retention event already exists in period: found ${retentionTx.length} transactions` 
+          };
         }
       }
     }
@@ -763,7 +912,7 @@ export class RewardRuleEvaluator {
     // Validar perPeriodCap (se aplicará después en ConflictResolver, pero podemos pre-validar aquí)
     // Nota: perPeriodCap se aplica después de calcular puntos, así que aquí solo validamos frecuencia y cooldown
 
-    return true;
+    return { passed: true };
   }
 
   /**

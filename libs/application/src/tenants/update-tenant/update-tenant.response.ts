@@ -92,6 +92,13 @@ export class UpdateTenantResponse {
   minPointsToRedeem: number;
 
   @ApiProperty({
+    description: 'Porcentaje de impuestos aplicable al tenant',
+    example: 12.5,
+    type: Number,
+  })
+  taxPercentage: number;
+
+  @ApiProperty({
     description: 'Estado del tenant',
     example: 'active',
     type: String,
@@ -125,6 +132,7 @@ export class UpdateTenantResponse {
     secondaryColor: string,
     pointsExpireDays: number,
     minPointsToRedeem: number,
+    taxPercentage: number,
     status: string,
     createdAt: Date,
     updatedAt: Date,
@@ -141,6 +149,7 @@ export class UpdateTenantResponse {
     this.secondaryColor = secondaryColor;
     this.pointsExpireDays = pointsExpireDays;
     this.minPointsToRedeem = minPointsToRedeem;
+    this.taxPercentage = taxPercentage;
     this.status = status;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;

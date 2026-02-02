@@ -14,6 +14,10 @@ import { RewardRuleEntity } from '../entities/reward-rule.entity';
 import { RewardRuleEligibilityEntity } from '../entities/reward-rule-eligibility.entity';
 import { RewardRulePointsFormulaEntity } from '../entities/reward-rule-points-formula.entity';
 import { RewardRulePointsTableEntryEntity } from '../entities/reward-rule-points-table-entry.entity';
+import { RewardRuleEligibilityMembershipStatusEntity } from '../entities/reward-rule-eligibility-membership-status.entity';
+import { RewardRuleEligibilityFlagEntity } from '../entities/reward-rule-eligibility-flag.entity';
+import { RewardRuleEligibilityCategoryIdEntity } from '../entities/reward-rule-eligibility-category-id.entity';
+import { RewardRuleEligibilitySkuEntity } from '../entities/reward-rule-eligibility-sku.entity';
 
 /**
  * Mapper para convertir entre entidades de dominio y entidades de persistencia
@@ -313,13 +317,212 @@ export class RewardRuleMapper {
       entity.limitPeriodDays = null;
     }
 
+    // Construir eligibilityRelation si existe eligibility
+    if (domainEntity.eligibility) {
+      entity.eligibilityRelation = this.buildEligibilityRelation(
+        domainEntity.eligibility,
+        domainEntity.id || 0,
+      );
+    }
+
+    // Construir pointsFormulaRelation si existe pointsFormula
+    if (domainEntity.pointsFormula) {
+      entity.pointsFormulaRelation = this.buildPointsFormulaRelation(
+        domainEntity.pointsFormula,
+        domainEntity.id || 0,
+      );
+    }
 
     return entity;
   }
 
   /**
+   * Construye RewardRuleEligibilityEntity con todas sus tablas hijas
+   */
+  private static buildEligibilityRelation(
+    eligibility: EligibilityConditions,
+    rewardRuleId: number,
+  ): RewardRuleEligibilityEntity {
+    const eligibilityEntity = new RewardRuleEligibilityEntity();
+    eligibilityEntity.rewardRuleId = rewardRuleId;
+    eligibilityEntity.minTierId = eligibility.minTierId ?? null;
+    eligibilityEntity.maxTierId = eligibility.maxTierId ?? null;
+    eligibilityEntity.minMembershipAgeDays = eligibility.minMembershipAgeDays ?? null;
+    eligibilityEntity.minAmount = eligibility.minAmount ?? null;
+    eligibilityEntity.maxAmount = eligibility.maxAmount ?? null;
+    eligibilityEntity.minItems = eligibility.minItems ?? null;
+    eligibilityEntity.dayOfWeek = eligibility.dayOfWeek ?? null;
+    eligibilityEntity.timeRangeStart = eligibility.timeRange?.start
+      ? this.parseTime(eligibility.timeRange.start)
+      : null;
+    eligibilityEntity.timeRangeEnd = eligibility.timeRange?.end
+      ? this.parseTime(eligibility.timeRange.end)
+      : null;
+    eligibilityEntity.metadata = eligibility.metadata
+      ? JSON.stringify(eligibility.metadata)
+      : null;
+
+    // Construir tablas hijas (eligibilityId será 0 inicialmente, TypeORM lo actualizará)
+    const tempEligibilityId = 0;
+    eligibilityEntity.membershipStatuses = this.buildMembershipStatuses(
+      eligibility.membershipStatus,
+      tempEligibilityId,
+    );
+    eligibilityEntity.flags = this.buildFlags(eligibility.flags, tempEligibilityId);
+    eligibilityEntity.categoryIds = this.buildCategoryIds(
+      eligibility.categoryIds,
+      tempEligibilityId,
+    );
+    eligibilityEntity.skus = this.buildSkus(eligibility.skus, tempEligibilityId);
+
+    return eligibilityEntity;
+  }
+
+  /**
+   * Construye RewardRulePointsFormulaEntity con todas sus tablas hijas
+   */
+  private static buildPointsFormulaRelation(
+    formula: PointsFormula,
+    rewardRuleId: number,
+  ): RewardRulePointsFormulaEntity {
+    const formulaEntity = new RewardRulePointsFormulaEntity();
+    formulaEntity.rewardRuleId = rewardRuleId;
+    formulaEntity.formulaType = formula.type;
+
+    switch (formula.type) {
+      case 'fixed':
+        formulaEntity.fixedPoints = formula.points;
+        break;
+
+      case 'rate':
+        formulaEntity.rateRate = formula.rate;
+        formulaEntity.rateAmountField = formula.amountField;
+        formulaEntity.rateRoundingPolicy = formula.roundingPolicy;
+        formulaEntity.rateMinPoints = formula.minPoints ?? null;
+        formulaEntity.rateMaxPoints = formula.maxPoints ?? null;
+        break;
+
+      case 'table':
+        formulaEntity.rateAmountField = formula.amountField;
+        // Construir entradas de tabla (formulaId será 0 inicialmente, TypeORM lo actualizará)
+        const tempFormulaId = 0;
+        formulaEntity.tableEntries = this.buildTableEntries(
+          formula.table,
+          tempFormulaId,
+        );
+        break;
+
+      case 'hybrid':
+        // Para fórmulas híbridas, guardamos en tableData temporalmente
+        // hasta implementar la lógica completa de relaciones recursivas
+        formulaEntity.tableData = {
+          base: formula.base,
+          bonuses: formula.bonuses,
+        } as any;
+        // TODO: Implementar guardado recursivo completo de fórmulas híbridas
+        break;
+    }
+
+    return formulaEntity;
+  }
+
+  /**
+   * Construye array de RewardRuleEligibilityMembershipStatusEntity
+   */
+  private static buildMembershipStatuses(
+    statuses: string[] | null,
+    eligibilityId: number,
+  ): RewardRuleEligibilityMembershipStatusEntity[] {
+    if (!statuses || statuses.length === 0) {
+      return [];
+    }
+    return statuses.map((status) => {
+      const entity = new RewardRuleEligibilityMembershipStatusEntity();
+      entity.eligibilityId = eligibilityId;
+      entity.status = status as 'active' | 'inactive';
+      return entity;
+    });
+  }
+
+  /**
+   * Construye array de RewardRuleEligibilityFlagEntity
+   */
+  private static buildFlags(
+    flags: string[] | null,
+    eligibilityId: number,
+  ): RewardRuleEligibilityFlagEntity[] {
+    if (!flags || flags.length === 0) {
+      return [];
+    }
+    return flags.map((flag) => {
+      const entity = new RewardRuleEligibilityFlagEntity();
+      entity.eligibilityId = eligibilityId;
+      entity.flag = flag;
+      return entity;
+    });
+  }
+
+  /**
+   * Construye array de RewardRuleEligibilityCategoryIdEntity
+   */
+  private static buildCategoryIds(
+    categoryIds: number[] | null,
+    eligibilityId: number,
+  ): RewardRuleEligibilityCategoryIdEntity[] {
+    if (!categoryIds || categoryIds.length === 0) {
+      return [];
+    }
+    return categoryIds.map((categoryId) => {
+      const entity = new RewardRuleEligibilityCategoryIdEntity();
+      entity.eligibilityId = eligibilityId;
+      entity.categoryId = categoryId;
+      return entity;
+    });
+  }
+
+  /**
+   * Construye array de RewardRuleEligibilitySkuEntity
+   */
+  private static buildSkus(
+    skus: string[] | null,
+    eligibilityId: number,
+  ): RewardRuleEligibilitySkuEntity[] {
+    if (!skus || skus.length === 0) {
+      return [];
+    }
+    return skus.map((sku) => {
+      const entity = new RewardRuleEligibilitySkuEntity();
+      entity.eligibilityId = eligibilityId;
+      entity.sku = sku;
+      return entity;
+    });
+  }
+
+  /**
+   * Construye array de RewardRulePointsTableEntryEntity
+   */
+  private static buildTableEntries(
+    table: Array<{ min: number; max: number | null; points: number }>,
+    formulaId: number,
+  ): RewardRulePointsTableEntryEntity[] {
+    if (!table || table.length === 0) {
+      return [];
+    }
+    return table.map((entry, index) => {
+      const entity = new RewardRulePointsTableEntryEntity();
+      entity.formulaId = formulaId;
+      entity.minValue = entry.min;
+      entity.maxValue = entry.max ?? null;
+      entity.points = entry.points;
+      entity.sortOrder = index;
+      return entity;
+    });
+  }
+
+  /**
    * Convierte EligibilityConditions a RewardRuleEligibilityEntity
    * Usado para crear/actualizar la relación de elegibilidad
+   * @deprecated Usar buildEligibilityRelation en su lugar
    */
   static eligibilityToPersistence(
     eligibility: EligibilityConditions,

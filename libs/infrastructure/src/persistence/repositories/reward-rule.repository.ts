@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IRewardRuleRepository, RewardRule } from '@libs/domain';
 import { RewardRuleEntity } from '../entities/reward-rule.entity';
+import { RewardRuleEligibilityEntity } from '../entities/reward-rule-eligibility.entity';
+import { RewardRulePointsFormulaEntity } from '../entities/reward-rule-points-formula.entity';
 import { RewardRuleMapper } from '../mappers/reward-rule.mapper';
 
 /**
@@ -20,12 +22,67 @@ export class RewardRuleRepository implements IRewardRuleRepository {
 
   async save(rule: RewardRule): Promise<RewardRule> {
     const entity = RewardRuleMapper.toPersistence(rule);
+
+    // Si es una actualización (id > 0), eliminar relaciones existentes solo si se están actualizando
+    if (rule.id > 0) {
+      const existingEntity = await this.rewardRuleRepository.findOne({
+        where: { id: rule.id },
+        relations: ['eligibilityRelation', 'pointsFormulaRelation'],
+      });
+
+      if (existingEntity) {
+        // Eliminar eligibility existente solo si vamos a crear una nueva
+        // (si entity.eligibilityRelation existe, significa que el mapper la construyó)
+        if (existingEntity.eligibilityRelation && entity.eligibilityRelation) {
+          await this.rewardRuleRepository.manager.delete(
+            RewardRuleEligibilityEntity,
+            existingEntity.eligibilityRelation.id,
+          );
+        }
+        // Si no vamos a crear nueva pero existe una antigua, eliminarla (caso de eliminación explícita)
+        else if (existingEntity.eligibilityRelation && !entity.eligibilityRelation) {
+          await this.rewardRuleRepository.manager.delete(
+            RewardRuleEligibilityEntity,
+            existingEntity.eligibilityRelation.id,
+          );
+        }
+
+        // Eliminar pointsFormula existente solo si vamos a crear una nueva
+        if (existingEntity.pointsFormulaRelation && entity.pointsFormulaRelation) {
+          await this.rewardRuleRepository.manager.delete(
+            RewardRulePointsFormulaEntity,
+            existingEntity.pointsFormulaRelation.id,
+          );
+        }
+        // Si no vamos a crear nueva pero existe una antigua, eliminarla (caso de eliminación explícita)
+        else if (existingEntity.pointsFormulaRelation && !entity.pointsFormulaRelation) {
+          await this.rewardRuleRepository.manager.delete(
+            RewardRulePointsFormulaEntity,
+            existingEntity.pointsFormulaRelation.id,
+          );
+        }
+      }
+    }
+
+    // Guardar la entidad principal con sus relaciones
+    // TypeORM guardará automáticamente las relaciones OneToMany con cascade: true
     const savedEntity = await this.rewardRuleRepository.save(entity);
 
-    // Cargar relaciones después de guardar para el mapper
+    // Cargar relaciones completas después de guardar para el mapper
     const entityWithRelations = await this.rewardRuleRepository.findOne({
       where: { id: savedEntity.id },
-      relations: ['eligibilityRelation', 'pointsFormulaRelation'],
+      relations: [
+        'eligibilityRelation',
+        'eligibilityRelation.membershipStatuses',
+        'eligibilityRelation.flags',
+        'eligibilityRelation.categoryIds',
+        'eligibilityRelation.skus',
+        'pointsFormulaRelation',
+        'pointsFormulaRelation.tableEntries',
+        'pointsFormulaRelation.bonuses',
+        'pointsFormulaRelation.bonuses.bonusFormula',
+        'pointsFormulaRelation.bonuses.eligibility',
+      ],
     });
 
     return RewardRuleMapper.toDomain(entityWithRelations || savedEntity);

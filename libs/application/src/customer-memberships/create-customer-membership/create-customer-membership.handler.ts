@@ -11,7 +11,10 @@ import {
   ITenantRepository,
   IBranchRepository,
   ICustomerTierRepository,
+  ILoyaltyProgramRepository,
+  IEnrollmentRepository,
   CustomerMembership,
+  Enrollment,
 } from '@libs/domain';
 import { generateMembershipQrCode } from '@libs/shared';
 import { CreateCustomerMembershipRequest } from './create-customer-membership.request';
@@ -38,6 +41,10 @@ export class CreateCustomerMembershipHandler {
     private readonly branchRepository: IBranchRepository,
     @Inject('ICustomerTierRepository')
     private readonly tierRepository: ICustomerTierRepository,
+    @Inject('ILoyaltyProgramRepository')
+    private readonly programRepository: ILoyaltyProgramRepository,
+    @Inject('IEnrollmentRepository')
+    private readonly enrollmentRepository: IEnrollmentRepository,
     @InjectRepository(PartnerSubscriptionUsageEntity)
     private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
     @InjectRepository(PartnerSubscriptionEntity)
@@ -143,10 +150,74 @@ export class CreateCustomerMembershipHandler {
       );
     }
 
+    // Crear enrollment automático al programa BASE
+    await this.autoEnrollInBaseProgram(savedMembership);
+
     // Convertir a DTO con información denormalizada
     const membershipDto = await this.toDto(savedMembership);
 
     return new CreateCustomerMembershipResponse(membershipDto);
+  }
+
+  /**
+   * Inscribe automáticamente al customer en el programa BASE del tenant
+   * Esto es crítico para que el customer pueda acumular puntos
+   */
+  private async autoEnrollInBaseProgram(membership: CustomerMembership): Promise<void> {
+    try {
+      // Buscar programa BASE activo del tenant
+      const baseProgram = await this.programRepository.findBaseProgramByTenantId(membership.tenantId);
+
+      if (!baseProgram) {
+        console.warn(
+          `[CreateCustomerMembershipHandler] ⚠ No BASE program found for tenant ${membership.tenantId}. Customer ${membership.userId} will not be able to accumulate points until enrolled in a program.`,
+        );
+        return;
+      }
+
+      if (!baseProgram.isActive()) {
+        console.warn(
+          `[CreateCustomerMembershipHandler] ⚠ BASE program ${baseProgram.id} for tenant ${membership.tenantId} is not active. Customer ${membership.userId} will not be able to accumulate points.`,
+        );
+        return;
+      }
+
+      // Verificar que no exista ya un enrollment activo
+      const existingEnrollment = await this.enrollmentRepository.findByMembershipIdAndProgramId(
+        membership.id,
+        baseProgram.id,
+      );
+
+      if (existingEnrollment && existingEnrollment.isActive()) {
+        console.log(
+          `[CreateCustomerMembershipHandler] ✓ Membership ${membership.id} is already enrolled in BASE program ${baseProgram.id}. Skipping auto-enrollment.`,
+        );
+        return;
+      }
+
+      // Crear enrollment automático al BASE
+      const enrollment = Enrollment.create(
+        membership.id,
+        baseProgram.id,
+        new Date(), // effectiveFrom = ahora
+        null, // effectiveTo = null (sin fecha de expiración)
+        null, // metadata = null
+        'ACTIVE',
+      );
+
+      await this.enrollmentRepository.save(enrollment);
+
+      console.log(
+        `[CreateCustomerMembershipHandler] ✓ Successfully auto-enrolled membership ${membership.id} (user ${membership.userId}) in BASE program ${baseProgram.id} (tenant ${membership.tenantId})`,
+      );
+    } catch (error) {
+      // No lanzar error para no interrumpir la creación de la membership
+      // pero registrar el error para debugging
+      console.error(
+        `[CreateCustomerMembershipHandler] ✗ Error auto-enrolling membership ${membership.id} in BASE program:`,
+        error,
+      );
+    }
   }
 
   /**

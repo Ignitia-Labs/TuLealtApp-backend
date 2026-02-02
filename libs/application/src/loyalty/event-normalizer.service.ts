@@ -78,10 +78,17 @@ export class EventNormalizer {
 
   /**
    * Valida y normaliza membershipRef
+   * Debe tener al menos una forma de resolver membership:
+   * - membershipId, O
+   * - (customerId + tenantId), O
+   * - qrCode
    */
   private validateMembershipRef(ref: MembershipRef): MembershipRef {
-    // Debe tener al menos una forma de resolver membership
-    if ((!ref.membershipId && !ref.customerId) || (!ref.tenantId && !ref.qrCode)) {
+    const hasMembershipId = !!ref.membershipId;
+    const hasCustomerIdAndTenantId = !!(ref.customerId && ref.tenantId);
+    const hasQrCode = !!ref.qrCode;
+
+    if (!hasMembershipId && !hasCustomerIdAndTenantId && !hasQrCode) {
       throw new BadRequestException(
         'membershipRef must have either: membershipId, or (customerId+tenantId), or qrCode',
       );
@@ -133,10 +140,16 @@ export class EventNormalizer {
     if (!payload.currency || typeof payload.currency !== 'string') {
       throw new BadRequestException('PURCHASE payload requires currency (string)');
     }
-    if (!Array.isArray(payload.items)) {
-      throw new BadRequestException('PURCHASE payload requires items (array)');
+    // Items es opcional - solo validar que sea array si está presente
+    // Las reglas BASE_PURCHASE no requieren items, solo las reglas BONUS_CATEGORY/BONUS_SKU
+    if (payload.items !== undefined && !Array.isArray(payload.items)) {
+      throw new BadRequestException('PURCHASE payload items must be an array if provided');
     }
-    // Validar items básicos
+    // Inicializar como array vacío si no se proporciona
+    if (!payload.items) {
+      payload.items = [];
+    }
+    // Validar items básicos solo si hay items en el array
     for (const item of payload.items) {
       if (!item.sku || typeof item.sku !== 'string') {
         throw new BadRequestException('PURCHASE items require sku (string)');

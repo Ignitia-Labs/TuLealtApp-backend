@@ -73,6 +73,9 @@ export class TenantEntity {
   @Column('int', { default: 100 })
   minPointsToRedeem: number;
 
+  @Column('decimal', { precision: 5, scale: 2, default: 0 })
+  taxPercentage: number;
+
   @Column('varchar', { length: 20, unique: true })
   quickSearchCode: string;
 

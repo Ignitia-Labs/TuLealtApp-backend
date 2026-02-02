@@ -58,7 +58,7 @@ describe('TenantsController', () => {
   const mockSubscriptionEntity: PartnerSubscriptionEntity = {
     id: 1,
     partnerId: 1,
-    planId: '1',
+    planId: 1,
     planType: 'conecta',
     status: 'active',
     billingFrequency: 'monthly',

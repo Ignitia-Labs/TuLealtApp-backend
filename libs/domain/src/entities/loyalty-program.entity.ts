@@ -209,8 +209,19 @@ export class LoyaltyProgram {
 
   /**
    * Método de dominio para activar el programa
+   * @param activeFrom - Fecha de inicio de vigencia. null = siempre vigente, undefined = usar valor existente o fecha actual
    */
-  activate(activeFrom?: Date): LoyaltyProgram {
+  activate(activeFrom?: Date | null): LoyaltyProgram {
+    // Si activeFrom es null explícitamente, usar null (siempre vigente)
+    // Si activeFrom es undefined, usar valor existente o fecha actual
+    // Si activeFrom tiene un valor Date, usar ese valor
+    const finalActiveFrom =
+      activeFrom === null
+        ? null
+        : activeFrom !== undefined
+          ? activeFrom
+          : this.activeFrom || new Date();
+
     return new LoyaltyProgram(
       this.id,
       this.tenantId,
@@ -226,7 +237,7 @@ export class LoyaltyProgram {
       this.minPointsToRedeem,
       'active',
       this.version,
-      activeFrom || this.activeFrom || new Date(),
+      finalActiveFrom,
       this.activeTo,
       this.createdAt,
       new Date(),

@@ -34,6 +34,11 @@ export class Tenant {
      * @see LoyaltyProgram.minPointsToRedeem
      */
     public readonly minPointsToRedeem: number,
+    /**
+     * Porcentaje de impuestos aplicable al tenant
+     * Valor por defecto: 0 (sin impuestos)
+     */
+    public readonly taxPercentage: number,
     public readonly quickSearchCode: string,
     public readonly status: 'active' | 'inactive' | 'suspended',
     public readonly createdAt: Date,
@@ -58,6 +63,7 @@ export class Tenant {
     logo: string | null = null,
     banner: string | null = null,
     status: 'active' | 'inactive' | 'suspended' = 'active',
+    taxPercentage: number = 0,
     id?: number,
   ): Tenant {
     const now = new Date();
@@ -74,6 +80,7 @@ export class Tenant {
       secondaryColor,
       pointsExpireDays,
       minPointsToRedeem,
+      taxPercentage,
       quickSearchCode,
       status,
       now,
@@ -105,6 +112,7 @@ export class Tenant {
       this.secondaryColor,
       this.pointsExpireDays,
       this.minPointsToRedeem,
+      this.taxPercentage,
       this.quickSearchCode,
       'suspended',
       this.createdAt,
@@ -129,6 +137,7 @@ export class Tenant {
       this.secondaryColor,
       this.pointsExpireDays,
       this.minPointsToRedeem,
+      this.taxPercentage,
       this.quickSearchCode,
       'active',
       this.createdAt,

@@ -71,6 +71,28 @@ export class CreateSubscriptionHandler {
       }
     }
 
+    // Convertir planId de string a number
+    let numericPlanId: number;
+    const numericPlanIdParsed = parseInt(request.planId, 10);
+    if (!isNaN(numericPlanIdParsed) && numericPlanIdParsed.toString() === request.planId.trim()) {
+      // Ya es numérico
+      numericPlanId = numericPlanIdParsed;
+    } else {
+      // Es un slug, buscar el plan
+      let pricingPlan = await this.pricingPlanRepository.findBySlug(request.planId);
+      if (!pricingPlan) {
+        // Intentar sin prefijo "plan-"
+        const slugWithoutPrefix = request.planId.replace(/^plan-/, '');
+        pricingPlan = await this.pricingPlanRepository.findBySlug(slugWithoutPrefix);
+      }
+      if (!pricingPlan) {
+        throw new NotFoundException(
+          `Pricing plan with ID or slug "${request.planId}" not found`,
+        );
+      }
+      numericPlanId = pricingPlan.id;
+    }
+
     // Calcular valores de impuestos si no se proporcionan
     let basePrice = request.basePrice ?? request.billingAmount;
     let taxAmount = request.taxAmount ?? 0;
@@ -85,7 +107,7 @@ export class CreateSubscriptionHandler {
     // Crear la entidad de dominio
     const subscription = PartnerSubscription.create(
       request.partnerId,
-      request.planId,
+      numericPlanId,
       request.planType,
       new Date(request.startDate),
       new Date(request.renewalDate),
@@ -134,34 +156,10 @@ export class CreateSubscriptionHandler {
       billingFrequency: savedSubscription.billingFrequency,
     });
 
-    // Buscar el plan de precios para obtener el ID numérico y el slug
-    let planId: number = 0;
-    let planSlug: string = savedEntity.planId; // Por defecto usar el planId como slug
-
-    // Intentar buscar el plan por ID numérico primero
-    const numericPlanId = parseInt(savedEntity.planId, 10);
-    if (!isNaN(numericPlanId)) {
-      const plan = await this.pricingPlanRepository.findById(numericPlanId);
-      if (plan) {
-        planId = plan.id;
-        planSlug = plan.slug;
-      }
-    } else {
-      // Si no es numérico, buscar por slug
-      const plan = await this.pricingPlanRepository.findBySlug(savedEntity.planId);
-      if (plan) {
-        planId = plan.id;
-        planSlug = plan.slug;
-      } else {
-        // Si no se encuentra, intentar buscar sin el prefijo "plan-"
-        const slugWithoutPrefix = savedEntity.planId.replace(/^plan-/, '');
-        const planBySlug = await this.pricingPlanRepository.findBySlug(slugWithoutPrefix);
-        if (planBySlug) {
-          planId = planBySlug.id;
-          planSlug = planBySlug.slug;
-        }
-      }
-    }
+    // Obtener el plan de precios para obtener el slug (planId ya es numérico)
+    const plan = await this.pricingPlanRepository.findById(savedEntity.planId);
+    const planId = plan?.id ?? savedEntity.planId;
+    const planSlug = plan?.slug ?? 'unknown';
 
     return new CreateSubscriptionResponse(
       savedEntity.id,

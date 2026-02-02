@@ -180,6 +180,18 @@ export class PartnersController {
         maxCustomers: 5000,
         maxRewards: 50,
       },
+      usage: {
+        tenantsCount: 2,
+        branchesCount: 8,
+        customersCount: 2345,
+        rewardsCount: 15,
+        loyaltyProgramsCount: 3,
+        loyaltyProgramsBaseCount: 1,
+        loyaltyProgramsPromoCount: 1,
+        loyaltyProgramsPartnerCount: 0,
+        loyaltyProgramsSubscriptionCount: 1,
+        loyaltyProgramsExperimentalCount: 0,
+      },
     },
   })
   @ApiResponse({

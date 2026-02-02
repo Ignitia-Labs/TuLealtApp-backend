@@ -70,6 +70,7 @@ import { TierPolicyEntity } from './entities/tier-policy.entity';
 import { TierStatusEntity } from './entities/tier-status.entity';
 import { TierBenefitEntity } from './entities/tier-benefit.entity';
 import { ReferralEntity } from './entities/referral.entity';
+import { RewardEntity } from './entities/reward.entity';
 import { UserRepository } from './repositories/user.repository';
 import { PricingPlanRepository } from './repositories/pricing-plan.repository';
 import { RateExchangeRepository } from './repositories/rate-exchange.repository';
@@ -115,6 +116,7 @@ import { TierPolicyRepository } from './repositories/tier-policy.repository';
 import { TierStatusRepository } from './repositories/tier-status.repository';
 import { TierBenefitRepository } from './repositories/tier-benefit.repository';
 import { ReferralRepository } from './repositories/referral.repository';
+import { RewardRepository } from './repositories/reward.repository';
 import { CustomerMembershipSubscriber } from './subscribers/customer-membership.subscriber';
 import {
   IUserRepository,
@@ -161,6 +163,7 @@ import {
   ITierStatusRepository,
   ITierBenefitRepository,
   IReferralRepository,
+  IRewardRepository,
 } from '@libs/domain';
 
 /**
@@ -250,6 +253,7 @@ import {
       TierStatusEntity,
       TierBenefitEntity,
       ReferralEntity,
+      RewardEntity,
     ]),
   ],
   providers: [
@@ -474,6 +478,11 @@ import {
       provide: 'IReferralRepository',
       useClass: ReferralRepository,
     },
+    RewardRepository,
+    {
+      provide: 'IRewardRepository',
+      useClass: RewardRepository,
+    },
     // TypeORM Subscribers se registran en la configuración de TypeORM
     // para evitar dependencias circulares
   ],
@@ -522,6 +531,7 @@ import {
     'ITierStatusRepository',
     'ITierBenefitRepository',
     'IReferralRepository',
+    'IRewardRepository',
     UserRepository,
     PricingPlanRepository,
     RateExchangeRepository,

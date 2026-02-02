@@ -116,6 +116,17 @@ export class CreateTenantRequest {
   @IsOptional()
   minPointsToRedeem?: number;
 
+  @ApiProperty({
+    description: 'Porcentaje de impuestos aplicable al tenant',
+    example: 12.5,
+    type: Number,
+    required: false,
+    default: 0,
+  })
+  @IsNumber()
+  @IsOptional()
+  taxPercentage?: number;
+
   // Features
   @ApiProperty({
     description: 'Habilitar escaneo QR',

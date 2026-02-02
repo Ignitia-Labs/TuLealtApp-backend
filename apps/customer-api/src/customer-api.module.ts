@@ -5,6 +5,7 @@ import { CustomerAuthModule } from './auth/customer-auth.module';
 import { PricingController } from './controllers/pricing.controller';
 import { CustomerMembershipsController } from './controllers/customer-memberships.controller';
 import { CustomerPartnersController } from './controllers/customer-partners.controller';
+import { RewardsController } from './controllers/rewards.controller';
 import { CurrenciesController } from './controllers/currencies.controller';
 import { InvitationCodesController } from './controllers/invitation-codes.controller';
 import {
@@ -22,12 +23,22 @@ import {
   GetPointsBalanceHandler,
   GetPointsTransactionsHandler,
   GetCustomerLoyaltyProgramsHandler,
+  GetMembershipEnrollmentsHandler,
+  GetUserEnrollmentsHandler,
   EnrollInProgramHandler,
+  UnenrollFromProgramHandler,
   GetCurrentTierHandler,
   GetTierHistoryHandler,
   GetReferralCodeHandler,
   GetReferralsHandler,
   GetActivityHandler,
+  // Rewards Handlers
+  GetAvailableRewardsHandler,
+  RedeemRewardHandler,
+  // Loyalty Services
+  BalanceProjectionService,
+  BalanceSyncService,
+  LoyaltyProgramConfigResolver,
 } from '@libs/application';
 
 /**
@@ -40,6 +51,7 @@ import {
     PricingController,
     CustomerMembershipsController,
     CustomerPartnersController,
+    RewardsController,
     CurrenciesController,
     InvitationCodesController,
     HealthController,
@@ -64,12 +76,22 @@ import {
     GetPointsBalanceHandler,
     GetPointsTransactionsHandler,
     GetCustomerLoyaltyProgramsHandler,
+    GetMembershipEnrollmentsHandler,
+    GetUserEnrollmentsHandler,
     EnrollInProgramHandler,
+    UnenrollFromProgramHandler,
     GetCurrentTierHandler,
     GetTierHistoryHandler,
     GetReferralCodeHandler,
     GetReferralsHandler,
     GetActivityHandler,
+    // Rewards Handlers
+    GetAvailableRewardsHandler,
+    RedeemRewardHandler,
+    // Loyalty Services
+    BalanceProjectionService,
+    BalanceSyncService,
+    LoyaltyProgramConfigResolver,
   ],
 })
 export class CustomerApiModule {}

@@ -26,14 +26,15 @@ export class UpdateSubscriptionRequest {
   subscriptionId: number;
 
   @ApiProperty({
-    description: 'ID del plan de suscripción',
-    example: 'plan-conecta',
-    type: String,
+    description: 'ID del plan de suscripción (numérico)',
+    example: 1,
+    type: Number,
     required: false,
   })
-  @IsString()
+  @IsNumber()
   @IsOptional()
-  planId?: string;
+  @Min(1)
+  planId?: number;
 
   @ApiProperty({
     description: 'Tipo de plan',

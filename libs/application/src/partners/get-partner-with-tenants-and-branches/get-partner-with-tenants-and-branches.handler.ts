@@ -7,10 +7,15 @@ import { GetPartnerWithTenantsAndBranchesResponse } from './get-partner-with-ten
 import { TenantWithBranchesDto } from './get-partner-with-tenants-and-branches.response';
 import { GetTenantResponse } from '../../tenants/get-tenant/get-tenant.response';
 import { GetBranchResponse } from '../../branches/get-branch/get-branch.response';
-import { TenantFeaturesEntity, PartnerSubscriptionEntity } from '@libs/infrastructure';
+import {
+  TenantFeaturesEntity,
+  PartnerSubscriptionEntity,
+  PartnerSubscriptionUsageEntity,
+} from '@libs/infrastructure';
 import { PartnerLimitsSwaggerDto } from '../dto/partner-limits-swagger.dto';
 import { IPricingPlanRepository } from '@libs/domain';
 import { SubscriptionUsageHelper } from '@libs/application';
+import { PartnerUsageDto } from './get-partner-with-tenants-and-branches.response';
 
 /**
  * Handler para el caso de uso de obtener un partner con sus tenants y branches
@@ -30,6 +35,8 @@ export class GetPartnerWithTenantsAndBranchesHandler {
     private readonly featuresRepository: Repository<TenantFeaturesEntity>,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
+    @InjectRepository(PartnerSubscriptionUsageEntity)
+    private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
   ) {}
 
   async execute(
@@ -119,6 +126,7 @@ export class GetPartnerWithTenantsAndBranchesHandler {
         tenant.secondaryColor,
         tenant.pointsExpireDays,
         tenant.minPointsToRedeem,
+        tenant.taxPercentage,
         tenant.quickSearchCode,
         tenant.status,
         tenant.createdAt,
@@ -166,6 +174,33 @@ export class GetPartnerWithTenantsAndBranchesHandler {
       limitsDto = null;
     }
 
+    // Obtener usage actual de la suscripción
+    let usageDto: PartnerUsageDto | null = null;
+    try {
+      const usage = await SubscriptionUsageHelper.getCurrentUsageForPartner(
+        request.partnerId,
+        this.subscriptionRepository,
+        this.usageRepository,
+      );
+
+      usageDto = new PartnerUsageDto(
+        usage.tenantsCount,
+        usage.branchesCount,
+        usage.customersCount,
+        usage.rewardsCount,
+        usage.loyaltyProgramsCount,
+        usage.loyaltyProgramsBaseCount,
+        usage.loyaltyProgramsPromoCount,
+        usage.loyaltyProgramsPartnerCount,
+        usage.loyaltyProgramsSubscriptionCount,
+        usage.loyaltyProgramsExperimentalCount,
+      );
+    } catch (error) {
+      // Si hay error al obtener usage, continuar sin él (no crítico)
+      console.error('Error al obtener usage desde subscription:', error);
+      usageDto = null;
+    }
+
     return new GetPartnerWithTenantsAndBranchesResponse(
       partner.id,
       partner.name,
@@ -193,6 +228,7 @@ export class GetPartnerWithTenantsAndBranchesHandler {
       partner.updatedAt,
       tenantsWithBranches,
       limitsDto,
+      usageDto,
     );
   }
 }

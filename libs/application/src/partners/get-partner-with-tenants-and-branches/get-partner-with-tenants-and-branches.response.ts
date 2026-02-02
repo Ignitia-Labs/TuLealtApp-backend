@@ -4,6 +4,105 @@ import { GetBranchResponse } from '../../branches/get-branch/get-branch.response
 import { PartnerLimitsSwaggerDto } from '../dto/partner-limits-swagger.dto';
 
 /**
+ * DTO para el uso actual de la suscripción del partner
+ */
+export class PartnerUsageDto {
+  @ApiProperty({
+    description: 'Número de tenants actuales',
+    example: 2,
+    type: Number,
+  })
+  tenantsCount: number;
+
+  @ApiProperty({
+    description: 'Número de branches actuales',
+    example: 8,
+    type: Number,
+  })
+  branchesCount: number;
+
+  @ApiProperty({
+    description: 'Número de customers actuales',
+    example: 2345,
+    type: Number,
+  })
+  customersCount: number;
+
+  @ApiProperty({
+    description: 'Número de rewards actuales',
+    example: 15,
+    type: Number,
+  })
+  rewardsCount: number;
+
+  @ApiProperty({
+    description: 'Número total de programas de lealtad',
+    example: 3,
+    type: Number,
+  })
+  loyaltyProgramsCount: number;
+
+  @ApiProperty({
+    description: 'Número de programas de lealtad base',
+    example: 1,
+    type: Number,
+  })
+  loyaltyProgramsBaseCount: number;
+
+  @ApiProperty({
+    description: 'Número de programas de lealtad promocionales',
+    example: 1,
+    type: Number,
+  })
+  loyaltyProgramsPromoCount: number;
+
+  @ApiProperty({
+    description: 'Número de programas de lealtad de partner',
+    example: 0,
+    type: Number,
+  })
+  loyaltyProgramsPartnerCount: number;
+
+  @ApiProperty({
+    description: 'Número de programas de lealtad de suscripción',
+    example: 1,
+    type: Number,
+  })
+  loyaltyProgramsSubscriptionCount: number;
+
+  @ApiProperty({
+    description: 'Número de programas de lealtad experimentales',
+    example: 0,
+    type: Number,
+  })
+  loyaltyProgramsExperimentalCount: number;
+
+  constructor(
+    tenantsCount: number,
+    branchesCount: number,
+    customersCount: number,
+    rewardsCount: number,
+    loyaltyProgramsCount: number,
+    loyaltyProgramsBaseCount: number,
+    loyaltyProgramsPromoCount: number,
+    loyaltyProgramsPartnerCount: number,
+    loyaltyProgramsSubscriptionCount: number,
+    loyaltyProgramsExperimentalCount: number,
+  ) {
+    this.tenantsCount = tenantsCount;
+    this.branchesCount = branchesCount;
+    this.customersCount = customersCount;
+    this.rewardsCount = rewardsCount;
+    this.loyaltyProgramsCount = loyaltyProgramsCount;
+    this.loyaltyProgramsBaseCount = loyaltyProgramsBaseCount;
+    this.loyaltyProgramsPromoCount = loyaltyProgramsPromoCount;
+    this.loyaltyProgramsPartnerCount = loyaltyProgramsPartnerCount;
+    this.loyaltyProgramsSubscriptionCount = loyaltyProgramsSubscriptionCount;
+    this.loyaltyProgramsExperimentalCount = loyaltyProgramsExperimentalCount;
+  }
+}
+
+/**
  * DTO de respuesta para un tenant con sus branches
  */
 export class TenantWithBranchesDto {
@@ -217,6 +316,13 @@ export class GetPartnerWithTenantsAndBranchesResponse {
   })
   limits: PartnerLimitsSwaggerDto | null;
 
+  @ApiProperty({
+    description: 'Uso actual de la suscripción del partner',
+    type: PartnerUsageDto,
+    nullable: true,
+  })
+  usage: PartnerUsageDto | null;
+
   constructor(
     id: number,
     name: string,
@@ -244,6 +350,7 @@ export class GetPartnerWithTenantsAndBranchesResponse {
     updatedAt: Date,
     tenants: TenantWithBranchesDto[],
     limits: PartnerLimitsSwaggerDto | null = null,
+    usage: PartnerUsageDto | null = null,
   ) {
     this.id = id;
     this.name = name;
@@ -271,5 +378,6 @@ export class GetPartnerWithTenantsAndBranchesResponse {
     this.updatedAt = updatedAt;
     this.tenants = tenants;
     this.limits = limits;
+    this.usage = usage;
   }
 }

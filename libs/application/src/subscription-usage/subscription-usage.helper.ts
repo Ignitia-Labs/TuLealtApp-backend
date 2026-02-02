@@ -9,7 +9,11 @@ import {
   RewardRuleEntity,
 } from '@libs/infrastructure';
 import { PartnerSubscriptionUsageMapper } from '@libs/infrastructure';
-import { PartnerSubscriptionUsage, IPricingPlanRepository, PricingPlanLimits } from '@libs/domain';
+import {
+  PartnerSubscriptionUsage,
+  IPricingPlanRepository,
+  PricingPlanLimits,
+} from '@libs/domain';
 
 /**
  * Helper functions para manejar la creación y actualización automática
@@ -1129,8 +1133,10 @@ export class SubscriptionUsageHelper {
       const previousLoyaltyProgramsBaseCount = usageEntity.loyaltyProgramsBaseCount ?? 0;
       const previousLoyaltyProgramsPromoCount = usageEntity.loyaltyProgramsPromoCount ?? 0;
       const previousLoyaltyProgramsPartnerCount = usageEntity.loyaltyProgramsPartnerCount ?? 0;
-      const previousLoyaltyProgramsSubscriptionCount = usageEntity.loyaltyProgramsSubscriptionCount ?? 0;
-      const previousLoyaltyProgramsExperimentalCount = usageEntity.loyaltyProgramsExperimentalCount ?? 0;
+      const previousLoyaltyProgramsSubscriptionCount =
+        usageEntity.loyaltyProgramsSubscriptionCount ?? 0;
+      const previousLoyaltyProgramsExperimentalCount =
+        usageEntity.loyaltyProgramsExperimentalCount ?? 0;
 
       // Actualizar tenantsCount, branchesCount, customersCount y rewardsCount
       usageEntity.tenantsCount = tenantsCount;
@@ -1275,12 +1281,26 @@ export class SubscriptionUsageHelper {
         where: { partnerId, status: 'active' },
       });
 
-      if (!subscription || !subscription.planId) {
+      console.log(
+        `[SubscriptionUsageHelper] Getting plan limits for partner ${partnerId}. Active subscription:`,
+        subscription ? { id: subscription.id, planId: subscription.planId, status: subscription.status } : 'not found',
+      );
+
+      // Validar subscription y planId (planId debe ser un número válido > 0)
+      if (!subscription || !subscription.planId || subscription.planId <= 0) {
+        console.log(
+          `[SubscriptionUsageHelper] Active subscription not found or invalid planId (${subscription?.planId}), trying other valid subscriptions...`,
+        );
+        
         // Intentar con otras suscripciones válidas si no hay activa
         const validSubscriptions = await subscriptionRepository.find({
           where: { partnerId, status: In(['active', 'trialing', 'past_due']) },
           order: { createdAt: 'DESC' },
         });
+
+        console.log(
+          `[SubscriptionUsageHelper] Found ${validSubscriptions.length} valid subscriptions for partner ${partnerId}`,
+        );
 
         if (validSubscriptions.length === 0) {
           console.warn(
@@ -1290,24 +1310,66 @@ export class SubscriptionUsageHelper {
         }
 
         const selectedSubscription = validSubscriptions[0];
-        if (!selectedSubscription.planId) {
+        console.log(
+          `[SubscriptionUsageHelper] Selected subscription:`,
+          { id: selectedSubscription.id, planId: selectedSubscription.planId, status: selectedSubscription.status },
+        );
+
+        if (!selectedSubscription.planId || selectedSubscription.planId <= 0) {
+          console.warn(
+            `[SubscriptionUsageHelper] Subscription found for partner ${partnerId} but planId is invalid: ${selectedSubscription.planId}`,
+          );
           return null;
         }
 
-        // Obtener pricing plan
-        const pricingPlan = await pricingPlanRepository.findById(
-          parseInt(selectedSubscription.planId),
+        // Obtener pricing plan por ID numérico (planId ahora siempre es integer)
+        console.log(
+          `[SubscriptionUsageHelper] Looking up pricing plan with ID: ${selectedSubscription.planId}`,
         );
-        if (!pricingPlan || !pricingPlan.limits) {
+        const pricingPlan = await pricingPlanRepository.findById(selectedSubscription.planId);
+        
+        if (!pricingPlan) {
+          console.error(
+            `[SubscriptionUsageHelper] Pricing plan not found for planId: ${selectedSubscription.planId} (partner ${partnerId})`,
+          );
+          return null;
+        }
+
+        console.log(
+          `[SubscriptionUsageHelper] Pricing plan found: ${pricingPlan.name} (ID: ${pricingPlan.id}). Has limits: ${!!pricingPlan.limits}`,
+        );
+
+        if (!pricingPlan.limits) {
+          console.warn(
+            `[SubscriptionUsageHelper] Pricing plan ${pricingPlan.id} (${pricingPlan.name}) has no limits configured`,
+          );
           return null;
         }
 
         return pricingPlan.limits;
       }
 
-      // Obtener pricing plan
-      const pricingPlan = await pricingPlanRepository.findById(parseInt(subscription.planId));
-      if (!pricingPlan || !pricingPlan.limits) {
+      // Obtener pricing plan por ID numérico (planId ahora siempre es integer)
+      console.log(
+        `[SubscriptionUsageHelper] Looking up pricing plan with ID: ${subscription.planId}`,
+      );
+      const pricingPlan = await pricingPlanRepository.findById(subscription.planId);
+      
+      if (!pricingPlan) {
+        console.error(
+          `[SubscriptionUsageHelper] Pricing plan not found for planId: ${subscription.planId} (partner ${partnerId})`,
+        );
+        return null;
+      }
+
+      console.log(
+        `[SubscriptionUsageHelper] Pricing plan found: ${pricingPlan.name} (ID: ${pricingPlan.id}). Has limits: ${!!pricingPlan.limits}`,
+      );
+
+      if (!pricingPlan.limits) {
+        console.warn(
+          `[SubscriptionUsageHelper] Pricing plan ${pricingPlan.id} (${pricingPlan.name}) has no limits configured`,
+        );
         return null;
       }
 
@@ -1317,6 +1379,10 @@ export class SubscriptionUsageHelper {
         `[SubscriptionUsageHelper] Error getting plan limits for partner ${partnerId}:`,
         error,
       );
+      // Log stack trace para debugging
+      if (error instanceof Error) {
+        console.error(`[SubscriptionUsageHelper] Error stack:`, error.stack);
+      }
       return null;
     }
   }
@@ -1422,35 +1488,35 @@ export class SubscriptionUsageHelper {
         });
       }
 
-        if (!usage) {
-          // Crear registro si no existe
-          await this.createUsageForSubscription(subscription.id, usageRepository);
-          return {
-            tenantsCount: 0,
-            branchesCount: 0,
-            customersCount: 0,
-            rewardsCount: 0,
-            loyaltyProgramsCount: 0,
-            loyaltyProgramsBaseCount: 0,
-            loyaltyProgramsPromoCount: 0,
-            loyaltyProgramsPartnerCount: 0,
-            loyaltyProgramsSubscriptionCount: 0,
-            loyaltyProgramsExperimentalCount: 0,
-          };
-        }
-
+      if (!usage) {
+        // Crear registro si no existe
+        await this.createUsageForSubscription(subscription.id, usageRepository);
         return {
-          tenantsCount: usage.tenantsCount,
-          branchesCount: usage.branchesCount,
-          customersCount: usage.customersCount,
-          rewardsCount: usage.rewardsCount,
-          loyaltyProgramsCount: usage.loyaltyProgramsCount ?? 0,
-          loyaltyProgramsBaseCount: usage.loyaltyProgramsBaseCount ?? 0,
-          loyaltyProgramsPromoCount: usage.loyaltyProgramsPromoCount ?? 0,
-          loyaltyProgramsPartnerCount: usage.loyaltyProgramsPartnerCount ?? 0,
-          loyaltyProgramsSubscriptionCount: usage.loyaltyProgramsSubscriptionCount ?? 0,
-          loyaltyProgramsExperimentalCount: usage.loyaltyProgramsExperimentalCount ?? 0,
+          tenantsCount: 0,
+          branchesCount: 0,
+          customersCount: 0,
+          rewardsCount: 0,
+          loyaltyProgramsCount: 0,
+          loyaltyProgramsBaseCount: 0,
+          loyaltyProgramsPromoCount: 0,
+          loyaltyProgramsPartnerCount: 0,
+          loyaltyProgramsSubscriptionCount: 0,
+          loyaltyProgramsExperimentalCount: 0,
         };
+      }
+
+      return {
+        tenantsCount: usage.tenantsCount,
+        branchesCount: usage.branchesCount,
+        customersCount: usage.customersCount,
+        rewardsCount: usage.rewardsCount,
+        loyaltyProgramsCount: usage.loyaltyProgramsCount ?? 0,
+        loyaltyProgramsBaseCount: usage.loyaltyProgramsBaseCount ?? 0,
+        loyaltyProgramsPromoCount: usage.loyaltyProgramsPromoCount ?? 0,
+        loyaltyProgramsPartnerCount: usage.loyaltyProgramsPartnerCount ?? 0,
+        loyaltyProgramsSubscriptionCount: usage.loyaltyProgramsSubscriptionCount ?? 0,
+        loyaltyProgramsExperimentalCount: usage.loyaltyProgramsExperimentalCount ?? 0,
+      };
     } catch (error) {
       console.error(
         `[SubscriptionUsageHelper] Error getting current usage for partner ${partnerId}:`,

@@ -74,7 +74,40 @@ export class UpdateRewardRuleHandler {
     let finalRule = updatedRule;
     if (request.status !== undefined) {
       if (request.status === 'active') {
-        finalRule = updatedRule.activate(request.activeFrom || undefined);
+        // Si se proporcionan activeFrom/activeTo explícitamente (incluyendo null), crear instancia directamente
+        // De lo contrario, usar el método activate() que maneja valores por defecto
+        if (request.activeFrom !== undefined || request.activeTo !== undefined) {
+          finalRule = new (updatedRule.constructor as any)(
+            updatedRule.id,
+            updatedRule.programId,
+            updatedRule.name,
+            updatedRule.description,
+            updatedRule.trigger,
+            updatedRule.scope,
+            updatedRule.eligibility,
+            updatedRule.pointsFormula,
+            updatedRule.limits,
+            updatedRule.conflict,
+            updatedRule.idempotencyScope,
+            updatedRule.earningDomain,
+            'active',
+            updatedRule.version,
+            request.activeFrom !== undefined
+              ? request.activeFrom
+                ? new Date(request.activeFrom)
+                : null
+              : updatedRule.activeFrom || new Date(),
+            request.activeTo !== undefined
+              ? request.activeTo
+                ? new Date(request.activeTo)
+                : null
+              : updatedRule.activeTo,
+            updatedRule.createdAt,
+            new Date(),
+          );
+        } else {
+          finalRule = updatedRule.activate(request.activeFrom || undefined);
+        }
       } else if (request.status === 'inactive') {
         finalRule = updatedRule.deactivate();
       } else {
@@ -94,8 +127,16 @@ export class UpdateRewardRuleHandler {
           updatedRule.earningDomain,
           'draft',
           updatedRule.version,
-          request.activeFrom ? new Date(request.activeFrom) : updatedRule.activeFrom,
-          request.activeTo ? new Date(request.activeTo) : updatedRule.activeTo,
+          request.activeFrom !== undefined
+            ? request.activeFrom
+              ? new Date(request.activeFrom)
+              : null
+            : updatedRule.activeFrom,
+          request.activeTo !== undefined
+            ? request.activeTo
+              ? new Date(request.activeTo)
+              : null
+            : updatedRule.activeTo,
           updatedRule.createdAt,
           new Date(),
         );
@@ -118,8 +159,16 @@ export class UpdateRewardRuleHandler {
           updatedRule.earningDomain,
           updatedRule.status,
           updatedRule.version,
-          request.activeFrom ? new Date(request.activeFrom) : updatedRule.activeFrom,
-          request.activeTo ? new Date(request.activeTo) : updatedRule.activeTo,
+          request.activeFrom !== undefined
+            ? request.activeFrom
+              ? new Date(request.activeFrom)
+              : null
+            : updatedRule.activeFrom,
+          request.activeTo !== undefined
+            ? request.activeTo
+              ? new Date(request.activeTo)
+              : null
+            : updatedRule.activeTo,
           updatedRule.createdAt,
           new Date(),
         );

@@ -18,7 +18,7 @@ export class PartnerSubscription {
   constructor(
     public readonly id: number,
     public readonly partnerId: number,
-    public readonly planId: string,
+    public readonly planId: number,
     public readonly planType: PlanType,
     public readonly startDate: Date,
     public readonly renewalDate: Date,
@@ -58,7 +58,7 @@ export class PartnerSubscription {
    */
   static create(
     partnerId: number,
-    planId: string,
+    planId: number,
     planType: PlanType,
     startDate: Date,
     renewalDate: Date,

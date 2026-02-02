@@ -18,6 +18,7 @@ import { InvitationCodesController } from './controllers/invitation-codes.contro
 import { LoyaltyEventsController } from './controllers/loyalty-events.controller';
 import { LoyaltyProgramsController } from './controllers/loyalty-programs.controller';
 import { RewardRulesController } from './controllers/reward-rules.controller';
+import { RewardsController } from './controllers/rewards.controller';
 import { EnrollmentsController } from './controllers/enrollments.controller';
 import { LoyaltyDashboardController } from './controllers/loyalty-dashboard.controller';
 import { InfrastructureModule } from '@libs/infrastructure';
@@ -131,6 +132,12 @@ import {
   UpdateRewardRuleHandler,
   DeleteRewardRuleHandler,
   RewardRuleValidator,
+  // Rewards Handlers
+  CreateRewardHandler,
+  GetRewardsHandler,
+  GetRewardHandler,
+  UpdateRewardHandler,
+  DeleteRewardHandler,
   // Enrollments Handlers
   GetEnrollmentsHandler,
   CreateEnrollmentHandler,
@@ -171,6 +178,7 @@ import {
     LoyaltyEventsController,
     LoyaltyProgramsController,
     RewardRulesController,
+    RewardsController,
     EnrollmentsController,
     LoyaltyDashboardController,
     HealthController,
@@ -294,6 +302,12 @@ import {
     UpdateRewardRuleHandler,
     DeleteRewardRuleHandler,
     RewardRuleValidator,
+    // Rewards Handlers
+    CreateRewardHandler,
+    GetRewardsHandler,
+    GetRewardHandler,
+    UpdateRewardHandler,
+    DeleteRewardHandler,
     // Enrollments Handlers
     GetEnrollmentsHandler,
     CreateEnrollmentHandler,

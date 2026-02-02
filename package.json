@@ -66,6 +66,7 @@
     "script:migrate-tier-benefits-json": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/migrate-tier-benefits-json-to-relational.ts",
     "script:migrate-customer-tiers-json": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/migrate-customer-tiers-json-to-relational.ts",
     "script:validate-customer-partners": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/validate-customer-partners-migration.ts",
+    "script:validate-base-enrollments": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/validate-and-fix-base-enrollments.ts",
     "script:recalculate-subscription-usage": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/recalculate-subscription-usage.ts",
     "script:refresh-analytics": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/refresh-tenant-analytics.ts",
     "script:test-email": "ts-node -r tsconfig-paths/register libs/infrastructure/src/scripts/test-email.ts",

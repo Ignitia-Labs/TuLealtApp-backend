@@ -66,11 +66,13 @@ export class UpdateSubscriptionHandler {
       updatedSubscription = updatedSubscription.updateStatus(request.status);
     }
 
-    if (request.planId || request.planType) {
+    if (request.planId !== undefined || request.planType) {
       // Crear nueva suscripción con los valores actualizados
+      // planId ahora siempre es number
+      const newPlanId = request.planId !== undefined ? request.planId : subscription.planId;
       updatedSubscription = PartnerSubscription.create(
         subscription.partnerId,
-        request.planId ?? subscription.planId,
+        newPlanId,
         request.planType ?? subscription.planType,
         subscription.startDate,
         request.renewalDate ? new Date(request.renewalDate) : subscription.renewalDate,

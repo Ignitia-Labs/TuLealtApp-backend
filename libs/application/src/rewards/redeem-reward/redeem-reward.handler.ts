@@ -1,0 +1,187 @@
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  IRewardRepository,
+  ICustomerMembershipRepository,
+  IPointsTransactionRepository,
+  ITenantRepository,
+  ILoyaltyProgramRepository,
+  IEnrollmentRepository,
+  PointsTransaction,
+} from '@libs/domain';
+import { BalanceSyncService } from '../../loyalty/balance-sync.service';
+import { LoyaltyProgramConfigResolver } from '../../loyalty/loyalty-program-config-resolver.service';
+import { RedeemRewardRequest } from './redeem-reward.request';
+import { RedeemRewardResponse } from './redeem-reward.response';
+
+/**
+ * Handler para canjear una recompensa
+ */
+@Injectable()
+export class RedeemRewardHandler {
+  constructor(
+    @Inject('IRewardRepository')
+    private readonly rewardRepository: IRewardRepository,
+    @Inject('ICustomerMembershipRepository')
+    private readonly membershipRepository: ICustomerMembershipRepository,
+    @Inject('IPointsTransactionRepository')
+    private readonly pointsTransactionRepository: IPointsTransactionRepository,
+    @Inject('ITenantRepository')
+    private readonly tenantRepository: ITenantRepository,
+    @Inject('ILoyaltyProgramRepository')
+    private readonly programRepository: ILoyaltyProgramRepository,
+    @Inject('IEnrollmentRepository')
+    private readonly enrollmentRepository: IEnrollmentRepository,
+    private readonly balanceSyncService: BalanceSyncService,
+    private readonly configResolver: LoyaltyProgramConfigResolver,
+  ) {}
+
+  async execute(request: RedeemRewardRequest): Promise<RedeemRewardResponse> {
+    // 1. Obtener recompensa
+    const reward = await this.rewardRepository.findById(request.rewardId);
+    if (!reward) {
+      throw new NotFoundException(`Reward with ID ${request.rewardId} not found`);
+    }
+
+    // 2. Obtener membership
+    const membership = await this.membershipRepository.findById(request.membershipId);
+    if (!membership) {
+      throw new NotFoundException(`Membership with ID ${request.membershipId} not found`);
+    }
+
+    // 3. Validar que membership pertenece al tenant de la recompensa
+    if (membership.tenantId !== reward.tenantId) {
+      throw new BadRequestException(
+        `Reward belongs to tenant ${reward.tenantId}, but membership belongs to tenant ${membership.tenantId}`,
+      );
+    }
+
+    // 4. Validar que membership está activa
+    if (membership.status !== 'active') {
+      throw new BadRequestException(
+        `Membership is ${membership.status}. Only active memberships can redeem rewards.`,
+      );
+    }
+
+    // 5. Verificar balance suficiente
+    if (membership.points < reward.pointsRequired) {
+      throw new BadRequestException(
+        `Insufficient points. Required: ${reward.pointsRequired}, Available: ${membership.points}`,
+      );
+    }
+
+    // 6. Validar minPointsToRedeem (del tenant o programa)
+    const tenant = await this.tenantRepository.findById(membership.tenantId);
+    if (!tenant) {
+      throw new NotFoundException(`Tenant with ID ${membership.tenantId} not found`);
+    }
+
+    // Buscar enrollment activo en programa BASE para obtener minPointsToRedeem
+    const baseEnrollments = await this.enrollmentRepository.findActiveByMembershipIdAndProgramType(
+      membership.id,
+      'BASE',
+    );
+    
+    let program = null;
+    if (baseEnrollments.length > 0) {
+      // Usar el primer enrollment BASE activo
+      program = await this.programRepository.findById(baseEnrollments[0].programId);
+    }
+
+    const minPointsToRedeem = this.configResolver.resolveMinPointsToRedeem(program, tenant);
+    if (reward.pointsRequired < minPointsToRedeem) {
+      throw new BadRequestException(
+        `Reward requires ${reward.pointsRequired} points, but minimum to redeem is ${minPointsToRedeem} points`,
+      );
+    }
+
+    // 7. Verificar disponibilidad de la recompensa
+    if (!reward.isAvailable()) {
+      throw new BadRequestException(
+        'Reward is not available (out of stock, expired, or inactive)',
+      );
+    }
+
+    // 8. Verificar límite por usuario (contar redemptions previas)
+    const redemptionTransactions =
+      await this.pointsTransactionRepository.findByMembershipIdAndType(
+        membership.id,
+        'REDEEM',
+      );
+
+    // Filtrar solo las redemptions de esta recompensa específica
+    const userRedemptions = redemptionTransactions.filter(
+      (tx) => tx.metadata && tx.metadata.rewardId === reward.id,
+    ).length;
+
+    if (!reward.canRedeem(userRedemptions, membership.points)) {
+      throw new BadRequestException(
+        `Cannot redeem: ${
+          reward.maxRedemptionsPerUser
+            ? `limit of ${reward.maxRedemptionsPerUser} redemptions reached`
+            : 'insufficient points'
+        }`,
+      );
+    }
+
+    // 9. Crear transacción REDEEM en el ledger
+    const idempotencyKey = `REDEEM-${request.membershipId}-${request.rewardId}-${Date.now()}`;
+
+    // Verificar idempotencia
+    const existingTransaction =
+      await this.pointsTransactionRepository.findByIdempotencyKey(idempotencyKey);
+    if (existingTransaction) {
+      // Ya existe, retornar la transacción existente
+      const updatedMembership = await this.membershipRepository.findById(
+        request.membershipId,
+      );
+      return new RedeemRewardResponse({
+        transactionId: existingTransaction.id,
+        rewardId: reward.id,
+        pointsUsed: Math.abs(existingTransaction.pointsDelta),
+        newBalance: updatedMembership?.points || membership.points,
+      });
+    }
+
+    // Las recompensas son globales del tenant, no específicas de un programa
+    // Por lo tanto, programId es null en la transacción REDEEM
+    const transaction = PointsTransaction.createRedeem(
+      membership.tenantId,
+      membership.userId,
+      membership.id,
+      -reward.pointsRequired, // Negativo para REDEEM
+      idempotencyKey,
+      null, // sourceEventId
+      null, // correlationId
+      null, // createdBy (se puede obtener del contexto)
+      'REWARD_REDEMPTION', // reasonCode
+      null, // programId: null porque las recompensas son globales del tenant
+      {
+        rewardId: reward.id,
+        rewardName: reward.name,
+        rewardCategory: reward.category,
+      },
+    );
+
+    await this.pointsTransactionRepository.save(transaction);
+
+    // 10. Reducir stock de la recompensa
+    const updatedReward = reward.reduceStock();
+    await this.rewardRepository.update(updatedReward);
+
+    // 11. Sincronizar balance (actualizar proyección en customer_memberships.points)
+    await this.balanceSyncService.syncAfterTransaction(membership.id);
+
+    // 12. Obtener balance actualizado
+    const updatedMembership = await this.membershipRepository.findById(request.membershipId);
+    if (!updatedMembership) {
+      throw new NotFoundException(`Membership ${request.membershipId} not found after redemption`);
+    }
+
+    return new RedeemRewardResponse({
+      transactionId: transaction.id,
+      rewardId: reward.id,
+      pointsUsed: reward.pointsRequired,
+      newBalance: updatedMembership.points,
+    });
+  }
+}

@@ -105,7 +105,7 @@ export class GetPartnerHandler {
             : new Date();
 
           subscriptionDto = {
-            planId: partnerEntity.subscription.planId || '',
+            planId: partnerEntity.subscription.planId || 0,
             planType: (partnerEntity.subscription.planType || 'conecta') as
               | 'esencia'
               | 'conecta'

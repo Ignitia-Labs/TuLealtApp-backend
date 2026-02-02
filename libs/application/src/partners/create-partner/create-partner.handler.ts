@@ -130,9 +130,9 @@ export class CreatePartnerHandler {
     let pricingPlan = null;
 
     // Intentar buscar por ID numérico primero
-    const numericPlanId = parseInt(request.subscriptionPlanId, 10);
-    if (!isNaN(numericPlanId)) {
-      pricingPlan = await this.pricingPlanRepository.findById(numericPlanId);
+    const parsedPlanId = parseInt(request.subscriptionPlanId, 10);
+    if (!isNaN(parsedPlanId)) {
+      pricingPlan = await this.pricingPlanRepository.findById(parsedPlanId);
     }
 
     // Si no se encontró por ID, buscar por slug
@@ -227,10 +227,26 @@ export class CreatePartnerHandler {
       }
     }
 
+    // Obtener el ID numérico del plan de precios
+    let numericPlanId: number;
+    if (pricingPlan) {
+      numericPlanId = pricingPlan.id;
+    } else {
+      // Si no se encontró el plan, intentar convertir el planId a número
+      const parsedId = parseInt(request.subscriptionPlanId, 10);
+      if (!isNaN(parsedId)) {
+        numericPlanId = parsedId;
+      } else {
+        throw new NotFoundException(
+          `Pricing plan with ID or slug "${request.subscriptionPlanId}" not found`,
+        );
+      }
+    }
+
     // Crear y guardar la suscripción
     const subscription = PartnerSubscription.create(
       savedPartner.id,
-      request.subscriptionPlanId,
+      numericPlanId,
       planType,
       startDate,
       renewalDate,

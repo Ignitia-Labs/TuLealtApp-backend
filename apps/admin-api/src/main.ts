@@ -9,6 +9,25 @@ import {
   LoggerModule,
 } from '@libs/shared';
 import { S3Service } from '@libs/infrastructure';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Cargar variables de entorno antes de inicializar la aplicación
+// Prioridad: .env.local > .env > variables de entorno del sistema
+if (process.env.NODE_ENV !== 'production') {
+  // Intentar cargar .env.local primero
+  const envLocalPath = path.resolve(process.cwd(), '.env.local');
+  dotenv.config({ path: envLocalPath });
+
+  // Si no existe .env.local o no tiene DB_HOST, cargar .env
+  if (!process.env.DB_HOST) {
+    const envPath = path.resolve(process.cwd(), '.env');
+    dotenv.config({ path: envPath });
+  }
+} else {
+  // En producción, solo usar variables de entorno del sistema
+  dotenv.config();
+}
 
 /**
  * Bootstrap de la aplicación Admin API

@@ -769,6 +769,35 @@ export * from './loyalty/update-reward-rule/update-reward-rule.response';
 export * from './loyalty/delete-reward-rule/delete-reward-rule.handler';
 export * from './loyalty/delete-reward-rule/delete-reward-rule.request';
 export * from './loyalty/reward-rule-validator.service';
+
+// Rewards Handlers
+export * from './rewards/create-reward/create-reward.handler';
+export * from './rewards/create-reward/create-reward.request';
+export * from './rewards/create-reward/create-reward.response';
+
+export * from './rewards/get-rewards/get-rewards.handler';
+export * from './rewards/get-rewards/get-rewards.request';
+export * from './rewards/get-rewards/get-rewards.response';
+
+export * from './rewards/get-reward/get-reward.handler';
+export * from './rewards/get-reward/get-reward.request';
+export * from './rewards/get-reward/get-reward.response';
+
+export * from './rewards/update-reward/update-reward.handler';
+export * from './rewards/update-reward/update-reward.request';
+export * from './rewards/update-reward/update-reward.response';
+
+export * from './rewards/delete-reward/delete-reward.handler';
+export * from './rewards/delete-reward/delete-reward.request';
+
+export * from './rewards/get-available-rewards/get-available-rewards.handler';
+export * from './rewards/get-available-rewards/get-available-rewards.request';
+export * from './rewards/get-available-rewards/get-available-rewards.response';
+
+export * from './rewards/redeem-reward/redeem-reward.handler';
+export * from './rewards/redeem-reward/redeem-reward.request';
+export * from './rewards/redeem-reward/redeem-reward.response';
+
 export * from './customer-memberships/get-points-balance/get-points-balance.handler';
 export * from './customer-memberships/get-points-balance/get-points-balance.request';
 export * from './customer-memberships/get-points-balance/get-points-balance.response';
@@ -778,9 +807,17 @@ export * from './customer-memberships/get-points-transactions/get-points-transac
 export * from './customer-memberships/get-loyalty-programs/get-loyalty-programs.handler';
 export * from './customer-memberships/get-loyalty-programs/get-loyalty-programs.request';
 export * from './customer-memberships/get-loyalty-programs/get-loyalty-programs.response';
+export * from './customer-memberships/get-membership-enrollments/get-membership-enrollments.handler';
+export * from './customer-memberships/get-membership-enrollments/get-membership-enrollments.request';
+export * from './customer-memberships/get-membership-enrollments/get-membership-enrollments.response';
+export * from './customer-memberships/get-user-enrollments/get-user-enrollments.handler';
+export * from './customer-memberships/get-user-enrollments/get-user-enrollments.request';
+export * from './customer-memberships/get-user-enrollments/get-user-enrollments.response';
 export * from './customer-memberships/enroll-in-program/enroll-in-program.handler';
 export * from './customer-memberships/enroll-in-program/enroll-in-program.request';
 export * from './customer-memberships/enroll-in-program/enroll-in-program.response';
+export * from './customer-memberships/unenroll-from-program/unenroll-from-program.handler';
+export * from './customer-memberships/unenroll-from-program/unenroll-from-program.request';
 export * from './customer-memberships/get-current-tier/get-current-tier.handler';
 export * from './customer-memberships/get-current-tier/get-current-tier.request';
 export * from './customer-memberships/get-current-tier/get-current-tier.response';
