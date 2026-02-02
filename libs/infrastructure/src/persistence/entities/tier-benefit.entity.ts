@@ -49,13 +49,13 @@ export class TierBenefitEntity {
   // Columnas para higherCaps
   // ============================================================================
 
-  @Column('int', { nullable: true })
+  @Column('int', { name: 'higher_caps_max_points_per_event', nullable: true })
   higherCapsMaxPointsPerEvent: number | null;
 
-  @Column('int', { nullable: true })
+  @Column('int', { name: 'higher_caps_max_points_per_day', nullable: true })
   higherCapsMaxPointsPerDay: number | null;
 
-  @Column('int', { nullable: true })
+  @Column('int', { name: 'higher_caps_max_points_per_month', nullable: true })
   higherCapsMaxPointsPerMonth: number | null;
 
   // ============================================================================

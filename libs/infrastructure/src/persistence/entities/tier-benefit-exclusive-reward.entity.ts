@@ -19,9 +19,9 @@ export class TierBenefitExclusiveRewardEntity {
   @JoinColumn({ name: 'tier_benefit_id' })
   tierBenefit: TierBenefitEntity;
 
-  @Column('int')
+  @Column('int', { name: 'tier_benefit_id' })
   tierBenefitId: number;
 
-  @Column('varchar', { length: 255 })
+  @Column('varchar', { name: 'reward_id', length: 255 })
   rewardId: string; // ID de la recompensa exclusiva
 }

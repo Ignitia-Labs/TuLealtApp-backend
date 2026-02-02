@@ -20,13 +20,13 @@ export class TierBenefitCategoryBenefitEntity {
   @JoinColumn({ name: 'tier_benefit_id' })
   tierBenefit: TierBenefitEntity;
 
-  @Column('int')
+  @Column('int', { name: 'tier_benefit_id' })
   tierBenefitId: number;
 
-  @Column('int')
+  @Column('int', { name: 'category_id' })
   categoryId: number;
 
-  @Column('decimal', { precision: 5, scale: 2, nullable: true })
+  @Column('decimal', { name: 'points_multiplier', precision: 5, scale: 2, nullable: true })
   pointsMultiplier: number | null;
 
   @OneToMany(
