@@ -66,19 +66,17 @@ export class ConvertPlanIdToIntegerInPartnerSubscriptions1808000000000
 
       // Es un slug, buscar en pricing_plans
       // Primero intentar con el slug tal cual
-      let plan = await queryRunner.query(
-        'SELECT id FROM pricing_plans WHERE slug = ? LIMIT 1',
-        [planIdValue.trim()],
-      );
+      let plan = await queryRunner.query('SELECT id FROM pricing_plans WHERE slug = ? LIMIT 1', [
+        planIdValue.trim(),
+      ]);
 
       // Si no se encuentra, intentar sin prefijo "plan-" si existe
       if (!plan || plan.length === 0) {
         const slugWithoutPrefix = planIdValue.replace(/^plan-/, '').trim();
         if (slugWithoutPrefix !== planIdValue.trim()) {
-          plan = await queryRunner.query(
-            'SELECT id FROM pricing_plans WHERE slug = ? LIMIT 1',
-            [slugWithoutPrefix],
-          );
+          plan = await queryRunner.query('SELECT id FROM pricing_plans WHERE slug = ? LIMIT 1', [
+            slugWithoutPrefix,
+          ]);
         }
       }
 
@@ -132,10 +130,10 @@ export class ConvertPlanIdToIntegerInPartnerSubscriptions1808000000000
 
       // Actualizar la columna temporal con los valores convertidos
       for (const [subscriptionId, numericPlanId] of conversionMap.entries()) {
-        await queryRunner.query(
-          'UPDATE partner_subscriptions SET planId_temp = ? WHERE id = ?',
-          [numericPlanId, subscriptionId],
-        );
+        await queryRunner.query('UPDATE partner_subscriptions SET planId_temp = ? WHERE id = ?', [
+          numericPlanId,
+          subscriptionId,
+        ]);
       }
 
       // Eliminar la columna original
@@ -226,9 +224,7 @@ export class ConvertPlanIdToIntegerInPartnerSubscriptions1808000000000
     }
 
     // Eliminar la foreign key si existe
-    const existingFK = table.foreignKeys.find(
-      (fk) => fk.columnNames.indexOf('planId') !== -1,
-    );
+    const existingFK = table.foreignKeys.find((fk) => fk.columnNames.indexOf('planId') !== -1);
 
     if (existingFK) {
       await queryRunner.dropForeignKey('partner_subscriptions', existingFK);

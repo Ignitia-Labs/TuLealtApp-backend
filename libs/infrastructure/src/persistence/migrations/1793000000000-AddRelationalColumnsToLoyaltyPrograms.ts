@@ -1,4 +1,11 @@
-import { MigrationInterface, QueryRunner, Table, TableColumn, TableForeignKey, TableIndex } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableColumn,
+  TableForeignKey,
+  TableIndex,
+} from 'typeorm';
 
 /**
  * Migración: Agregar columnas relacionales a loyalty_programs
@@ -78,7 +85,9 @@ export class AddRelationalColumnsToLoyaltyPrograms1793000000000 implements Migra
       // ============================================================================
       // 2. AGREGAR COLUMNAS PARA limits (JSON → Columnas directas)
       // ============================================================================
-      const hasLimitMaxPointsPerEvent = loyaltyProgramsTable.findColumnByName('limit_max_points_per_event');
+      const hasLimitMaxPointsPerEvent = loyaltyProgramsTable.findColumnByName(
+        'limit_max_points_per_event',
+      );
       if (!hasLimitMaxPointsPerEvent) {
         await queryRunner.addColumn(
           'loyalty_programs',

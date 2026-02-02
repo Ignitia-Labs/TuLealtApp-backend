@@ -6,7 +6,10 @@ import {
   IPointsTransactionRepository,
 } from '@libs/domain';
 import { GetMembershipEnrollmentsRequest } from './get-membership-enrollments.request';
-import { GetMembershipEnrollmentsResponse, EnrollmentDetailDto } from './get-membership-enrollments.response';
+import {
+  GetMembershipEnrollmentsResponse,
+  EnrollmentDetailDto,
+} from './get-membership-enrollments.response';
 
 /**
  * Handler para obtener enrollments de una membership

@@ -1,8 +1,5 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import {
-  IRewardRepository,
-  ICustomerMembershipRepository,
-} from '@libs/domain';
+import { IRewardRepository, ICustomerMembershipRepository } from '@libs/domain';
 import { GetAvailableRewardsRequest } from './get-available-rewards.request';
 import { GetAvailableRewardsResponse } from './get-available-rewards.response';
 
@@ -18,17 +15,11 @@ export class GetAvailableRewardsHandler {
     private readonly membershipRepository: ICustomerMembershipRepository,
   ) {}
 
-  async execute(
-    request: GetAvailableRewardsRequest,
-  ): Promise<GetAvailableRewardsResponse> {
+  async execute(request: GetAvailableRewardsRequest): Promise<GetAvailableRewardsResponse> {
     // Obtener membership
-    const membership = await this.membershipRepository.findById(
-      request.membershipId,
-    );
+    const membership = await this.membershipRepository.findById(request.membershipId);
     if (!membership) {
-      throw new NotFoundException(
-        `Membership with ID ${request.membershipId} not found`,
-      );
+      throw new NotFoundException(`Membership with ID ${request.membershipId} not found`);
     }
 
     // Obtener recompensas disponibles del tenant

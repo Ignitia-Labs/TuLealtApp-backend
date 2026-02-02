@@ -138,6 +138,10 @@ import {
   GetRewardHandler,
   UpdateRewardHandler,
   DeleteRewardHandler,
+  GetAvailableRewardsHandler,
+  RedeemRewardHandler,
+  ValidateRedemptionCodeHandler,
+  RedeemRewardCodeGeneratorService,
   // Enrollments Handlers
   GetEnrollmentsHandler,
   CreateEnrollmentHandler,
@@ -308,6 +312,10 @@ import {
     GetRewardHandler,
     UpdateRewardHandler,
     DeleteRewardHandler,
+    GetAvailableRewardsHandler,
+    RedeemRewardHandler,
+    ValidateRedemptionCodeHandler,
+    RedeemRewardCodeGeneratorService,
     // Enrollments Handlers
     GetEnrollmentsHandler,
     CreateEnrollmentHandler,

@@ -85,11 +85,21 @@ export class UpdatePricingPlanHandler {
               request.limits.storageGB ?? existingPlan.limits?.storageGB ?? -1,
               request.limits.apiCallsPerMonth ?? existingPlan.limits?.apiCallsPerMonth ?? -1,
               request.limits.maxLoyaltyPrograms ?? existingPlan.limits?.maxLoyaltyPrograms ?? -1,
-              request.limits.maxLoyaltyProgramsBase ?? existingPlan.limits?.maxLoyaltyProgramsBase ?? -1,
-              request.limits.maxLoyaltyProgramsPromo ?? existingPlan.limits?.maxLoyaltyProgramsPromo ?? -1,
-              request.limits.maxLoyaltyProgramsPartner ?? existingPlan.limits?.maxLoyaltyProgramsPartner ?? -1,
-              request.limits.maxLoyaltyProgramsSubscription ?? existingPlan.limits?.maxLoyaltyProgramsSubscription ?? -1,
-              request.limits.maxLoyaltyProgramsExperimental ?? existingPlan.limits?.maxLoyaltyProgramsExperimental ?? -1,
+              request.limits.maxLoyaltyProgramsBase ??
+                existingPlan.limits?.maxLoyaltyProgramsBase ??
+                -1,
+              request.limits.maxLoyaltyProgramsPromo ??
+                existingPlan.limits?.maxLoyaltyProgramsPromo ??
+                -1,
+              request.limits.maxLoyaltyProgramsPartner ??
+                existingPlan.limits?.maxLoyaltyProgramsPartner ??
+                -1,
+              request.limits.maxLoyaltyProgramsSubscription ??
+                existingPlan.limits?.maxLoyaltyProgramsSubscription ??
+                -1,
+              request.limits.maxLoyaltyProgramsExperimental ??
+                existingPlan.limits?.maxLoyaltyProgramsExperimental ??
+                -1,
               existingPlan.limits?.id,
             )
           : null

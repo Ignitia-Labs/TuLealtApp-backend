@@ -1,4 +1,11 @@
-import { MigrationInterface, QueryRunner, Table, TableColumn, TableForeignKey, TableIndex } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableColumn,
+  TableForeignKey,
+  TableIndex,
+} from 'typeorm';
 
 /**
  * Migración: Agregar columnas relacionales a tier_benefits
@@ -19,7 +26,9 @@ export class AddRelationalColumnsToTierBenefits1796000000000 implements Migratio
       // ============================================================================
       // 1. AGREGAR COLUMNAS PARA higherCaps (JSON → Columnas directas)
       // ============================================================================
-      const hasHigherCapsMaxPointsPerEvent = tierBenefitsTable.findColumnByName('higher_caps_max_points_per_event');
+      const hasHigherCapsMaxPointsPerEvent = tierBenefitsTable.findColumnByName(
+        'higher_caps_max_points_per_event',
+      );
       if (!hasHigherCapsMaxPointsPerEvent) {
         await queryRunner.addColumn(
           'tier_benefits',
@@ -56,7 +65,9 @@ export class AddRelationalColumnsToTierBenefits1796000000000 implements Migratio
     // ============================================================================
     // 2. CREAR TABLA tier_benefit_exclusive_rewards (para exclusiveRewards JSON array)
     // ============================================================================
-    const exclusiveRewardsTableExists = await queryRunner.hasTable('tier_benefit_exclusive_rewards');
+    const exclusiveRewardsTableExists = await queryRunner.hasTable(
+      'tier_benefit_exclusive_rewards',
+    );
     if (!exclusiveRewardsTableExists) {
       await queryRunner.createTable(
         new Table({
@@ -131,7 +142,9 @@ export class AddRelationalColumnsToTierBenefits1796000000000 implements Migratio
     // ============================================================================
     // 3. CREAR TABLA tier_benefit_category_benefits (para categoryBenefits JSON)
     // ============================================================================
-    const categoryBenefitsTableExists = await queryRunner.hasTable('tier_benefit_category_benefits');
+    const categoryBenefitsTableExists = await queryRunner.hasTable(
+      'tier_benefit_category_benefits',
+    );
     if (!categoryBenefitsTableExists) {
       await queryRunner.createTable(
         new Table({
@@ -213,7 +226,9 @@ export class AddRelationalColumnsToTierBenefits1796000000000 implements Migratio
     // ============================================================================
     // 4. CREAR TABLA tier_benefit_category_exclusive_rewards (para exclusiveRewards dentro de categoryBenefits)
     // ============================================================================
-    const categoryExclusiveRewardsTableExists = await queryRunner.hasTable('tier_benefit_category_exclusive_rewards');
+    const categoryExclusiveRewardsTableExists = await queryRunner.hasTable(
+      'tier_benefit_category_exclusive_rewards',
+    );
     if (!categoryExclusiveRewardsTableExists) {
       await queryRunner.createTable(
         new Table({

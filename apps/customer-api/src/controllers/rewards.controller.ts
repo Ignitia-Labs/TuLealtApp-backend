@@ -7,14 +7,9 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import {
   GetAvailableRewardsHandler,
   GetAvailableRewardsRequest,
@@ -22,6 +17,9 @@ import {
   RedeemRewardHandler,
   RedeemRewardRequest,
   RedeemRewardResponse,
+  GetCustomerRedemptionCodesHandler,
+  GetCustomerRedemptionCodesRequest,
+  GetCustomerRedemptionCodesResponse,
 } from '@libs/application';
 import {
   JwtAuthGuard,
@@ -46,6 +44,7 @@ export class RewardsController {
   constructor(
     private readonly getAvailableRewardsHandler: GetAvailableRewardsHandler,
     private readonly redeemRewardHandler: RedeemRewardHandler,
+    private readonly getCustomerRedemptionCodesHandler: GetCustomerRedemptionCodesHandler,
   ) {}
 
   @Get()
@@ -58,7 +57,11 @@ export class RewardsController {
   })
   @ApiResponse({ status: 401, description: 'No autorizado', type: UnauthorizedErrorResponseDto })
   @ApiResponse({ status: 403, description: 'Prohibido', type: ForbiddenErrorResponseDto })
-  @ApiResponse({ status: 404, description: 'Membership no encontrada', type: NotFoundErrorResponseDto })
+  @ApiResponse({
+    status: 404,
+    description: 'Membership no encontrada',
+    type: NotFoundErrorResponseDto,
+  })
   async getAvailableRewards(
     @Param('membershipId', ParseIntPipe) membershipId: number,
     @CurrentUser() user: JwtPayload,
@@ -78,10 +81,18 @@ export class RewardsController {
     description: 'Recompensa canjeada exitosamente',
     type: RedeemRewardResponse,
   })
-  @ApiResponse({ status: 400, description: 'No se puede canjear', type: BadRequestErrorResponseDto })
+  @ApiResponse({
+    status: 400,
+    description: 'No se puede canjear',
+    type: BadRequestErrorResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'No autorizado', type: UnauthorizedErrorResponseDto })
   @ApiResponse({ status: 403, description: 'Prohibido', type: ForbiddenErrorResponseDto })
-  @ApiResponse({ status: 404, description: 'Recompensa o membership no encontrada', type: NotFoundErrorResponseDto })
+  @ApiResponse({
+    status: 404,
+    description: 'Recompensa o membership no encontrada',
+    type: NotFoundErrorResponseDto,
+  })
   async redeemReward(
     @Param('membershipId', ParseIntPipe) membershipId: number,
     @Param('rewardId', ParseIntPipe) rewardId: number,
@@ -91,5 +102,43 @@ export class RewardsController {
     request.membershipId = membershipId;
     request.rewardId = rewardId;
     return this.redeemRewardHandler.execute(request);
+  }
+
+  @Get('redemption-codes')
+  @ApiOperation({ summary: 'Obtener códigos de canje del cliente' })
+  @ApiParam({ name: 'membershipId', type: Number, description: 'ID de la membership' })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['pending', 'used', 'expired', 'cancelled'],
+    description: 'Filtrar por estado del código',
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Número de página' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Límite de resultados' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de códigos de canje obtenida exitosamente',
+    type: GetCustomerRedemptionCodesResponse,
+  })
+  @ApiResponse({ status: 401, description: 'No autorizado', type: UnauthorizedErrorResponseDto })
+  @ApiResponse({ status: 403, description: 'Prohibido', type: ForbiddenErrorResponseDto })
+  @ApiResponse({
+    status: 404,
+    description: 'Membership no encontrada',
+    type: NotFoundErrorResponseDto,
+  })
+  async getRedemptionCodes(
+    @Param('membershipId', ParseIntPipe) membershipId: number,
+    @Query('status') status?: 'pending' | 'used' | 'expired' | 'cancelled',
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @CurrentUser() user?: JwtPayload,
+  ): Promise<GetCustomerRedemptionCodesResponse> {
+    const request = new GetCustomerRedemptionCodesRequest();
+    request.membershipId = membershipId;
+    if (status) request.status = status;
+    if (page) request.page = page;
+    if (limit) request.limit = limit;
+    return this.getCustomerRedemptionCodesHandler.execute(request);
   }
 }

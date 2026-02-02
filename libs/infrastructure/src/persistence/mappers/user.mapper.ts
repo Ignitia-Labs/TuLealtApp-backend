@@ -16,14 +16,16 @@ export class UserMapper {
    */
   static toDomain(persistenceEntity: UserEntity): User {
     // Construir roles desde tabla relacionada (columnas JSON eliminadas)
-    const roles: string[] = persistenceEntity.rolesRelation?.length > 0
-      ? persistenceEntity.rolesRelation.map((ur) => ur.role)
-      : [];
+    const roles: string[] =
+      persistenceEntity.rolesRelation?.length > 0
+        ? persistenceEntity.rolesRelation.map((ur) => ur.role)
+        : [];
 
     // Construir profile desde tabla relacionada (columnas JSON eliminadas)
-    const profile: Record<string, any> | null = persistenceEntity.profileDataRelation?.length > 0
-      ? this.buildProfileFromRelation(persistenceEntity.profileDataRelation)
-      : null;
+    const profile: Record<string, any> | null =
+      persistenceEntity.profileDataRelation?.length > 0
+        ? this.buildProfileFromRelation(persistenceEntity.profileDataRelation)
+        : null;
 
     return new User(
       persistenceEntity.id,
@@ -83,7 +85,10 @@ export class UserMapper {
     }
 
     if (domainEntity.profile) {
-      entity.profileDataRelation = this.profileToPersistence(domainEntity.id || 0, domainEntity.profile);
+      entity.profileDataRelation = this.profileToPersistence(
+        domainEntity.id || 0,
+        domainEntity.profile,
+      );
     }
 
     return entity;

@@ -48,7 +48,6 @@ export class RewardRuleEntity {
   @Column('varchar', { length: 20 })
   trigger: 'VISIT' | 'PURCHASE' | 'REFERRAL' | 'SUBSCRIPTION' | 'RETENTION' | 'CUSTOM';
 
-
   // ============================================================================
   // Nuevas Columnas Relacionales (Fuente de Verdad después de migración)
   // ============================================================================
@@ -76,7 +75,12 @@ export class RewardRuleEntity {
   scopeSku: string | null;
 
   // Columnas para conflict
-  @Column('varchar', { name: 'conflict_stack_policy', length: 20, nullable: false, default: 'EXCLUSIVE' })
+  @Column('varchar', {
+    name: 'conflict_stack_policy',
+    length: 20,
+    nullable: false,
+    default: 'EXCLUSIVE',
+  })
   conflictStackPolicy: 'STACK' | 'EXCLUSIVE' | 'BEST_OF' | 'PRIORITY';
 
   @Column('int', { name: 'conflict_priority_rank', nullable: false, default: 0 })
@@ -86,7 +90,12 @@ export class RewardRuleEntity {
   conflictMaxAwardsPerEvent: number | null;
 
   // Columnas para idempotencyScope
-  @Column('varchar', { name: 'idempotency_strategy', length: 20, nullable: false, default: 'default' })
+  @Column('varchar', {
+    name: 'idempotency_strategy',
+    length: 20,
+    nullable: false,
+    default: 'default',
+  })
   idempotencyStrategy: 'default' | 'per-day' | 'per-period' | 'per-event';
 
   @Column('varchar', { name: 'idempotency_bucket_timezone', length: 50, nullable: true })
@@ -121,18 +130,12 @@ export class RewardRuleEntity {
   // porque ellas tienen la foreign key (reward_rule_id). Aquí solo definimos
   // la relación inversa sin JoinColumn.
 
-  @OneToOne(
-    () => RewardRuleEligibilityEntity,
-    (eligibility) => eligibility.rewardRule,
-    { cascade: true },
-  )
+  @OneToOne(() => RewardRuleEligibilityEntity, (eligibility) => eligibility.rewardRule, {
+    cascade: true,
+  })
   eligibilityRelation: RewardRuleEligibilityEntity | null;
 
-  @OneToOne(
-    () => RewardRulePointsFormulaEntity,
-    (formula) => formula.rewardRule,
-    { cascade: true },
-  )
+  @OneToOne(() => RewardRulePointsFormulaEntity, (formula) => formula.rewardRule, { cascade: true })
   pointsFormulaRelation: RewardRulePointsFormulaEntity | null;
 
   @Column('varchar', { length: 50 })

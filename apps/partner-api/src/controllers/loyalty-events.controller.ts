@@ -7,7 +7,15 @@ import {
   UseGuards,
   BadRequestException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+  ApiProperty,
+  ApiPropertyOptional,
+} from '@nestjs/swagger';
 import {
   IsNumber,
   IsString,
@@ -232,7 +240,8 @@ class ProcessPurchaseEventRequest {
   currency: string;
 
   @ApiPropertyOptional({
-    description: 'Items de la compra (opcional - requerido solo para reglas con alcance de categoría/SKU)',
+    description:
+      'Items de la compra (opcional - requerido solo para reglas con alcance de categoría/SKU)',
     type: [PurchaseItemDto],
     default: [],
   })

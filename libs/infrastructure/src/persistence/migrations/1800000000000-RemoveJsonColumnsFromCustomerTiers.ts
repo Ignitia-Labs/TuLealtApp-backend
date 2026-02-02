@@ -28,9 +28,7 @@ export class RemoveJsonColumnsFromCustomerTiers1800000000000 implements Migratio
     // VALIDACIÓN PREVIA: Verificar que la tabla relacionada tiene datos
     // ============================================================================
 
-    const totalRecords = await queryRunner.query(
-      `SELECT COUNT(*) as count FROM customer_tiers`
-    );
+    const totalRecords = await queryRunner.query(`SELECT COUNT(*) as count FROM customer_tiers`);
 
     if (totalRecords[0].count === 0) {
       console.warn('⚠️  Advertencia: No hay registros en customer_tiers. Continuando...');
@@ -42,19 +40,19 @@ export class RemoveJsonColumnsFromCustomerTiers1800000000000 implements Migratio
           `SELECT COUNT(DISTINCT ct.id) as count
            FROM customer_tiers ct
            WHERE ct.\`benefits\` IS NOT NULL
-             AND JSON_LENGTH(ct.\`benefits\`) > 0`
+             AND JSON_LENGTH(ct.\`benefits\`) > 0`,
         );
 
         const migratedBenefits = await queryRunner.query(
-          `SELECT COUNT(*) as count FROM customer_tier_benefits`
+          `SELECT COUNT(*) as count FROM customer_tier_benefits`,
         );
 
         if (customerTiersWithBenefits[0].count > 0 && migratedBenefits[0].count === 0) {
           throw new Error(
             `No se pueden remover columnas JSON: Hay customer tiers con benefits pero no hay datos migrados. ` +
-            `Customer tiers con benefits: ${customerTiersWithBenefits[0].count}, ` +
-            `Benefits migrados: ${migratedBenefits[0].count}. ` +
-            `Ejecutar primero el script de migración de datos.`
+              `Customer tiers con benefits: ${customerTiersWithBenefits[0].count}, ` +
+              `Benefits migrados: ${migratedBenefits[0].count}. ` +
+              `Ejecutar primero el script de migración de datos.`,
           );
         }
       }

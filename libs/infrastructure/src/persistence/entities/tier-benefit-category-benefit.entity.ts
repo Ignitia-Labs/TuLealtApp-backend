@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany, JoinColumn, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+  Index,
+} from 'typeorm';
 import { TierBenefitEntity } from './tier-benefit.entity';
 import { TierBenefitCategoryExclusiveRewardEntity } from './tier-benefit-category-exclusive-reward.entity';
 
@@ -9,7 +17,9 @@ import { TierBenefitCategoryExclusiveRewardEntity } from './tier-benefit-categor
 @Entity('tier_benefit_category_benefits')
 @Index('IDX_TIER_BENEFIT_CATEGORY_BENEFITS_TIER_BENEFIT_ID', ['tierBenefitId'])
 @Index('IDX_TIER_BENEFIT_CATEGORY_BENEFITS_CATEGORY_ID', ['categoryId'])
-@Index('UK_TIER_BENEFIT_CATEGORY_BENEFITS_TIER_BENEFIT_CATEGORY', ['tierBenefitId', 'categoryId'], { unique: true })
+@Index('UK_TIER_BENEFIT_CATEGORY_BENEFITS_TIER_BENEFIT_CATEGORY', ['tierBenefitId', 'categoryId'], {
+  unique: true,
+})
 export class TierBenefitCategoryBenefitEntity {
   @PrimaryGeneratedColumn()
   id: number;

@@ -42,9 +42,7 @@ import {
 @ApiTags('Partner Limits')
 @Controller('partner-limits')
 export class PartnerLimitsController {
-  constructor(
-    private readonly getPartnerLimitsHandler: GetPartnerLimitsHandler,
-  ) {}
+  constructor(private readonly getPartnerLimitsHandler: GetPartnerLimitsHandler) {}
 
   @Get(':partnerId')
   @HttpCode(HttpStatus.OK)
@@ -139,5 +137,4 @@ export class PartnerLimitsController {
     request.partnerId = partnerId;
     return this.getPartnerLimitsHandler.execute(request);
   }
-
 }

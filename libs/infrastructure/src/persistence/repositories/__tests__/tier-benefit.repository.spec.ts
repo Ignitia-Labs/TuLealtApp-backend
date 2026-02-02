@@ -49,7 +49,9 @@ describe('TierBenefitRepository', () => {
     }).compile();
 
     repository = module.get<TierBenefitRepository>(TierBenefitRepository);
-    typeOrmRepository = module.get<Repository<TierBenefitEntity>>(getRepositoryToken(TierBenefitEntity));
+    typeOrmRepository = module.get<Repository<TierBenefitEntity>>(
+      getRepositoryToken(TierBenefitEntity),
+    );
   });
 
   afterEach(() => {

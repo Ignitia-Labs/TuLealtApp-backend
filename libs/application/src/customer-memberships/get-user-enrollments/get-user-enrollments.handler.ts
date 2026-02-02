@@ -41,9 +41,7 @@ export class GetUserEnrollmentsHandler {
 
     // Obtener todos los enrollments de todas las memberships
     const allEnrollments = await Promise.all(
-      memberships.map((membership) =>
-        this.enrollmentRepository.findByMembershipId(membership.id),
-      ),
+      memberships.map((membership) => this.enrollmentRepository.findByMembershipId(membership.id)),
     );
 
     // Aplanar array de arrays

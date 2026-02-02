@@ -15,12 +15,32 @@ export class AddLoyaltyProgramLimits1802000000000 implements MigrationInterface 
     const pricingPlanLimitsTable = await queryRunner.getTable('pricing_plan_limits');
     if (pricingPlanLimitsTable) {
       const columnsToAdd = [
-        { name: 'maxLoyaltyPrograms', comment: 'Número máximo total de loyalty programs permitidos. -1 para ilimitado.' },
-        { name: 'maxLoyaltyProgramsBase', comment: 'Número máximo de loyalty programs tipo BASE permitidos. -1 para ilimitado.' },
-        { name: 'maxLoyaltyProgramsPromo', comment: 'Número máximo de loyalty programs tipo PROMO permitidos. -1 para ilimitado.' },
-        { name: 'maxLoyaltyProgramsPartner', comment: 'Número máximo de loyalty programs tipo PARTNER permitidos. -1 para ilimitado.' },
-        { name: 'maxLoyaltyProgramsSubscription', comment: 'Número máximo de loyalty programs tipo SUBSCRIPTION permitidos. -1 para ilimitado.' },
-        { name: 'maxLoyaltyProgramsExperimental', comment: 'Número máximo de loyalty programs tipo EXPERIMENTAL permitidos. -1 para ilimitado.' },
+        {
+          name: 'maxLoyaltyPrograms',
+          comment: 'Número máximo total de loyalty programs permitidos. -1 para ilimitado.',
+        },
+        {
+          name: 'maxLoyaltyProgramsBase',
+          comment: 'Número máximo de loyalty programs tipo BASE permitidos. -1 para ilimitado.',
+        },
+        {
+          name: 'maxLoyaltyProgramsPromo',
+          comment: 'Número máximo de loyalty programs tipo PROMO permitidos. -1 para ilimitado.',
+        },
+        {
+          name: 'maxLoyaltyProgramsPartner',
+          comment: 'Número máximo de loyalty programs tipo PARTNER permitidos. -1 para ilimitado.',
+        },
+        {
+          name: 'maxLoyaltyProgramsSubscription',
+          comment:
+            'Número máximo de loyalty programs tipo SUBSCRIPTION permitidos. -1 para ilimitado.',
+        },
+        {
+          name: 'maxLoyaltyProgramsExperimental',
+          comment:
+            'Número máximo de loyalty programs tipo EXPERIMENTAL permitidos. -1 para ilimitado.',
+        },
       ];
 
       for (const column of columnsToAdd) {
@@ -68,12 +88,32 @@ export class AddLoyaltyProgramLimits1802000000000 implements MigrationInterface 
     const partnerLimitsTable = await queryRunner.getTable('partner_limits');
     if (partnerLimitsTable) {
       const columnsToAdd = [
-        { name: 'maxLoyaltyPrograms', comment: 'Número máximo total de loyalty programs permitidos. -1 para ilimitado.' },
-        { name: 'maxLoyaltyProgramsBase', comment: 'Número máximo de loyalty programs tipo BASE permitidos. -1 para ilimitado.' },
-        { name: 'maxLoyaltyProgramsPromo', comment: 'Número máximo de loyalty programs tipo PROMO permitidos. -1 para ilimitado.' },
-        { name: 'maxLoyaltyProgramsPartner', comment: 'Número máximo de loyalty programs tipo PARTNER permitidos. -1 para ilimitado.' },
-        { name: 'maxLoyaltyProgramsSubscription', comment: 'Número máximo de loyalty programs tipo SUBSCRIPTION permitidos. -1 para ilimitado.' },
-        { name: 'maxLoyaltyProgramsExperimental', comment: 'Número máximo de loyalty programs tipo EXPERIMENTAL permitidos. -1 para ilimitado.' },
+        {
+          name: 'maxLoyaltyPrograms',
+          comment: 'Número máximo total de loyalty programs permitidos. -1 para ilimitado.',
+        },
+        {
+          name: 'maxLoyaltyProgramsBase',
+          comment: 'Número máximo de loyalty programs tipo BASE permitidos. -1 para ilimitado.',
+        },
+        {
+          name: 'maxLoyaltyProgramsPromo',
+          comment: 'Número máximo de loyalty programs tipo PROMO permitidos. -1 para ilimitado.',
+        },
+        {
+          name: 'maxLoyaltyProgramsPartner',
+          comment: 'Número máximo de loyalty programs tipo PARTNER permitidos. -1 para ilimitado.',
+        },
+        {
+          name: 'maxLoyaltyProgramsSubscription',
+          comment:
+            'Número máximo de loyalty programs tipo SUBSCRIPTION permitidos. -1 para ilimitado.',
+        },
+        {
+          name: 'maxLoyaltyProgramsExperimental',
+          comment:
+            'Número máximo de loyalty programs tipo EXPERIMENTAL permitidos. -1 para ilimitado.',
+        },
       ];
 
       for (const column of columnsToAdd) {

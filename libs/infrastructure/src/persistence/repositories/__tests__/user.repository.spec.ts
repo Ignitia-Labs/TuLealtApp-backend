@@ -139,10 +139,20 @@ describe('UserRepository', () => {
       const result = await repository.findByRoles(['ADMIN'], 0, 10);
 
       expect(typeOrmRepository.createQueryBuilder).toHaveBeenCalledWith('user');
-      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('user.rolesRelation', 'userRole');
-      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('user.profileDataRelation', 'profileData');
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('user.isActive = :isActive', { isActive: true });
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('userRole.role IN (:...roles)', { roles: ['ADMIN'] });
+      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
+        'user.rolesRelation',
+        'userRole',
+      );
+      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
+        'user.profileDataRelation',
+        'profileData',
+      );
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith('user.isActive = :isActive', {
+        isActive: true,
+      });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('userRole.role IN (:...roles)', {
+        roles: ['ADMIN'],
+      });
       expect(result).toHaveLength(1);
       expect(result[0].roles).toEqual(['ADMIN']);
     });
@@ -193,8 +203,12 @@ describe('UserRepository', () => {
 
       expect(typeOrmRepository.createQueryBuilder).toHaveBeenCalledWith('user');
       expect(mockQueryBuilder.innerJoin).toHaveBeenCalledWith('user.rolesRelation', 'userRole');
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('user.isActive = :isActive', { isActive: true });
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('userRole.role IN (:...roles)', { roles: ['ADMIN'] });
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith('user.isActive = :isActive', {
+        isActive: true,
+      });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('userRole.role IN (:...roles)', {
+        roles: ['ADMIN'],
+      });
       expect(result).toBe(5);
     });
   });
@@ -222,8 +236,12 @@ describe('UserRepository', () => {
 
       const result = await repository.findByPartnerIdAndRoles(1, ['PARTNER_STAFF'], 0, 10, false);
 
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('user.partnerId = :partnerId', { partnerId: 1 });
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('user.isActive = :isActive', { isActive: true });
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith('user.partnerId = :partnerId', {
+        partnerId: 1,
+      });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('user.isActive = :isActive', {
+        isActive: true,
+      });
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('userRole.role IN (:...roles)', {
         roles: ['PARTNER_STAFF'],
       });
@@ -245,7 +263,10 @@ describe('UserRepository', () => {
 
       await repository.findByPartnerIdAndRoles(1, ['PARTNER_STAFF'], 0, 10, true);
 
-      expect(mockQueryBuilder.andWhere).not.toHaveBeenCalledWith('user.isActive = :isActive', expect.anything());
+      expect(mockQueryBuilder.andWhere).not.toHaveBeenCalledWith(
+        'user.isActive = :isActive',
+        expect.anything(),
+      );
     });
   });
 
@@ -262,8 +283,12 @@ describe('UserRepository', () => {
 
       const result = await repository.countByPartnerIdAndRoles(1, ['PARTNER_STAFF'], false);
 
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('user.partnerId = :partnerId', { partnerId: 1 });
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('user.isActive = :isActive', { isActive: true });
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith('user.partnerId = :partnerId', {
+        partnerId: 1,
+      });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('user.isActive = :isActive', {
+        isActive: true,
+      });
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('userRole.role IN (:...roles)', {
         roles: ['PARTNER_STAFF'],
       });

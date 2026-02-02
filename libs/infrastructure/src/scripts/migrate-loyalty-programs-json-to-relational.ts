@@ -112,7 +112,10 @@ async function migrateLoyaltyProgramsJsonToRelational() {
             if (result.affectedRows !== undefined) {
               console.log(`    → ${result.affectedRows} filas insertadas`);
             }
-          } else if (!statement.toUpperCase().startsWith('CREATE') && !statement.toUpperCase().startsWith('ALTER')) {
+          } else if (
+            !statement.toUpperCase().startsWith('CREATE') &&
+            !statement.toUpperCase().startsWith('ALTER')
+          ) {
             // Solo mostrar para statements que no sean CREATE/ALTER (ya ejecutados en migración)
             console.log(`  ✓ Statement ejecutado (${i + 1}/${statements.length})`);
           }
@@ -124,7 +127,10 @@ async function migrateLoyaltyProgramsJsonToRelational() {
           console.error(`     ${error.message}`);
 
           // Si es un error crítico, detener la ejecución
-          if (error.message.includes('does not exist') || error.message.includes('Unknown column')) {
+          if (
+            error.message.includes('does not exist') ||
+            error.message.includes('Unknown column')
+          ) {
             console.error('\n❌ Error crítico detectado. Deteniendo migración.');
             throw error;
           }

@@ -35,6 +35,8 @@ import {
   // Rewards Handlers
   GetAvailableRewardsHandler,
   RedeemRewardHandler,
+  GetCustomerRedemptionCodesHandler,
+  RedeemRewardCodeGeneratorService,
   // Loyalty Services
   BalanceProjectionService,
   BalanceSyncService,
@@ -88,6 +90,8 @@ import {
     // Rewards Handlers
     GetAvailableRewardsHandler,
     RedeemRewardHandler,
+    GetCustomerRedemptionCodesHandler,
+    RedeemRewardCodeGeneratorService,
     // Loyalty Services
     BalanceProjectionService,
     BalanceSyncService,

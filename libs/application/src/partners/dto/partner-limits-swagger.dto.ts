@@ -83,14 +83,16 @@ export class PartnerLimitsSwaggerDto {
 
   @ApiProperty({
     example: 0,
-    description: 'Número máximo de loyalty programs tipo SUBSCRIPTION permitidos (-1 para ilimitado)',
+    description:
+      'Número máximo de loyalty programs tipo SUBSCRIPTION permitidos (-1 para ilimitado)',
     type: Number,
   })
   maxLoyaltyProgramsSubscription: number;
 
   @ApiProperty({
     example: 0,
-    description: 'Número máximo de loyalty programs tipo EXPERIMENTAL permitidos (-1 para ilimitado)',
+    description:
+      'Número máximo de loyalty programs tipo EXPERIMENTAL permitidos (-1 para ilimitado)',
     type: Number,
   })
   maxLoyaltyProgramsExperimental: number;

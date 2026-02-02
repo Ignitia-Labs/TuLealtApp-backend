@@ -8,7 +8,9 @@ import { LoyaltyProgramEntity } from './loyalty-program.entity';
 @Entity('loyalty_program_earning_domains')
 @Index('IDX_LOYALTY_PROGRAM_EARNING_DOMAINS_PROGRAM_ID', ['programId'])
 @Index('IDX_LOYALTY_PROGRAM_EARNING_DOMAINS_DOMAIN', ['domain'])
-@Index('UK_LOYALTY_PROGRAM_EARNING_DOMAINS_PROGRAM_DOMAIN', ['programId', 'domain'], { unique: true })
+@Index('UK_LOYALTY_PROGRAM_EARNING_DOMAINS_PROGRAM_DOMAIN', ['programId', 'domain'], {
+  unique: true,
+})
 export class LoyaltyProgramEarningDomainEntity {
   @PrimaryGeneratedColumn()
   id: number;

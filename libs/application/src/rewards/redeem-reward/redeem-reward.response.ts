@@ -32,15 +32,25 @@ export class RedeemRewardResponse {
   })
   newBalance: number;
 
+  @ApiProperty({
+    description: 'Código único de canje generado (opcional)',
+    example: 'REWARD-ABC123-XYZ789',
+    type: String,
+    required: false,
+  })
+  redemptionCode?: string;
+
   constructor(data: {
     transactionId: number;
     rewardId: number;
     pointsUsed: number;
     newBalance: number;
+    redemptionCode?: string;
   }) {
     this.transactionId = data.transactionId;
     this.rewardId = data.rewardId;
     this.pointsUsed = data.pointsUsed;
     this.newBalance = data.newBalance;
+    this.redemptionCode = data.redemptionCode;
   }
 }

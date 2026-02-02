@@ -47,7 +47,9 @@ describe('CustomerTierRepository', () => {
     }).compile();
 
     repository = module.get<CustomerTierRepository>(CustomerTierRepository);
-    typeOrmRepository = module.get<Repository<CustomerTierEntity>>(getRepositoryToken(CustomerTierEntity));
+    typeOrmRepository = module.get<Repository<CustomerTierEntity>>(
+      getRepositoryToken(CustomerTierEntity),
+    );
   });
 
   afterEach(() => {
@@ -164,14 +166,7 @@ describe('CustomerTierRepository', () => {
 
   describe('save', () => {
     it('should save customer tier and load relations after saving', async () => {
-      const tier = CustomerTier.create(
-        10,
-        'New Tier',
-        0,
-        '#000000',
-        ['Benefit 1', 'Benefit 2'],
-        1,
-      );
+      const tier = CustomerTier.create(10, 'New Tier', 0, '#000000', ['Benefit 1', 'Benefit 2'], 1);
 
       const savedEntity = { ...mockCustomerTierEntity, id: 2, name: 'New Tier' };
       const entityWithRelations = {
@@ -217,7 +212,9 @@ describe('CustomerTierRepository', () => {
       const updatedEntity = { ...mockCustomerTierEntity, name: 'Updated Tier' };
       const entityWithRelations = {
         ...updatedEntity,
-        benefitsRelation: [{ id: 1, tierId: 1, benefit: 'Updated Benefit' } as CustomerTierBenefitEntity],
+        benefitsRelation: [
+          { id: 1, tierId: 1, benefit: 'Updated Benefit' } as CustomerTierBenefitEntity,
+        ],
       };
 
       jest.spyOn(typeOrmRepository, 'save').mockResolvedValue(updatedEntity);

@@ -277,15 +277,9 @@ async function bootstrap() {
 
     console.log('📊 Estadísticas Generales:');
     console.log(`   - Total memberships revisadas: ${result.totalMemberships}`);
-    console.log(
-      `   - Con enrollment BASE activo: ${result.membershipsWithBaseEnrollment} ✅`,
-    );
-    console.log(
-      `   - Sin enrollment BASE activo: ${result.membershipsWithoutBaseEnrollment} ⚠️`,
-    );
-    console.log(
-      `   - Sin programa BASE disponible: ${result.membershipsWithoutBaseProgram} ❌`,
-    );
+    console.log(`   - Con enrollment BASE activo: ${result.membershipsWithBaseEnrollment} ✅`);
+    console.log(`   - Sin enrollment BASE activo: ${result.membershipsWithoutBaseEnrollment} ⚠️`);
+    console.log(`   - Sin programa BASE disponible: ${result.membershipsWithoutBaseProgram} ❌`);
     console.log(`   - Necesitan corrección: ${result.membershipsNeedingFix} 🔧\n`);
 
     // Mostrar detalles de memberships que necesitan corrección
@@ -384,9 +378,7 @@ async function bootstrap() {
           }
         } catch (error) {
           const errorMsg = error instanceof Error ? error.message : String(error);
-          console.error(
-            `❌ Error corrigiendo membership ${status.membershipId}: ${errorMsg}`,
-          );
+          console.error(`❌ Error corrigiendo membership ${status.membershipId}: ${errorMsg}`);
           result.errors.push({
             membershipId: status.membershipId,
             error: errorMsg,
@@ -415,9 +407,7 @@ async function bootstrap() {
     if (result.membershipsNeedingFix === 0) {
       console.log('✅ Todas las memberships están correctamente enrolladas al programa BASE.');
     } else if (shouldFix && result.fixed === result.membershipsNeedingFix) {
-      console.log(
-        `✅ Se corrigieron ${result.fixed} memberships exitosamente.`,
-      );
+      console.log(`✅ Se corrigieron ${result.fixed} memberships exitosamente.`);
     } else if (shouldFix) {
       console.log(
         `⚠️  Se corrigieron ${result.fixed} de ${result.membershipsNeedingFix} memberships.`,

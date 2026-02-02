@@ -162,8 +162,10 @@ export class GetPartnersHandler {
               loyaltyProgramsBaseCount: Number(usageEntity.loyaltyProgramsBaseCount) || 0,
               loyaltyProgramsPromoCount: Number(usageEntity.loyaltyProgramsPromoCount) || 0,
               loyaltyProgramsPartnerCount: Number(usageEntity.loyaltyProgramsPartnerCount) || 0,
-              loyaltyProgramsSubscriptionCount: Number(usageEntity.loyaltyProgramsSubscriptionCount) || 0,
-              loyaltyProgramsExperimentalCount: Number(usageEntity.loyaltyProgramsExperimentalCount) || 0,
+              loyaltyProgramsSubscriptionCount:
+                Number(usageEntity.loyaltyProgramsSubscriptionCount) || 0,
+              loyaltyProgramsExperimentalCount:
+                Number(usageEntity.loyaltyProgramsExperimentalCount) || 0,
             };
           }
         }

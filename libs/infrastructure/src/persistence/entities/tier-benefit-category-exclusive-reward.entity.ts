@@ -8,9 +8,13 @@ import { TierBenefitCategoryBenefitEntity } from './tier-benefit-category-benefi
 @Entity('tier_benefit_category_exclusive_rewards')
 @Index('IDX_TIER_BENEFIT_CATEGORY_EXCLUSIVE_REWARDS_CATEGORY_BENEFIT_ID', ['categoryBenefitId'])
 @Index('IDX_TIER_BENEFIT_CATEGORY_EXCLUSIVE_REWARDS_REWARD_ID', ['rewardId'])
-@Index('UK_TIER_BENEFIT_CATEGORY_EXCLUSIVE_REWARDS_CATEGORY_BENEFIT_REWARD', ['categoryBenefitId', 'rewardId'], {
-  unique: true,
-})
+@Index(
+  'UK_TIER_BENEFIT_CATEGORY_EXCLUSIVE_REWARDS_CATEGORY_BENEFIT_REWARD',
+  ['categoryBenefitId', 'rewardId'],
+  {
+    unique: true,
+  },
+)
 export class TierBenefitCategoryExclusiveRewardEntity {
   @PrimaryGeneratedColumn()
   id: number;

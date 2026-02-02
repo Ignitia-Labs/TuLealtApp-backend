@@ -105,18 +105,24 @@ export class ProcessLoyaltyEventHandler {
       const skipped: Array<{ reason: string; ruleId?: number; programId?: number }> = [];
 
       for (const program of compatiblePrograms) {
-        console.log(`[PROCESS_EVENT] Processing program ${program.id} (${program.name}) - type: ${program.programType}`);
-        
+        console.log(
+          `[PROCESS_EVENT] Processing program ${program.id} (${program.name}) - type: ${program.programType}`,
+        );
+
         // Obtener reglas activas del programa
         const rules = await this.ruleRepository.findActiveByProgramIdAndTrigger(
           program.id,
           normalizedEvent.eventType,
         );
 
-        console.log(`[PROCESS_EVENT] Found ${rules.length} active rules for program ${program.id} with trigger ${normalizedEvent.eventType}`);
+        console.log(
+          `[PROCESS_EVENT] Found ${rules.length} active rules for program ${program.id} with trigger ${normalizedEvent.eventType}`,
+        );
 
         if (rules.length === 0) {
-          console.log(`[PROCESS_EVENT] No active rules found for trigger ${normalizedEvent.eventType} in program ${program.id}`);
+          console.log(
+            `[PROCESS_EVENT] No active rules found for trigger ${normalizedEvent.eventType} in program ${program.id}`,
+          );
           skipped.push({
             reason: `No active rules found for trigger ${normalizedEvent.eventType}`,
             programId: program.id,
@@ -132,7 +138,9 @@ export class ProcessLoyaltyEventHandler {
           tier,
         );
 
-        console.log(`[PROCESS_EVENT] Rule evaluation returned ${evaluations.length} evaluations for program ${program.id}`);
+        console.log(
+          `[PROCESS_EVENT] Rule evaluation returned ${evaluations.length} evaluations for program ${program.id}`,
+        );
 
         if (evaluations.length === 0) {
           console.log(`[PROCESS_EVENT] No eligible rules matched for program ${program.id}`);

@@ -9,11 +9,7 @@ import {
   RewardRuleEntity,
 } from '@libs/infrastructure';
 import { PartnerSubscriptionUsageMapper } from '@libs/infrastructure';
-import {
-  PartnerSubscriptionUsage,
-  IPricingPlanRepository,
-  PricingPlanLimits,
-} from '@libs/domain';
+import { PartnerSubscriptionUsage, IPricingPlanRepository, PricingPlanLimits } from '@libs/domain';
 
 /**
  * Helper functions para manejar la creación y actualización automática
@@ -1283,7 +1279,9 @@ export class SubscriptionUsageHelper {
 
       console.log(
         `[SubscriptionUsageHelper] Getting plan limits for partner ${partnerId}. Active subscription:`,
-        subscription ? { id: subscription.id, planId: subscription.planId, status: subscription.status } : 'not found',
+        subscription
+          ? { id: subscription.id, planId: subscription.planId, status: subscription.status }
+          : 'not found',
       );
 
       // Validar subscription y planId (planId debe ser un número válido > 0)
@@ -1291,7 +1289,7 @@ export class SubscriptionUsageHelper {
         console.log(
           `[SubscriptionUsageHelper] Active subscription not found or invalid planId (${subscription?.planId}), trying other valid subscriptions...`,
         );
-        
+
         // Intentar con otras suscripciones válidas si no hay activa
         const validSubscriptions = await subscriptionRepository.find({
           where: { partnerId, status: In(['active', 'trialing', 'past_due']) },
@@ -1310,10 +1308,11 @@ export class SubscriptionUsageHelper {
         }
 
         const selectedSubscription = validSubscriptions[0];
-        console.log(
-          `[SubscriptionUsageHelper] Selected subscription:`,
-          { id: selectedSubscription.id, planId: selectedSubscription.planId, status: selectedSubscription.status },
-        );
+        console.log(`[SubscriptionUsageHelper] Selected subscription:`, {
+          id: selectedSubscription.id,
+          planId: selectedSubscription.planId,
+          status: selectedSubscription.status,
+        });
 
         if (!selectedSubscription.planId || selectedSubscription.planId <= 0) {
           console.warn(
@@ -1327,7 +1326,7 @@ export class SubscriptionUsageHelper {
           `[SubscriptionUsageHelper] Looking up pricing plan with ID: ${selectedSubscription.planId}`,
         );
         const pricingPlan = await pricingPlanRepository.findById(selectedSubscription.planId);
-        
+
         if (!pricingPlan) {
           console.error(
             `[SubscriptionUsageHelper] Pricing plan not found for planId: ${selectedSubscription.planId} (partner ${partnerId})`,
@@ -1354,7 +1353,7 @@ export class SubscriptionUsageHelper {
         `[SubscriptionUsageHelper] Looking up pricing plan with ID: ${subscription.planId}`,
       );
       const pricingPlan = await pricingPlanRepository.findById(subscription.planId);
-      
+
       if (!pricingPlan) {
         console.error(
           `[SubscriptionUsageHelper] Pricing plan not found for planId: ${subscription.planId} (partner ${partnerId})`,

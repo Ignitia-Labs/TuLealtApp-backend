@@ -1,4 +1,11 @@
-import { MigrationInterface, QueryRunner, Table, TableColumn, TableForeignKey, TableIndex } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableColumn,
+  TableForeignKey,
+  TableIndex,
+} from 'typeorm';
 
 /**
  * Migración: Agregar columnas relacionales a reward_rules
@@ -372,7 +379,9 @@ export class AddRelationalColumnsToRewardRules1790000000000 implements Migration
     // ============================================================================
 
     // 6.1 reward_rule_eligibility_membership_status
-    const membershipStatusTableExists = await queryRunner.hasTable('reward_rule_eligibility_membership_status');
+    const membershipStatusTableExists = await queryRunner.hasTable(
+      'reward_rule_eligibility_membership_status',
+    );
     if (!membershipStatusTableExists) {
       await queryRunner.createTable(
         new Table({
@@ -476,7 +485,9 @@ export class AddRelationalColumnsToRewardRules1790000000000 implements Migration
     }
 
     // 6.3 reward_rule_eligibility_category_ids
-    const categoryIdsTableExists = await queryRunner.hasTable('reward_rule_eligibility_category_ids');
+    const categoryIdsTableExists = await queryRunner.hasTable(
+      'reward_rule_eligibility_category_ids',
+    );
     if (!categoryIdsTableExists) {
       await queryRunner.createTable(
         new Table({

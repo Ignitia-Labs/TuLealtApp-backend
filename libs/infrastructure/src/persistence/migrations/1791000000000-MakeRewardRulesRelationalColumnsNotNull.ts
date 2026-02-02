@@ -26,24 +26,24 @@ export class MakeRewardRulesRelationalColumnsNotNull1791000000000 implements Mig
     // ============================================================================
 
     const nullScopeTenantId = await queryRunner.query(
-      `SELECT COUNT(*) as count FROM reward_rules WHERE scope_tenant_id IS NULL OR scope_tenant_id = 0`
+      `SELECT COUNT(*) as count FROM reward_rules WHERE scope_tenant_id IS NULL OR scope_tenant_id = 0`,
     );
 
     if (nullScopeTenantId[0].count > 0) {
       throw new Error(
         `No se puede hacer NOT NULL: Hay ${nullScopeTenantId[0].count} registros con scope_tenant_id NULL o 0. ` +
-        `Ejecutar primero el script de migración de datos.`
+          `Ejecutar primero el script de migración de datos.`,
       );
     }
 
     const nullScopeProgramId = await queryRunner.query(
-      `SELECT COUNT(*) as count FROM reward_rules WHERE scope_program_id IS NULL OR scope_program_id = 0`
+      `SELECT COUNT(*) as count FROM reward_rules WHERE scope_program_id IS NULL OR scope_program_id = 0`,
     );
 
     if (nullScopeProgramId[0].count > 0) {
       throw new Error(
         `No se puede hacer NOT NULL: Hay ${nullScopeProgramId[0].count} registros con scope_program_id NULL o 0. ` +
-        `Ejecutar primero el script de migración de datos.`
+          `Ejecutar primero el script de migración de datos.`,
       );
     }
 

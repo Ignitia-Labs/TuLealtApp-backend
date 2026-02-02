@@ -12,10 +12,7 @@ import {
   JwtPayload,
 } from '@libs/application';
 import { IUserRepository, ITenantRepository, IBranchRepository, User } from '@libs/domain';
-import {
-  PartnerSubscriptionEntity,
-  PartnerSubscriptionUsageEntity,
-} from '@libs/infrastructure';
+import { PartnerSubscriptionEntity, PartnerSubscriptionUsageEntity } from '@libs/infrastructure';
 import { IPricingPlanRepository } from '@libs/domain';
 
 describe('BranchesController', () => {

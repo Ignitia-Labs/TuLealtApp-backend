@@ -67,19 +67,20 @@ export class RewardRuleMapper {
         };
 
     // Construir limits desde columnas directas
-    const limits: RewardRuleLimits | null = persistenceEntity.limitFrequency !== null ||
+    const limits: RewardRuleLimits | null =
+      persistenceEntity.limitFrequency !== null ||
       persistenceEntity.limitCooldownHours !== null ||
       persistenceEntity.limitPerEventCap !== null ||
       persistenceEntity.limitPerPeriodCap !== null
-      ? {
-          frequency: persistenceEntity.limitFrequency ?? null,
-          cooldownHours: persistenceEntity.limitCooldownHours ?? null,
-          perEventCap: persistenceEntity.limitPerEventCap ?? null,
-          perPeriodCap: persistenceEntity.limitPerPeriodCap ?? null,
-          periodType: persistenceEntity.limitPeriodType ?? null,
-          periodDays: persistenceEntity.limitPeriodDays ?? null,
-        }
-      : null;
+        ? {
+            frequency: persistenceEntity.limitFrequency ?? null,
+            cooldownHours: persistenceEntity.limitCooldownHours ?? null,
+            perEventCap: persistenceEntity.limitPerEventCap ?? null,
+            perPeriodCap: persistenceEntity.limitPerPeriodCap ?? null,
+            periodType: persistenceEntity.limitPeriodType ?? null,
+            periodDays: persistenceEntity.limitPeriodDays ?? null,
+          }
+        : null;
 
     // Construir conflict desde columnas directas
     const conflict: ConflictSettings = {
@@ -127,8 +128,7 @@ export class RewardRuleMapper {
     return {
       minTierId: eligibilityEntity.minTierId ?? null,
       maxTierId: eligibilityEntity.maxTierId ?? null,
-      membershipStatus:
-        eligibilityEntity.membershipStatuses?.map((s) => s.status) ?? null,
+      membershipStatus: eligibilityEntity.membershipStatuses?.map((s) => s.status) ?? null,
       minMembershipAgeDays: eligibilityEntity.minMembershipAgeDays ?? null,
       flags: eligibilityEntity.flags?.map((f) => f.flag) ?? null,
       minAmount: eligibilityEntity.minAmount ?? null,
@@ -217,9 +217,7 @@ export class RewardRuleMapper {
           base: baseFormula,
           bonuses:
             formulaEntity.bonuses?.map((bonus) => {
-              const bonusFormulaRaw = this.buildPointsFormulaFromRelation(
-                bonus.bonusFormula,
-              );
+              const bonusFormulaRaw = this.buildPointsFormulaFromRelation(bonus.bonusFormula);
               // Validar que bonus sea solo fixed o rate
               const bonusFormula: FixedPointsFormula | RatePointsFormula =
                 bonusFormulaRaw.type === 'fixed' || bonusFormulaRaw.type === 'rate'
@@ -358,9 +356,7 @@ export class RewardRuleMapper {
     eligibilityEntity.timeRangeEnd = eligibility.timeRange?.end
       ? this.parseTime(eligibility.timeRange.end)
       : null;
-    eligibilityEntity.metadata = eligibility.metadata
-      ? JSON.stringify(eligibility.metadata)
-      : null;
+    eligibilityEntity.metadata = eligibility.metadata ? JSON.stringify(eligibility.metadata) : null;
 
     // Construir tablas hijas (eligibilityId será 0 inicialmente, TypeORM lo actualizará)
     const tempEligibilityId = 0;
@@ -406,10 +402,7 @@ export class RewardRuleMapper {
         formulaEntity.rateAmountField = formula.amountField;
         // Construir entradas de tabla (formulaId será 0 inicialmente, TypeORM lo actualizará)
         const tempFormulaId = 0;
-        formulaEntity.tableEntries = this.buildTableEntries(
-          formula.table,
-          tempFormulaId,
-        );
+        formulaEntity.tableEntries = this.buildTableEntries(formula.table, tempFormulaId);
         break;
 
       case 'hybrid':
@@ -540,9 +533,7 @@ export class RewardRuleMapper {
       timeRangeStart: eligibility.timeRange?.start
         ? this.parseTime(eligibility.timeRange.start)
         : null,
-      timeRangeEnd: eligibility.timeRange?.end
-        ? this.parseTime(eligibility.timeRange.end)
-        : null,
+      timeRangeEnd: eligibility.timeRange?.end ? this.parseTime(eligibility.timeRange.end) : null,
       metadata: eligibility.metadata ? JSON.stringify(eligibility.metadata) : null,
     };
 

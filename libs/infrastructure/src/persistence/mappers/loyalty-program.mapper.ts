@@ -21,11 +21,12 @@ export class LoyaltyProgramMapper {
    */
   static toDomain(persistenceEntity: LoyaltyProgramEntity): LoyaltyProgram {
     // Construir earningDomains desde tabla relacionada (columnas JSON eliminadas)
-    const earningDomains: EarningDomainItem[] = persistenceEntity.earningDomainsRelation?.length > 0
-      ? persistenceEntity.earningDomainsRelation.map((ed) => ({
-          domain: ed.domain as any, // Cast a EarningDomain
-        }))
-      : [];
+    const earningDomains: EarningDomainItem[] =
+      persistenceEntity.earningDomainsRelation?.length > 0
+        ? persistenceEntity.earningDomainsRelation.map((ed) => ({
+            domain: ed.domain as any, // Cast a EarningDomain
+          }))
+        : [];
 
     // Construir stacking desde columnas directas (columnas JSON eliminadas)
     const stacking: StackingPolicy = {
@@ -37,17 +38,18 @@ export class LoyaltyProgramMapper {
     };
 
     // Construir limits desde columnas directas (columnas JSON eliminadas)
-    const limits: ProgramLimits | null = persistenceEntity.limitMaxPointsPerEvent !== null ||
+    const limits: ProgramLimits | null =
+      persistenceEntity.limitMaxPointsPerEvent !== null ||
       persistenceEntity.limitMaxPointsPerDay !== null ||
       persistenceEntity.limitMaxPointsPerMonth !== null ||
       persistenceEntity.limitMaxPointsPerYear !== null
-      ? {
-          maxPointsPerEvent: persistenceEntity.limitMaxPointsPerEvent ?? undefined,
-          maxPointsPerDay: persistenceEntity.limitMaxPointsPerDay ?? undefined,
-          maxPointsPerMonth: persistenceEntity.limitMaxPointsPerMonth ?? undefined,
-          maxPointsPerYear: persistenceEntity.limitMaxPointsPerYear ?? undefined,
-        }
-      : null;
+        ? {
+            maxPointsPerEvent: persistenceEntity.limitMaxPointsPerEvent ?? undefined,
+            maxPointsPerDay: persistenceEntity.limitMaxPointsPerDay ?? undefined,
+            maxPointsPerMonth: persistenceEntity.limitMaxPointsPerMonth ?? undefined,
+            maxPointsPerYear: persistenceEntity.limitMaxPointsPerYear ?? undefined,
+          }
+        : null;
 
     // Construir expirationPolicy desde columnas directas (columnas JSON eliminadas)
     const expirationPolicy: ExpirationPolicy = {
@@ -138,7 +140,10 @@ export class LoyaltyProgramMapper {
     // Construir relación earningDomainsRelation (columnas JSON eliminadas)
     if (domainEntity.earningDomains && domainEntity.earningDomains.length > 0) {
       const programId = domainEntity.id || 0; // Usar 0 si es nuevo, TypeORM lo actualizará después
-      entity.earningDomainsRelation = this.earningDomainsToPersistence(domainEntity.earningDomains, programId);
+      entity.earningDomainsRelation = this.earningDomainsToPersistence(
+        domainEntity.earningDomains,
+        programId,
+      );
     }
 
     return entity;

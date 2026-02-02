@@ -8,7 +8,9 @@ export class AddLoyaltyProgramsCountToSubscriptionUsage1805000000000 implements 
   name = 'AddLoyaltyProgramsCountToSubscriptionUsage1805000000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    console.log('🔄 Iniciando migración: Agregar campos de conteo de loyalty programs a partner_subscription_usage');
+    console.log(
+      '🔄 Iniciando migración: Agregar campos de conteo de loyalty programs a partner_subscription_usage',
+    );
 
     const table = await queryRunner.getTable('partner_subscription_usage');
     if (!table) {
@@ -85,7 +87,9 @@ export class AddLoyaltyProgramsCountToSubscriptionUsage1805000000000 implements 
     }
 
     // Agregar columna loyaltyProgramsSubscriptionCount
-    const hasLoyaltyProgramsSubscriptionCount = table.findColumnByName('loyaltyProgramsSubscriptionCount');
+    const hasLoyaltyProgramsSubscriptionCount = table.findColumnByName(
+      'loyaltyProgramsSubscriptionCount',
+    );
     if (!hasLoyaltyProgramsSubscriptionCount) {
       await queryRunner.addColumn(
         'partner_subscription_usage',
@@ -102,7 +106,9 @@ export class AddLoyaltyProgramsCountToSubscriptionUsage1805000000000 implements 
     }
 
     // Agregar columna loyaltyProgramsExperimentalCount
-    const hasLoyaltyProgramsExperimentalCount = table.findColumnByName('loyaltyProgramsExperimentalCount');
+    const hasLoyaltyProgramsExperimentalCount = table.findColumnByName(
+      'loyaltyProgramsExperimentalCount',
+    );
     if (!hasLoyaltyProgramsExperimentalCount) {
       await queryRunner.addColumn(
         'partner_subscription_usage',
@@ -136,11 +142,15 @@ export class AddLoyaltyProgramsCountToSubscriptionUsage1805000000000 implements 
          OR loyaltyProgramsExperimentalCount IS NULL
     `);
 
-    console.log('✅ Migración completada: Campos de conteo de loyalty programs agregados a partner_subscription_usage');
+    console.log(
+      '✅ Migración completada: Campos de conteo de loyalty programs agregados a partner_subscription_usage',
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    console.log('🔄 Iniciando rollback: Eliminar campos de conteo de loyalty programs de partner_subscription_usage');
+    console.log(
+      '🔄 Iniciando rollback: Eliminar campos de conteo de loyalty programs de partner_subscription_usage',
+    );
 
     const table = await queryRunner.getTable('partner_subscription_usage');
     if (!table) {
@@ -168,6 +178,8 @@ export class AddLoyaltyProgramsCountToSubscriptionUsage1805000000000 implements 
       }
     }
 
-    console.log('✅ Rollback completado: Campos de conteo de loyalty programs eliminados de partner_subscription_usage');
+    console.log(
+      '✅ Rollback completado: Campos de conteo de loyalty programs eliminados de partner_subscription_usage',
+    );
   }
 }

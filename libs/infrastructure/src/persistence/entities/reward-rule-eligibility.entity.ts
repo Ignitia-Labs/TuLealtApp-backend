@@ -63,11 +63,9 @@ export class RewardRuleEligibilityEntity {
   metadata: string | null; // JSON solo para metadata flexible
 
   // Relaciones con tablas de arrays
-  @OneToMany(
-    () => RewardRuleEligibilityMembershipStatusEntity,
-    (status) => status.eligibility,
-    { cascade: true },
-  )
+  @OneToMany(() => RewardRuleEligibilityMembershipStatusEntity, (status) => status.eligibility, {
+    cascade: true,
+  })
   membershipStatuses: RewardRuleEligibilityMembershipStatusEntity[];
 
   @OneToMany(() => RewardRuleEligibilityFlagEntity, (flag) => flag.eligibility, {
@@ -75,11 +73,9 @@ export class RewardRuleEligibilityEntity {
   })
   flags: RewardRuleEligibilityFlagEntity[];
 
-  @OneToMany(
-    () => RewardRuleEligibilityCategoryIdEntity,
-    (categoryId) => categoryId.eligibility,
-    { cascade: true },
-  )
+  @OneToMany(() => RewardRuleEligibilityCategoryIdEntity, (categoryId) => categoryId.eligibility, {
+    cascade: true,
+  })
   categoryIds: RewardRuleEligibilityCategoryIdEntity[];
 
   @OneToMany(() => RewardRuleEligibilitySkuEntity, (sku) => sku.eligibility, {

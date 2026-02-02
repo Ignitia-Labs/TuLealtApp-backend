@@ -28,9 +28,7 @@ export class RemoveJsonColumnsFromUsers1798000000000 implements MigrationInterfa
     // VALIDACIÓN PREVIA: Verificar que las tablas relacionadas tienen datos
     // ============================================================================
 
-    const totalRecords = await queryRunner.query(
-      `SELECT COUNT(*) as count FROM users`
-    );
+    const totalRecords = await queryRunner.query(`SELECT COUNT(*) as count FROM users`);
 
     if (totalRecords[0].count === 0) {
       console.warn('⚠️  Advertencia: No hay registros en users. Continuando...');
@@ -40,19 +38,17 @@ export class RemoveJsonColumnsFromUsers1798000000000 implements MigrationInterfa
         `SELECT COUNT(DISTINCT u.id) as count
          FROM users u
          WHERE u.roles IS NOT NULL
-           AND JSON_LENGTH(u.roles) > 0`
+           AND JSON_LENGTH(u.roles) > 0`,
       );
 
-      const migratedRoles = await queryRunner.query(
-        `SELECT COUNT(*) as count FROM user_roles`
-      );
+      const migratedRoles = await queryRunner.query(`SELECT COUNT(*) as count FROM user_roles`);
 
       if (usersWithRoles[0].count > 0 && migratedRoles[0].count === 0) {
         throw new Error(
           `No se pueden remover columnas JSON: Hay usuarios con roles pero no hay datos migrados. ` +
-          `Usuarios con roles: ${usersWithRoles[0].count}, ` +
-          `Roles migrados: ${migratedRoles[0].count}. ` +
-          `Ejecutar primero el script de migración de datos.`
+            `Usuarios con roles: ${usersWithRoles[0].count}, ` +
+            `Roles migrados: ${migratedRoles[0].count}. ` +
+            `Ejecutar primero el script de migración de datos.`,
         );
       }
 
@@ -61,19 +57,19 @@ export class RemoveJsonColumnsFromUsers1798000000000 implements MigrationInterfa
         `SELECT COUNT(DISTINCT u.id) as count
          FROM users u
          WHERE u.profile IS NOT NULL
-           AND JSON_LENGTH(u.profile) > 0`
+           AND JSON_LENGTH(u.profile) > 0`,
       );
 
       const migratedProfileData = await queryRunner.query(
-        `SELECT COUNT(*) as count FROM user_profile_data`
+        `SELECT COUNT(*) as count FROM user_profile_data`,
       );
 
       if (usersWithProfile[0].count > 0 && migratedProfileData[0].count === 0) {
         throw new Error(
           `No se pueden remover columnas JSON: Hay usuarios con profile pero no hay datos migrados. ` +
-          `Usuarios con profile: ${usersWithProfile[0].count}, ` +
-          `Profile data migrado: ${migratedProfileData[0].count}. ` +
-          `Ejecutar primero el script de migración de datos.`
+            `Usuarios con profile: ${usersWithProfile[0].count}, ` +
+            `Profile data migrado: ${migratedProfileData[0].count}. ` +
+            `Ejecutar primero el script de migración de datos.`,
         );
       }
     }

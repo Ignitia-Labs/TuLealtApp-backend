@@ -9,10 +9,7 @@ import {
   EarningDomain,
   isValidEarningDomain,
 } from '@libs/domain';
-import {
-  PartnerSubscriptionEntity,
-  PartnerSubscriptionUsageEntity,
-} from '@libs/infrastructure';
+import { PartnerSubscriptionEntity, PartnerSubscriptionUsageEntity } from '@libs/infrastructure';
 import { SubscriptionUsageHelper } from '@libs/application';
 import { LoyaltyProgramValidator } from '../loyalty-program-validator.service';
 import { CreateLoyaltyProgramRequest } from './create-loyalty-program.request';

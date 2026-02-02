@@ -166,7 +166,9 @@ export class CreateCustomerMembershipHandler {
   private async autoEnrollInBaseProgram(membership: CustomerMembership): Promise<void> {
     try {
       // Buscar programa BASE activo del tenant
-      const baseProgram = await this.programRepository.findBaseProgramByTenantId(membership.tenantId);
+      const baseProgram = await this.programRepository.findBaseProgramByTenantId(
+        membership.tenantId,
+      );
 
       if (!baseProgram) {
         console.warn(

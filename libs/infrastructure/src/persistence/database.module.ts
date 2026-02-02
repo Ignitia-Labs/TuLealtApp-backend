@@ -71,6 +71,7 @@ import { TierStatusEntity } from './entities/tier-status.entity';
 import { TierBenefitEntity } from './entities/tier-benefit.entity';
 import { ReferralEntity } from './entities/referral.entity';
 import { RewardEntity } from './entities/reward.entity';
+import { RedemptionCodeEntity } from './entities/redemption-code.entity';
 import { UserRepository } from './repositories/user.repository';
 import { PricingPlanRepository } from './repositories/pricing-plan.repository';
 import { RateExchangeRepository } from './repositories/rate-exchange.repository';
@@ -117,6 +118,7 @@ import { TierStatusRepository } from './repositories/tier-status.repository';
 import { TierBenefitRepository } from './repositories/tier-benefit.repository';
 import { ReferralRepository } from './repositories/referral.repository';
 import { RewardRepository } from './repositories/reward.repository';
+import { RedemptionCodeRepository } from './repositories/redemption-code.repository';
 import { CustomerMembershipSubscriber } from './subscribers/customer-membership.subscriber';
 import {
   IUserRepository,
@@ -162,8 +164,9 @@ import {
   ITierPolicyRepository,
   ITierStatusRepository,
   ITierBenefitRepository,
-  IReferralRepository,
-  IRewardRepository,
+      IReferralRepository,
+      IRewardRepository,
+      IRedemptionCodeRepository,
 } from '@libs/domain';
 
 /**
@@ -254,6 +257,7 @@ import {
       TierBenefitEntity,
       ReferralEntity,
       RewardEntity,
+      RedemptionCodeEntity,
     ]),
   ],
   providers: [
@@ -483,6 +487,11 @@ import {
       provide: 'IRewardRepository',
       useClass: RewardRepository,
     },
+    RedemptionCodeRepository,
+    {
+      provide: 'IRedemptionCodeRepository',
+      useClass: RedemptionCodeRepository,
+    },
     // TypeORM Subscribers se registran en la configuración de TypeORM
     // para evitar dependencias circulares
   ],
@@ -532,6 +541,7 @@ import {
     'ITierBenefitRepository',
     'IReferralRepository',
     'IRewardRepository',
+    'IRedemptionCodeRepository',
     UserRepository,
     PricingPlanRepository,
     RateExchangeRepository,
@@ -576,6 +586,9 @@ import {
     TierPolicyRepository,
     TierStatusRepository,
     TierBenefitRepository,
+    ReferralRepository,
+    RewardRepository,
+    RedemptionCodeRepository,
     TypeOrmModule,
   ],
 })

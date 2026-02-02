@@ -29,9 +29,7 @@ export class RemoveJsonColumnsFromRewardRules1792000000000 implements MigrationI
     // VALIDACIÓN PREVIA: Verificar que las columnas relacionales tienen datos
     // ============================================================================
 
-    const totalRecords = await queryRunner.query(
-      `SELECT COUNT(*) as count FROM reward_rules`
-    );
+    const totalRecords = await queryRunner.query(`SELECT COUNT(*) as count FROM reward_rules`);
 
     if (totalRecords[0].count === 0) {
       console.warn('⚠️  Advertencia: No hay registros en reward_rules. Continuando...');
@@ -43,14 +41,14 @@ export class RemoveJsonColumnsFromRewardRules1792000000000 implements MigrationI
            AND scope_program_id IS NOT NULL
            AND conflict_stack_policy IS NOT NULL
            AND conflict_priority_rank IS NOT NULL
-           AND idempotency_strategy IS NOT NULL`
+           AND idempotency_strategy IS NOT NULL`,
       );
 
       if (recordsWithRelationalData[0].count < totalRecords[0].count) {
         throw new Error(
           `No se pueden remover columnas JSON: Hay registros sin datos relacionales completos. ` +
-          `Total: ${totalRecords[0].count}, Con datos relacionales: ${recordsWithRelationalData[0].count}. ` +
-          `Ejecutar primero el script de migración de datos.`
+            `Total: ${totalRecords[0].count}, Con datos relacionales: ${recordsWithRelationalData[0].count}. ` +
+            `Ejecutar primero el script de migración de datos.`,
         );
       }
     }

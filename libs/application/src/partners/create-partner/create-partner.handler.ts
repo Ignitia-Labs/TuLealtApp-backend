@@ -13,10 +13,7 @@ import { CreatePartnerRequest } from './create-partner.request';
 import { CreatePartnerResponse } from './create-partner.response';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  PartnerSubscriptionEntity,
-  PartnerEntity,
-} from '@libs/infrastructure';
+import { PartnerSubscriptionEntity, PartnerEntity } from '@libs/infrastructure';
 import { PartnerMapper } from '@libs/infrastructure';
 import { getPriceForPeriod, calculateFinalPrice } from '@libs/shared';
 import { SubscriptionUsageHelper } from '@libs/application';

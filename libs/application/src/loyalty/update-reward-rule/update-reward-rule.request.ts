@@ -10,11 +10,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-  RewardRuleStatus,
-  EligibilityConditions,
-  RewardRuleLimits,
-} from '@libs/domain';
+import { RewardRuleStatus, EligibilityConditions, RewardRuleLimits } from '@libs/domain';
 import { PointsFormulaDto } from '../create-reward-rule/dto/points-formula.dto';
 import { ConflictSettingsDto } from '../create-reward-rule/dto/conflict-settings.dto';
 import { IdempotencyScopeDto } from '../create-reward-rule/dto/idempotency-scope.dto';

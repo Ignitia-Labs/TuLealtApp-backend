@@ -13,15 +13,11 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  * 2. Busca el programa BASE activo de cada tenant
  * 3. Crea enrollments automáticos para esas memberships
  */
-export class AutoEnrollExistingCustomersInBaseProgram1807000000000
-  implements MigrationInterface
-{
+export class AutoEnrollExistingCustomersInBaseProgram1807000000000 implements MigrationInterface {
   name = 'AutoEnrollExistingCustomersInBaseProgram1807000000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    console.log(
-      '🔄 Iniciando migración: Auto-enrollar customers existentes en programa BASE',
-    );
+    console.log('🔄 Iniciando migración: Auto-enrollar customers existentes en programa BASE');
 
     // Verificar que las tablas existan
     const membershipsTable = await queryRunner.getTable('customer_memberships');
@@ -29,9 +25,7 @@ export class AutoEnrollExistingCustomersInBaseProgram1807000000000
     const programsTable = await queryRunner.getTable('loyalty_programs');
 
     if (!membershipsTable || !enrollmentsTable || !programsTable) {
-      console.warn(
-        '⚠️  Una o más tablas requeridas no existen. Saltando migración.',
-      );
+      console.warn('⚠️  Una o más tablas requeridas no existen. Saltando migración.');
       return;
     }
 
@@ -149,10 +143,7 @@ export class AutoEnrollExistingCustomersInBaseProgram1807000000000
           enrolledCount++;
         }
       } catch (error) {
-        console.error(
-          `❌ Error procesando membership ${membership.membershipId}:`,
-          error,
-        );
+        console.error(`❌ Error procesando membership ${membership.membershipId}:`, error);
         errorCount++;
       }
     }
@@ -204,11 +195,7 @@ export class AutoEnrollExistingCustomersInBaseProgram1807000000000
     console.log(
       `✅ Rollback completado: ${result.affectedRows || 0} enrollments marcados como ENDED`,
     );
-    console.log(
-      '⚠️  NOTA: Este rollback afecta todos los enrollments al BASE creados hoy.',
-    );
-    console.log(
-      '    Si necesitas un rollback más específico, debes hacerlo manualmente.',
-    );
+    console.log('⚠️  NOTA: Este rollback afecta todos los enrollments al BASE creados hoy.');
+    console.log('    Si necesitas un rollback más específico, debes hacerlo manualmente.');
   }
 }

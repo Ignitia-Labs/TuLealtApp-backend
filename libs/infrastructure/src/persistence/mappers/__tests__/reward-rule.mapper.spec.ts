@@ -8,11 +8,7 @@ import { RewardRuleEligibilityCategoryIdEntity } from '../../entities/reward-rul
 import { RewardRuleEligibilitySkuEntity } from '../../entities/reward-rule-eligibility-sku.entity';
 import { RewardRulePointsTableEntryEntity } from '../../entities/reward-rule-points-table-entry.entity';
 import { RewardRule } from '@libs/domain';
-import {
-  BASE_EARNING_DOMAINS,
-  PURCHASE_CONFLICT_GROUPS,
-  STACK_POLICIES,
-} from '@libs/domain';
+import { BASE_EARNING_DOMAINS, PURCHASE_CONFLICT_GROUPS, STACK_POLICIES } from '@libs/domain';
 
 describe('RewardRuleMapper', () => {
   const baseDate = new Date('2024-01-01T10:00:00Z');

@@ -97,7 +97,10 @@ export class TierBenefitRepository implements ITierBenefitRepository {
 
       if (existingEntity) {
         // 1. Eliminar exclusiveRewards antiguos si vamos a crear nuevos
-        if (existingEntity.exclusiveRewardsRelation && existingEntity.exclusiveRewardsRelation.length > 0) {
+        if (
+          existingEntity.exclusiveRewardsRelation &&
+          existingEntity.exclusiveRewardsRelation.length > 0
+        ) {
           if (entity.exclusiveRewardsRelation && entity.exclusiveRewardsRelation.length > 0) {
             await this.tierBenefitRepository.manager.delete(
               TierBenefitExclusiveRewardEntity,
@@ -105,7 +108,10 @@ export class TierBenefitRepository implements ITierBenefitRepository {
             );
           }
           // Si no vamos a crear nuevos pero existen antiguos, eliminarlos (caso de eliminación explícita)
-          else if (!entity.exclusiveRewardsRelation || entity.exclusiveRewardsRelation.length === 0) {
+          else if (
+            !entity.exclusiveRewardsRelation ||
+            entity.exclusiveRewardsRelation.length === 0
+          ) {
             await this.tierBenefitRepository.manager.delete(
               TierBenefitExclusiveRewardEntity,
               existingEntity.exclusiveRewardsRelation.map((r) => r.id),
@@ -114,7 +120,10 @@ export class TierBenefitRepository implements ITierBenefitRepository {
         }
 
         // 2. Eliminar categoryBenefits antiguos (y sus exclusiveRewards) si vamos a crear nuevos
-        if (existingEntity.categoryBenefitsRelation && existingEntity.categoryBenefitsRelation.length > 0) {
+        if (
+          existingEntity.categoryBenefitsRelation &&
+          existingEntity.categoryBenefitsRelation.length > 0
+        ) {
           if (entity.categoryBenefitsRelation && entity.categoryBenefitsRelation.length > 0) {
             // Primero eliminar los exclusiveRewards de cada categoryBenefit
             for (const categoryBenefit of existingEntity.categoryBenefitsRelation) {
@@ -135,7 +144,10 @@ export class TierBenefitRepository implements ITierBenefitRepository {
             );
           }
           // Si no vamos a crear nuevos pero existen antiguos, eliminarlos (caso de eliminación explícita)
-          else if (!entity.categoryBenefitsRelation || entity.categoryBenefitsRelation.length === 0) {
+          else if (
+            !entity.categoryBenefitsRelation ||
+            entity.categoryBenefitsRelation.length === 0
+          ) {
             // Eliminar todos los categoryBenefits y sus exclusiveRewards
             for (const categoryBenefit of existingEntity.categoryBenefitsRelation) {
               if (

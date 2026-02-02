@@ -123,14 +123,7 @@ describe('CustomerTierMapper', () => {
     });
 
     it('should not assign ID if domain ID is 0', () => {
-      const domain = CustomerTier.create(
-        10,
-        'New Tier',
-        0,
-        '#000000',
-        ['Benefit 1'],
-        1,
-      );
+      const domain = CustomerTier.create(10, 'New Tier', 0, '#000000', ['Benefit 1'], 1);
 
       const entity = CustomerTierMapper.toPersistence(domain);
 

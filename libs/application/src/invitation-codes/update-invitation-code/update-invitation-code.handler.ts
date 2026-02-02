@@ -49,7 +49,7 @@ export class UpdateInvitationCodeHandler {
     }
 
     // Validar fecha de expiración si se proporciona
-    let expiresAtDate: Date | null = request.expiresAt
+    const expiresAtDate: Date | null = request.expiresAt
       ? new Date(request.expiresAt)
       : existingCode.expiresAt;
 

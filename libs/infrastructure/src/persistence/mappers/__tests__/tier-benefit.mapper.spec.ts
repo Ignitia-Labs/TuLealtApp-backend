@@ -211,7 +211,10 @@ describe('TierBenefitMapper', () => {
       expect(entity.higherCapsMaxPointsPerMonth).toBe(50000);
       expect(entity.exclusiveRewardsRelation).toBeDefined();
       expect(entity.exclusiveRewardsRelation?.length).toBe(2);
-      expect(entity.exclusiveRewardsRelation?.map((r) => r.rewardId)).toEqual(['reward-1', 'reward-2']);
+      expect(entity.exclusiveRewardsRelation?.map((r) => r.rewardId)).toEqual([
+        'reward-1',
+        'reward-2',
+      ]);
       expect(entity.categoryBenefitsRelation).toBeDefined();
       expect(entity.categoryBenefitsRelation?.length).toBe(1);
       expect(entity.categoryBenefitsRelation?.[0]?.categoryId).toBe(10);
@@ -219,16 +222,7 @@ describe('TierBenefitMapper', () => {
     });
 
     it('should not assign ID if domain ID is 0', () => {
-      const domain = TierBenefit.create(
-        100,
-        5,
-        null,
-        [],
-        null,
-        null,
-        null,
-        'active',
-      );
+      const domain = TierBenefit.create(100, 5, null, [], null, null, null, 'active');
 
       const entity = TierBenefitMapper.toPersistence(domain);
 
@@ -237,17 +231,7 @@ describe('TierBenefitMapper', () => {
     });
 
     it('should handle null higherCaps', () => {
-      const domain = TierBenefit.create(
-        100,
-        5,
-        null,
-        [],
-        null,
-        null,
-        null,
-        'active',
-        1,
-      );
+      const domain = TierBenefit.create(100, 5, null, [], null, null, null, 'active', 1);
 
       const entity = TierBenefitMapper.toPersistence(domain);
 

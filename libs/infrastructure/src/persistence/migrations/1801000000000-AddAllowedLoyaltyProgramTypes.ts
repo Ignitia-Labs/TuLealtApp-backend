@@ -1,4 +1,12 @@
-import { MigrationInterface, QueryRunner, Table, TableColumn, TableForeignKey, TableIndex, TableUnique } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableColumn,
+  TableForeignKey,
+  TableIndex,
+  TableUnique,
+} from 'typeorm';
 
 /**
  * Migración para crear tabla relacional de tipos de loyalty programs permitidos
@@ -145,7 +153,9 @@ export class AddAllowedLoyaltyProgramTypes1801000000000 implements MigrationInte
       await queryRunner.dropTable('partner_allowed_loyalty_program_types');
       console.log('✅ Table partner_allowed_loyalty_program_types dropped.');
     } else {
-      console.warn('Table partner_allowed_loyalty_program_types does not exist. Skipping rollback.');
+      console.warn(
+        'Table partner_allowed_loyalty_program_types does not exist. Skipping rollback.',
+      );
     }
   }
 }

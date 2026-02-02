@@ -56,6 +56,12 @@ import {
   CreatePointsReversalHandler,
   CreatePointsReversalRequest,
   CreatePointsReversalResponse,
+  GetAvailableRewardsHandler,
+  GetAvailableRewardsRequest,
+  GetAvailableRewardsResponse,
+  RedeemRewardHandler,
+  RedeemRewardRequest,
+  RedeemRewardResponse,
   JwtPayload,
 } from '@libs/application';
 import { IUserRepository, ICustomerMembershipRepository, ITenantRepository } from '@libs/domain';
@@ -85,6 +91,8 @@ import {
  * - GET /partner/customers/:id/points-transactions - Obtener historial de transacciones
  * - POST /partner/customers/:id/points/adjustment - Crear ajuste manual de puntos
  * - POST /partner/customers/:id/points/reversal - Revertir transacción de puntos
+ * - GET /partner/customers/:id/rewards - Obtener recompensas disponibles para un customer
+ * - POST /partner/customers/:id/rewards/:rewardId/redeem - Procesar canje de recompensa
  */
 @ApiTags('Partner Customers')
 @ApiExtraModels(
@@ -92,6 +100,10 @@ import {
   CreatePointsAdjustmentResponse,
   CreatePointsReversalRequest,
   CreatePointsReversalResponse,
+  GetAvailableRewardsRequest,
+  GetAvailableRewardsResponse,
+  RedeemRewardRequest,
+  RedeemRewardResponse,
 )
 @Controller('customers')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -109,6 +121,8 @@ export class PartnerCustomersController {
     private readonly getCustomerPointsTransactionsHandler: GetCustomerPointsTransactionsHandler,
     private readonly createPointsAdjustmentHandler: CreatePointsAdjustmentHandler,
     private readonly createPointsReversalHandler: CreatePointsReversalHandler,
+    private readonly getAvailableRewardsHandler: GetAvailableRewardsHandler,
+    private readonly redeemRewardHandler: RedeemRewardHandler,
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
     @Inject('ICustomerMembershipRepository')
@@ -1072,5 +1086,164 @@ export class PartnerCustomersController {
     }
 
     return this.createPointsReversalHandler.execute(body, currentUser.partnerId, createdBy);
+  }
+
+  @Get(':id/rewards')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Obtener recompensas disponibles para un customer',
+    description:
+      'Obtiene las recompensas que el customer puede canjear con sus puntos actuales. ' +
+      'Las recompensas están filtradas por disponibilidad, puntos suficientes y límites de canje. ' +
+      'El customer debe pertenecer al partner del usuario autenticado.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único de la membership (customer)',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de recompensas disponibles obtenida exitosamente',
+    type: GetAvailableRewardsResponse,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos o el customer no pertenece a tu partner',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Customer no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  async getCustomerAvailableRewards(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseIntPipe) membershipId: number,
+  ): Promise<GetAvailableRewardsResponse> {
+    // Obtener el partnerId del usuario autenticado
+    const currentUser = await this.userRepository.findById(user.userId);
+    if (!currentUser) {
+      throw new NotFoundException(`User with ID ${user.userId} not found`);
+    }
+
+    if (!currentUser.partnerId) {
+      throw new ForbiddenException('User does not belong to a partner');
+    }
+
+    // Verificar que la membership existe y pertenece al partner
+    const membership = await this.membershipRepository.findById(membershipId);
+    if (!membership) {
+      throw new NotFoundException(`Membership with ID ${membershipId} not found`);
+    }
+
+    // Verificar que el tenant pertenece al partner del usuario autenticado
+    const tenant = await this.tenantRepository.findById(membership.tenantId);
+    if (!tenant) {
+      throw new NotFoundException(`Tenant with ID ${membership.tenantId} not found`);
+    }
+
+    if (tenant.partnerId !== currentUser.partnerId) {
+      throw new ForbiddenException('Customer does not belong to your partner');
+    }
+
+    // Obtener recompensas disponibles
+    const request = new GetAvailableRewardsRequest();
+    request.membershipId = membershipId;
+    return this.getAvailableRewardsHandler.execute(request);
+  }
+
+  @Post(':id/rewards/:rewardId/redeem')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Canjear recompensa para un customer',
+    description:
+      'Procesa el canje de una recompensa usando los puntos del customer. ' +
+      'Valida que el customer tenga puntos suficientes, que la recompensa esté disponible ' +
+      'y que no se haya alcanzado el límite de canjes. El customer debe pertenecer al partner del usuario autenticado.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único de la membership (customer)',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiParam({
+    name: 'rewardId',
+    description: 'ID de la recompensa a canjear',
+    type: Number,
+    example: 1,
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Recompensa canjeada exitosamente',
+    type: RedeemRewardResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'No se puede canjear (puntos insuficientes, límite alcanzado, recompensa no disponible)',
+    type: BadRequestErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos o el customer no pertenece a tu partner',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Customer o recompensa no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  async redeemRewardForCustomer(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseIntPipe) membershipId: number,
+    @Param('rewardId', ParseIntPipe) rewardId: number,
+  ): Promise<RedeemRewardResponse> {
+    // Obtener el partnerId del usuario autenticado
+    const currentUser = await this.userRepository.findById(user.userId);
+    if (!currentUser) {
+      throw new NotFoundException(`User with ID ${user.userId} not found`);
+    }
+
+    if (!currentUser.partnerId) {
+      throw new ForbiddenException('User does not belong to a partner');
+    }
+
+    // Verificar que la membership existe y pertenece al partner
+    const membership = await this.membershipRepository.findById(membershipId);
+    if (!membership) {
+      throw new NotFoundException(`Membership with ID ${membershipId} not found`);
+    }
+
+    // Verificar que el tenant pertenece al partner del usuario autenticado
+    const tenant = await this.tenantRepository.findById(membership.tenantId);
+    if (!tenant) {
+      throw new NotFoundException(`Tenant with ID ${membership.tenantId} not found`);
+    }
+
+    if (tenant.partnerId !== currentUser.partnerId) {
+      throw new ForbiddenException('Customer does not belong to your partner');
+    }
+
+    // Procesar canje
+    const request = new RedeemRewardRequest();
+    request.membershipId = membershipId;
+    request.rewardId = rewardId;
+    return this.redeemRewardHandler.execute(request);
   }
 }

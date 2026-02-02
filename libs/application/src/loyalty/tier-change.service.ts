@@ -75,7 +75,7 @@ export class TierChangeService {
     }
 
     // 2. Obtener estado actual
-    let currentStatus = await this.statusRepository.findByMembershipId(membershipId);
+    const currentStatus = await this.statusRepository.findByMembershipId(membershipId);
 
     // 3. Determinar tipo de cambio y aplicar
     let newStatus: TierStatus;
@@ -266,7 +266,7 @@ export class TierChangeService {
       throw new Error(`No active tier policy found for tenant ${tenantId}`);
     }
 
-    let currentStatus = await this.statusRepository.findByMembershipId(membershipId);
+    const currentStatus = await this.statusRepository.findByMembershipId(membershipId);
     const previousTierId = currentStatus?.currentTierId ?? null;
 
     const nextEvalAt = this.calculateNextEvaluationDate(policy);
@@ -308,7 +308,7 @@ export class TierChangeService {
       throw new Error(`No active tier policy found for tenant ${tenantId}`);
     }
 
-    let currentStatus = await this.statusRepository.findByMembershipId(membershipId);
+    const currentStatus = await this.statusRepository.findByMembershipId(membershipId);
     const previousTierId = currentStatus?.currentTierId ?? null;
 
     const nextEvalAt = this.calculateNextEvaluationDate(policy);

@@ -7,10 +7,7 @@ import {
   IRewardRuleRepository,
   IEnrollmentRepository,
 } from '@libs/domain';
-import {
-  PartnerSubscriptionEntity,
-  PartnerSubscriptionUsageEntity,
-} from '@libs/infrastructure';
+import { PartnerSubscriptionEntity, PartnerSubscriptionUsageEntity } from '@libs/infrastructure';
 import { SubscriptionUsageHelper } from '@libs/application';
 import { DeleteLoyaltyProgramRequest } from './delete-loyalty-program.request';
 

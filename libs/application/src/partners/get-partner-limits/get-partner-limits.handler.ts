@@ -9,9 +9,7 @@ import { Repository } from 'typeorm';
 import { IPartnerRepository, IPricingPlanRepository } from '@libs/domain';
 import { GetPartnerLimitsRequest } from './get-partner-limits.request';
 import { GetPartnerLimitsResponse } from './get-partner-limits.response';
-import {
-  PartnerSubscriptionEntity,
-} from '@libs/infrastructure';
+import { PartnerSubscriptionEntity } from '@libs/infrastructure';
 import { SubscriptionUsageHelper } from '@libs/application';
 import { PartnerLimitsSwaggerDto } from '../dto/partner-limits-swagger.dto';
 

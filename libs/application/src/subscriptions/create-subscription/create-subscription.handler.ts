@@ -86,9 +86,7 @@ export class CreateSubscriptionHandler {
         pricingPlan = await this.pricingPlanRepository.findBySlug(slugWithoutPrefix);
       }
       if (!pricingPlan) {
-        throw new NotFoundException(
-          `Pricing plan with ID or slug "${request.planId}" not found`,
-        );
+        throw new NotFoundException(`Pricing plan with ID or slug "${request.planId}" not found`);
       }
       numericPlanId = pricingPlan.id;
     }

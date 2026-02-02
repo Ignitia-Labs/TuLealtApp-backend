@@ -28,9 +28,7 @@ export class RemoveJsonColumnsFromLoyaltyPrograms1797000000000 implements Migrat
     // VALIDACIÓN PREVIA: Verificar que las columnas relacionales tienen datos
     // ============================================================================
 
-    const totalRecords = await queryRunner.query(
-      `SELECT COUNT(*) as count FROM loyalty_programs`
-    );
+    const totalRecords = await queryRunner.query(`SELECT COUNT(*) as count FROM loyalty_programs`);
 
     if (totalRecords[0].count === 0) {
       console.warn('⚠️  Advertencia: No hay registros en loyalty_programs. Continuando...');
@@ -39,7 +37,7 @@ export class RemoveJsonColumnsFromLoyaltyPrograms1797000000000 implements Migrat
       const recordsWithRelationalData = await queryRunner.query(
         `SELECT COUNT(*) as count FROM loyalty_programs
          WHERE stacking_allowed IS NOT NULL
-           AND expiration_enabled IS NOT NULL`
+           AND expiration_enabled IS NOT NULL`,
       );
 
       // Verificar que hay earning domains migrados (si hay programas con earning domains)
@@ -50,19 +48,19 @@ export class RemoveJsonColumnsFromLoyaltyPrograms1797000000000 implements Migrat
           `SELECT COUNT(DISTINCT lp.id) as count
            FROM loyalty_programs lp
            WHERE lp.\`earningDomains\` IS NOT NULL
-             AND JSON_LENGTH(lp.\`earningDomains\`) > 0`
+             AND JSON_LENGTH(lp.\`earningDomains\`) > 0`,
         );
 
         const migratedEarningDomains = await queryRunner.query(
-          `SELECT COUNT(*) as count FROM loyalty_program_earning_domains`
+          `SELECT COUNT(*) as count FROM loyalty_program_earning_domains`,
         );
 
         if (programsWithEarningDomains[0].count > 0 && migratedEarningDomains[0].count === 0) {
           throw new Error(
             `No se pueden remover columnas JSON: Hay programas con earningDomains pero no hay datos migrados. ` +
-            `Programas con earningDomains: ${programsWithEarningDomains[0].count}, ` +
-            `Earning domains migrados: ${migratedEarningDomains[0].count}. ` +
-            `Ejecutar primero el script de migración de datos.`
+              `Programas con earningDomains: ${programsWithEarningDomains[0].count}, ` +
+              `Earning domains migrados: ${migratedEarningDomains[0].count}. ` +
+              `Ejecutar primero el script de migración de datos.`,
           );
         }
       }
@@ -70,8 +68,8 @@ export class RemoveJsonColumnsFromLoyaltyPrograms1797000000000 implements Migrat
       if (recordsWithRelationalData[0].count < totalRecords[0].count) {
         throw new Error(
           `No se pueden remover columnas JSON: Hay registros sin datos relacionales completos. ` +
-          `Total: ${totalRecords[0].count}, Con datos relacionales: ${recordsWithRelationalData[0].count}. ` +
-          `Ejecutar primero el script de migración de datos.`
+            `Total: ${totalRecords[0].count}, Con datos relacionales: ${recordsWithRelationalData[0].count}. ` +
+            `Ejecutar primero el script de migración de datos.`,
         );
       }
     }

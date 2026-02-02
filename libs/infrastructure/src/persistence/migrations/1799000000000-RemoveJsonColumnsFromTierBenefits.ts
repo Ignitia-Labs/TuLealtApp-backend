@@ -28,9 +28,7 @@ export class RemoveJsonColumnsFromTierBenefits1799000000000 implements Migration
     // VALIDACIÓN PREVIA: Verificar que las columnas y tablas relacionadas tienen datos
     // ============================================================================
 
-    const totalRecords = await queryRunner.query(
-      `SELECT COUNT(*) as count FROM tier_benefits`
-    );
+    const totalRecords = await queryRunner.query(`SELECT COUNT(*) as count FROM tier_benefits`);
 
     if (totalRecords[0].count === 0) {
       console.warn('⚠️  Advertencia: No hay registros en tier_benefits. Continuando...');
@@ -42,19 +40,22 @@ export class RemoveJsonColumnsFromTierBenefits1799000000000 implements Migration
           `SELECT COUNT(DISTINCT tb.id) as count
            FROM tier_benefits tb
            WHERE tb.\`exclusiveRewards\` IS NOT NULL
-             AND JSON_LENGTH(tb.\`exclusiveRewards\`) > 0`
+             AND JSON_LENGTH(tb.\`exclusiveRewards\`) > 0`,
         );
 
         const migratedExclusiveRewards = await queryRunner.query(
-          `SELECT COUNT(*) as count FROM tier_benefit_exclusive_rewards`
+          `SELECT COUNT(*) as count FROM tier_benefit_exclusive_rewards`,
         );
 
-        if (tierBenefitsWithExclusiveRewards[0].count > 0 && migratedExclusiveRewards[0].count === 0) {
+        if (
+          tierBenefitsWithExclusiveRewards[0].count > 0 &&
+          migratedExclusiveRewards[0].count === 0
+        ) {
           throw new Error(
             `No se pueden remover columnas JSON: Hay tier benefits con exclusiveRewards pero no hay datos migrados. ` +
-            `Tier benefits con exclusiveRewards: ${tierBenefitsWithExclusiveRewards[0].count}, ` +
-            `Exclusive rewards migrados: ${migratedExclusiveRewards[0].count}. ` +
-            `Ejecutar primero el script de migración de datos.`
+              `Tier benefits con exclusiveRewards: ${tierBenefitsWithExclusiveRewards[0].count}, ` +
+              `Exclusive rewards migrados: ${migratedExclusiveRewards[0].count}. ` +
+              `Ejecutar primero el script de migración de datos.`,
           );
         }
       }
@@ -66,19 +67,22 @@ export class RemoveJsonColumnsFromTierBenefits1799000000000 implements Migration
           `SELECT COUNT(DISTINCT tb.id) as count
            FROM tier_benefits tb
            WHERE tb.\`categoryBenefits\` IS NOT NULL
-             AND JSON_LENGTH(tb.\`categoryBenefits\`) > 0`
+             AND JSON_LENGTH(tb.\`categoryBenefits\`) > 0`,
         );
 
         const migratedCategoryBenefits = await queryRunner.query(
-          `SELECT COUNT(*) as count FROM tier_benefit_category_benefits`
+          `SELECT COUNT(*) as count FROM tier_benefit_category_benefits`,
         );
 
-        if (tierBenefitsWithCategoryBenefits[0].count > 0 && migratedCategoryBenefits[0].count === 0) {
+        if (
+          tierBenefitsWithCategoryBenefits[0].count > 0 &&
+          migratedCategoryBenefits[0].count === 0
+        ) {
           throw new Error(
             `No se pueden remover columnas JSON: Hay tier benefits con categoryBenefits pero no hay datos migrados. ` +
-            `Tier benefits con categoryBenefits: ${tierBenefitsWithCategoryBenefits[0].count}, ` +
-            `Category benefits migrados: ${migratedCategoryBenefits[0].count}. ` +
-            `Ejecutar primero el script de migración de datos.`
+              `Tier benefits con categoryBenefits: ${tierBenefitsWithCategoryBenefits[0].count}, ` +
+              `Category benefits migrados: ${migratedCategoryBenefits[0].count}. ` +
+              `Ejecutar primero el script de migración de datos.`,
           );
         }
       }
@@ -91,22 +95,25 @@ export class RemoveJsonColumnsFromTierBenefits1799000000000 implements Migration
            FROM tier_benefits
            WHERE higher_caps_max_points_per_event IS NOT NULL
               OR higher_caps_max_points_per_day IS NOT NULL
-              OR higher_caps_max_points_per_month IS NOT NULL`
+              OR higher_caps_max_points_per_month IS NOT NULL`,
         );
 
         const tierBenefitsWithHigherCapsJson = await queryRunner.query(
           `SELECT COUNT(*) as count
            FROM tier_benefits
            WHERE \`higherCaps\` IS NOT NULL
-             AND JSON_LENGTH(\`higherCaps\`) > 0`
+             AND JSON_LENGTH(\`higherCaps\`) > 0`,
         );
 
-        if (tierBenefitsWithHigherCapsJson[0].count > 0 && tierBenefitsWithHigherCaps[0].count === 0) {
+        if (
+          tierBenefitsWithHigherCapsJson[0].count > 0 &&
+          tierBenefitsWithHigherCaps[0].count === 0
+        ) {
           throw new Error(
             `No se pueden remover columnas JSON: Hay tier benefits con higherCaps pero no hay datos migrados. ` +
-            `Tier benefits con higherCaps JSON: ${tierBenefitsWithHigherCapsJson[0].count}, ` +
-            `Tier benefits con higherCaps relacionales: ${tierBenefitsWithHigherCaps[0].count}. ` +
-            `Ejecutar primero el script de migración de datos.`
+              `Tier benefits con higherCaps JSON: ${tierBenefitsWithHigherCapsJson[0].count}, ` +
+              `Tier benefits con higherCaps relacionales: ${tierBenefitsWithHigherCaps[0].count}. ` +
+              `Ejecutar primero el script de migración de datos.`,
           );
         }
       }

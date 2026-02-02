@@ -6,12 +6,15 @@ import {
   ITenantRepository,
   ILoyaltyProgramRepository,
   IEnrollmentRepository,
+  IRedemptionCodeRepository,
   PointsTransaction,
+  RedemptionCode,
 } from '@libs/domain';
 import { BalanceSyncService } from '../../loyalty/balance-sync.service';
 import { LoyaltyProgramConfigResolver } from '../../loyalty/loyalty-program-config-resolver.service';
 import { RedeemRewardRequest } from './redeem-reward.request';
 import { RedeemRewardResponse } from './redeem-reward.response';
+import { RedeemRewardCodeGeneratorService } from './redeem-reward-code-generator.service';
 
 /**
  * Handler para canjear una recompensa
@@ -31,8 +34,11 @@ export class RedeemRewardHandler {
     private readonly programRepository: ILoyaltyProgramRepository,
     @Inject('IEnrollmentRepository')
     private readonly enrollmentRepository: IEnrollmentRepository,
+    @Inject('IRedemptionCodeRepository')
+    private readonly redemptionCodeRepository: IRedemptionCodeRepository,
     private readonly balanceSyncService: BalanceSyncService,
     private readonly configResolver: LoyaltyProgramConfigResolver,
+    private readonly codeGenerator: RedeemRewardCodeGeneratorService,
   ) {}
 
   async execute(request: RedeemRewardRequest): Promise<RedeemRewardResponse> {
@@ -80,7 +86,7 @@ export class RedeemRewardHandler {
       membership.id,
       'BASE',
     );
-    
+
     let program = null;
     if (baseEnrollments.length > 0) {
       // Usar el primer enrollment BASE activo
@@ -96,17 +102,14 @@ export class RedeemRewardHandler {
 
     // 7. Verificar disponibilidad de la recompensa
     if (!reward.isAvailable()) {
-      throw new BadRequestException(
-        'Reward is not available (out of stock, expired, or inactive)',
-      );
+      throw new BadRequestException('Reward is not available (out of stock, expired, or inactive)');
     }
 
     // 8. Verificar límite por usuario (contar redemptions previas)
-    const redemptionTransactions =
-      await this.pointsTransactionRepository.findByMembershipIdAndType(
-        membership.id,
-        'REDEEM',
-      );
+    const redemptionTransactions = await this.pointsTransactionRepository.findByMembershipIdAndType(
+      membership.id,
+      'REDEEM',
+    );
 
     // Filtrar solo las redemptions de esta recompensa específica
     const userRedemptions = redemptionTransactions.filter(
@@ -130,15 +133,17 @@ export class RedeemRewardHandler {
     const existingTransaction =
       await this.pointsTransactionRepository.findByIdempotencyKey(idempotencyKey);
     if (existingTransaction) {
-      // Ya existe, retornar la transacción existente
-      const updatedMembership = await this.membershipRepository.findById(
-        request.membershipId,
+      // Ya existe, verificar si tiene código asociado
+      const existingCode = await this.redemptionCodeRepository.findByTransactionId(
+        existingTransaction.id,
       );
+      const updatedMembership = await this.membershipRepository.findById(request.membershipId);
       return new RedeemRewardResponse({
         transactionId: existingTransaction.id,
         rewardId: reward.id,
         pointsUsed: Math.abs(existingTransaction.pointsDelta),
         newBalance: updatedMembership?.points || membership.points,
+        redemptionCode: existingCode?.code,
       });
     }
 
@@ -162,16 +167,44 @@ export class RedeemRewardHandler {
       },
     );
 
-    await this.pointsTransactionRepository.save(transaction);
+    const savedTransaction = await this.pointsTransactionRepository.save(transaction);
 
-    // 10. Reducir stock de la recompensa
+    // 10. Generar código único de canje (después de guardar transacción)
+    // Verificar si ya existe código para esta transacción (idempotencia)
+    let existingCode = await this.redemptionCodeRepository.findByTransactionId(
+      savedTransaction.id,
+    );
+    let redemptionCode: string | undefined;
+
+    if (!existingCode) {
+      // Generar nuevo código
+      const codeString = await this.codeGenerator.generateUniqueCode(membership.tenantId);
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30); // 30 días de validez
+
+      const redemptionCodeEntity = RedemptionCode.create(
+        codeString,
+        savedTransaction.id,
+        reward.id,
+        membership.id,
+        membership.tenantId,
+        expiresAt,
+      );
+
+      existingCode = await this.redemptionCodeRepository.save(redemptionCodeEntity);
+      redemptionCode = codeString;
+    } else {
+      redemptionCode = existingCode.code;
+    }
+
+    // 11. Reducir stock de la recompensa
     const updatedReward = reward.reduceStock();
     await this.rewardRepository.update(updatedReward);
 
-    // 11. Sincronizar balance (actualizar proyección en customer_memberships.points)
+    // 12. Sincronizar balance (actualizar proyección en customer_memberships.points)
     await this.balanceSyncService.syncAfterTransaction(membership.id);
 
-    // 12. Obtener balance actualizado
+    // 13. Obtener balance actualizado
     const updatedMembership = await this.membershipRepository.findById(request.membershipId);
     if (!updatedMembership) {
       throw new NotFoundException(`Membership ${request.membershipId} not found after redemption`);
@@ -182,6 +215,7 @@ export class RedeemRewardHandler {
       rewardId: reward.id,
       pointsUsed: reward.pointsRequired,
       newBalance: updatedMembership.points,
+      redemptionCode,
     });
   }
 }

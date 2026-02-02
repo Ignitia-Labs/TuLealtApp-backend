@@ -46,7 +46,11 @@ export class RewardRulePointsFormulaEntity {
   @Column('enum', { name: 'rate_amount_field', enum: ['netAmount', 'grossAmount'], nullable: true })
   rateAmountField: 'netAmount' | 'grossAmount' | null;
 
-  @Column('enum', { name: 'rate_rounding_policy', enum: ['floor', 'ceil', 'nearest'], nullable: true })
+  @Column('enum', {
+    name: 'rate_rounding_policy',
+    enum: ['floor', 'ceil', 'nearest'],
+    nullable: true,
+  })
   rateRoundingPolicy: 'floor' | 'ceil' | 'nearest' | null;
 
   @Column('int', { name: 'rate_min_points', nullable: true })
@@ -70,17 +74,9 @@ export class RewardRulePointsFormulaEntity {
   hybridBaseFormulaId: number | null;
 
   // Relaciones con tablas relacionadas
-  @OneToMany(
-    () => RewardRulePointsTableEntryEntity,
-    (entry) => entry.formula,
-    { cascade: true },
-  )
+  @OneToMany(() => RewardRulePointsTableEntryEntity, (entry) => entry.formula, { cascade: true })
   tableEntries: RewardRulePointsTableEntryEntity[];
 
-  @OneToMany(
-    () => RewardRulePointsFormulaBonusEntity,
-    (bonus) => bonus.formula,
-    { cascade: true },
-  )
+  @OneToMany(() => RewardRulePointsFormulaBonusEntity, (bonus) => bonus.formula, { cascade: true })
   bonuses: RewardRulePointsFormulaBonusEntity[];
 }

@@ -797,6 +797,15 @@ export * from './rewards/get-available-rewards/get-available-rewards.response';
 export * from './rewards/redeem-reward/redeem-reward.handler';
 export * from './rewards/redeem-reward/redeem-reward.request';
 export * from './rewards/redeem-reward/redeem-reward.response';
+export * from './rewards/redeem-reward/redeem-reward-code-generator.service';
+
+export * from './rewards/validate-redemption-code/validate-redemption-code.handler';
+export * from './rewards/validate-redemption-code/validate-redemption-code.request';
+export * from './rewards/validate-redemption-code/validate-redemption-code.response';
+
+export * from './rewards/get-customer-redemption-codes/get-customer-redemption-codes.handler';
+export * from './rewards/get-customer-redemption-codes/get-customer-redemption-codes.request';
+export * from './rewards/get-customer-redemption-codes/get-customer-redemption-codes.response';
 
 export * from './customer-memberships/get-points-balance/get-points-balance.handler';
 export * from './customer-memberships/get-points-balance/get-points-balance.request';

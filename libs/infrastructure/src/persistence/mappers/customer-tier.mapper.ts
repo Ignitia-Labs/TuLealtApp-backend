@@ -12,9 +12,10 @@ export class CustomerTierMapper {
    */
   static toDomain(persistenceEntity: CustomerTierEntity): CustomerTier {
     // Construir benefits desde tabla relacionada
-    const benefits: string[] = persistenceEntity.benefitsRelation?.length > 0
-      ? persistenceEntity.benefitsRelation.map((b) => b.benefit)
-      : [];
+    const benefits: string[] =
+      persistenceEntity.benefitsRelation?.length > 0
+        ? persistenceEntity.benefitsRelation.map((b) => b.benefit)
+        : [];
 
     return new CustomerTier(
       persistenceEntity.id,

@@ -62,12 +62,18 @@ export class TierBenefitEntity {
   // Relaciones con Tablas Relacionadas
   // ============================================================================
 
-  @OneToMany(() => TierBenefitExclusiveRewardEntity, (reward) => reward.tierBenefit, { cascade: true })
-  exclusiveRewardsRelation: TierBenefitExclusiveRewardEntity[];
-
-  @OneToMany(() => TierBenefitCategoryBenefitEntity, (categoryBenefit) => categoryBenefit.tierBenefit, {
+  @OneToMany(() => TierBenefitExclusiveRewardEntity, (reward) => reward.tierBenefit, {
     cascade: true,
   })
+  exclusiveRewardsRelation: TierBenefitExclusiveRewardEntity[];
+
+  @OneToMany(
+    () => TierBenefitCategoryBenefitEntity,
+    (categoryBenefit) => categoryBenefit.tierBenefit,
+    {
+      cascade: true,
+    },
+  )
   categoryBenefitsRelation: TierBenefitCategoryBenefitEntity[];
 
   @Column('varchar', { length: 20, default: 'active' })
