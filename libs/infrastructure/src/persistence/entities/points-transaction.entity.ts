@@ -10,6 +10,7 @@ import {
 import { TenantEntity } from './tenant.entity';
 import { UserEntity } from './user.entity';
 import { CustomerMembershipEntity } from './customer-membership.entity';
+import { RewardEntity } from './reward.entity';
 
 /**
  * Entidad de persistencia para PointsTransaction
@@ -26,6 +27,7 @@ import { CustomerMembershipEntity } from './customer-membership.entity';
 @Index('IDX_POINTS_TRANSACTIONS_TYPE', ['type'])
 @Index('IDX_POINTS_TRANSACTIONS_EXPIRES_AT', ['expiresAt'])
 @Index('IDX_POINTS_TRANSACTIONS_REVERSAL_OF', ['reversalOfTransactionId'])
+@Index('IDX_POINTS_TRANSACTIONS_REWARD_ID', ['rewardId'])
 export class PointsTransactionEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -62,6 +64,16 @@ export class PointsTransactionEntity {
 
   @Column('int', { nullable: true })
   rewardRuleId: number | null;
+
+  @ManyToOne(() => RewardEntity, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'rewardId' })
+  reward: RewardEntity | null;
+
+  @Column('int', { nullable: true })
+  rewardId: number | null; // FK a rewards.id - Solo para transacciones tipo REDEEM
 
   @Column('varchar', { length: 20 })
   type: 'EARNING' | 'REDEEM' | 'ADJUSTMENT' | 'REVERSAL' | 'EXPIRATION' | 'HOLD' | 'RELEASE';

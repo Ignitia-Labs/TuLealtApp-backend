@@ -34,9 +34,10 @@ export class PointsTransaction {
     public readonly correlationId: string | null, // ID para correlacionar transacciones relacionadas
     public readonly createdBy: string | null, // Usuario/sistema que creó la transacción
     public readonly reasonCode: string | null, // Código de razón para auditoría
-    public readonly metadata: PointsTransactionMetadata | null, // Metadatos adicionales (JSON)
+    public readonly metadata: PointsTransactionMetadata | null, // Metadatos adicionales (JSON) - solo para auditoría, no consultable
     public readonly reversalOfTransactionId: number | null, // ID de la transacción que se revierte (solo para REVERSAL)
     public readonly expiresAt: Date | null, // Fecha de expiración de los puntos (solo para EARNING)
+    public readonly rewardId: number | null, // FK a rewards.id - Solo para transacciones tipo REDEEM
     public readonly createdAt: Date,
   ) {}
 
@@ -80,12 +81,14 @@ export class PointsTransaction {
       metadata,
       null,
       expiresAt,
+      null, // rewardId solo para REDEEM
       id ? new Date() : new Date(),
     );
   }
 
   /**
    * Factory method para crear una transacción de tipo REDEEM
+   * @param rewardId ID de la recompensa canjeada (requerido para transacciones REDEEM)
    */
   static createRedeem(
     tenantId: number,
@@ -93,6 +96,7 @@ export class PointsTransaction {
     membershipId: number,
     pointsDelta: number, // Debe ser negativo
     idempotencyKey: string,
+    rewardId: number, // Requerido para transacciones REDEEM
     sourceEventId: string | null = null,
     correlationId: string | null = null,
     createdBy: string | null = null,
@@ -103,6 +107,9 @@ export class PointsTransaction {
   ): PointsTransaction {
     if (pointsDelta >= 0) {
       throw new Error('REDEEM transactions must have negative pointsDelta');
+    }
+    if (!rewardId || rewardId <= 0) {
+      throw new Error('REDEEM transactions must have a valid rewardId');
     }
 
     return new PointsTransaction(
@@ -122,6 +129,7 @@ export class PointsTransaction {
       metadata,
       null,
       null,
+      rewardId,
       id ? new Date() : new Date(),
     );
   }
@@ -159,6 +167,7 @@ export class PointsTransaction {
       metadata,
       reversalOfTransactionId,
       null,
+      null, // rewardId solo para REDEEM
       id ? new Date() : new Date(),
     );
   }
@@ -199,6 +208,7 @@ export class PointsTransaction {
       metadata,
       null,
       null,
+      null, // rewardId solo para REDEEM
       id ? new Date() : new Date(),
     );
   }
@@ -239,6 +249,7 @@ export class PointsTransaction {
       metadata,
       null,
       null,
+      null, // rewardId solo para REDEEM
       id ? new Date() : new Date(),
     );
   }
@@ -280,6 +291,7 @@ export class PointsTransaction {
       metadata,
       null,
       null,
+      null, // rewardId solo para REDEEM
       id ? new Date() : new Date(),
     );
   }
@@ -321,6 +333,7 @@ export class PointsTransaction {
       metadata,
       null,
       null,
+      null, // rewardId solo para REDEEM
       id ? new Date() : new Date(),
     );
   }

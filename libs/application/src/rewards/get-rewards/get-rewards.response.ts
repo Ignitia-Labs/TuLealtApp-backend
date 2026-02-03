@@ -12,7 +12,10 @@ export class GetRewardsResponse {
   })
   rewards: CreateRewardResponse[];
 
-  constructor(rewards: Reward[]) {
-    this.rewards = rewards.map((reward) => new CreateRewardResponse(reward));
+  constructor(rewards: Reward[], redemptionsCounts?: Map<number, number>) {
+    this.rewards = rewards.map((reward) => {
+      const count = redemptionsCounts?.get(reward.id) || 0;
+      return new CreateRewardResponse(reward, count);
+    });
   }
 }

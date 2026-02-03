@@ -47,4 +47,17 @@ export interface IRewardRepository {
    * @param membershipId ID de la membership del usuario
    */
   countRedemptionsByUser(rewardId: number, membershipId: number): Promise<number>;
+
+  /**
+   * Cuenta el total de redemptions globales de una recompensa (todas las memberships)
+   * @param rewardId ID de la recompensa
+   */
+  countTotalRedemptions(rewardId: number): Promise<number>;
+
+  /**
+   * Cuenta el total de redemptions globales para múltiples recompensas en batch
+   * Retorna un Map con rewardId como clave y el conteo como valor
+   * @param rewardIds Array de IDs de recompensas
+   */
+  countTotalRedemptionsBatch(rewardIds: number[]): Promise<Map<number, number>>;
 }

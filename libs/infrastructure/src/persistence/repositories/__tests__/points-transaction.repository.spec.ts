@@ -26,10 +26,12 @@ describe('PointsTransactionRepository', () => {
     metadata: { visitId: 123 },
     reversalOfTransactionId: null,
     expiresAt: null,
+    rewardId: null, // EARNING transactions don't have rewardId
     createdAt: new Date('2024-01-01T10:00:00Z'),
     tenant: null as any,
     customer: null as any,
     membership: null as any,
+    reward: null as any,
   };
 
   beforeEach(async () => {

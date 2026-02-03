@@ -50,7 +50,7 @@ export class CreateRewardResponse {
   pointsRequired: number;
 
   @ApiProperty({
-    description: 'Stock disponible',
+    description: 'Stock disponible. -1 significa stock ilimitado',
     example: 50,
     type: Number,
   })
@@ -87,7 +87,7 @@ export class CreateRewardResponse {
   terms: string | null;
 
   @ApiProperty({
-    description: 'Fecha de expiración',
+    description: 'Fecha de expiración. null significa válida de forma perpetua',
     example: '2026-12-31T23:59:59Z',
     type: String,
     nullable: true,
@@ -108,7 +108,14 @@ export class CreateRewardResponse {
   })
   updatedAt: Date;
 
-  constructor(reward: Reward) {
+  @ApiProperty({
+    description: 'Total de redemptions globales de esta recompensa (todas las memberships)',
+    example: 42,
+    type: Number,
+  })
+  totalRedemptions: number;
+
+  constructor(reward: Reward, totalRedemptions: number = 0) {
     this.id = reward.id;
     this.tenantId = reward.tenantId;
     this.name = reward.name;
@@ -123,5 +130,6 @@ export class CreateRewardResponse {
     this.validUntil = reward.validUntil;
     this.createdAt = reward.createdAt;
     this.updatedAt = reward.updatedAt;
+    this.totalRedemptions = totalRedemptions;
   }
 }

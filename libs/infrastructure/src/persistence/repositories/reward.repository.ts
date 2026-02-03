@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { IRewardRepository, Reward, IPointsTransactionRepository } from '@libs/domain';
 import { RewardEntity } from '../entities/reward.entity';
 import { RewardMapper } from '../mappers/reward.mapper';
+import { PointsTransactionEntity } from '../entities/points-transaction.entity';
 
 /**
  * Implementación del repositorio de Reward usando TypeORM
@@ -41,7 +42,9 @@ export class RewardRepository implements IRewardRepository {
 
     return entities
       .filter((e) => {
-        if (e.stock <= 0) return false;
+        // stock === -1 significa ilimitado, siempre disponible
+        if (e.stock !== -1 && e.stock <= 0) return false;
+        // validUntil === null significa válida de forma perpetua
         if (e.validUntil && e.validUntil < now) return false;
         return true;
       })
@@ -81,8 +84,8 @@ export class RewardRepository implements IRewardRepository {
         throw new Error(`Reward ${reward.id} not found`);
       }
 
-      // Validar stock si se está reduciendo
-      if (currentEntity.stock <= 0 && reward.stock <= 0) {
+      // Validar stock si se está reduciendo (excepto si es ilimitado)
+      if (currentEntity.stock !== -1 && reward.stock !== -1 && currentEntity.stock <= 0 && reward.stock <= 0) {
         throw new Error('Reward is out of stock');
       }
 
@@ -97,18 +100,56 @@ export class RewardRepository implements IRewardRepository {
   }
 
   async countRedemptionsByUser(rewardId: number, membershipId: number): Promise<number> {
-    // Obtener todas las transacciones REDEEM de esta membership
-    const redeemTransactions = await this.pointsTransactionRepository.findByMembershipIdAndType(
+    // Usar método optimizado con filtro directo en BD en lugar de filtrar en memoria
+    const rewardRedemptions = await this.pointsTransactionRepository.findByMembershipIdAndTypeAndRewardId(
       membershipId,
       'REDEEM',
-    );
-
-    // Filtrar solo las que corresponden a esta recompensa específica
-    // (verificando metadata.rewardId)
-    const rewardRedemptions = redeemTransactions.filter(
-      (tx) => tx.metadata && tx.metadata.rewardId === rewardId,
+      rewardId,
     );
 
     return rewardRedemptions.length;
+  }
+
+  async countTotalRedemptions(rewardId: number): Promise<number> {
+    // Usar COUNT() SQL directo para eficiencia, usando la columna tipada rewardId
+    const result = await this.rewardRepository.manager
+      .createQueryBuilder(PointsTransactionEntity, 'pt')
+      .select('COUNT(pt.id)', 'count')
+      .where('pt.type = :type', { type: 'REDEEM' })
+      .andWhere('pt.rewardId = :rewardId', { rewardId })
+      .getRawOne();
+
+    return Number(result?.count || 0);
+  }
+
+  async countTotalRedemptionsBatch(rewardIds: number[]): Promise<Map<number, number>> {
+    if (rewardIds.length === 0) {
+      return new Map();
+    }
+
+    // Usar GROUP BY para obtener conteos de múltiples rewards en una sola query
+    const results = await this.rewardRepository.manager
+      .createQueryBuilder(PointsTransactionEntity, 'pt')
+      .select('pt.rewardId', 'rewardId')
+      .addSelect('COUNT(pt.id)', 'count')
+      .where('pt.type = :type', { type: 'REDEEM' })
+      .andWhere('pt.rewardId IN (:...rewardIds)', { rewardIds })
+      .groupBy('pt.rewardId')
+      .getRawMany();
+
+    // Convertir resultados a Map
+    const countsMap = new Map<number, number>();
+    for (const row of results) {
+      countsMap.set(Number(row.rewardId), Number(row.count || 0));
+    }
+
+    // Asegurar que todas las rewards tengan entrada (aunque sea 0)
+    for (const rewardId of rewardIds) {
+      if (!countsMap.has(rewardId)) {
+        countsMap.set(rewardId, 0);
+      }
+    }
+
+    return countsMap;
   }
 }

@@ -70,14 +70,14 @@ export class UpdateRewardRequest {
   pointsRequired?: number;
 
   @ApiPropertyOptional({
-    description: 'Stock disponible',
+    description: 'Stock disponible. Use -1 para stock ilimitado',
     example: 50,
     type: Number,
-    minimum: 0,
+    minimum: -1,
   })
   @IsOptional()
   @IsNumber()
-  @Min(0)
+  @Min(-1)
   stock?: number;
 
   @ApiPropertyOptional({
@@ -116,7 +116,7 @@ export class UpdateRewardRequest {
   terms?: string | null;
 
   @ApiPropertyOptional({
-    description: 'Fecha de expiración (ISO 8601)',
+    description: 'Fecha de expiración (ISO 8601). Use null para validez perpetua',
     type: String,
     nullable: true,
   })

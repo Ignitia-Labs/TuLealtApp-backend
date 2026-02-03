@@ -37,6 +37,16 @@ export interface IPointsTransactionRepository {
   ): Promise<PointsTransaction[]>;
 
   /**
+   * Busca transacciones de una membership por tipo y rewardId
+   * Útil para contar redemptions de una recompensa específica
+   */
+  findByMembershipIdAndTypeAndRewardId(
+    membershipId: number,
+    type: PointsTransaction['type'],
+    rewardId: number,
+  ): Promise<PointsTransaction[]>;
+
+  /**
    * Busca transacciones por sourceEventId
    * Útil para encontrar todas las transacciones generadas por un evento específico
    */

@@ -44,8 +44,8 @@ export class Reward {
     if (pointsRequired <= 0) {
       throw new Error('pointsRequired must be greater than 0');
     }
-    if (stock < 0) {
-      throw new Error('stock cannot be negative');
+    if (stock < -1) {
+      throw new Error('stock must be -1 (unlimited) or greater than or equal to 0');
     }
     if (maxRedemptionsPerUser !== null && maxRedemptionsPerUser <= 0) {
       throw new Error('maxRedemptionsPerUser must be greater than 0 if provided');
@@ -77,14 +77,17 @@ export class Reward {
 
   /**
    * Verifica si la recompensa está disponible para canje
+   * stock === -1 significa stock ilimitado (siempre disponible)
    */
   isAvailable(): boolean {
     if (this.status !== 'active') {
       return false;
     }
-    if (this.stock <= 0) {
+    // stock === -1 significa ilimitado, siempre disponible
+    if (this.stock !== -1 && this.stock <= 0) {
       return false;
     }
+    // validUntil === null significa válida de forma perpetua
     if (this.validUntil && new Date() > this.validUntil) {
       return false;
     }
@@ -111,8 +114,13 @@ export class Reward {
 
   /**
    * Reduce el stock en 1 (inmutable)
+   * No hace nada si stock === -1 (ilimitado)
    */
   reduceStock(): Reward {
+    // stock === -1 significa ilimitado, no se reduce
+    if (this.stock === -1) {
+      return this;
+    }
     if (this.stock <= 0) {
       throw new Error('Cannot reduce stock: already at 0');
     }
@@ -136,10 +144,15 @@ export class Reward {
 
   /**
    * Aumenta el stock en una cantidad específica (inmutable)
+   * Si stock === -1 (ilimitado), permanece ilimitado
    */
   increaseStock(amount: number): Reward {
     if (amount <= 0) {
       throw new Error('amount must be greater than 0');
+    }
+    // Si stock es ilimitado (-1), permanece ilimitado
+    if (this.stock === -1) {
+      return this;
     }
     return new Reward(
       this.id,

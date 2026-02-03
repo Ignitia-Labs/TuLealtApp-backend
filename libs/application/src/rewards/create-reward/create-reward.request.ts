@@ -65,14 +65,14 @@ export class CreateRewardRequest {
   pointsRequired: number;
 
   @ApiProperty({
-    description: 'Cantidad disponible en inventario',
+    description: 'Cantidad disponible en inventario. Use -1 para stock ilimitado',
     example: 50,
     type: Number,
-    minimum: 0,
+    minimum: -1,
   })
   @IsNumber()
   @IsNotEmpty()
-  @Min(0)
+  @Min(-1)
   stock: number;
 
   @ApiPropertyOptional({
@@ -117,7 +117,7 @@ export class CreateRewardRequest {
   terms?: string | null;
 
   @ApiPropertyOptional({
-    description: 'Fecha de expiración de la recompensa (ISO 8601)',
+    description: 'Fecha de expiración de la recompensa (ISO 8601). Use null para validez perpetua',
     example: '2026-12-31T23:59:59Z',
     type: String,
     nullable: true,

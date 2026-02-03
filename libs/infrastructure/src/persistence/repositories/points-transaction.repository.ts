@@ -66,6 +66,19 @@ export class PointsTransactionRepository implements IPointsTransactionRepository
     return entities.map((entity) => PointsTransactionMapper.toDomain(entity));
   }
 
+  async findByMembershipIdAndTypeAndRewardId(
+    membershipId: number,
+    type: PointsTransaction['type'],
+    rewardId: number,
+  ): Promise<PointsTransaction[]> {
+    const entities = await this.pointsTransactionRepository.find({
+      where: { membershipId, type, rewardId },
+      order: { createdAt: 'DESC' },
+    });
+
+    return entities.map((entity) => PointsTransactionMapper.toDomain(entity));
+  }
+
   async findBySourceEventId(sourceEventId: string): Promise<PointsTransaction[]> {
     const entities = await this.pointsTransactionRepository.find({
       where: { sourceEventId },

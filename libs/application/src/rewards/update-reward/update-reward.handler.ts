@@ -56,15 +56,23 @@ export class UpdateRewardHandler {
     }
 
     if (request.stock !== undefined) {
-      // Calcular diferencia de stock
-      const stockDiff = request.stock - updatedReward.stock;
-      if (stockDiff > 0) {
-        updatedReward = updatedReward.increaseStock(stockDiff);
-      } else if (stockDiff < 0) {
-        // Reducir stock múltiples veces
-        for (let i = 0; i < Math.abs(stockDiff); i++) {
-          updatedReward = updatedReward.reduceStock();
-        }
+      // Si el nuevo stock es -1 (ilimitado) o diferente al actual, establecer directamente
+      if (request.stock === -1 || request.stock !== updatedReward.stock) {
+        // Crear nueva instancia con el stock especificado directamente
+        updatedReward = Reward.create(
+          updatedReward.tenantId,
+          updatedReward.name,
+          updatedReward.pointsRequired,
+          request.stock,
+          updatedReward.category,
+          updatedReward.description,
+          updatedReward.image,
+          updatedReward.maxRedemptionsPerUser,
+          updatedReward.status,
+          updatedReward.terms,
+          updatedReward.validUntil,
+          updatedReward.id,
+        );
       }
     }
 

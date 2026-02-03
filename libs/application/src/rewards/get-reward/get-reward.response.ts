@@ -6,7 +6,7 @@ import { CreateRewardResponse } from '../create-reward/create-reward.response';
  * DTO de response para obtener una recompensa
  */
 export class GetRewardResponse extends CreateRewardResponse {
-  constructor(reward: Reward) {
-    super(reward);
+  constructor(reward: Reward, totalRedemptions: number = 0) {
+    super(reward, totalRedemptions);
   }
 }

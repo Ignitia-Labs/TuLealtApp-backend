@@ -26,6 +26,9 @@ export class GetRewardHandler {
       );
     }
 
-    return new GetRewardResponse(reward);
+    // Obtener conteo de redemptions globales
+    const totalRedemptions = await this.rewardRepository.countTotalRedemptions(reward.id);
+
+    return new GetRewardResponse(reward, totalRedemptions);
   }
 }

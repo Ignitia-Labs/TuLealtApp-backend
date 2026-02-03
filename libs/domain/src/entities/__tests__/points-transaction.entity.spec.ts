@@ -82,23 +82,35 @@ describe('PointsTransaction Entity', () => {
         50,
         -50, // negative pointsDelta
         'idempotency-key-redeem',
+        123, // rewardId (requerido)
       );
 
       expect(transaction.type).toBe('REDEEM');
       expect(transaction.pointsDelta).toBe(-50);
       expect(transaction.idempotencyKey).toBe('idempotency-key-redeem');
+      expect(transaction.rewardId).toBe(123);
       expect(transaction.programId).toBeNull();
       expect(transaction.rewardRuleId).toBeNull();
     });
 
     it('should throw error if pointsDelta is not negative', () => {
       expect(() => {
-        PointsTransaction.createRedeem(1, 100, 50, 50, 'key');
+        PointsTransaction.createRedeem(1, 100, 50, 50, 'key', 123);
       }).toThrow('REDEEM transactions must have negative pointsDelta');
 
       expect(() => {
-        PointsTransaction.createRedeem(1, 100, 50, 0, 'key');
+        PointsTransaction.createRedeem(1, 100, 50, 0, 'key', 123);
       }).toThrow('REDEEM transactions must have negative pointsDelta');
+    });
+
+    it('should throw error if rewardId is not provided or invalid', () => {
+      expect(() => {
+        PointsTransaction.createRedeem(1, 100, 50, -50, 'key', 0);
+      }).toThrow('REDEEM transactions must have a valid rewardId');
+
+      expect(() => {
+        PointsTransaction.createRedeem(1, 100, 50, -50, 'key', -1);
+      }).toThrow('REDEEM transactions must have a valid rewardId');
     });
   });
 
@@ -232,14 +244,14 @@ describe('PointsTransaction Entity', () => {
     });
 
     it('should return false for non-EARNING transactions', () => {
-      const transaction = PointsTransaction.createRedeem(1, 100, 50, -50, 'key');
+      const transaction = PointsTransaction.createRedeem(1, 100, 50, -50, 'key', 123);
       expect(transaction.isEarning()).toBe(false);
     });
   });
 
   describe('isRedeem', () => {
     it('should return true for REDEEM transactions', () => {
-      const transaction = PointsTransaction.createRedeem(1, 100, 50, -50, 'key');
+      const transaction = PointsTransaction.createRedeem(1, 100, 50, -50, 'key', 123);
       expect(transaction.isRedeem()).toBe(true);
     });
 

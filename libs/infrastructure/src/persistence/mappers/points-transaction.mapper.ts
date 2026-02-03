@@ -26,6 +26,7 @@ export class PointsTransactionMapper {
       persistenceEntity.metadata,
       persistenceEntity.reversalOfTransactionId,
       persistenceEntity.expiresAt,
+      persistenceEntity.rewardId ?? null,
       persistenceEntity.createdAt,
     );
   }
@@ -56,6 +57,7 @@ export class PointsTransactionMapper {
     entity.metadata = domainEntity.metadata as Record<string, any> | null;
     entity.reversalOfTransactionId = domainEntity.reversalOfTransactionId;
     entity.expiresAt = domainEntity.expiresAt;
+    entity.rewardId = domainEntity.rewardId ?? null;
     entity.createdAt = domainEntity.createdAt;
     return entity;
   }

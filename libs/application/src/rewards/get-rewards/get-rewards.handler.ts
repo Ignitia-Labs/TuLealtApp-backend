@@ -15,6 +15,11 @@ export class GetRewardsHandler {
 
   async execute(request: GetRewardsRequest): Promise<GetRewardsResponse> {
     const rewards = await this.rewardRepository.findByTenantId(request.tenantId);
-    return new GetRewardsResponse(rewards);
+
+    // Obtener conteos de redemptions en batch para todas las rewards
+    const rewardIds = rewards.map((r) => r.id);
+    const redemptionsCounts = await this.rewardRepository.countTotalRedemptionsBatch(rewardIds);
+
+    return new GetRewardsResponse(rewards, redemptionsCounts);
   }
 }

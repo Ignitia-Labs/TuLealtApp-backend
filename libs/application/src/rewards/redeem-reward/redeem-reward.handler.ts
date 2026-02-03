@@ -106,15 +106,14 @@ export class RedeemRewardHandler {
     }
 
     // 8. Verificar límite por usuario (contar redemptions previas)
-    const redemptionTransactions = await this.pointsTransactionRepository.findByMembershipIdAndType(
+    // Usar método optimizado con filtro directo en BD en lugar de filtrar en memoria
+    const redemptionTransactions = await this.pointsTransactionRepository.findByMembershipIdAndTypeAndRewardId(
       membership.id,
       'REDEEM',
+      reward.id,
     );
 
-    // Filtrar solo las redemptions de esta recompensa específica
-    const userRedemptions = redemptionTransactions.filter(
-      (tx) => tx.metadata && tx.metadata.rewardId === reward.id,
-    ).length;
+    const userRedemptions = redemptionTransactions.length;
 
     if (!reward.canRedeem(userRedemptions, membership.points)) {
       throw new BadRequestException(
@@ -155,13 +154,14 @@ export class RedeemRewardHandler {
       membership.id,
       -reward.pointsRequired, // Negativo para REDEEM
       idempotencyKey,
+      reward.id, // rewardId ahora es parámetro requerido, no va en metadata
       null, // sourceEventId
       null, // correlationId
       null, // createdBy (se puede obtener del contexto)
       'REWARD_REDEMPTION', // reasonCode
       null, // programId: null porque las recompensas son globales del tenant
       {
-        rewardId: reward.id,
+        // metadata solo para auditoría (sin rewardId que ahora es columna)
         rewardName: reward.name,
         rewardCategory: reward.category,
       },
