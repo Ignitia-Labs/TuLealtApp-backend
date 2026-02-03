@@ -23,10 +23,15 @@
     "paths": {
       "@libs/domain": ["libs/domain/src/index"],
       "@libs/domain/*": ["libs/domain/src/*"],
+      "@libs/domain/entities/*": ["libs/domain/src/entities/*"],
       "@libs/application": ["libs/application/src/index"],
       "@libs/application/*": ["libs/application/src/*"],
       "@libs/infrastructure": ["libs/infrastructure/src/index"],
       "@libs/infrastructure/*": ["libs/infrastructure/src/*"],
+      "@libs/infrastructure/entities/*": ["libs/infrastructure/src/persistence/entities/*"],
+      "@libs/infrastructure/mappers/*": ["libs/infrastructure/src/persistence/mappers/*"],
+      "@libs/infrastructure/repositories/*": ["libs/infrastructure/src/persistence/repositories/*"],
+      "@libs/domain/repositories/*": ["libs/domain/src/repositories/*"],
       "@libs/shared": ["libs/shared/src/index"],
       "@libs/shared/*": ["libs/shared/src/*"]
     }

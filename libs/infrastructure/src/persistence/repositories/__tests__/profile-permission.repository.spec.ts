@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ProfilePermissionRepository } from '../profile-permission.repository';
-import { ProfilePermissionEntity } from '../../entities/profile-permission.entity';
+import { ProfilePermissionRepository } from '@libs/infrastructure/repositories/auth/profile-permission.repository';
+import { ProfilePermissionEntity } from '@libs/infrastructure/entities/auth/profile-permission.entity';
 import { ProfilePermission } from '@libs/domain';
 
 describe('ProfilePermissionRepository', () => {

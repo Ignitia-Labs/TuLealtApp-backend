@@ -1,4 +1,4 @@
-import { TierPolicy } from '../tier-policy.entity';
+import { TierPolicy } from '@libs/domain/entities/tier/tier-policy.entity';
 
 describe('TierPolicy', () => {
   describe('create', () => {

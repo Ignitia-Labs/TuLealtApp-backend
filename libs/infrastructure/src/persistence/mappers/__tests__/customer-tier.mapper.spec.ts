@@ -1,6 +1,6 @@
-import { CustomerTierMapper } from '../customer-tier.mapper';
-import { CustomerTierEntity } from '../../entities/customer-tier.entity';
-import { CustomerTierBenefitEntity } from '../../entities/customer-tier-benefit.entity';
+import { CustomerTierMapper } from '@libs/infrastructure/mappers/customer/customer-tier.mapper';
+import { CustomerTierEntity } from '@libs/infrastructure/entities/customer/customer-tier.entity';
+import { CustomerTierBenefitEntity } from '@libs/infrastructure/entities/customer/customer-tier-benefit.entity';
 import { CustomerTier } from '@libs/domain';
 
 describe('CustomerTierMapper', () => {

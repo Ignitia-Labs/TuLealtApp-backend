@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PointsTransactionRepository } from '../points-transaction.repository';
-import { PointsTransactionEntity } from '../../entities/points-transaction.entity';
+import { PointsTransactionRepository } from '@libs/infrastructure/repositories/loyalty/points-transaction.repository';
+import { PointsTransactionEntity } from '@libs/infrastructure/entities/loyalty/points-transaction.entity';
 import { PointsTransaction } from '@libs/domain';
 
 describe('PointsTransactionRepository', () => {

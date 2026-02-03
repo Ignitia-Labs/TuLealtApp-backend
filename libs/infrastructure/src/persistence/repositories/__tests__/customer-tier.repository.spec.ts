@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CustomerTierRepository } from '../customer-tier.repository';
-import { CustomerTierEntity } from '../../entities/customer-tier.entity';
-import { CustomerTierBenefitEntity } from '../../entities/customer-tier-benefit.entity';
+import { CustomerTierRepository } from '@libs/infrastructure/repositories/customer/customer-tier.repository';
+import { CustomerTierEntity } from '@libs/infrastructure/entities/customer/customer-tier.entity';
+import { CustomerTierBenefitEntity } from '@libs/infrastructure/entities/customer/customer-tier-benefit.entity';
 import { CustomerTier } from '@libs/domain';
 
 describe('CustomerTierRepository', () => {

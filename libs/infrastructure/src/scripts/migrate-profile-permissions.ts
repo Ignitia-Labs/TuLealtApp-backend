@@ -12,10 +12,10 @@ import {
   Permission,
   ProfilePermission,
 } from '@libs/domain';
-import { ProfileEntity } from '../persistence/entities/profile.entity';
+import { ProfileEntity } from '@libs/infrastructure/entities/auth/profile.entity';
 import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
-import { ProfileMapper } from '../persistence/mappers/profile.mapper';
+import { ProfileMapper } from '@libs/infrastructure/mappers/auth/profile.mapper';
 
 /**
  * Módulo específico para el script de migración de permisos de perfiles

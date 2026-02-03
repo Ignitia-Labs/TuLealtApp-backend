@@ -1,4 +1,4 @@
-import { LoyaltyProgram } from '../loyalty-program.entity';
+import { LoyaltyProgram } from '@libs/domain/entities/loyalty/loyalty-program.entity';
 import { BASE_EARNING_DOMAINS } from '../../constants/earning-domains';
 
 describe('LoyaltyProgram Entity', () => {

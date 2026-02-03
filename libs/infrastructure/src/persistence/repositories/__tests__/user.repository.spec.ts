@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserRepository } from '../user.repository';
-import { UserEntity } from '../../entities/user.entity';
-import { UserRoleEntity } from '../../entities/user-role.entity';
-import { UserProfileDataEntity } from '../../entities/user-profile-data.entity';
+import { UserRepository } from '@libs/infrastructure/repositories/auth/user.repository';
+import { UserEntity } from '@libs/infrastructure/entities/auth/user.entity';
+import { UserRoleEntity } from '@libs/infrastructure/entities/auth/user-role.entity';
+import { UserProfileDataEntity } from '@libs/infrastructure/entities/auth/user-profile-data.entity';
 import { User } from '@libs/domain';
 
 describe('UserRepository', () => {

@@ -1,12 +1,12 @@
-import { RewardRuleMapper } from '../reward-rule.mapper';
-import { RewardRuleEntity } from '../../entities/reward-rule.entity';
-import { RewardRuleEligibilityEntity } from '../../entities/reward-rule-eligibility.entity';
-import { RewardRulePointsFormulaEntity } from '../../entities/reward-rule-points-formula.entity';
-import { RewardRuleEligibilityMembershipStatusEntity } from '../../entities/reward-rule-eligibility-membership-status.entity';
-import { RewardRuleEligibilityFlagEntity } from '../../entities/reward-rule-eligibility-flag.entity';
-import { RewardRuleEligibilityCategoryIdEntity } from '../../entities/reward-rule-eligibility-category-id.entity';
-import { RewardRuleEligibilitySkuEntity } from '../../entities/reward-rule-eligibility-sku.entity';
-import { RewardRulePointsTableEntryEntity } from '../../entities/reward-rule-points-table-entry.entity';
+import { RewardRuleMapper } from '@libs/infrastructure/mappers/loyalty/reward-rule.mapper';
+import { RewardRuleEntity } from '@libs/infrastructure/entities/loyalty/reward-rule.entity';
+import { RewardRuleEligibilityEntity } from '@libs/infrastructure/entities/loyalty/reward-rule-eligibility.entity';
+import { RewardRulePointsFormulaEntity } from '@libs/infrastructure/entities/loyalty/reward-rule-points-formula.entity';
+import { RewardRuleEligibilityMembershipStatusEntity } from '@libs/infrastructure/entities/loyalty/reward-rule-eligibility-membership-status.entity';
+import { RewardRuleEligibilityFlagEntity } from '@libs/infrastructure/entities/loyalty/reward-rule-eligibility-flag.entity';
+import { RewardRuleEligibilityCategoryIdEntity } from '@libs/infrastructure/entities/loyalty/reward-rule-eligibility-category-id.entity';
+import { RewardRuleEligibilitySkuEntity } from '@libs/infrastructure/entities/loyalty/reward-rule-eligibility-sku.entity';
+import { RewardRulePointsTableEntryEntity } from '@libs/infrastructure/entities/loyalty/reward-rule-points-table-entry.entity';
 import { RewardRule } from '@libs/domain';
 import { BASE_EARNING_DOMAINS, PURCHASE_CONFLICT_GROUPS, STACK_POLICIES } from '@libs/domain';
 

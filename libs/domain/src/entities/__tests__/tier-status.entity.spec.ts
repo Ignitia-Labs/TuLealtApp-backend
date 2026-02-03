@@ -1,4 +1,4 @@
-import { TierStatus } from '../tier-status.entity';
+import { TierStatus } from '@libs/domain/entities/tier/tier-status.entity';
 
 describe('TierStatus', () => {
   describe('create', () => {

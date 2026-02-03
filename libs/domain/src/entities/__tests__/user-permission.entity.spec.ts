@@ -1,4 +1,4 @@
-import { UserPermission } from '../user-permission.entity';
+import { UserPermission } from '@libs/domain/entities/auth/user-permission.entity';
 
 describe('UserPermission Entity', () => {
   describe('create', () => {

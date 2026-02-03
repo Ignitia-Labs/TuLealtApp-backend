@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { TierBenefitRepository } from '../tier-benefit.repository';
-import { TierBenefitEntity } from '../../entities/tier-benefit.entity';
-import { TierBenefitExclusiveRewardEntity } from '../../entities/tier-benefit-exclusive-reward.entity';
-import { TierBenefitCategoryBenefitEntity } from '../../entities/tier-benefit-category-benefit.entity';
-import { TierBenefitCategoryExclusiveRewardEntity } from '../../entities/tier-benefit-category-exclusive-reward.entity';
+import { TierBenefitRepository } from '@libs/infrastructure/repositories/tier/tier-benefit.repository';
+import { TierBenefitEntity } from '@libs/infrastructure/entities/tier/tier-benefit.entity';
+import { TierBenefitExclusiveRewardEntity } from '@libs/infrastructure/entities/tier/tier-benefit-exclusive-reward.entity';
+import { TierBenefitCategoryBenefitEntity } from '@libs/infrastructure/entities/tier/tier-benefit-category-benefit.entity';
+import { TierBenefitCategoryExclusiveRewardEntity } from '@libs/infrastructure/entities/tier/tier-benefit-category-exclusive-reward.entity';
 import { TierBenefit } from '@libs/domain';
 
 describe('TierBenefitRepository', () => {

@@ -6,10 +6,10 @@ import { Logger } from '@nestjs/common';
 import { InfrastructureModule } from '../infrastructure.module';
 import { IBillingCycleRepository, IPaymentRepository, ICommissionRepository } from '@libs/domain';
 import { CommissionCalculationService } from '@libs/application';
-import { BillingCycleEntity } from '../persistence/entities/billing-cycle.entity';
+import { BillingCycleEntity } from '@libs/infrastructure/entities/billing/billing-cycle.entity';
 import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
-import { BillingCycleMapper } from '../persistence/mappers/billing-cycle.mapper';
+import { BillingCycleMapper } from '@libs/infrastructure/mappers/billing/billing-cycle.mapper';
 
 /**
  * Módulo específico para el script de generación de comisiones

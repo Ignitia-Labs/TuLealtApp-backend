@@ -1,8 +1,8 @@
 import { EventSubscriber, EntitySubscriberInterface, RemoveEvent, Repository, In } from 'typeorm';
-import { CustomerMembershipEntity } from '../entities/customer-membership.entity';
-import { PartnerSubscriptionUsageEntity } from '../entities/partner-subscription-usage.entity';
-import { PartnerSubscriptionEntity } from '../entities/partner-subscription.entity';
-import { TenantEntity } from '../entities/tenant.entity';
+import { CustomerMembershipEntity } from '@libs/infrastructure/entities/customer/customer-membership.entity';
+import { PartnerSubscriptionUsageEntity } from '@libs/infrastructure/entities/partner/partner-subscription-usage.entity';
+import { PartnerSubscriptionEntity } from '@libs/infrastructure/entities/partner/partner-subscription.entity';
+import { TenantEntity } from '@libs/infrastructure/entities/system/tenant.entity';
 
 /**
  * Subscriber de TypeORM para CustomerMembershipEntity

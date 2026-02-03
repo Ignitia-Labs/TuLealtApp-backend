@@ -1,8 +1,8 @@
-import { TierBenefitMapper } from '../tier-benefit.mapper';
-import { TierBenefitEntity } from '../../entities/tier-benefit.entity';
-import { TierBenefitExclusiveRewardEntity } from '../../entities/tier-benefit-exclusive-reward.entity';
-import { TierBenefitCategoryBenefitEntity } from '../../entities/tier-benefit-category-benefit.entity';
-import { TierBenefitCategoryExclusiveRewardEntity } from '../../entities/tier-benefit-category-exclusive-reward.entity';
+import { TierBenefitMapper } from '@libs/infrastructure/mappers/tier/tier-benefit.mapper';
+import { TierBenefitEntity } from '@libs/infrastructure/entities/tier/tier-benefit.entity';
+import { TierBenefitExclusiveRewardEntity } from '@libs/infrastructure/entities/tier/tier-benefit-exclusive-reward.entity';
+import { TierBenefitCategoryBenefitEntity } from '@libs/infrastructure/entities/tier/tier-benefit-category-benefit.entity';
+import { TierBenefitCategoryExclusiveRewardEntity } from '@libs/infrastructure/entities/tier/tier-benefit-category-exclusive-reward.entity';
 import { TierBenefit } from '@libs/domain';
 
 describe('TierBenefitMapper', () => {

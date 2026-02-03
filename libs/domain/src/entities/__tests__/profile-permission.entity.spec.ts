@@ -1,4 +1,4 @@
-import { ProfilePermission } from '../profile-permission.entity';
+import { ProfilePermission } from '@libs/domain/entities/auth/profile-permission.entity';
 
 describe('ProfilePermission Entity', () => {
   describe('create', () => {

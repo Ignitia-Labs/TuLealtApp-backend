@@ -1,4 +1,4 @@
-import { TierBenefit } from '../tier-benefit.entity';
+import { TierBenefit } from '@libs/domain/entities/tier/tier-benefit.entity';
 
 describe('TierBenefit', () => {
   describe('create', () => {

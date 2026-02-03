@@ -1,4 +1,4 @@
-import { Enrollment } from '../enrollment.entity';
+import { Enrollment } from '@libs/domain/entities/loyalty/enrollment.entity';
 
 describe('Enrollment Entity', () => {
   const baseDate = new Date('2024-01-01T10:00:00Z');

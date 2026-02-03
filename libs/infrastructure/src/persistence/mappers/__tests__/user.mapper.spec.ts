@@ -1,7 +1,7 @@
-import { UserMapper } from '../user.mapper';
-import { UserEntity } from '../../entities/user.entity';
-import { UserRoleEntity } from '../../entities/user-role.entity';
-import { UserProfileDataEntity } from '../../entities/user-profile-data.entity';
+import { UserMapper } from '@libs/infrastructure/mappers/auth/user.mapper';
+import { UserEntity } from '@libs/infrastructure/entities/auth/user.entity';
+import { UserRoleEntity } from '@libs/infrastructure/entities/auth/user-role.entity';
+import { UserProfileDataEntity } from '@libs/infrastructure/entities/auth/user-profile-data.entity';
 import { User } from '@libs/domain';
 
 describe('UserMapper', () => {

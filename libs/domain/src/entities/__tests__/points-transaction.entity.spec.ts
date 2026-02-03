@@ -1,4 +1,4 @@
-import { PointsTransaction } from '../points-transaction.entity';
+import { PointsTransaction } from '@libs/domain/entities/loyalty/points-transaction.entity';
 
 describe('PointsTransaction Entity', () => {
   const baseDate = new Date('2024-01-01T10:00:00Z');

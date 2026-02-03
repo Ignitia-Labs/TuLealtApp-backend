@@ -1,4 +1,4 @@
-import { RewardRule } from '../reward-rule.entity';
+import { RewardRule } from '@libs/domain/entities/loyalty/reward-rule.entity';
 import { BASE_EARNING_DOMAINS, BONUS_EARNING_DOMAINS } from '../../constants/earning-domains';
 import {
   PURCHASE_CONFLICT_GROUPS,

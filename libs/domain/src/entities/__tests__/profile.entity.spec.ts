@@ -1,4 +1,4 @@
-import { Profile } from '../profile.entity';
+import { Profile } from '@libs/domain/entities/auth/profile.entity';
 
 describe('Profile Entity', () => {
   describe('create', () => {
