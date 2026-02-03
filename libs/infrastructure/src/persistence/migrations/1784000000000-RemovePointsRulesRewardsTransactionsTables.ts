@@ -6,7 +6,8 @@ import { MigrationInterface, QueryRunner, Table } from 'typeorm';
  * Tablas a eliminar (en orden correcto respetando foreign keys):
  * - transactions (primero, por posibles foreign keys)
  * - reward_tiers (tiene FK hacia rewards, debe eliminarse antes)
- * - rewards (después de reward_tiers)
+ * - Foreign keys que apuntan hacia rewards (desde points_transactions y redemption_codes)
+ * - rewards (después de eliminar FKs que apuntan hacia ella)
  * - points_rules
  *
  * IMPORTANTE: Esta migración elimina las tablas y todos sus datos.
@@ -93,7 +94,44 @@ export class RemovePointsRulesRewardsTransactionsTables1784000000000 implements 
     }
 
     // ============================================
-    // ELIMINAR TABLA REWARDS (después de reward_tiers)
+    // ELIMINAR FOREIGN KEYS QUE APUNTAN HACIA REWARDS
+    // (debe hacerse antes de eliminar la tabla rewards)
+    // ============================================
+
+    // Eliminar FK desde points_transactions hacia rewards
+    const pointsTransactionsTable = await queryRunner.getTable('points_transactions');
+    if (pointsTransactionsTable) {
+      const fkPointsTransactionsRewardId = pointsTransactionsTable.foreignKeys.find(
+        (fk) => fk.name === 'FK_points_transactions_rewardId',
+      );
+      if (fkPointsTransactionsRewardId) {
+        try {
+          await queryRunner.dropForeignKey('points_transactions', fkPointsTransactionsRewardId);
+          console.log('✅ Foreign key FK_points_transactions_rewardId eliminada de points_transactions');
+        } catch (error) {
+          console.warn('⚠️  Error al eliminar FK_points_transactions_rewardId:', error);
+        }
+      }
+    }
+
+    // Eliminar FK desde redemption_codes hacia rewards
+    const redemptionCodesTable = await queryRunner.getTable('redemption_codes');
+    if (redemptionCodesTable) {
+      const fkRedemptionCodesRewardId = redemptionCodesTable.foreignKeys.find(
+        (fk) => fk.name === 'FK_redemption_codes_rewardId',
+      );
+      if (fkRedemptionCodesRewardId) {
+        try {
+          await queryRunner.dropForeignKey('redemption_codes', fkRedemptionCodesRewardId);
+          console.log('✅ Foreign key FK_redemption_codes_rewardId eliminada de redemption_codes');
+        } catch (error) {
+          console.warn('⚠️  Error al eliminar FK_redemption_codes_rewardId:', error);
+        }
+      }
+    }
+
+    // ============================================
+    // ELIMINAR TABLA REWARDS (después de eliminar FKs que apuntan hacia ella)
     // ============================================
     const rewardsTable = await queryRunner.getTable('rewards');
     if (rewardsTable) {
@@ -109,7 +147,7 @@ export class RemovePointsRulesRewardsTransactionsTables1784000000000 implements 
         );
       }
 
-      // Eliminar foreign keys primero (si existen)
+      // Eliminar foreign keys primero (si existen) - estas son las FKs que salen desde rewards
       const foreignKeys = rewardsTable.foreignKeys;
       for (const fk of foreignKeys) {
         try {
