@@ -9,8 +9,10 @@ import { GetLoyaltyDashboardRequest } from './get-loyalty-dashboard.request';
 import {
   GetLoyaltyDashboardResponse,
   TopRewardRuleDto,
-  RecentActivityDto,
 } from './get-loyalty-dashboard.response';
+import { TopCustomerDto } from './top-customer-dto';
+import { LoyaltyDashboardPointsTransactionDto } from './points-transaction-dto';
+import { DailyActivityDto } from './daily-activity-dto';
 
 /**
  * Handler para obtener métricas del dashboard de lealtad de un tenant
@@ -36,96 +38,140 @@ export class GetLoyaltyDashboardHandler {
       throw new NotFoundException(`Tenant with ID ${request.tenantId} not found`);
     }
 
-    // 1. Métricas de Customers
-    const totalCustomers = await this.membershipRepository.countByTenantId(request.tenantId);
-    const activeCustomers = await this.membershipRepository.countByTenantIdAndStatus(
-      request.tenantId,
-      'active',
-    );
+    // Ejecutar queries en paralelo para optimizar rendimiento
+    const [
+      totalCustomers,
+      activeCustomers,
+      memberships,
+      tenantMetrics,
+      topCustomersWithStats,
+      recentTransactions,
+      dailyActivityData,
+    ] = await Promise.all([
+      // 1. Métricas de Customers
+      this.membershipRepository.countByTenantId(request.tenantId),
+      this.membershipRepository.countByTenantIdAndStatus(request.tenantId, 'active'),
+      // 2. Obtener memberships para calcular puntos activos
+      this.membershipRepository.findByTenantId(request.tenantId),
+      // 3. Métricas agregadas optimizadas (totalRedemptions, pointsEarned, pointsRedeemed, topRewards)
+      this.pointsTransactionRepository.getTenantMetrics(request.tenantId),
+      // 4. Top customers con estadísticas optimizadas
+      this.membershipRepository.getTopCustomersWithStats(request.tenantId, 10),
+      // 5. Transacciones recientes optimizadas
+      this.pointsTransactionRepository.getRecentTransactionsByTenant(request.tenantId, 50),
+      // 6. Actividad diaria de los últimos 7 días
+      this.pointsTransactionRepository.getDailyActivityByTenant(request.tenantId, 7),
+    ]);
 
-    // 2. Obtener todas las memberships del tenant para calcular puntos activos
-    const memberships = await this.membershipRepository.findByTenantId(request.tenantId);
-    const activePoints = memberships.reduce((sum, m) => sum + m.points, 0);
+    // Calcular puntos activos (totalPoints)
+    const totalPoints = memberships.reduce((sum, m) => sum + m.points, 0);
 
-    // 3. Calcular puntos emitidos y canjeados desde el ledger
-    // Necesitamos obtener todas las transacciones del tenant
-    // Como no hay método directo, obtenemos por membership
-    let totalPointsIssued = 0;
-    let totalPointsRedeemed = 0;
-    const rewardRuleStats = new Map<number, { points: number; count: number }>();
-    const recentTransactions: RecentActivityDto[] = [];
+    // Calcular promedio de puntos por customer
+    const avgPointsPerCustomer =
+      totalCustomers > 0 ? Math.round((totalPoints / totalCustomers) * 100) / 100 : 0;
 
-    // Obtener transacciones de todas las memberships del tenant
-    for (const membership of memberships) {
-      const transactions = await this.pointsTransactionRepository.findByMembershipId(membership.id);
-
-      for (const tx of transactions) {
-        // Calcular puntos emitidos (solo EARNING con puntos positivos)
-        if (tx.type === 'EARNING' && tx.pointsDelta > 0) {
-          totalPointsIssued += tx.pointsDelta;
-
-          // Agrupar por rewardRuleId para top rewards
-          if (tx.rewardRuleId) {
-            const current = rewardRuleStats.get(tx.rewardRuleId) || {
-              points: 0,
-              count: 0,
-            };
-            rewardRuleStats.set(tx.rewardRuleId, {
-              points: current.points + tx.pointsDelta,
-              count: current.count + 1,
-            });
-          }
+    // Obtener nombres de reglas para topRewards (batch query para evitar N+1)
+    const ruleIds = tenantMetrics.topRewards.map((r) => r.ruleId);
+    const rulesMap = new Map<number, { id: number; name: string }>();
+    if (ruleIds.length > 0) {
+      const rules = await Promise.all(
+        ruleIds.map((ruleId) => this.rewardRuleRepository.findById(ruleId)),
+      );
+      rules.forEach((rule) => {
+        if (rule) {
+          rulesMap.set(rule.id, { id: rule.id, name: rule.name });
         }
-
-        // Calcular puntos canjeados (REDEEM y EXPIRATION con puntos negativos)
-        if ((tx.type === 'REDEEM' || tx.type === 'EXPIRATION') && tx.pointsDelta < 0) {
-          totalPointsRedeemed += Math.abs(tx.pointsDelta);
-        }
-
-        // Agregar a actividad reciente (últimas 20 transacciones)
-        if (recentTransactions.length < 20) {
-          recentTransactions.push({
-            transactionId: tx.id,
-            type: tx.type,
-            pointsDelta: tx.pointsDelta,
-            reasonCode: tx.reasonCode || '',
-            createdAt: tx.createdAt,
-            membershipId: tx.membershipId,
-          });
-        }
-      }
+      });
     }
 
-    // Ordenar actividad reciente por fecha descendente
-    recentTransactions.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-    const top20RecentActivity = recentTransactions.slice(0, 20);
+    // Construir topRewards con nombres
+    const topRewards: TopRewardRuleDto[] = tenantMetrics.topRewards
+      .map((reward) => {
+        const rule = rulesMap.get(reward.ruleId);
+        if (!rule) return null;
+        return {
+          ruleId: reward.ruleId,
+          name: rule.name,
+          pointsAwarded: reward.pointsAwarded,
+          transactionsCount: reward.transactionsCount,
+        };
+      })
+      .filter((r): r is TopRewardRuleDto => r !== null);
 
-    // 4. Obtener top reward rules
-    const topRewards: TopRewardRuleDto[] = [];
-    const sortedRules = Array.from(rewardRuleStats.entries()).sort(
-      (a, b) => b[1].points - a[1].points,
+    // Construir topCustomers DTOs
+    const topCustomers: TopCustomerDto[] = topCustomersWithStats.map(
+      (customer) =>
+        new TopCustomerDto(customer.userId, customer.userName, customer.points, customer.transactions),
     );
 
-    for (const [ruleId, stats] of sortedRules.slice(0, 10)) {
-      const rule = await this.rewardRuleRepository.findById(ruleId);
-      if (rule) {
-        topRewards.push({
-          ruleId: rule.id,
-          name: rule.name,
-          pointsAwarded: stats.points,
-          transactionsCount: stats.count,
-        });
-      }
+    // Construir recentTransactions DTOs
+    const recentTransactionsDto: LoyaltyDashboardPointsTransactionDto[] = recentTransactions.map(
+      (tx) =>
+        new LoyaltyDashboardPointsTransactionDto(
+          tx.id,
+          tx.type,
+          tx.pointsDelta,
+          tx.reasonCode,
+          tx.sourceEventId,
+          tx.createdAt,
+          tx.expiresAt,
+          tx.metadata,
+          tx.programId,
+          tx.rewardRuleId,
+          tx.membershipId,
+        ),
+    );
+
+    // Construir dailyActivity DTOs con información de día de la semana
+    // Generar array de los últimos 7 días para asegurar que todos los días estén presentes
+    const today = new Date();
+    const dailyActivityMap = new Map<string, { pointsEarned: number; pointsRedeemed: number }>();
+    
+    // Mapear datos obtenidos de la BD
+    dailyActivityData.forEach((day) => {
+      dailyActivityMap.set(day.date, {
+        pointsEarned: day.pointsEarned,
+        pointsRedeemed: day.pointsRedeemed,
+      });
+    });
+
+    // Generar array completo de los últimos 7 días
+    const dailyActivity: DailyActivityDto[] = [];
+    const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      date.setHours(0, 0, 0, 0);
+      
+      const dateStr = date.toISOString().split('T')[0];
+      const dayData = dailyActivityMap.get(dateStr) || { pointsEarned: 0, pointsRedeemed: 0 };
+      const dayOfWeek = date.getDay();
+      
+      dailyActivity.push(
+        new DailyActivityDto(
+          dateStr,
+          dayOfWeek,
+          dayNames[dayOfWeek],
+          dayData.pointsEarned,
+          dayData.pointsRedeemed,
+        ),
+      );
     }
 
     return new GetLoyaltyDashboardResponse(
       totalCustomers,
       activeCustomers,
-      totalPointsIssued,
-      totalPointsRedeemed,
-      activePoints,
+      totalPoints,
+      tenantMetrics.pointsEarned,
+      tenantMetrics.pointsRedeemed,
+      tenantMetrics.totalRedemptions,
+      avgPointsPerCustomer,
       topRewards,
-      top20RecentActivity,
+      topCustomers,
+      recentTransactionsDto,
+      new Date(), // lastCalculatedAt
+      dailyActivity,
     );
   }
 }

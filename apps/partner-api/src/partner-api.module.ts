@@ -71,6 +71,7 @@ import {
   UpdateTenantHandler,
   DeleteTenantHandler,
   GetTenantDashboardStatsHandler,
+  GetTenantPointsTransactionsHandler,
   TenantAnalyticsUpdaterService,
   // Branches Handlers
   CreateBranchHandler,
@@ -242,6 +243,7 @@ import {
     UpdateTenantHandler,
     DeleteTenantHandler,
     GetTenantDashboardStatsHandler,
+    GetTenantPointsTransactionsHandler,
     TenantAnalyticsUpdaterService,
     // Branches Handlers
     CreateBranchHandler,

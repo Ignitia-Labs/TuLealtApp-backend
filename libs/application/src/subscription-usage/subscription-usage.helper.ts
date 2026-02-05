@@ -7,6 +7,7 @@ import {
   CustomerMembershipEntity,
   LoyaltyProgramEntity,
   RewardRuleEntity,
+  RewardEntity,
 } from '@libs/infrastructure';
 import { PartnerSubscriptionUsageMapper } from '@libs/infrastructure';
 import { PartnerSubscriptionUsage, IPricingPlanRepository, PricingPlanLimits } from '@libs/domain';
@@ -857,6 +858,7 @@ export class SubscriptionUsageHelper {
     allowAnyStatus: boolean = true, // Para recálculo manual, permitir cualquier status
     loyaltyProgramRepository?: Repository<LoyaltyProgramEntity>,
     rewardRuleRepository?: Repository<RewardRuleEntity>,
+    rewardRepository?: Repository<RewardEntity>,
   ): Promise<void> {
     try {
       // Primero intentar obtener la suscripción activa
@@ -893,6 +895,7 @@ export class SubscriptionUsageHelper {
         partnerId,
         loyaltyProgramRepository,
         rewardRuleRepository,
+        rewardRepository,
       );
     } catch (error) {
       console.error(
@@ -906,7 +909,7 @@ export class SubscriptionUsageHelper {
   /**
    * Recalcula el uso de suscripción para una suscripción específica desde los datos reales de la BD
    * Solo afecta a la suscripción especificada
-   * Recalcula tenantsCount, branchesCount y customersCount
+   * Recalcula tenantsCount, branchesCount, customersCount y rewardsCount
    */
   static async recalculateUsageForSubscription(
     partnerSubscriptionId: number,
@@ -917,6 +920,7 @@ export class SubscriptionUsageHelper {
     partnerId?: number,
     loyaltyProgramRepository?: Repository<LoyaltyProgramEntity>,
     rewardRuleRepository?: Repository<RewardRuleEntity>,
+    rewardRepository?: Repository<RewardEntity>,
   ): Promise<void> {
     try {
       // Si no se proporciona partnerId, obtenerlo desde la suscripción
@@ -1010,43 +1014,22 @@ export class SubscriptionUsageHelper {
         `[SubscriptionUsageHelper] Total customers count for partner ${actualPartnerId}: ${customersCount}`,
       );
 
-      // Contar rewards (RewardRule activas) de todos los programas de lealtad activos de los tenants del partner
+      // Contar rewards (Reward activas) de todos los tenants del partner
       let rewardsCount = 0;
-      if (tenantIds.length > 0 && loyaltyProgramRepository && rewardRuleRepository) {
-        const now = new Date();
+      if (tenantIds.length > 0 && rewardRepository) {
+        // Contar rewards activas directamente por tenantId
+        rewardsCount = await rewardRepository
+          .createQueryBuilder('reward')
+          .where('reward.tenantId IN (:...tenantIds)', { tenantIds })
+          .andWhere('reward.status = :status', { status: 'active' })
+          .getCount();
 
-        // Obtener todos los programas de lealtad activos de los tenants del partner
-        const activePrograms = await loyaltyProgramRepository
-          .createQueryBuilder('program')
-          .where('program.tenantId IN (:...tenantIds)', { tenantIds })
-          .andWhere('program.status = :status', { status: 'active' })
-          .andWhere('(program.activeFrom IS NULL OR program.activeFrom <= :now)', { now })
-          .andWhere('(program.activeTo IS NULL OR program.activeTo >= :now)', { now })
-          .getMany();
-
-        const programIds = activePrograms.map((p) => p.id);
-
-        if (programIds.length > 0) {
-          // Contar reglas activas de todos los programas
-          rewardsCount = await rewardRuleRepository
-            .createQueryBuilder('rule')
-            .where('rule.programId IN (:...programIds)', { programIds })
-            .andWhere('rule.status = :status', { status: 'active' })
-            .andWhere('(rule.activeFrom IS NULL OR rule.activeFrom <= :now)', { now })
-            .andWhere('(rule.activeTo IS NULL OR rule.activeTo >= :now)', { now })
-            .getCount();
-
-          console.log(
-            `[SubscriptionUsageHelper] Found ${activePrograms.length} active loyalty programs with ${rewardsCount} active reward rules for partner ${actualPartnerId}`,
-          );
-        } else {
-          console.log(
-            `[SubscriptionUsageHelper] No active loyalty programs found for partner ${actualPartnerId}`,
-          );
-        }
-      } else if (tenantIds.length > 0 && (!loyaltyProgramRepository || !rewardRuleRepository)) {
+        console.log(
+          `[SubscriptionUsageHelper] Found ${rewardsCount} active rewards for partner ${actualPartnerId}`,
+        );
+      } else if (tenantIds.length > 0 && !rewardRepository) {
         console.warn(
-          `[SubscriptionUsageHelper] Loyalty program or reward rule repositories not provided. Skipping rewardsCount calculation.`,
+          `[SubscriptionUsageHelper] Reward repository not provided. Skipping rewardsCount calculation.`,
         );
       }
 
@@ -1138,8 +1121,8 @@ export class SubscriptionUsageHelper {
       usageEntity.tenantsCount = tenantsCount;
       usageEntity.branchesCount = branchesCount;
       usageEntity.customersCount = customersCount;
-      if (rewardsCount > 0 || (loyaltyProgramRepository && rewardRuleRepository)) {
-        // Solo actualizar si se calculó o si los repositorios están disponibles
+      if (rewardsCount > 0 || rewardRepository) {
+        // Solo actualizar si se calculó o si el repositorio está disponible
         usageEntity.rewardsCount = rewardsCount;
       }
 
@@ -1167,7 +1150,7 @@ export class SubscriptionUsageHelper {
       console.log(
         `  - Customers: ${previousCustomersCount} → ${customersCount} ${previousCustomersCount !== customersCount ? '⚠️ CHANGED' : '✓'}`,
       );
-      if (rewardsCount > 0 || (loyaltyProgramRepository && rewardRuleRepository)) {
+      if (rewardsCount > 0 || rewardRepository) {
         console.log(
           `  - Rewards: ${previousRewardsCount} → ${rewardsCount} ${previousRewardsCount !== rewardsCount ? '⚠️ CHANGED' : '✓'}`,
         );
@@ -1256,6 +1239,99 @@ export class SubscriptionUsageHelper {
         error,
       );
       throw error; // Lanzar error para que el llamador pueda manejarlo
+    }
+  }
+
+  /**
+   * Recalcula el conteo de rewards para un tenant específico
+   * Actualiza el rewardsCount en partner_subscription_usage
+   * @param tenantId ID del tenant
+   * @param usageRepository Repositorio de subscription usage
+   * @param subscriptionRepository Repositorio de subscriptions
+   * @param tenantRepository Repositorio de tenants
+   * @param rewardRepository Repositorio de rewards
+   */
+  static async recalculateRewardsCountForTenant(
+    tenantId: number,
+    usageRepository: Repository<PartnerSubscriptionUsageEntity>,
+    subscriptionRepository: Repository<PartnerSubscriptionEntity>,
+    tenantRepository: any, // ITenantRepository
+    rewardRepository: Repository<RewardEntity>,
+  ): Promise<void> {
+    try {
+      console.log(`[SubscriptionUsageHelper] Recalculating rewards count for tenant ${tenantId}`);
+
+      // Obtener el tenant para obtener el partnerId
+      const tenant = await tenantRepository.findById(tenantId);
+      if (!tenant) {
+        console.warn(`[SubscriptionUsageHelper] Tenant ${tenantId} not found`);
+        return;
+      }
+
+      // Obtener el subscriptionId desde el tenantId
+      const subscriptionId = await this.getSubscriptionIdFromTenantId(
+        tenantId,
+        tenantRepository,
+        subscriptionRepository,
+      );
+
+      if (!subscriptionId) {
+        console.warn(
+          `[SubscriptionUsageHelper] No subscription found for tenant ${tenantId}. Skipping rewards count recalculation.`,
+        );
+        return;
+      }
+
+      // Contar rewards activas del tenant
+      const rewardsCount = await rewardRepository
+        .createQueryBuilder('reward')
+        .where('reward.tenantId = :tenantId', { tenantId })
+        .andWhere('reward.status = :status', { status: 'active' })
+        .getCount();
+
+      console.log(
+        `[SubscriptionUsageHelper] Found ${rewardsCount} active rewards for tenant ${tenantId}`,
+      );
+
+      // Asegurar que existe el registro de uso
+      await this.ensureUsageRecordExists(subscriptionId, usageRepository);
+
+      // Obtener todos los tenants del partner para recalcular el total
+      const partnerTenants = await tenantRepository.findByPartnerId(tenant.partnerId);
+
+      const tenantIds = partnerTenants.map((t) => t.id);
+
+      // Contar todas las rewards activas de todos los tenants del partner
+      const totalRewardsCount = await rewardRepository
+        .createQueryBuilder('reward')
+        .where('reward.tenantId IN (:...tenantIds)', { tenantIds })
+        .andWhere('reward.status = :status', { status: 'active' })
+        .getCount();
+
+      // Actualizar el registro de uso
+      const usageEntity = await usageRepository.findOne({
+        where: { partnerSubscriptionId: subscriptionId },
+      });
+
+      if (usageEntity) {
+        const previousRewardsCount = usageEntity.rewardsCount;
+        usageEntity.rewardsCount = totalRewardsCount;
+        await usageRepository.save(usageEntity);
+
+        console.log(
+          `[SubscriptionUsageHelper] Updated rewards count for subscription ${subscriptionId}: ${previousRewardsCount} → ${totalRewardsCount} ${previousRewardsCount !== totalRewardsCount ? '⚠️ CHANGED' : '✓'}`,
+        );
+      } else {
+        console.warn(
+          `[SubscriptionUsageHelper] Usage record not found for subscription ${subscriptionId}`,
+        );
+      }
+    } catch (error) {
+      console.error(
+        `[SubscriptionUsageHelper] Error recalculating rewards count for tenant ${tenantId}:`,
+        error,
+      );
+      // No lanzar excepción para no interrumpir el flujo principal
     }
   }
 

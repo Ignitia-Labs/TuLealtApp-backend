@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { ICustomerMembershipRepository, CustomerMembership, TopCustomer } from '@libs/domain';
 import { CustomerMembershipEntity } from '@libs/infrastructure/entities/customer/customer-membership.entity';
 import { CustomerMembershipMapper } from '@libs/infrastructure/mappers/customer/customer-membership.mapper';
+import { PointsTransactionEntity } from '@libs/infrastructure/entities/loyalty/points-transaction.entity';
 
 /**
  * Implementación del repositorio de customer memberships usando TypeORM
@@ -330,6 +331,41 @@ export class CustomerMembershipRepository implements ICustomerMembershipReposito
       membershipId: result.membershipId,
       points: result.points,
       totalRedemptions: 0, // Ya no hay transacciones disponibles
+    }));
+  }
+
+  async getTopCustomersWithStats(
+    tenantId: number,
+    limit: number,
+  ): Promise<Array<{ userId: number; userName: string; points: number; transactions: number }>> {
+    // Query optimizada con JOIN a users y LEFT JOIN manual a points_transactions para contar transacciones
+    const results = await this.membershipRepository
+      .createQueryBuilder('membership')
+      .innerJoin('membership.user', 'user')
+      .leftJoin(
+        PointsTransactionEntity,
+        'pt',
+        'pt.membershipId = membership.id',
+      )
+      .select([
+        'membership.userId as userId',
+        'user.name as userName',
+        'membership.points as points',
+        'COUNT(pt.id) as transactions',
+      ])
+      .where('membership.tenantId = :tenantId', { tenantId })
+      .groupBy('membership.userId')
+      .addGroupBy('user.name')
+      .addGroupBy('membership.points')
+      .orderBy('membership.points', 'DESC')
+      .limit(limit)
+      .getRawMany();
+
+    return results.map((result) => ({
+      userId: Number(result.userId),
+      userName: result.userName || 'Unknown',
+      points: Number(result.points || 0),
+      transactions: Number(result.transactions || 0),
     }));
   }
 }

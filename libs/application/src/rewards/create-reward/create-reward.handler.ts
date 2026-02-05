@@ -1,5 +1,13 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { IRewardRepository, ITenantRepository, Reward } from '@libs/domain';
+import {
+  PartnerSubscriptionUsageEntity,
+  PartnerSubscriptionEntity,
+  RewardEntity,
+} from '@libs/infrastructure';
+import { SubscriptionUsageHelper } from '@libs/application/subscription-usage/subscription-usage.helper';
 import { CreateRewardRequest } from './create-reward.request';
 import { CreateRewardResponse } from './create-reward.response';
 
@@ -13,6 +21,12 @@ export class CreateRewardHandler {
     private readonly rewardRepository: IRewardRepository,
     @Inject('ITenantRepository')
     private readonly tenantRepository: ITenantRepository,
+    @InjectRepository(PartnerSubscriptionUsageEntity)
+    private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
+    @InjectRepository(PartnerSubscriptionEntity)
+    private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
+    @InjectRepository(RewardEntity)
+    private readonly rewardEntityRepository: Repository<RewardEntity>,
   ) {}
 
   async execute(request: CreateRewardRequest): Promise<CreateRewardResponse> {
@@ -39,6 +53,18 @@ export class CreateRewardHandler {
 
     // Guardar en el repositorio
     const savedReward = await this.rewardRepository.save(reward);
+
+    // Actualizar el conteo de rewards en partner_subscription_usage
+    // Solo si la reward está activa
+    if (savedReward.status === 'active') {
+      await SubscriptionUsageHelper.recalculateRewardsCountForTenant(
+        request.tenantId,
+        this.usageRepository,
+        this.subscriptionRepository,
+        this.tenantRepository,
+        this.rewardEntityRepository,
+      );
+    }
 
     return new CreateRewardResponse(savedReward);
   }

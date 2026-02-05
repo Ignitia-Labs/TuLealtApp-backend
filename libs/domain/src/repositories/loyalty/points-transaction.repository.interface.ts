@@ -109,4 +109,49 @@ export interface IPointsTransactionRepository {
     startDate: Date,
     endDate: Date,
   ): Promise<PointsTransaction[]>;
+
+  /**
+   * Obtiene métricas agregadas de un tenant usando queries SQL optimizadas
+   * @param tenantId ID del tenant
+   */
+  getTenantMetrics(tenantId: number): Promise<{
+    totalRedemptions: number;
+    pointsEarned: number;
+    pointsRedeemed: number;
+    topRewards: Array<{ ruleId: number; pointsAwarded: number; transactionsCount: number }>;
+  }>;
+
+  /**
+   * Obtiene las transacciones más recientes de un tenant usando JOIN optimizado
+   * @param tenantId ID del tenant
+   * @param limit Número máximo de transacciones a retornar
+   */
+  getRecentTransactionsByTenant(tenantId: number, limit: number): Promise<PointsTransaction[]>;
+
+  /**
+   * Busca transacciones de un tenant con paginación y filtros usando JOIN optimizado
+   * @param tenantId ID del tenant
+   * @param filters Filtros opcionales (tipo, fechas, paginación)
+   */
+  findByTenantIdPaginated(
+    tenantId: number,
+    filters?: {
+      type?: PointsTransaction['type'] | 'all';
+      fromDate?: Date;
+      toDate?: Date;
+      page?: number;
+      limit?: number;
+    },
+  ): Promise<{ transactions: PointsTransaction[]; total: number }>;
+
+  /**
+   * Obtiene actividad diaria agregada de los últimos N días para un tenant
+   * Agrupa transacciones por fecha y calcula puntos ganados/canjeados por día
+   * @param tenantId ID del tenant
+   * @param days Número de días hacia atrás (default: 7)
+   */
+  getDailyActivityByTenant(
+    tenantId: number,
+    days?: number,
+  ): Promise<Array<{ date: string; pointsEarned: number; pointsRedeemed: number }>>;
 }

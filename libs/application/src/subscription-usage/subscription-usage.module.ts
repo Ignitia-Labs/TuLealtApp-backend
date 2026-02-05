@@ -8,6 +8,7 @@ import {
   CustomerMembershipEntity,
   LoyaltyProgramEntity,
   RewardRuleEntity,
+  RewardEntity,
 } from '@libs/infrastructure';
 import { SubscriptionUsageService } from './subscription-usage.service';
 import { RecalculateSubscriptionUsageHandler } from './recalculate-subscription-usage/recalculate-subscription-usage.handler';
@@ -26,6 +27,7 @@ import { RecalculateSubscriptionUsageHandler } from './recalculate-subscription-
       CustomerMembershipEntity,
       LoyaltyProgramEntity,
       RewardRuleEntity,
+      RewardEntity,
     ]),
   ],
   providers: [SubscriptionUsageService, RecalculateSubscriptionUsageHandler],

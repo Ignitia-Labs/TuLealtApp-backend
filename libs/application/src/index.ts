@@ -244,6 +244,10 @@ export * from './tenants/get-tenant-dashboard-stats/get-tenant-dashboard-stats.h
 export * from './tenants/get-tenant-dashboard-stats/get-tenant-dashboard-stats.request';
 export * from './tenants/get-tenant-dashboard-stats/get-tenant-dashboard-stats.response';
 
+export * from './tenants/get-tenant-points-transactions/get-tenant-points-transactions.handler';
+export * from './tenants/get-tenant-points-transactions/get-tenant-points-transactions.request';
+export * from './tenants/get-tenant-points-transactions/get-tenant-points-transactions.response';
+
 export * from './tenants/tenant-analytics-updater.service';
 
 // Branches Handlers
@@ -845,5 +849,8 @@ export * from './customer-memberships/get-activity/get-activity.response';
 export * from './loyalty/get-loyalty-dashboard/get-loyalty-dashboard.handler';
 export * from './loyalty/get-loyalty-dashboard/get-loyalty-dashboard.request';
 export * from './loyalty/get-loyalty-dashboard/get-loyalty-dashboard.response';
+export * from './loyalty/get-loyalty-dashboard/top-customer-dto';
+export * from './loyalty/get-loyalty-dashboard/points-transaction-dto';
+export * from './loyalty/get-loyalty-dashboard/daily-activity-dto';
 export * from './auth/types/jwt-payload.interface';
 export { ProcessLoyaltyEventResult } from '@libs/domain';

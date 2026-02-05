@@ -1,5 +1,13 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { IRewardRepository, Reward } from '@libs/domain';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { IRewardRepository, ITenantRepository, Reward } from '@libs/domain';
+import {
+  PartnerSubscriptionUsageEntity,
+  PartnerSubscriptionEntity,
+  RewardEntity,
+} from '@libs/infrastructure';
+import { SubscriptionUsageHelper } from '@libs/application/subscription-usage/subscription-usage.helper';
 import { UpdateRewardRequest } from './update-reward.request';
 import { UpdateRewardResponse } from './update-reward.response';
 
@@ -11,6 +19,14 @@ export class UpdateRewardHandler {
   constructor(
     @Inject('IRewardRepository')
     private readonly rewardRepository: IRewardRepository,
+    @Inject('ITenantRepository')
+    private readonly tenantRepository: ITenantRepository,
+    @InjectRepository(PartnerSubscriptionUsageEntity)
+    private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
+    @InjectRepository(PartnerSubscriptionEntity)
+    private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
+    @InjectRepository(RewardEntity)
+    private readonly rewardEntityRepository: Repository<RewardEntity>,
   ) {}
 
   async execute(request: UpdateRewardRequest): Promise<UpdateRewardResponse> {
@@ -133,6 +149,19 @@ export class UpdateRewardHandler {
 
     // Guardar cambios
     const savedReward = await this.rewardRepository.update(updatedReward);
+
+    // Actualizar el conteo de rewards en partner_subscription_usage
+    // Solo si cambió el status (de activa a inactiva o viceversa)
+    const statusChanged = existingReward.status !== savedReward.status;
+    if (statusChanged || savedReward.status === 'active') {
+      await SubscriptionUsageHelper.recalculateRewardsCountForTenant(
+        savedReward.tenantId,
+        this.usageRepository,
+        this.subscriptionRepository,
+        this.tenantRepository,
+        this.rewardEntityRepository,
+      );
+    }
 
     return new UpdateRewardResponse(savedReward);
   }

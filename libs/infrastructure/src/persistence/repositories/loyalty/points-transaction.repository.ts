@@ -4,6 +4,7 @@ import { Repository, Between, LessThanOrEqual } from 'typeorm';
 import { IPointsTransactionRepository, PointsTransaction } from '@libs/domain';
 import { PointsTransactionEntity } from '@libs/infrastructure/entities/loyalty/points-transaction.entity';
 import { PointsTransactionMapper } from '@libs/infrastructure/mappers/loyalty/points-transaction.mapper';
+import { CustomerMembershipEntity } from '@libs/infrastructure/entities/customer/customer-membership.entity';
 
 /**
  * Implementación del repositorio de PointsTransaction usando TypeORM
@@ -206,5 +207,162 @@ export class PointsTransactionRepository implements IPointsTransactionRepository
     const entities = await queryBuilder.getMany();
 
     return entities.map((entity) => PointsTransactionMapper.toDomain(entity));
+  }
+
+  async getTenantMetrics(tenantId: number): Promise<{
+    totalRedemptions: number;
+    pointsEarned: number;
+    pointsRedeemed: number;
+    topRewards: Array<{ ruleId: number; pointsAwarded: number; transactionsCount: number }>;
+  }> {
+    // Query optimizada con JOIN para obtener métricas agregadas del tenant
+    const metricsQuery = this.pointsTransactionRepository
+      .createQueryBuilder('pt')
+      .innerJoin(CustomerMembershipEntity, 'cm', 'pt.membershipId = cm.id')
+      .where('cm.tenantId = :tenantId', { tenantId })
+      .select([
+        'COUNT(CASE WHEN pt.type = :redeemType THEN 1 END) as totalRedemptions',
+        'SUM(CASE WHEN pt.type = :earningType AND pt.pointsDelta > 0 THEN pt.pointsDelta ELSE 0 END) as pointsEarned',
+        'SUM(CASE WHEN pt.type IN (:redeemTypes) AND pt.pointsDelta < 0 THEN ABS(pt.pointsDelta) ELSE 0 END) as pointsRedeemed',
+      ])
+      .setParameters({
+        tenantId,
+        redeemType: 'REDEEM',
+        earningType: 'EARNING',
+        redeemTypes: ['REDEEM', 'EXPIRATION'],
+      });
+
+    const metricsResult = await metricsQuery.getRawOne();
+
+    // Query optimizada para top rewards con GROUP BY
+    const topRewardsQuery = this.pointsTransactionRepository
+      .createQueryBuilder('pt')
+      .innerJoin(CustomerMembershipEntity, 'cm', 'pt.membershipId = cm.id')
+      .where('cm.tenantId = :tenantId', { tenantId })
+      .andWhere('pt.type = :earningType', { earningType: 'EARNING' })
+      .andWhere('pt.rewardRuleId IS NOT NULL')
+      .select([
+        'pt.rewardRuleId as ruleId',
+        'SUM(pt.pointsDelta) as pointsAwarded',
+        'COUNT(pt.id) as transactionsCount',
+      ])
+      .groupBy('pt.rewardRuleId')
+      .orderBy('pointsAwarded', 'DESC')
+      .limit(10)
+      .setParameter('tenantId', tenantId);
+
+    const topRewardsResults = await topRewardsQuery.getRawMany();
+
+    return {
+      totalRedemptions: Number(metricsResult?.totalRedemptions || 0),
+      pointsEarned: Number(metricsResult?.pointsEarned || 0),
+      pointsRedeemed: Number(metricsResult?.pointsRedeemed || 0),
+      topRewards: topRewardsResults.map((row) => ({
+        ruleId: Number(row.ruleId),
+        pointsAwarded: Number(row.pointsAwarded || 0),
+        transactionsCount: Number(row.transactionsCount || 0),
+      })),
+    };
+  }
+
+  async getRecentTransactionsByTenant(tenantId: number, limit: number): Promise<PointsTransaction[]> {
+    // Query optimizada con JOIN directo para obtener transacciones recientes
+    const entities = await this.pointsTransactionRepository
+      .createQueryBuilder('pt')
+      .innerJoin(CustomerMembershipEntity, 'cm', 'pt.membershipId = cm.id')
+      .where('cm.tenantId = :tenantId', { tenantId })
+      .orderBy('pt.createdAt', 'DESC')
+      .limit(limit)
+      .getMany();
+
+    return entities.map((entity) => PointsTransactionMapper.toDomain(entity));
+  }
+
+  async findByTenantIdPaginated(
+    tenantId: number,
+    filters?: {
+      type?: PointsTransaction['type'] | 'all';
+      fromDate?: Date;
+      toDate?: Date;
+      page?: number;
+      limit?: number;
+    },
+  ): Promise<{ transactions: PointsTransaction[]; total: number }> {
+    const page = filters?.page || 1;
+    const limit = filters?.limit || 20;
+    const skip = (page - 1) * limit;
+
+    // Query builder base con JOIN optimizado
+    const queryBuilder = this.pointsTransactionRepository
+      .createQueryBuilder('pt')
+      .innerJoin(CustomerMembershipEntity, 'cm', 'pt.membershipId = cm.id')
+      .where('cm.tenantId = :tenantId', { tenantId });
+
+    // Aplicar filtros
+    if (filters?.type && filters.type !== 'all') {
+      queryBuilder.andWhere('pt.type = :type', { type: filters.type });
+    }
+
+    if (filters?.fromDate) {
+      queryBuilder.andWhere('pt.createdAt >= :fromDate', { fromDate: filters.fromDate });
+    }
+
+    if (filters?.toDate) {
+      queryBuilder.andWhere('pt.createdAt <= :toDate', { toDate: filters.toDate });
+    }
+
+    // Obtener total antes de paginación
+    const total = await queryBuilder.getCount();
+
+    // Aplicar paginación y ordenamiento
+    queryBuilder.orderBy('pt.createdAt', 'DESC').skip(skip).take(limit);
+
+    const entities = await queryBuilder.getMany();
+
+    return {
+      transactions: entities.map((entity) => PointsTransactionMapper.toDomain(entity)),
+      total,
+    };
+  }
+
+  async getDailyActivityByTenant(
+    tenantId: number,
+    days: number = 7,
+  ): Promise<Array<{ date: string; pointsEarned: number; pointsRedeemed: number }>> {
+    // Calcular fecha de inicio (hace N días)
+    const endDate = new Date();
+    endDate.setHours(23, 59, 59, 999); // Fin del día actual
+    const startDate = new Date(endDate);
+    startDate.setDate(startDate.getDate() - days);
+    startDate.setHours(0, 0, 0, 0); // Inicio del día
+
+    // Query optimizada con JOIN y agregación por fecha usando DATE_FORMAT para MySQL/MariaDB
+    const results = await this.pointsTransactionRepository
+      .createQueryBuilder('pt')
+      .innerJoin(CustomerMembershipEntity, 'cm', 'pt.membershipId = cm.id')
+      .where('cm.tenantId = :tenantId', { tenantId })
+      .andWhere('pt.createdAt >= :startDate', { startDate })
+      .andWhere('pt.createdAt <= :endDate', { endDate })
+      .select([
+        "DATE_FORMAT(pt.createdAt, '%Y-%m-%d') as date",
+        'SUM(CASE WHEN pt.type = :earningType AND pt.pointsDelta > 0 THEN pt.pointsDelta ELSE 0 END) as pointsEarned',
+        'SUM(CASE WHEN pt.type = :redeemType AND pt.pointsDelta < 0 THEN ABS(pt.pointsDelta) ELSE 0 END) as pointsRedeemed',
+      ])
+      .groupBy("DATE_FORMAT(pt.createdAt, '%Y-%m-%d')")
+      .orderBy("DATE_FORMAT(pt.createdAt, '%Y-%m-%d')", 'ASC')
+      .setParameters({
+        tenantId,
+        startDate,
+        endDate,
+        earningType: 'EARNING',
+        redeemType: 'REDEEM',
+      })
+      .getRawMany();
+
+    return results.map((row) => ({
+      date: String(row.date || ''),
+      pointsEarned: Number(row.pointsEarned || 0),
+      pointsRedeemed: Number(row.pointsRedeemed || 0),
+    }));
   }
 }

@@ -9,6 +9,7 @@ import {
   CustomerMembershipEntity,
   LoyaltyProgramEntity,
   RewardRuleEntity,
+  RewardEntity,
 } from '@libs/infrastructure';
 import { SubscriptionUsageHelper } from '../subscription-usage.helper';
 import { RecalculateSubscriptionUsageRequest } from './recalculate-subscription-usage.request';
@@ -37,6 +38,8 @@ export class RecalculateSubscriptionUsageHandler {
     private readonly loyaltyProgramRepository: Repository<LoyaltyProgramEntity>,
     @InjectRepository(RewardRuleEntity)
     private readonly rewardRuleRepository: Repository<RewardRuleEntity>,
+    @InjectRepository(RewardEntity)
+    private readonly rewardRepository: Repository<RewardEntity>,
   ) {}
 
   async execute(
@@ -78,6 +81,7 @@ export class RecalculateSubscriptionUsageHandler {
         subscription.partnerId,
         this.loyaltyProgramRepository,
         this.rewardRuleRepository,
+        this.rewardRepository,
       );
 
       // Obtener el resultado actualizado
@@ -122,6 +126,7 @@ export class RecalculateSubscriptionUsageHandler {
         true, // allowAnyStatus = true para recálculo manual
         this.loyaltyProgramRepository,
         this.rewardRuleRepository,
+        this.rewardRepository,
       );
 
       // Obtener el resultado actualizado (buscar cualquier suscripción, no solo activa)
@@ -221,6 +226,7 @@ export class RecalculateSubscriptionUsageHandler {
             subscription.partnerId,
             this.loyaltyProgramRepository,
             this.rewardRuleRepository,
+            this.rewardRepository,
           );
 
           // Obtener el resultado actualizado

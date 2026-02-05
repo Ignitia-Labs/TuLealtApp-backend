@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   HttpCode,
   HttpStatus,
   ParseIntPipe,
@@ -23,6 +24,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiParam,
+  ApiQuery,
   ApiBody,
   ApiBearerAuth,
   ApiConsumes,
@@ -48,6 +50,9 @@ import {
   GetTenantDashboardStatsHandler,
   GetTenantDashboardStatsRequest,
   GetTenantDashboardStatsResponse,
+  GetTenantPointsTransactionsHandler,
+  GetTenantPointsTransactionsRequest,
+  GetTenantPointsTransactionsResponse,
   JwtPayload,
 } from '@libs/application';
 import { IUserRepository, ITenantRepository, IPricingPlanRepository } from '@libs/domain';
@@ -111,6 +116,7 @@ export class TenantsController {
     private readonly updateTenantHandler: UpdateTenantHandler,
     private readonly deleteTenantHandler: DeleteTenantHandler,
     private readonly getTenantDashboardStatsHandler: GetTenantDashboardStatsHandler,
+    private readonly getTenantPointsTransactionsHandler: GetTenantPointsTransactionsHandler,
     private readonly s3Service: S3Service,
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
@@ -245,6 +251,104 @@ export class TenantsController {
     request.tenantId = id;
 
     return this.getTenantDashboardStatsHandler.execute(request);
+  }
+
+  @Get(':id/loyalty/points-transactions')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Obtener transacciones de puntos de un tenant',
+    description:
+      'Obtiene las transacciones de puntos de un tenant con paginación y filtros. Útil para AdvancedAnalytics. El tenant debe pertenecer al partner del usuario autenticado.',
+  })
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    description: 'ID del tenant',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'type',
+    required: false,
+    enum: ['EARNING', 'REDEEM', 'ADJUSTMENT', 'REVERSAL', 'EXPIRATION', 'all'],
+    description: 'Tipo de transacción a filtrar',
+    example: 'EARNING',
+  })
+  @ApiQuery({
+    name: 'fromDate',
+    required: false,
+    type: String,
+    description: 'Fecha de inicio (ISO 8601)',
+    example: '2025-01-01T00:00:00Z',
+  })
+  @ApiQuery({
+    name: 'toDate',
+    required: false,
+    type: String,
+    description: 'Fecha de fin (ISO 8601)',
+    example: '2025-01-31T23:59:59Z',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Número de página',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Límite de resultados por página',
+    example: 20,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Transacciones obtenidas exitosamente',
+    type: GetTenantPointsTransactionsResponse,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos o el tenant no pertenece a su partner',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Tenant no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  async getTenantPointsTransactions(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() _user: JwtPayload, // eslint-disable-line @typescript-eslint/no-unused-vars
+    @Query('type') type?: string,
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ): Promise<GetTenantPointsTransactionsResponse> {
+    const request = new GetTenantPointsTransactionsRequest();
+    request.tenantId = id;
+    if (type) {
+      request.type = type as any;
+    }
+    if (fromDate) {
+      request.fromDate = fromDate;
+    }
+    if (toDate) {
+      request.toDate = toDate;
+    }
+    if (page) {
+      request.page = parseInt(page, 10);
+    }
+    if (limit) {
+      request.limit = parseInt(limit, 10);
+    }
+
+    return this.getTenantPointsTransactionsHandler.execute(request);
   }
 
   @Post()
