@@ -29,6 +29,7 @@ describe('PointsTransaction Entity', () => {
       expect(transaction.metadata).toBeNull();
       expect(transaction.reversalOfTransactionId).toBeNull();
       expect(transaction.expiresAt).toBeNull();
+      expect(transaction.branchId).toBeNull();
       expect(transaction.createdAt).toBeInstanceOf(Date);
     });
 
@@ -47,6 +48,7 @@ describe('PointsTransaction Entity', () => {
         5, // rewardRuleId
         { visitId: 123 },
         expiresAt,
+        null, // branchId
         1, // id
       );
 
@@ -61,6 +63,33 @@ describe('PointsTransaction Entity', () => {
       expect(transaction.rewardRuleId).toBe(5);
       expect(transaction.metadata).toEqual({ visitId: 123 });
       expect(transaction.expiresAt).toEqual(expiresAt);
+      expect(transaction.branchId).toBeNull();
+    });
+
+    it('should create an EARNING transaction with branchId', () => {
+      const transaction = PointsTransaction.createEarning(
+        1,
+        100,
+        50,
+        150,
+        'idempotency-key-branch',
+        'source-event-branch',
+        null,
+        'SYSTEM',
+        'PURCHASE_BONUS',
+        10,
+        5,
+        { orderId: 'ORD-123' },
+        null,
+        2, // branchId
+      );
+
+      expect(transaction.type).toBe('EARNING');
+      expect(transaction.pointsDelta).toBe(150);
+      expect(transaction.branchId).toBe(2);
+      expect(transaction.sourceEventId).toBe('source-event-branch');
+      expect(transaction.reasonCode).toBe('PURCHASE_BONUS');
+      expect(transaction.metadata).toEqual({ orderId: 'ORD-123' });
     });
 
     it('should throw error if pointsDelta is not positive', () => {
@@ -91,6 +120,32 @@ describe('PointsTransaction Entity', () => {
       expect(transaction.rewardId).toBe(123);
       expect(transaction.programId).toBeNull();
       expect(transaction.rewardRuleId).toBeNull();
+      expect(transaction.branchId).toBeNull();
+    });
+
+    it('should create a REDEEM transaction with branchId', () => {
+      const transaction = PointsTransaction.createRedeem(
+        1,
+        100,
+        50,
+        -75,
+        'idempotency-key-redeem-branch',
+        456, // rewardId
+        'source-event-redeem',
+        null,
+        'USER_123',
+        'REWARD_REDEMPTION',
+        null,
+        { rewardName: 'Free Coffee' },
+        3, // branchId
+      );
+
+      expect(transaction.type).toBe('REDEEM');
+      expect(transaction.pointsDelta).toBe(-75);
+      expect(transaction.rewardId).toBe(456);
+      expect(transaction.branchId).toBe(3);
+      expect(transaction.createdBy).toBe('USER_123');
+      expect(transaction.metadata).toEqual({ rewardName: 'Free Coffee' });
     });
 
     it('should throw error if pointsDelta is not negative', () => {
@@ -149,6 +204,7 @@ describe('PointsTransaction Entity', () => {
       expect(transaction.createdBy).toBe('admin-user');
       expect(transaction.reasonCode).toBe('MANUAL_ADJUSTMENT');
       expect(transaction.sourceEventId).toBeNull();
+      expect(transaction.branchId).toBeNull();
     });
 
     it('should create an ADJUSTMENT transaction with negative pointsDelta', () => {
@@ -164,6 +220,31 @@ describe('PointsTransaction Entity', () => {
 
       expect(transaction.type).toBe('ADJUSTMENT');
       expect(transaction.pointsDelta).toBe(-50);
+    });
+
+    it('should create an ADJUSTMENT transaction with branchId', () => {
+      const transaction = PointsTransaction.createAdjustment(
+        1,
+        100,
+        50,
+        200,
+        'idempotency-key-adjust-branch',
+        'PARTNER_USER_456',
+        'BONUS_BIRTHDAY',
+        null, // correlationId
+        { birthdayMonth: 3, appliedBy: 'Store Manager' },
+        5, // branchId
+      );
+
+      expect(transaction.type).toBe('ADJUSTMENT');
+      expect(transaction.pointsDelta).toBe(200);
+      expect(transaction.createdBy).toBe('PARTNER_USER_456');
+      expect(transaction.reasonCode).toBe('BONUS_BIRTHDAY');
+      expect(transaction.branchId).toBe(5);
+      expect(transaction.metadata).toEqual({ 
+        birthdayMonth: 3, 
+        appliedBy: 'Store Manager' 
+      });
     });
 
     it('should throw error if pointsDelta is zero', () => {
