@@ -365,4 +365,41 @@ export class PointsTransactionRepository implements IPointsTransactionRepository
       pointsRedeemed: Number(row.pointsRedeemed || 0),
     }));
   }
+
+  async getTenantMetricsByPeriod(
+    tenantId: number,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<{
+    pointsEarnedInPeriod: number;
+    pointsRedeemedInPeriod: number;
+    redemptionsInPeriod: number;
+  }> {
+    // Query optimizada con agregaciones SQL para métricas por período
+    const result = await this.pointsTransactionRepository
+      .createQueryBuilder('pt')
+      .innerJoin(CustomerMembershipEntity, 'cm', 'pt.membershipId = cm.id')
+      .where('cm.tenantId = :tenantId', { tenantId })
+      .andWhere('pt.createdAt >= :startDate', { startDate })
+      .andWhere('pt.createdAt <= :endDate', { endDate })
+      .select([
+        'COUNT(CASE WHEN pt.type = :redeemType THEN 1 END) as redemptionsInPeriod',
+        'SUM(CASE WHEN pt.type = :earningType AND pt.pointsDelta > 0 THEN pt.pointsDelta ELSE 0 END) as pointsEarnedInPeriod',
+        'SUM(CASE WHEN pt.type = :redeemType AND pt.pointsDelta < 0 THEN ABS(pt.pointsDelta) ELSE 0 END) as pointsRedeemedInPeriod',
+      ])
+      .setParameters({
+        tenantId,
+        startDate,
+        endDate,
+        redeemType: 'REDEEM',
+        earningType: 'EARNING',
+      })
+      .getRawOne();
+
+    return {
+      redemptionsInPeriod: Number(result?.redemptionsInPeriod || 0),
+      pointsEarnedInPeriod: Number(result?.pointsEarnedInPeriod || 0),
+      pointsRedeemedInPeriod: Number(result?.pointsRedeemedInPeriod || 0),
+    };
+  }
 }

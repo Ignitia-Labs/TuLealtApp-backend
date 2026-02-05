@@ -43,6 +43,20 @@ export class LoyaltyDashboardPointsTransactionDto {
   @ApiProperty({ example: 100 })
   membershipId: number;
 
+  @ApiProperty({
+    example: 'Juan Pérez',
+    description: 'Nombre del cliente (incluido cuando includeCustomer=true)',
+    required: false,
+  })
+  customerName?: string;
+
+  @ApiProperty({
+    example: 'Compra de Q125.00',
+    description: 'Descripción legible de la transacción generada por el backend',
+    required: false,
+  })
+  description?: string;
+
   constructor(
     id: number,
     type: 'EARNING' | 'REDEEM' | 'ADJUSTMENT' | 'REVERSAL' | 'EXPIRATION' | 'HOLD' | 'RELEASE',
@@ -55,6 +69,8 @@ export class LoyaltyDashboardPointsTransactionDto {
     programId: number | null,
     rewardRuleId: number | null,
     membershipId: number,
+    customerName?: string,
+    description?: string,
   ) {
     this.id = id;
     this.type = type;
@@ -67,5 +83,7 @@ export class LoyaltyDashboardPointsTransactionDto {
     this.programId = programId;
     this.rewardRuleId = rewardRuleId;
     this.membershipId = membershipId;
+    this.customerName = customerName;
+    this.description = description;
   }
 }

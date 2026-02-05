@@ -154,4 +154,20 @@ export interface IPointsTransactionRepository {
     tenantId: number,
     days?: number,
   ): Promise<Array<{ date: string; pointsEarned: number; pointsRedeemed: number }>>;
+
+  /**
+   * Obtiene métricas agregadas de un tenant para un período específico usando queries SQL optimizadas
+   * @param tenantId ID del tenant
+   * @param startDate Fecha de inicio del período
+   * @param endDate Fecha de fin del período
+   */
+  getTenantMetricsByPeriod(
+    tenantId: number,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<{
+    pointsEarnedInPeriod: number;
+    pointsRedeemedInPeriod: number;
+    redemptionsInPeriod: number;
+  }>;
 }

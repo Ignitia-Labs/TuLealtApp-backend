@@ -5,6 +5,7 @@ import { IRewardRepository, Reward, IPointsTransactionRepository } from '@libs/d
 import { RewardEntity } from '@libs/infrastructure/entities/loyalty/reward.entity';
 import { RewardMapper } from '@libs/infrastructure/mappers/loyalty/reward.mapper';
 import { PointsTransactionEntity } from '@libs/infrastructure/entities/loyalty/points-transaction.entity';
+import { CustomerMembershipEntity } from '@libs/infrastructure/entities/customer/customer-membership.entity';
 
 /**
  * Implementación del repositorio de Reward usando TypeORM
@@ -151,5 +152,34 @@ export class RewardRepository implements IRewardRepository {
     }
 
     return countsMap;
+  }
+
+  async getTopRedeemedRewardsByPeriod(
+    tenantId: number,
+    limit: number,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<Array<{ rewardId: number; timesRedeemed: number }>> {
+    // Query optimizada con JOIN a customer_memberships para filtrar por tenantId
+    // Agrupa por rewardId y cuenta redemptions en el período
+    const results = await this.rewardRepository.manager
+      .createQueryBuilder(PointsTransactionEntity, 'pt')
+      .innerJoin(CustomerMembershipEntity, 'cm', 'pt.membershipId = cm.id')
+      .where('cm.tenantId = :tenantId', { tenantId })
+      .andWhere('pt.type = :type', { type: 'REDEEM' })
+      .andWhere('pt.rewardId IS NOT NULL')
+      .andWhere('pt.createdAt >= :startDate', { startDate })
+      .andWhere('pt.createdAt <= :endDate', { endDate })
+      .select('pt.rewardId', 'rewardId')
+      .addSelect('COUNT(pt.id)', 'timesRedeemed')
+      .groupBy('pt.rewardId')
+      .orderBy('timesRedeemed', 'DESC')
+      .limit(limit)
+      .getRawMany();
+
+    return results.map((row) => ({
+      rewardId: Number(row.rewardId),
+      timesRedeemed: Number(row.timesRedeemed || 0),
+    }));
   }
 }

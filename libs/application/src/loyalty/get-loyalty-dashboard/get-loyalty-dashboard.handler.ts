@@ -1,11 +1,12 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
 import {
   ITenantRepository,
   ICustomerMembershipRepository,
   IPointsTransactionRepository,
   IRewardRuleRepository,
+  IUserRepository,
 } from '@libs/domain';
-import { GetLoyaltyDashboardRequest } from './get-loyalty-dashboard.request';
+import { GetLoyaltyDashboardRequest, DashboardPeriod } from './get-loyalty-dashboard.request';
 import {
   GetLoyaltyDashboardResponse,
   TopRewardRuleDto,
@@ -13,6 +14,9 @@ import {
 import { TopCustomerDto } from './top-customer-dto';
 import { LoyaltyDashboardPointsTransactionDto } from './points-transaction-dto';
 import { DailyActivityDto } from './daily-activity-dto';
+import { PeriodDto } from './period-dto';
+import { DashboardMetricsCacheService } from '../dashboard-metrics-cache.service';
+import { In } from 'typeorm';
 
 /**
  * Handler para obtener métricas del dashboard de lealtad de un tenant
@@ -29,13 +33,145 @@ export class GetLoyaltyDashboardHandler {
     private readonly pointsTransactionRepository: IPointsTransactionRepository,
     @Inject('IRewardRuleRepository')
     private readonly rewardRuleRepository: IRewardRuleRepository,
+    @Inject('IUserRepository')
+    private readonly userRepository: IUserRepository,
+    private readonly cacheService: DashboardMetricsCacheService,
   ) {}
+
+  /**
+   * Calcula las fechas de inicio y fin según el período especificado
+   */
+  private calculatePeriodDates(period: DashboardPeriod, startDate?: string, endDate?: string): {
+    start: Date;
+    end: Date;
+    periodType: 'all' | 'month' | 'week' | 'custom';
+  } {
+    const now = new Date();
+    now.setHours(23, 59, 59, 999);
+
+    if (period === 'custom') {
+      if (!startDate || !endDate) {
+        throw new BadRequestException('startDate and endDate are required when period="custom"');
+      }
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        throw new BadRequestException('Invalid date format. Use ISO 8601 format.');
+      }
+      if (start >= end) {
+        throw new BadRequestException('startDate must be before endDate');
+      }
+      return { start, end, periodType: 'custom' };
+    }
+
+    if (period === 'month') {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      start.setHours(0, 0, 0, 0);
+      return { start, end: now, periodType: 'month' };
+    }
+
+    if (period === 'week') {
+      const start = new Date(now);
+      start.setDate(start.getDate() - 6); // Últimos 7 días
+      start.setHours(0, 0, 0, 0);
+      return { start, end: now, periodType: 'week' };
+    }
+
+    // period === 'all'
+    const start = new Date(0); // Desde el inicio de los tiempos
+    return { start, end: now, periodType: 'all' };
+  }
+
+  /**
+   * Genera descripción legible para una transacción
+   */
+  private generateTransactionDescription(
+    type: string,
+    reasonCode: string | null,
+    metadata: Record<string, unknown> | null,
+    pointsDelta: number,
+  ): string {
+    if (type === 'REDEEM') {
+      const rewardName = metadata?.rewardName as string;
+      if (rewardName) {
+        return `Canjeó: ${rewardName}`;
+      }
+      return `Canjeó recompensa (${Math.abs(pointsDelta)} puntos)`;
+    }
+
+    if (type === 'EARNING') {
+      if (reasonCode === 'PURCHASE_BASE' || reasonCode === 'PURCHASE') {
+        const amount = metadata?.amount as number;
+        if (amount) {
+          return `Compra de Q${amount.toFixed(2)}`;
+        }
+        return `Compra realizada`;
+      }
+      if (reasonCode === 'REGISTRATION' || reasonCode === 'SIGNUP') {
+        return `Nuevo cliente registrado`;
+      }
+      if (reasonCode) {
+        return `Puntos ganados: ${reasonCode}`;
+      }
+      return `Puntos ganados (${pointsDelta} puntos)`;
+    }
+
+    if (type === 'ADJUSTMENT') {
+      const reason = metadata?.reason as string;
+      if (reason) {
+        return `Ajuste manual: ${reason}`;
+      }
+      return `Ajuste manual de puntos`;
+    }
+
+    if (type === 'REVERSAL') {
+      return `Reversión de transacción`;
+    }
+
+    if (type === 'EXPIRATION') {
+      return `Puntos expirados`;
+    }
+
+    return `${type}: ${pointsDelta > 0 ? '+' : ''}${pointsDelta} puntos`;
+  }
 
   async execute(request: GetLoyaltyDashboardRequest): Promise<GetLoyaltyDashboardResponse> {
     // Validar que el tenant existe
     const tenant = await this.tenantRepository.findById(request.tenantId);
     if (!tenant) {
       throw new NotFoundException(`Tenant with ID ${request.tenantId} not found`);
+    }
+
+    // Calcular período
+    const period = request.period || 'all';
+    const { start: periodStart, end: periodEnd, periodType } = this.calculatePeriodDates(
+      period,
+      request.startDate,
+      request.endDate,
+    );
+
+    // Intentar obtener métricas por período desde caché (solo para períodos comunes)
+    const cacheKey =
+      periodType === 'month' || periodType === 'week'
+        ? this.cacheService.generateKey(request.tenantId, periodType)
+        : null;
+    let periodMetrics: {
+      pointsEarnedInPeriod: number;
+      pointsRedeemedInPeriod: number;
+      redemptionsInPeriod: number;
+    } | null = cacheKey ? this.cacheService.get(cacheKey) : null;
+
+    if (!periodMetrics) {
+      // Obtener métricas por período desde BD
+      periodMetrics = await this.pointsTransactionRepository.getTenantMetricsByPeriod(
+        request.tenantId,
+        periodStart,
+        periodEnd,
+      );
+      // Guardar en caché solo para períodos comunes
+      if (cacheKey) {
+        this.cacheService.set(cacheKey, periodMetrics);
+      }
     }
 
     // Ejecutar queries en paralelo para optimizar rendimiento
@@ -104,10 +240,64 @@ export class GetLoyaltyDashboardHandler {
         new TopCustomerDto(customer.userId, customer.userName, customer.points, customer.transactions),
     );
 
-    // Construir recentTransactions DTOs
+    // Obtener información de usuarios si se solicita (batch query para evitar N+1)
+    const usersMap = new Map<number, { id: number; name: string }>();
+    if (request.includeCustomer) {
+      // Obtener membershipIds únicos de las transacciones
+      const membershipIds = [...new Set(recentTransactions.map((tx) => tx.membershipId))];
+      if (membershipIds.length > 0) {
+        // Obtener memberships para obtener userIds
+        const memberships = await Promise.all(
+          membershipIds.map((membershipId) => this.membershipRepository.findById(membershipId)),
+        );
+        const userIds = memberships
+          .filter((m) => m !== null)
+          .map((m) => m!.userId)
+          .filter((id) => id !== undefined);
+        
+        if (userIds.length > 0) {
+          const users = await Promise.all(
+            [...new Set(userIds)].map((userId) => this.userRepository.findById(userId)),
+          );
+          users.forEach((user) => {
+            if (user) {
+              usersMap.set(user.id, { id: user.id, name: user.name });
+            }
+          });
+        }
+        
+        // Crear mapa de membershipId -> userId para acceso rápido
+        const membershipToUserMap = new Map<number, number>();
+        memberships.forEach((m) => {
+          if (m && m.userId) {
+            membershipToUserMap.set(m.id, m.userId);
+          }
+        });
+        
+        // Agregar el mapa al contexto para usarlo después
+        (usersMap as any).membershipToUserMap = membershipToUserMap;
+      }
+    }
+
+    // Construir recentTransactions DTOs con información del cliente y descripciones
+    const membershipToUserMap = (usersMap as any).membershipToUserMap as Map<number, number> | undefined;
     const recentTransactionsDto: LoyaltyDashboardPointsTransactionDto[] = recentTransactions.map(
-      (tx) =>
-        new LoyaltyDashboardPointsTransactionDto(
+      (tx) => {
+        let userName: string | undefined;
+        if (request.includeCustomer && membershipToUserMap) {
+          const userId = membershipToUserMap.get(tx.membershipId);
+          if (userId) {
+            const user = usersMap.get(userId);
+            userName = user?.name;
+          }
+        }
+        const description = this.generateTransactionDescription(
+          tx.type,
+          tx.reasonCode,
+          tx.metadata,
+          tx.pointsDelta,
+        );
+        return new LoyaltyDashboardPointsTransactionDto(
           tx.id,
           tx.type,
           tx.pointsDelta,
@@ -119,7 +309,10 @@ export class GetLoyaltyDashboardHandler {
           tx.programId,
           tx.rewardRuleId,
           tx.membershipId,
-        ),
+          userName,
+          description,
+        );
+      },
     );
 
     // Construir dailyActivity DTOs con información de día de la semana
@@ -159,6 +352,19 @@ export class GetLoyaltyDashboardHandler {
       );
     }
 
+    // Calcular returnRate: (redemptionsInPeriod / totalCustomers) * 100
+    const returnRate =
+      totalCustomers > 0
+        ? Math.round((periodMetrics.redemptionsInPeriod / totalCustomers) * 10000) / 100
+        : 0;
+
+    // Construir PeriodDto
+    const periodDto = new PeriodDto(
+      periodStart.toISOString(),
+      periodEnd.toISOString(),
+      periodType,
+    );
+
     return new GetLoyaltyDashboardResponse(
       totalCustomers,
       activeCustomers,
@@ -172,6 +378,11 @@ export class GetLoyaltyDashboardHandler {
       recentTransactionsDto,
       new Date(), // lastCalculatedAt
       dailyActivity,
+      periodMetrics.pointsEarnedInPeriod,
+      periodMetrics.pointsRedeemedInPeriod,
+      periodMetrics.redemptionsInPeriod,
+      returnRate,
+      periodDto,
     );
   }
 }

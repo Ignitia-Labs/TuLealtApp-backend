@@ -811,6 +811,11 @@ export * from './rewards/get-customer-redemption-codes/get-customer-redemption-c
 export * from './rewards/get-customer-redemption-codes/get-customer-redemption-codes.request';
 export * from './rewards/get-customer-redemption-codes/get-customer-redemption-codes.response';
 
+export * from './rewards/get-top-redeemed-rewards/get-top-redeemed-rewards.handler';
+export * from './rewards/get-top-redeemed-rewards/get-top-redeemed-rewards.request';
+export * from './rewards/get-top-redeemed-rewards/get-top-redeemed-rewards.response';
+export * from './rewards/get-top-redeemed-rewards/get-top-redeemed-rewards-body.dto';
+
 export * from './customer-memberships/get-points-balance/get-points-balance.handler';
 export * from './customer-memberships/get-points-balance/get-points-balance.request';
 export * from './customer-memberships/get-points-balance/get-points-balance.response';
@@ -846,11 +851,17 @@ export * from './customer-memberships/get-referrals/get-referrals.response';
 export * from './customer-memberships/get-activity/get-activity.handler';
 export * from './customer-memberships/get-activity/get-activity.request';
 export * from './customer-memberships/get-activity/get-activity.response';
+
+export * from './customer-memberships/get-new-customers/get-new-customers.handler';
+export * from './customer-memberships/get-new-customers/get-new-customers.request';
+export * from './customer-memberships/get-new-customers/get-new-customers.response';
 export * from './loyalty/get-loyalty-dashboard/get-loyalty-dashboard.handler';
 export * from './loyalty/get-loyalty-dashboard/get-loyalty-dashboard.request';
 export * from './loyalty/get-loyalty-dashboard/get-loyalty-dashboard.response';
 export * from './loyalty/get-loyalty-dashboard/top-customer-dto';
 export * from './loyalty/get-loyalty-dashboard/points-transaction-dto';
 export * from './loyalty/get-loyalty-dashboard/daily-activity-dto';
+export * from './loyalty/get-loyalty-dashboard/period-dto';
+export * from './loyalty/dashboard-metrics-cache.service';
 export * from './auth/types/jwt-payload.interface';
 export { ProcessLoyaltyEventResult } from '@libs/domain';

@@ -60,4 +60,18 @@ export interface IRewardRepository {
    * @param rewardIds Array de IDs de recompensas
    */
   countTotalRedemptionsBatch(rewardIds: number[]): Promise<Map<number, number>>;
+
+  /**
+   * Obtiene las recompensas más canjeadas de un tenant en un período específico usando query optimizada
+   * @param tenantId ID del tenant
+   * @param limit Número máximo de recompensas a retornar
+   * @param startDate Fecha de inicio del período
+   * @param endDate Fecha de fin del período
+   */
+  getTopRedeemedRewardsByPeriod(
+    tenantId: number,
+    limit: number,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<Array<{ rewardId: number; timesRedeemed: number }>>;
 }

@@ -149,6 +149,11 @@ import {
   DeleteEnrollmentHandler,
   // Loyalty Dashboard Handlers
   GetLoyaltyDashboardHandler,
+  DashboardMetricsCacheService,
+  // Rewards Handlers
+  GetTopRedeemedRewardsHandler,
+  // Customer Memberships Handlers
+  GetNewCustomersHandler,
   // Partner Customers Handlers
   CreatePointsAdjustmentHandler,
   CreatePointsReversalHandler,
@@ -324,6 +329,11 @@ import {
     DeleteEnrollmentHandler,
     // Loyalty Dashboard Handlers
     GetLoyaltyDashboardHandler,
+    DashboardMetricsCacheService,
+    // Rewards Handlers
+    GetTopRedeemedRewardsHandler,
+    // Customer Memberships Handlers
+    GetNewCustomersHandler,
   ],
 })
 export class PartnerApiModule {}

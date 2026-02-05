@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   ParseIntPipe,
   UseGuards,
   HttpCode,
@@ -14,7 +15,7 @@ import {
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import {
   CreateRewardHandler,
   CreateRewardRequest,
@@ -33,6 +34,10 @@ import {
   ValidateRedemptionCodeHandler,
   ValidateRedemptionCodeRequest,
   ValidateRedemptionCodeResponse,
+  GetTopRedeemedRewardsHandler,
+  GetTopRedeemedRewardsRequest,
+  GetTopRedeemedRewardsResponse,
+  GetTopRedeemedRewardsBodyDto,
   JwtPayload,
 } from '@libs/application';
 import { IUserRepository, ITenantRepository } from '@libs/domain';
@@ -65,6 +70,7 @@ export class RewardsController {
     private readonly updateRewardHandler: UpdateRewardHandler,
     private readonly deleteRewardHandler: DeleteRewardHandler,
     private readonly validateRedemptionCodeHandler: ValidateRedemptionCodeHandler,
+    private readonly getTopRedeemedRewardsHandler: GetTopRedeemedRewardsHandler,
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
     @Inject('ITenantRepository')
@@ -233,5 +239,70 @@ export class RewardsController {
     const request = new ValidateRedemptionCodeRequest();
     request.code = body.code;
     return this.validateRedemptionCodeHandler.execute(request, currentUser.id);
+  }
+
+  @Post('top-redeemed')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Obtener recompensas más canjeadas',
+    description:
+      'Obtiene las recompensas más canjeadas de un tenant en un período específico. ' +
+      'Útil para el dashboard y análisis de popularidad de recompensas.',
+  })
+  @ApiParam({ name: 'tenantId', type: Number, description: 'ID del tenant' })
+  @ApiBody({
+    type: GetTopRedeemedRewardsBodyDto,
+    description: 'Parámetros de consulta para obtener las recompensas más canjeadas',
+    examples: {
+      default: {
+        summary: 'Consulta por período mensual',
+        value: {
+          limit: 5,
+          period: 'month',
+        },
+      },
+      custom: {
+        summary: 'Consulta con fechas personalizadas',
+        value: {
+          limit: 10,
+          startDate: '2026-01-01T00:00:00Z',
+          endDate: '2026-01-31T23:59:59Z',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de recompensas más canjeadas',
+    type: GetTopRedeemedRewardsResponse,
+  })
+  @ApiResponse({ status: 400, description: 'Datos inválidos', type: BadRequestErrorResponseDto })
+  @ApiResponse({ status: 401, description: 'No autenticado', type: UnauthorizedErrorResponseDto })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos o el tenant no pertenece a su partner',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Tenant no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  async getTopRedeemedRewards(
+    @Param('tenantId', ParseIntPipe) tenantId: number,
+    @CurrentUser() _user: JwtPayload, // eslint-disable-line @typescript-eslint/no-unused-vars
+    @Body() body: GetTopRedeemedRewardsBodyDto,
+  ): Promise<GetTopRedeemedRewardsResponse> {
+    const request = new GetTopRedeemedRewardsRequest();
+    request.tenantId = tenantId;
+    request.limit = body.limit || 5;
+    request.period = body.period || 'month';
+    if (body.startDate) {
+      request.startDate = body.startDate;
+    }
+    if (body.endDate) {
+      request.endDate = body.endDate;
+    }
+    return this.getTopRedeemedRewardsHandler.execute(request);
   }
 }

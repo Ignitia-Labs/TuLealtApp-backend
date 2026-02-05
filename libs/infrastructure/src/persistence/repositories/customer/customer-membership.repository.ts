@@ -368,4 +368,117 @@ export class CustomerMembershipRepository implements ICustomerMembershipReposito
       transactions: Number(result.transactions || 0),
     }));
   }
+
+  async getNewCustomersByPeriod(
+    tenantId: number,
+    startDate: Date,
+    endDate: Date,
+    groupBy: 'day' | 'week' | 'month',
+  ): Promise<
+    Array<{
+      label: string;
+      startDate: string;
+      endDate: string;
+      count: number;
+      weekNumber?: number;
+      monthName?: string;
+    }>
+  > {
+    let dateFormat: string;
+    let labelFormat: string;
+
+    switch (groupBy) {
+      case 'day':
+        dateFormat = '%Y-%m-%d';
+        labelFormat = '%Y-%m-%d';
+        break;
+      case 'week':
+        // YEARWEEK retorna año-semana (ej: 202601)
+        dateFormat = 'YEARWEEK(cm.joinedDate, 1)';
+        labelFormat = 'YEARWEEK(cm.joinedDate, 1)';
+        break;
+      case 'month':
+        dateFormat = '%Y-%m';
+        labelFormat = '%Y-%m';
+        break;
+      default:
+        dateFormat = '%Y-%m-%d';
+        labelFormat = '%Y-%m-%d';
+    }
+
+    // Query optimizada con agregación SQL
+    const queryBuilder = this.membershipRepository
+      .createQueryBuilder('cm')
+      .where('cm.tenantId = :tenantId', { tenantId })
+      .andWhere('cm.joinedDate >= :startDate', { startDate })
+      .andWhere('cm.joinedDate <= :endDate', { endDate });
+
+    if (groupBy === 'week') {
+      queryBuilder
+        .select([
+          'YEARWEEK(cm.joinedDate, 1) as period',
+          'MIN(cm.joinedDate) as startDate',
+          'MAX(cm.joinedDate) as endDate',
+          'COUNT(cm.id) as count',
+        ])
+        .groupBy('YEARWEEK(cm.joinedDate, 1)')
+        .orderBy('YEARWEEK(cm.joinedDate, 1)', 'ASC');
+    } else {
+      queryBuilder
+        .select([
+          `DATE_FORMAT(cm.joinedDate, '${dateFormat}') as period`,
+          `DATE_FORMAT(MIN(cm.joinedDate), '%Y-%m-%d') as startDate`,
+          `DATE_FORMAT(MAX(cm.joinedDate), '%Y-%m-%d') as endDate`,
+          'COUNT(cm.id) as count',
+        ])
+        .groupBy(`DATE_FORMAT(cm.joinedDate, '${dateFormat}')`)
+        .orderBy('period', 'ASC');
+    }
+
+    const results = await queryBuilder.getRawMany();
+
+    // Mapear resultados y generar etiquetas
+    const monthNames = [
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre',
+    ];
+
+    return results.map((row) => {
+      let label = String(row.period || '');
+      let weekNumber: number | undefined;
+      let monthName: string | undefined;
+
+      if (groupBy === 'week') {
+        const periodStr = String(row.period);
+        const year = parseInt(periodStr.substring(0, 4));
+        const week = parseInt(periodStr.substring(4));
+        weekNumber = week;
+        label = `Sem ${week}`;
+      } else if (groupBy === 'month') {
+        const [year, month] = label.split('-');
+        const monthNum = parseInt(month) - 1;
+        monthName = monthNames[monthNum] || month;
+        label = `${monthName} ${year}`;
+      }
+
+      return {
+        label,
+        startDate: String(row.startDate || ''),
+        endDate: String(row.endDate || ''),
+        count: Number(row.count || 0),
+        weekNumber,
+        monthName,
+      };
+    });
+  }
 }

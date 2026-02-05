@@ -105,6 +105,29 @@ export interface ICustomerMembershipRepository {
   ): Promise<Array<{ userId: number; userName: string; points: number; transactions: number }>>;
 
   /**
+   * Obtiene nuevos clientes agrupados por período usando query SQL optimizada
+   * @param tenantId ID del tenant
+   * @param startDate Fecha de inicio del período
+   * @param endDate Fecha de fin del período
+   * @param groupBy Tipo de agrupación: 'day', 'week', o 'month'
+   */
+  getNewCustomersByPeriod(
+    tenantId: number,
+    startDate: Date,
+    endDate: Date,
+    groupBy: 'day' | 'week' | 'month',
+  ): Promise<
+    Array<{
+      label: string;
+      startDate: string;
+      endDate: string;
+      count: number;
+      weekNumber?: number;
+      monthName?: string;
+    }>
+  >;
+
+  /**
    * Actualiza el balance de una membership desde el ledger
    * Este es el ÚNICO método permitido para actualizar customer_memberships.points
    * El campo points es una proyección calculada desde el ledger, no debe actualizarse directamente

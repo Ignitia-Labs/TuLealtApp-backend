@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { TopCustomerDto } from './top-customer-dto';
 import { LoyaltyDashboardPointsTransactionDto } from './points-transaction-dto';
 import { DailyActivityDto } from './daily-activity-dto';
+import { PeriodDto } from './period-dto';
 
 export class TopRewardRuleDto {
   @ApiProperty({ example: 1 })
@@ -57,6 +58,36 @@ export class GetLoyaltyDashboardResponse {
   })
   dailyActivity: DailyActivityDto[];
 
+  @ApiProperty({
+    example: 5000,
+    description: 'Total de puntos ganados en el período especificado',
+  })
+  pointsEarnedInPeriod: number;
+
+  @ApiProperty({
+    example: 2000,
+    description: 'Total de puntos canjeados en el período especificado',
+  })
+  pointsRedeemedInPeriod: number;
+
+  @ApiProperty({
+    example: 25,
+    description: 'Total de redemptions en el período especificado',
+  })
+  redemptionsInPeriod: number;
+
+  @ApiProperty({
+    example: 2.08,
+    description: 'Tasa de retorno calculada: (redemptionsInPeriod / totalCustomers) * 100',
+  })
+  returnRate: number;
+
+  @ApiProperty({
+    type: PeriodDto,
+    description: 'Período de tiempo usado para los cálculos',
+  })
+  period: PeriodDto;
+
   constructor(
     totalCustomers: number,
     activeCustomers: number,
@@ -70,6 +101,11 @@ export class GetLoyaltyDashboardResponse {
     recentTransactions: LoyaltyDashboardPointsTransactionDto[],
     lastCalculatedAt: Date,
     dailyActivity: DailyActivityDto[],
+    pointsEarnedInPeriod: number,
+    pointsRedeemedInPeriod: number,
+    redemptionsInPeriod: number,
+    returnRate: number,
+    period: PeriodDto,
   ) {
     this.totalCustomers = totalCustomers;
     this.activeCustomers = activeCustomers;
@@ -83,5 +119,10 @@ export class GetLoyaltyDashboardResponse {
     this.recentTransactions = recentTransactions;
     this.lastCalculatedAt = lastCalculatedAt;
     this.dailyActivity = dailyActivity;
+    this.pointsEarnedInPeriod = pointsEarnedInPeriod;
+    this.pointsRedeemedInPeriod = pointsRedeemedInPeriod;
+    this.redemptionsInPeriod = redemptionsInPeriod;
+    this.returnRate = returnRate;
+    this.period = period;
   }
 }
