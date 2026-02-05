@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PointsTransaction } from '@libs/domain';
 
 export class CreatePointsAdjustmentResponse {
@@ -17,6 +17,9 @@ export class CreatePointsAdjustmentResponse {
   @ApiProperty({ example: 100 })
   membershipId: number;
 
+  @ApiPropertyOptional({ example: 2, description: 'ID de la sucursal donde se realizó el ajuste' })
+  branchId?: number | null;
+
   @ApiProperty({ example: 500 })
   newBalance: number;
 
@@ -29,6 +32,7 @@ export class CreatePointsAdjustmentResponse {
     this.pointsDelta = transaction.pointsDelta;
     this.reasonCode = transaction.reasonCode || '';
     this.membershipId = transaction.membershipId;
+    this.branchId = transaction.branchId;
     this.newBalance = newBalance;
     this.createdAt = transaction.createdAt;
   }

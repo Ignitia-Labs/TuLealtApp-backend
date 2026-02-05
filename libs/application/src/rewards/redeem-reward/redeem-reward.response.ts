@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /**
  * DTO de response para canjear una recompensa
@@ -32,11 +32,17 @@ export class RedeemRewardResponse {
   })
   newBalance: number;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
+    description: 'ID de la sucursal donde se realizó el canje',
+    example: 2,
+    type: Number,
+  })
+  branchId?: number | null;
+
+  @ApiPropertyOptional({
     description: 'Código único de canje generado (opcional)',
     example: 'REWARD-ABC123-XYZ789',
     type: String,
-    required: false,
   })
   redemptionCode?: string;
 
@@ -45,12 +51,14 @@ export class RedeemRewardResponse {
     rewardId: number;
     pointsUsed: number;
     newBalance: number;
+    branchId?: number | null;
     redemptionCode?: string;
   }) {
     this.transactionId = data.transactionId;
     this.rewardId = data.rewardId;
     this.pointsUsed = data.pointsUsed;
     this.newBalance = data.newBalance;
+    this.branchId = data.branchId;
     this.redemptionCode = data.redemptionCode;
   }
 }
