@@ -233,6 +233,7 @@ export class ProcessLoyaltyEventHandler {
             evaluation.ruleId,
             evaluation.metadata || null,
             expiresAt,
+            normalizedEvent.branchId || null, // branchId from event payload
           );
 
           const savedTransaction = await this.pointsTransactionRepository.save(transaction);

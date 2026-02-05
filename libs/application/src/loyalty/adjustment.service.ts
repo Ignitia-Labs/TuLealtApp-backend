@@ -35,6 +35,7 @@ export class AdjustmentService {
    * @param pointsDelta Cantidad de puntos a ajustar (positivo para agregar, negativo para quitar)
    * @param reasonCode Código de razón obligatorio (ej: 'CORRECTION', 'BONUS', 'PENALTY')
    * @param createdBy Usuario ADMIN que crea el ajuste
+   * @param branchId ID de la sucursal donde se realiza el ajuste (opcional)
    * @param metadata Metadatos adicionales
    * @returns Transacción de ajuste creada
    */
@@ -43,6 +44,7 @@ export class AdjustmentService {
     pointsDelta: number,
     reasonCode: string,
     createdBy: string,
+    branchId?: number | null,
     metadata?: Record<string, any>,
   ): Promise<PointsTransaction> {
     // 1. Validar que createdBy es ADMIN
@@ -96,6 +98,7 @@ export class AdjustmentService {
         adjustmentType: pointsDelta > 0 ? 'ADD' : 'SUBTRACT',
         previousBalance: await this.pointsTransactionRepository.calculateBalance(membershipId),
       },
+      branchId || null,
     );
 
     // 8. Guardar transacción

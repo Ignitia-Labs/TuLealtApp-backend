@@ -165,6 +165,7 @@ export class RedeemRewardHandler {
         rewardName: reward.name,
         rewardCategory: reward.category,
       },
+      request.branchId || null, // branchId: sucursal donde se canjea
     );
 
     const savedTransaction = await this.pointsTransactionRepository.save(transaction);
