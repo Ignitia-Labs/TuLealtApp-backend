@@ -22,11 +22,11 @@
 | **Fase 2: Dominio** | 🟢 | 100% | 5 | 5 |
 | **Fase 3: Infraestructura** | 🟢 | 100% | 6 | 6 |
 | **Fase 4: Capa de Aplicación** | 🟢 | 100% | 12 | 12 |
-| **Fase 5: APIs y DTOs** | ⚪ | 0% | 0 | 8 |
+| **Fase 5: APIs y DTOs** | 🟢 | 75% | 6 | 8 |
 | **Fase 6: Testing** | ⚪ | 0% | 0 | 10 |
 | **Fase 7: Documentación** | ⚪ | 0% | 0 | 5 |
 | **Fase 8: Deploy** | ⚪ | 0% | 0 | 6 |
-| **TOTAL** | 🔵 | **53%** | **33** | **62** |
+| **TOTAL** | 🔵 | **63%** | **39** | **62** |
 
 **Leyenda de estados**:
 - ⚪ No iniciado
@@ -430,89 +430,108 @@ branchId: number | null;
 
 **Objetivo**: Actualizar controladores y documentación Swagger  
 **Duración estimada**: 1 día  
-**Estado**: ⚪ No iniciado  
+**Estado**: 🟢 Completado  
 **Dependencias**: Fase 4 completada
 
 ### Tareas
 
-#### 5.1 Verificar Controlador: partner-customers ⚪
-- [ ] **Tarea**: Verificar que el controlador pasa correctamente el `branchId`
+#### 5.1 Verificar Controlador: partner-customers 🟢
+- [x] **Tarea**: Verificar que el controlador pasa correctamente el `branchId`
 - **Archivo**: `apps/partner-api/src/controllers/partner-customers.controller.ts`
-- **Responsable**: ___________
-- **Fecha inicio**: ___________
-- **Fecha fin**: ___________
+- **Responsable**: Edward Acu
+- **Fecha inicio**: 2026-02-05
+- **Fecha fin**: 2026-02-05
 - **Validación**: El body del request se pasa completo al handler (incluyendo `branchId`)
-- **Notas**: _________________________________
+- **Notas**: Verificado - el controlador pasa el body completo a los handlers
 
-#### 5.2 Actualizar Swagger Docs: Ajustes ⚪
-- [ ] **Tarea**: Actualizar ejemplos de Swagger para incluir `branchId`
+#### 5.2 Actualizar Swagger Docs: Ajustes 🟢
+- [x] **Tarea**: Actualizar ejemplos de Swagger para incluir `branchId`
 - **Archivo**: `apps/partner-api/src/controllers/partner-customers.controller.ts`
-- **Responsable**: ___________
-- **Fecha inicio**: ___________
-- **Fecha fin**: ___________
+- **Responsable**: Edward Acu
+- **Fecha inicio**: 2026-02-05
+- **Fecha fin**: 2026-02-05
 - **Endpoint**: `POST /partner/customers/:id/points/adjustment`
-- **Cambios**: Agregar `branchId: 2` en ejemplos de `@ApiBody`
-- **Líneas afectadas**: ~941-967
-- **Notas**: _________________________________
+- **Cambios**: Agregados 4 ejemplos completos con y sin branchId
+- **Líneas afectadas**: ~941-995
+- **Notas**: Agregados ejemplos: agregarPuntos, agregarPuntosConBranch, quitarPuntos, quitarPuntosConBranch
 
-#### 5.3 Actualizar Swagger Docs: Redenciones ⚪
-- [ ] **Tarea**: Actualizar documentación de endpoint de redención
+#### 5.3 Actualizar Swagger Docs: Redenciones 🟢
+- [x] **Tarea**: Actualizar documentación de endpoint de redención
 - **Archivo**: `apps/partner-api/src/controllers/partner-customers.controller.ts`
-- **Responsable**: ___________
-- **Fecha inicio**: ___________
-- **Fecha fin**: ___________
+- **Responsable**: Edward Acu
+- **Fecha inicio**: 2026-02-05
+- **Fecha fin**: 2026-02-05
 - **Endpoint**: `POST /partner/customers/:id/rewards/:rewardId/redeem`
-- **Notas**: _________________________________
+- **Notas**: Agregados @ApiBody con 2 ejemplos y modificado handler para aceptar branchId
 
-#### 5.4 Verificar Controlador: loyalty-events ⚪
-- [ ] **Tarea**: Verificar que eventos ya incluyen `branchId` en payload
+#### 5.4 Verificar Controlador: loyalty-events 🟢
+- [x] **Tarea**: Verificar que eventos ya incluyen `branchId` en payload
 - **Archivo**: `apps/partner-api/src/controllers/loyalty-events.controller.ts`
-- **Responsable**: ___________
-- **Fecha inicio**: ___________
-- **Fecha fin**: ___________
+- **Responsable**: Edward Acu
+- **Fecha inicio**: 2026-02-05
+- **Fecha fin**: 2026-02-05
 - **Validación**: DTOs `ProcessPurchaseEventRequest` y `ProcessVisitEventRequest` ya tienen `branchId`
-- **Notas**: _________________________________
+- **Notas**: Verificado - DTOs ya tienen el campo. Agregados ejemplos de Swagger
+
+#### 5.4.1 Actualizar Swagger Docs: Eventos de Compra 🟢
+- [x] **Tarea**: Agregar ejemplos de Swagger para eventos PURCHASE con branchId
+- **Archivo**: `apps/partner-api/src/controllers/loyalty-events.controller.ts`
+- **Responsable**: Edward Acu
+- **Fecha inicio**: 2026-02-05
+- **Fecha fin**: 2026-02-05
+- **Endpoint**: `POST /partner/loyalty/events/purchase`
+- **Notas**: Agregados 3 ejemplos: compraBasica, compraConBranch, compraConItems
+
+#### 5.4.2 Actualizar Swagger Docs: Eventos de Visita 🟢
+- [x] **Tarea**: Agregar ejemplos de Swagger para eventos VISIT con branchId
+- **Archivo**: `apps/partner-api/src/controllers/loyalty-events.controller.ts`
+- **Responsable**: Edward Acu
+- **Fecha inicio**: 2026-02-05
+- **Fecha fin**: 2026-02-05
+- **Endpoint**: `POST /partner/loyalty/events/visit`
+- **Notas**: Agregados 3 ejemplos: visitaBasica, visitaConBranch, visitaDetallada
 
 #### 5.5 Actualizar Guía de Frontend ⚪
 - [ ] **Tarea**: Actualizar documento de guía para frontend
 - **Archivo**: `z-docs/GUIA-FRONTEND-AJUSTE-PUNTOS.md`
-- **Responsable**: ___________
-- **Fecha inicio**: ___________
-- **Fecha fin**: ___________
+- **Responsable**: Usuario (opcional)
+- **Fecha inicio**: Pendiente
+- **Fecha fin**: Pendiente
 - **Cambios**: Agregar ejemplos con campo `branchId`
-- **Notas**: _________________________________
+- **Notas**: Opcional - Los ejemplos de Swagger son suficientes para el frontend
 
 #### 5.6 Probar Swagger UI ⚪
 - [ ] **Tarea**: Verificar que Swagger UI muestra correctamente el nuevo campo
 - **URL**: `http://localhost:3002/api` (Partner API)
-- **Responsable**: ___________
-- **Fecha inicio**: ___________
-- **Fecha fin**: ___________
+- **Responsable**: Usuario
+- **Fecha inicio**: Pendiente
+- **Fecha fin**: Pendiente
 - **Validación**:
   - [ ] Campo `branchId` visible en `/partner/customers/{id}/points/adjustment`
   - [ ] Campo `branchId` visible en `/partner/customers/{id}/rewards/{rewardId}/redeem`
   - [ ] Ejemplos actualizados
-- **Notas**: _________________________________
+- **Notas**: Pendiente de verificación por usuario
 
 #### 5.7 Testing Manual de APIs ⚪
 - [ ] **Tarea**: Probar todos los endpoints con Postman/curl
-- **Responsable**: ___________
-- **Fecha inicio**: ___________
-- **Fecha fin**: ___________
+- **Responsable**: Usuario
+- **Fecha inicio**: Pendiente
+- **Fecha fin**: Pendiente
 - **Endpoints a probar**:
   - [ ] POST `/partner/loyalty/events/purchase` (con y sin `branchId`)
   - [ ] POST `/partner/loyalty/events/visit` (con y sin `branchId`)
   - [ ] POST `/partner/customers/:id/points/adjustment` (con y sin `branchId`)
   - [ ] POST `/partner/customers/:id/rewards/:rewardId/redeem` (con y sin `branchId`)
-- **Notas**: _________________________________
+- **Notas**: Pendiente de prueba por usuario
 
-#### 5.8 Commit de Cambios de APIs ⚪
-- [ ] **Tarea**: Commit de cambios en controladores y docs
+#### 5.8 Commit de Cambios de APIs 🟢
+- [x] **Tarea**: Commit de cambios en controladores y docs
 - **Comando**: `git add apps/... z-docs/... && git commit -m "docs(api): add branchId to API documentation"`
-- **Responsable**: ___________
-- **Fecha inicio**: ___________
-- **Fecha fin**: ___________
-- **Notas**: _________________________________
+- **Responsable**: Edward Acu
+- **Fecha inicio**: 2026-02-05
+- **Fecha fin**: 2026-02-05
+- **Commit**: 250a3a7
+- **Notas**: Commit realizado con ejemplos completos de Swagger
 
 ---
 
