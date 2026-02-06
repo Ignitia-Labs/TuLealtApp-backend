@@ -1,5 +1,5 @@
 import { IsInt, Min, IsString, IsNotEmpty, IsOptional, IsObject } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class CreatePointsAdjustmentRequest {
@@ -22,10 +22,19 @@ export class CreatePointsAdjustmentRequest {
   @IsNotEmpty()
   reasonCode: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
+    example: 2,
+    description: 'ID de la sucursal donde se realiza el ajuste (opcional)',
+    type: Number,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  branchId?: number | null;
+
+  @ApiPropertyOptional({
     example: { birthdayMonth: 1 },
     description: 'Metadatos adicionales (opcional)',
-    required: false,
   })
   @IsOptional()
   @IsObject()

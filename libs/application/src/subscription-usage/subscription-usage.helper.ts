@@ -974,15 +974,22 @@ export class SubscriptionUsageHelper {
 
         branchesCount = await branchesQuery.getCount();
 
-        // Log detallado de branches por tenant para debug
-        for (const tenantId of tenantIds) {
-          const branchCountForTenant = await branchRepository
+        // OPTIMIZACIÓN: Usar GROUP BY en lugar de loop con N queries
+        // Si se necesita el detalle por tenant, usar una sola query agrupada
+        if (tenantIds.length > 0) {
+          const branchCountsByTenant = await branchRepository
             .createQueryBuilder('branch')
-            .where('branch.tenantId = :tenantId', { tenantId })
-            .getCount();
-          console.log(
-            `[SubscriptionUsageHelper] Tenant ${tenantId} has ${branchCountForTenant} branches`,
-          );
+            .select('branch.tenantId', 'tenantId')
+            .addSelect('COUNT(*)', 'count')
+            .where('branch.tenantId IN (:...tenantIds)', { tenantIds })
+            .groupBy('branch.tenantId')
+            .getRawMany();
+
+          branchCountsByTenant.forEach(({ tenantId, count }) => {
+            console.log(
+              `[SubscriptionUsageHelper] Tenant ${tenantId} has ${count} branches`,
+            );
+          });
         }
       }
 
@@ -998,15 +1005,22 @@ export class SubscriptionUsageHelper {
           .where('membership.tenantId IN (:...tenantIds)', { tenantIds })
           .getCount();
 
-        // Log detallado de customers por tenant para debug
-        for (const tenantId of tenantIds) {
-          const customerCountForTenant = await customerMembershipRepository
+        // OPTIMIZACIÓN: Usar GROUP BY en lugar de loop con N queries
+        // Si se necesita el detalle por tenant, usar una sola query agrupada
+        if (tenantIds.length > 0) {
+          const customerCountsByTenant = await customerMembershipRepository
             .createQueryBuilder('membership')
-            .where('membership.tenantId = :tenantId', { tenantId })
-            .getCount();
-          console.log(
-            `[SubscriptionUsageHelper] Tenant ${tenantId} has ${customerCountForTenant} customers`,
-          );
+            .select('membership.tenantId', 'tenantId')
+            .addSelect('COUNT(*)', 'count')
+            .where('membership.tenantId IN (:...tenantIds)', { tenantIds })
+            .groupBy('membership.tenantId')
+            .getRawMany();
+
+          customerCountsByTenant.forEach(({ tenantId, count }) => {
+            console.log(
+              `[SubscriptionUsageHelper] Tenant ${tenantId} has ${count} customers`,
+            );
+          });
         }
       }
 

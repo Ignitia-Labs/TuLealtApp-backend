@@ -11,6 +11,7 @@ import { TenantEntity } from '@libs/infrastructure/entities/system/tenant.entity
 import { UserEntity } from '@libs/infrastructure/entities/auth/user.entity';
 import { CustomerMembershipEntity } from '@libs/infrastructure/entities/customer/customer-membership.entity';
 import { RewardEntity } from '@libs/infrastructure/entities/loyalty/reward.entity';
+import { BranchEntity } from '@libs/infrastructure/entities/partner/branch.entity';
 
 /**
  * Entidad de persistencia para PointsTransaction
@@ -28,6 +29,8 @@ import { RewardEntity } from '@libs/infrastructure/entities/loyalty/reward.entit
 @Index('IDX_POINTS_TRANSACTIONS_EXPIRES_AT', ['expiresAt'])
 @Index('IDX_POINTS_TRANSACTIONS_REVERSAL_OF', ['reversalOfTransactionId'])
 @Index('IDX_POINTS_TRANSACTIONS_REWARD_ID', ['rewardId'])
+@Index('IDX_POINTS_TRANSACTIONS_BRANCH_ID', ['branchId'])
+@Index('IDX_POINTS_TRANSACTIONS_TENANT_BRANCH_DATE', ['tenantId', 'branchId', 'createdAt'])
 export class PointsTransactionEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -104,6 +107,22 @@ export class PointsTransactionEntity {
 
   @Column('datetime', { nullable: true })
   expiresAt: Date | null; // Fecha de expiración de los puntos (solo para EARNING)
+
+  @ManyToOne(() => BranchEntity, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'branchId' })
+  branch: BranchEntity | null;
+
+  @Column('int', { nullable: true })
+  branchId: number | null; // FK a branches.id - Sucursal donde ocurrió la transacción
+
+  @Column('decimal', { precision: 15, scale: 2, nullable: true }) // ← NUEVO
+  amount: number | null; // Monto monetario de la transacción (solo para EARNING de PURCHASE)
+
+  @Column('varchar', { length: 10, nullable: true, default: 'GTQ' }) // ← NUEVO
+  currency: string | null; // Moneda del monto (ISO 4217: GTQ, USD, etc.)
 
   @CreateDateColumn()
   createdAt: Date;

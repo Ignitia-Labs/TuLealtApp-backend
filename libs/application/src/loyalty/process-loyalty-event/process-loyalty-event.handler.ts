@@ -100,7 +100,24 @@ export class ProcessLoyaltyEventHandler {
       // 4. Obtener tier actual
       const tier = membership.tierId ? await this.tierRepository.findById(membership.tierId) : null;
 
-      // 5. Evaluar reglas por programa
+      // 5. OPTIMIZACIÓN: Cargar TODAS las reglas de TODOS los programas en batch
+      // Esto evita N queries (una por programa) en el loop siguiente
+      const allProgramIds = compatiblePrograms.map(p => p.id);
+      const allRules = await this.ruleRepository.findActiveByProgramIdsAndTrigger(
+        allProgramIds,
+        normalizedEvent.eventType,
+      );
+
+      // Agrupar reglas por programId para acceso rápido en O(1)
+      const rulesByProgram = new Map<number, typeof allRules>();
+      allRules.forEach(rule => {
+        if (!rulesByProgram.has(rule.programId)) {
+          rulesByProgram.set(rule.programId, []);
+        }
+        rulesByProgram.get(rule.programId)!.push(rule);
+      });
+
+      // 6. Evaluar reglas por programa
       const allEvaluations: any[] = [];
       const skipped: Array<{ reason: string; ruleId?: number; programId?: number }> = [];
 
@@ -109,11 +126,8 @@ export class ProcessLoyaltyEventHandler {
           `[PROCESS_EVENT] Processing program ${program.id} (${program.name}) - type: ${program.programType}`,
         );
 
-        // Obtener reglas activas del programa
-        const rules = await this.ruleRepository.findActiveByProgramIdAndTrigger(
-          program.id,
-          normalizedEvent.eventType,
-        );
+        // OPTIMIZACIÓN: Obtener reglas desde el Map en lugar de query
+        const rules = rulesByProgram.get(program.id) || [];
 
         console.log(
           `[PROCESS_EVENT] Found ${rules.length} active rules for program ${program.id} with trigger ${normalizedEvent.eventType}`,
@@ -176,15 +190,56 @@ export class ProcessLoyaltyEventHandler {
       // 7. Calcular puntos + caps (ya aplicados en conflictResolver)
       const totalPointsAwarded = resolvedEvaluations.reduce((sum, eval_) => sum + eval_.points, 0);
 
-      // 8. Insertar ledger idempotente
+      // 8. OPTIMIZACIÓN: Cargar datos necesarios en batch ANTES del loop
+      // Esto evita 4N queries (N evaluaciones × 4 queries cada una)
+      
+      // 8.1. Verificar idempotencia en batch
+      const idempotencyKeys = resolvedEvaluations.map(e => e.idempotencyKey);
+      const existingTransactionsMap = await this.pointsTransactionRepository.findByIdempotencyKeys(
+        idempotencyKeys,
+      );
+
+      // 8.2. Cargar todas las reglas necesarias en batch
+      const ruleIds = [...new Set(resolvedEvaluations.map(e => e.ruleId))];
+      const rulesMap = new Map<number, any>();
+      if (ruleIds.length > 0) {
+        const rules = await this.ruleRepository.findByIds(ruleIds);
+        rules.forEach(r => rulesMap.set(r.id, r));
+      }
+
+      // 8.3. Cargar todos los programas necesarios en batch
+      const programIds = [...new Set(Array.from(rulesMap.values()).map(r => r.programId))];
+      const programsMap = new Map<number, any>();
+      if (programIds.length > 0) {
+        const programs = await this.programRepository.findByIds(programIds);
+        programs.forEach(p => programsMap.set(p.id, p));
+      }
+
+      // 8.4. Cargar tenant una sola vez (no cambia entre evaluaciones)
+      const tenant = await this.tenantRepository.findById(normalizedEvent.tenantId);
+      if (!tenant) {
+        this.logger.warn({
+          message: 'Tenant not found, skipping all evaluations',
+          tenantId: normalizedEvent.tenantId,
+        });
+        return {
+          eventId: normalizedEvent.sourceEventId,
+          membershipId: membership.id,
+          programsProcessed: compatiblePrograms.map((p) => p.id),
+          transactionsCreated: [],
+          totalPointsAwarded: 0,
+          evaluations: resolvedEvaluations,
+          skipped: [{ reason: `Tenant ${normalizedEvent.tenantId} not found` }],
+        };
+      }
+
+      // 9. Insertar ledger idempotente (ahora con datos precargados)
       const transactionsCreated: number[] = [];
 
       for (const evaluation of resolvedEvaluations) {
         try {
-          // Verificar idempotencia
-          const existingTransaction = await this.pointsTransactionRepository.findByIdempotencyKey(
-            evaluation.idempotencyKey,
-          );
+          // OPTIMIZACIÓN: Verificar idempotencia desde Map precargado
+          const existingTransaction = existingTransactionsMap.get(evaluation.idempotencyKey);
 
           if (existingTransaction) {
             // Ya existe, no duplicar
@@ -192,8 +247,8 @@ export class ProcessLoyaltyEventHandler {
             continue;
           }
 
-          // Crear nueva transacción
-          const rule = await this.ruleRepository.findById(evaluation.ruleId);
+          // OPTIMIZACIÓN: Obtener rule desde Map precargado
+          const rule = rulesMap.get(evaluation.ruleId);
           if (!rule) {
             skipped.push({
               reason: `Rule ${evaluation.ruleId} not found`,
@@ -202,22 +257,33 @@ export class ProcessLoyaltyEventHandler {
             continue;
           }
 
-          // Calcular fecha de expiración según política del programa
-          const program = await this.programRepository.findById(rule.programId);
-          const tenant = await this.tenantRepository.findById(normalizedEvent.tenantId);
-          if (!tenant) {
+          // OPTIMIZACIÓN: Obtener program desde Map precargado
+          const program = programsMap.get(rule.programId);
+          if (!program) {
             skipped.push({
-              reason: `Tenant ${normalizedEvent.tenantId} not found`,
+              reason: `Program ${rule.programId} not found`,
               ruleId: evaluation.ruleId,
             });
             continue;
           }
 
+          // Calcular fecha de expiración según política del programa (tenant ya cargado arriba)
           const expiresAt = this.expirationCalculator.calculateExpirationDate(
             program,
             tenant,
             normalizedEvent.occurredAt,
           );
+
+          // Extraer amount y currency para eventos PURCHASE
+          let amount: number | null = null;
+          let currency: string | null = null;
+
+          if (normalizedEvent.eventType === 'PURCHASE' && 'orderId' in normalizedEvent.payload) {
+            const purchasePayload = normalizedEvent.payload as any;
+            // Preferir netAmount sobre grossAmount (según especificación)
+            amount = purchasePayload.netAmount || purchasePayload.grossAmount || null;
+            currency = purchasePayload.currency || 'GTQ'; // Default a GTQ si no se especifica
+          }
 
           const transaction = PointsTransaction.createEarning(
             normalizedEvent.tenantId,
@@ -233,6 +299,9 @@ export class ProcessLoyaltyEventHandler {
             evaluation.ruleId,
             evaluation.metadata || null,
             expiresAt,
+            normalizedEvent.branchId || null, // branchId from event payload
+            amount, // ← NUEVO: monto de la transacción
+            currency, // ← NUEVO: moneda de la transacción
           );
 
           const savedTransaction = await this.pointsTransactionRepository.save(transaction);

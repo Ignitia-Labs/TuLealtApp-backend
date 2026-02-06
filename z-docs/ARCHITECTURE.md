@@ -895,6 +895,106 @@ describe('CreateUserHandler', () => {
 
 ---
 
+## 💰 Sistema de Puntos y Ledger
+
+### Principio Fundamental: Ledger como Fuente de Verdad
+
+El sistema de puntos está basado en un **ledger inmutable** (`PointsTransaction`) que actúa como la única fuente de verdad para todos los cambios de puntos. El campo `points` en `customer_memberships` es una **proyección calculada** desde el ledger, no la fuente primaria.
+
+### Arquitectura del Sistema
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Ledger (Fuente de Verdad)            │
+│              PointsTransaction (Inmutable)              │
+│  - EARNING, REDEEM, ADJUSTMENT, REVERSAL, EXPIRATION   │
+│  - Idempotencia garantizada por idempotencyKey         │
+└─────────────────────────────────────────────────────────┘
+                        │
+                        │ Proyección
+                        ▼
+┌─────────────────────────────────────────────────────────┐
+│              BalanceProjectionService                   │
+│  - Calcula balance desde ledger (SUM pointsDelta)       │
+│  - Actualiza proyección en customer_memberships.points │
+└─────────────────────────────────────────────────────────┘
+                        │
+                        │ Sincronización
+                        ▼
+┌─────────────────────────────────────────────────────────┐
+│              BalanceSyncService                          │
+│  - Sincroniza balances después de transacciones         │
+│  - Batch sync para reparación                          │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Reglas Críticas
+
+1. **Inmutabilidad del Ledger**: El ledger es de solo escritura (INSERT). Nunca se actualiza ni elimina una transacción existente.
+
+2. **Idempotencia Obligatoria**: Toda transacción debe tener un `idempotencyKey` único. El ledger tiene un índice UNIQUE en `idempotencyKey` para garantizar idempotencia.
+
+3. **Proyecciones, No Mutación Directa**:
+   - ❌ **NUNCA** actualizar `customer_memberships.points` directamente
+   - ✅ **SIEMPRE** crear transacciones en el ledger
+   - ✅ Usar `BalanceProjectionService.recalculateBalance()` para actualizar proyecciones
+
+4. **Validación en Repositorio**: El método `CustomerMembershipRepository.save()` valida y previene actualizaciones directas de `points`. Si se intenta actualizar `points` directamente, se ignora el cambio y se registra una advertencia.
+
+### Flujo de Actualización de Puntos
+
+```typescript
+// ✅ CORRECTO: Crear transacción en ledger
+const transaction = PointsTransaction.createEarning(
+  membershipId,
+  programId,
+  points,
+  idempotencyKey,
+  sourceEventId,
+  // ... otros parámetros
+);
+await pointsTransactionRepository.save(transaction);
+
+// Sincronizar proyección automáticamente
+await balanceSyncService.syncAfterTransaction(membershipId);
+
+// ❌ INCORRECTO: Actualizar puntos directamente
+membership.addPoints(points); // ⚠️ DEPRECATED - No usar
+await membershipRepository.save(membership); // ⚠️ points será ignorado
+```
+
+### Métodos Deprecados
+
+Los siguientes métodos están deprecados y serán removidos en versiones futuras:
+
+- `CustomerMembership.addPoints()` - Use ledger + `BalanceProjectionService`
+- `CustomerMembership.subtractPoints()` - Use ledger + `BalanceProjectionService`
+- `TierCalculatorHelper.addPointsAndRecalculateTier()` - Use ledger + `recalculateTierFromLedger()`
+- `TierCalculatorHelper.subtractPointsAndRecalculateTier()` - Use ledger + `recalculateTierFromLedger()`
+
+### Métodos Recomendados
+
+- `BalanceProjectionService.calculateMembershipBalance()` - Calcula balance desde ledger
+- `BalanceProjectionService.recalculateBalance()` - Recalcula y actualiza proyección
+- `BalanceSyncService.syncAfterTransaction()` - Sincroniza después de crear transacción
+- `TierCalculatorHelper.recalculateTierFromLedger()` - Recalcula tier basado en balance del ledger
+
+### Migración de Código Existente
+
+Si tienes código que actualiza puntos directamente:
+
+1. **Identificar**: Buscar usos de `addPoints()`, `subtractPoints()`, o actualización directa de `points`
+2. **Refactorizar**: Cambiar para crear transacciones en el ledger primero
+3. **Sincronizar**: Llamar a `BalanceSyncService.syncAfterTransaction()` después de crear transacciones
+4. **Validar**: Verificar que las proyecciones se actualizan correctamente
+
+### Documentación Adicional
+
+- Ver `PLAN-IMPLEMENTACION-TIPOS-RECOMPENSA.md` para detalles completos del sistema
+- Ver `ANALISIS-ACUMULACION-PUNTOS.md` para análisis técnico detallado
+
+---
+
 ## 📚 Recursos Adicionales
 
 - [Domain-Driven Design (DDD)](https://martinfowler.com/bliki/DomainDrivenDesign.html)
@@ -905,5 +1005,61 @@ describe('CreateUserHandler', () => {
 
 ---
 
-**Última actualización**: 2025-01-20
 
+
+# Regla: No usar JSON para datos consultables
+
+Prohibido guardar en JSON cualquier dato que:
+	•	se use en filtros (WHERE)
+	•	se use en joins (JOIN)
+	•	se use en agregaciones (GROUP BY, SUM, COUNT)
+	•	se use para ordenamiento (ORDER BY)
+	•	se use para reglas de negocio (tiers, rewards, eligibility, etc.)
+
+✅ Sí se permite JSON únicamente para:
+	•	metadata / auditing (ej. rawPayload, debugContext)
+	•	payloads externos que se almacenan “tal cual” por trazabilidad
+	•	campos opcionales no indexables y que no afectan reglas ni reportes
+
+Principio: Si lo vas a consultar, indexar o usar en reglas → debe ser columna tipada, no JSON.
+
+2) Diseño de modelo: columnas tipadas + tablas de relación
+	•	Preferir columnas tipadas (int, varchar, datetime, boolean, decimal) sobre “bolsas” JSON.
+	•	Preferir tablas normalizadas para listas (ej. reward_eligible_categories) en vez de categories: ["A","B"] dentro de JSON.
+	•	Definir claves y constraints: PK, FK, UNIQUE, CHECK, NOT NULL.
+
+3) Performance: consultas “sargables” e índices explícitos
+
+Para mantener las consultas eficientes:
+	•	Las condiciones en WHERE deben poder usar índices (evitar funciones sobre la columna).
+	•	❌ WHERE LOWER(email) = 'x@x.com'
+	•	✅ WHERE email = 'x@x.com' (y normalizar email al guardar si aplica)
+	•	No depender de “parsing” de JSON en tiempo de consulta.
+	•	❌ WHERE JSON_VALUE(payload, '$.tenantId') = ...
+	•	✅ WHERE tenant_id = ...
+	•	Índices por acceso real:
+	•	Índices en tenant_id, membership_id, program_id, created_at
+	•	Índices compuestos según patrones: (tenant_id, program_id, created_at) etc.
+
+4) Contrato de acceso a datos
+	•	Los repositorios deben exponer métodos que regresen entidades de dominio o DTOs, nunca blobs JSON.
+	•	Las consultas complejas (reporting/analytics) deben estar:
+	•	en un módulo dedicado (/infrastructure/persistence/queries o “read models”)
+	•	documentadas con su intención, y con índices requeridos
+
+5) Excepción explícita: ledger/transactions y trazabilidad
+
+En el sistema de ledger (PointsTransaction) se permite guardar rawPayload o context JSON solo para auditoría, pero:
+	•	Las columnas que soportan balance, tier, program, membership, tenant deben ser tipadas e indexadas.
+Esto es consistente con el enfoque de “ledger + proyecciones” que ya describes.  ￼
+
+6) Checklist antes de agregar una tabla o query nueva
+
+Antes de mergear:
+	•	¿Algún campo “consultable” quedó como JSON? → refactor a columna / tabla
+	•	¿La query usa índices existentes? → agregar índice
+	•	¿Se está filtrando por tenant/membership cuando aplica multitenancy? → obligatorio
+	•	¿Hay riesgo de N+1? → cambiar a joins / batch
+	•	¿Se documentó el patrón de acceso y los índices? → sí
+
+  **Última actualización**: 2025-01-28

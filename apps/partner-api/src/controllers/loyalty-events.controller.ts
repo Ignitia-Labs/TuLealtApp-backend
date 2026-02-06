@@ -564,6 +564,80 @@ export class LoyaltyEventsController {
   @ApiBody({
     description: 'Datos del evento de compra',
     type: ProcessPurchaseEventRequest,
+    examples: {
+      compraBasica: {
+        summary: 'Compra básica',
+        description: 'Ejemplo de evento de compra sin especificar sucursal',
+        value: {
+          tenantId: 1,
+          orderId: 'FAC-00124',
+          occurredAt: '2026-01-31T02:57:22.591Z',
+          membershipRef: {
+            membershipId: 100,
+          },
+          netAmount: 100.0,
+          grossAmount: 100.0,
+          currency: 'GTQ',
+          paymentMethod: 'cash',
+          paymentStatus: 'PAID',
+        },
+      },
+      compraConBranch: {
+        summary: 'Compra con sucursal',
+        description: 'Ejemplo de evento de compra registrando la sucursal',
+        value: {
+          tenantId: 1,
+          orderId: 'FAC-00125',
+          occurredAt: '2026-01-31T02:57:22.591Z',
+          membershipRef: {
+            membershipId: 100,
+          },
+          netAmount: 150.0,
+          grossAmount: 165.0,
+          currency: 'GTQ',
+          branchId: 2,
+          paymentMethod: 'card',
+          paymentStatus: 'PAID',
+          channel: 'in-store',
+        },
+      },
+      compraConItems: {
+        summary: 'Compra con items y sucursal',
+        description: 'Ejemplo de compra con items detallados y sucursal',
+        value: {
+          tenantId: 1,
+          orderId: 'FAC-00126',
+          occurredAt: '2026-01-31T02:57:22.591Z',
+          membershipRef: {
+            qrCode: 'QR-USER-3-TENANT-1-5SO3IT',
+          },
+          netAmount: 225.0,
+          grossAmount: 247.5,
+          currency: 'GTQ',
+          branchId: 3,
+          items: [
+            {
+              sku: 'PROD-001',
+              qty: 2,
+              unitPrice: 75.0,
+              categoryId: 5,
+              categoryName: 'Electrónica',
+              productName: 'Producto Ejemplo',
+            },
+            {
+              sku: 'PROD-002',
+              qty: 1,
+              unitPrice: 75.0,
+              categoryId: 3,
+              categoryName: 'Hogar',
+            },
+          ],
+          paymentMethod: 'card',
+          paymentStatus: 'PAID',
+          channel: 'in-store',
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 200,
@@ -642,6 +716,56 @@ export class LoyaltyEventsController {
   @ApiBody({
     description: 'Datos del evento de visita',
     type: ProcessVisitEventRequest,
+    examples: {
+      visitaBasica: {
+        summary: 'Visita básica',
+        description: 'Ejemplo de evento de visita sin especificar sucursal',
+        value: {
+          tenantId: 1,
+          visitId: 'VISIT-2025-01-29-001',
+          occurredAt: '2025-01-29T10:00:00Z',
+          membershipRef: {
+            membershipId: 100,
+          },
+        },
+      },
+      visitaConBranch: {
+        summary: 'Visita con sucursal',
+        description: 'Ejemplo de evento de visita registrando la sucursal',
+        value: {
+          tenantId: 1,
+          visitId: 'VISIT-2025-01-29-002',
+          occurredAt: '2025-01-29T10:00:00Z',
+          membershipRef: {
+            qrCode: 'QR-USER-3-TENANT-1-5SO3IT',
+          },
+          branchId: 2,
+          channel: 'in-store',
+          visitType: 'checkin',
+        },
+      },
+      visitaDetallada: {
+        summary: 'Visita detallada con sucursal',
+        description: 'Ejemplo de visita con información completa',
+        value: {
+          tenantId: 1,
+          visitId: 'VISIT-2025-01-29-003',
+          occurredAt: '2025-01-29T10:00:00Z',
+          membershipRef: {
+            customerId: 50,
+            tenantId: 1,
+          },
+          branchId: 3,
+          channel: 'in-store',
+          visitType: 'consultation',
+          durationMinutes: 45,
+          metadata: {
+            consultantId: 10,
+            serviceType: 'premium',
+          },
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 200,

@@ -129,6 +129,7 @@ export interface LoyaltyEvent {
   occurredAt: Date; // Fecha/hora en que ocurrió el evento
   membershipRef: MembershipRef; // Referencia a membership (debe resolverse a membershipId)
   payload: LoyaltyEventPayload; // Payload específico según eventType
+  branchId?: number | null; // ID de la sucursal donde ocurrió el evento (extraído del payload para fácil acceso)
   correlationId?: string | null; // ID para correlacionar eventos relacionados
   createdBy?: string | null; // Usuario/sistema que creó el evento
   metadata?: Record<string, any> | null; // Metadata adicional

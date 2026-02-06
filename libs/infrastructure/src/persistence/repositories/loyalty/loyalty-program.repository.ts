@@ -183,4 +183,22 @@ export class LoyaltyProgramRepository implements ILoyaltyProgramRepository {
   async delete(id: number): Promise<void> {
     await this.loyaltyProgramRepository.delete(id);
   }
+
+  /**
+   * Busca múltiples programas por sus IDs (batch query)
+   * Optimización para evitar N+1 queries
+   */
+  async findByIds(ids: number[]): Promise<LoyaltyProgram[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const entities = await this.loyaltyProgramRepository
+      .createQueryBuilder('program')
+      .leftJoinAndSelect('program.earningDomainsRelation', 'earningDomains')
+      .whereInIds(ids)
+      .getMany();
+
+    return entities.map((entity) => LoyaltyProgramMapper.toDomain(entity));
+  }
 }

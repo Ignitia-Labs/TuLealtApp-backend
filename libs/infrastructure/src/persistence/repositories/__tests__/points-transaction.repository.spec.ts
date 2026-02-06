@@ -27,11 +27,15 @@ describe('PointsTransactionRepository', () => {
     reversalOfTransactionId: null,
     expiresAt: null,
     rewardId: null, // EARNING transactions don't have rewardId
+    branchId: null, // branchId is nullable
+    amount: null, // ← NUEVO: VISIT no tiene revenue
+    currency: null, // ← NUEVO
     createdAt: new Date('2024-01-01T10:00:00Z'),
     tenant: null as any,
     customer: null as any,
     membership: null as any,
     reward: null as any,
+    branch: null as any,
   };
 
   beforeEach(async () => {

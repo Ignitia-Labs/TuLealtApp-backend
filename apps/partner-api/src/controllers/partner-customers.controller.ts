@@ -953,6 +953,19 @@ export class PartnerCustomersController {
           },
         },
       },
+      agregarPuntosConBranch: {
+        summary: 'Agregar puntos con sucursal',
+        description: 'Ejemplo de ajuste para agregar puntos registrando la sucursal',
+        value: {
+          pointsDelta: 100,
+          reasonCode: 'BONUS_BIRTHDAY',
+          branchId: 2,
+          metadata: {
+            birthdayMonth: 1,
+            appliedBy: 'Store Manager',
+          },
+        },
+      },
       quitarPuntos: {
         summary: 'Quitar puntos',
         description: 'Ejemplo de ajuste para quitar puntos',
@@ -961,6 +974,19 @@ export class PartnerCustomersController {
           reasonCode: 'PENALTY',
           metadata: {
             reason: 'Policy violation',
+          },
+        },
+      },
+      quitarPuntosConBranch: {
+        summary: 'Quitar puntos con sucursal',
+        description: 'Ejemplo de ajuste para quitar puntos registrando la sucursal',
+        value: {
+          pointsDelta: -50,
+          reasonCode: 'CORRECTION',
+          branchId: 3,
+          metadata: {
+            reason: 'Duplicate transaction',
+            originalTransactionId: 1234,
           },
         },
       },
@@ -1167,7 +1193,8 @@ export class PartnerCustomersController {
     description:
       'Procesa el canje de una recompensa usando los puntos del customer. ' +
       'Valida que el customer tenga puntos suficientes, que la recompensa esté disponible ' +
-      'y que no se haya alcanzado el límite de canjes. El customer debe pertenecer al partner del usuario autenticado.',
+      'y que no se haya alcanzado el límite de canjes. El customer debe pertenecer al partner del usuario autenticado. ' +
+      'Opcionalmente se puede incluir branchId para registrar la sucursal donde se realizó el canje.',
   })
   @ApiParam({
     name: 'id',
@@ -1182,6 +1209,25 @@ export class PartnerCustomersController {
     type: Number,
     example: 1,
     required: true,
+  })
+  @ApiBody({
+    type: RedeemRewardRequest,
+    description: 'Datos del canje de recompensa (opcional: incluir branchId)',
+    required: false,
+    examples: {
+      canjeBasico: {
+        summary: 'Canje básico',
+        description: 'Canje sin especificar sucursal',
+        value: {},
+      },
+      canjeConBranch: {
+        summary: 'Canje con sucursal',
+        description: 'Canje registrando la sucursal donde se realizó',
+        value: {
+          branchId: 2,
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 200,
@@ -1213,6 +1259,7 @@ export class PartnerCustomersController {
     @CurrentUser() user: JwtPayload,
     @Param('id', ParseIntPipe) membershipId: number,
     @Param('rewardId', ParseIntPipe) rewardId: number,
+    @Body() body?: Partial<RedeemRewardRequest>,
   ): Promise<RedeemRewardResponse> {
     // Obtener el partnerId del usuario autenticado
     const currentUser = await this.userRepository.findById(user.userId);
@@ -1244,6 +1291,10 @@ export class PartnerCustomersController {
     const request = new RedeemRewardRequest();
     request.membershipId = membershipId;
     request.rewardId = rewardId;
+    // Incluir branchId si se proporciona en el body
+    if (body?.branchId) {
+      request.branchId = body.branchId;
+    }
     return this.redeemRewardHandler.execute(request);
   }
 }

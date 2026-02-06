@@ -50,6 +50,7 @@ export class CreatePointsAdjustmentHandler {
       request.pointsDelta,
       request.reasonCode,
       createdBy,
+      request.branchId,
       request.metadata,
     );
 

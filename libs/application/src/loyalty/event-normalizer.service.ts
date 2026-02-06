@@ -62,6 +62,12 @@ export class EventNormalizer {
     }
     const payload = this.validatePayload(event.eventType, event.payload);
 
+    // Extraer branchId del payload si está disponible (para PURCHASE, VISIT, CUSTOM)
+    let branchId: number | null = null;
+    if ('branchId' in payload && typeof payload.branchId === 'number') {
+      branchId = payload.branchId;
+    }
+
     // Construir evento normalizado
     return {
       tenantId: event.tenantId,
@@ -70,6 +76,7 @@ export class EventNormalizer {
       occurredAt,
       membershipRef,
       payload,
+      branchId, // Extraído del payload para fácil acceso en handlers
       correlationId: event.correlationId || null,
       createdBy: event.createdBy || null,
       metadata: event.metadata || null,

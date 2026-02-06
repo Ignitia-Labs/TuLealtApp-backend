@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   HttpCode,
   HttpStatus,
   ParseIntPipe,
@@ -41,6 +42,12 @@ import {
   DeleteBranchHandler,
   DeleteBranchRequest,
   DeleteBranchResponse,
+  GetAllBranchesMetricsHandler,
+  GetAllBranchesMetricsRequest,
+  GetAllBranchesMetricsResponse,
+  GetCrossBranchInsightsHandler,
+  GetCrossBranchInsightsRequest,
+  GetCrossBranchInsightsResponse,
   JwtPayload,
 } from '@libs/application';
 import {
@@ -86,6 +93,8 @@ export class BranchesController {
     private readonly getBranchesByTenantHandler: GetBranchesByTenantHandler,
     private readonly updateBranchHandler: UpdateBranchHandler,
     private readonly deleteBranchHandler: DeleteBranchHandler,
+    private readonly getAllBranchesMetricsHandler: GetAllBranchesMetricsHandler,
+    private readonly getCrossBranchInsightsHandler: GetCrossBranchInsightsHandler,
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
     @Inject('ITenantRepository')
@@ -397,5 +406,140 @@ export class BranchesController {
     request.branchId = id;
 
     return this.deleteBranchHandler.execute(request);
+  }
+
+  @Get('tenants/:tenantId/branches/metrics')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Obtener métricas de todas las sucursales',
+    description:
+      'Obtiene métricas agregadas de revenue, clientes y recompensas para todas las sucursales de un tenant específico. Incluye filtros por período de tiempo.',
+  })
+  @ApiParam({
+    name: 'tenantId',
+    type: Number,
+    description: 'ID del tenant',
+    example: 1,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Métricas obtenidas exitosamente',
+    type: GetAllBranchesMetricsResponse,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos o el tenant no pertenece a su partner',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Tenant no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  async getAllBranchesMetrics(
+    @Param('tenantId', ParseIntPipe) tenantId: number,
+    @Query() query: Partial<GetAllBranchesMetricsRequest>,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<GetAllBranchesMetricsResponse> {
+    // Validar ownership del tenant
+    const tenant = await this.tenantRepository.findById(tenantId);
+    if (!tenant) {
+      throw new NotFoundException(`Tenant with ID ${tenantId} not found`);
+    }
+
+    // Para ADMIN/ADMIN_STAFF, permitir acceso a cualquier recurso
+    const isAdmin = user.roles.includes('ADMIN') || user.roles.includes('ADMIN_STAFF');
+    if (!isAdmin) {
+      const userEntity = await this.userRepository.findById(user.userId);
+      if (!userEntity || !userEntity.partnerId) {
+        throw new ForbiddenException('User does not belong to a partner');
+      }
+
+      if (tenant.partnerId !== userEntity.partnerId) {
+        throw new ForbiddenException('You can only access metrics from tenants of your partner');
+      }
+    }
+
+    const request = new GetAllBranchesMetricsRequest();
+    request.tenantId = tenantId;
+    request.period = query.period;
+    request.startDate = query.startDate;
+    request.endDate = query.endDate;
+
+    return this.getAllBranchesMetricsHandler.execute(request);
+  }
+
+  @Get('tenants/:tenantId/branches/cross-insights')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Obtener insights de clientes cross-branch',
+    description:
+      'Analiza patrones de clientes que visitan múltiples sucursales. Incluye combinaciones más populares, ' +
+      'revenue uplift y recomendaciones automáticas.',
+  })
+  @ApiParam({
+    name: 'tenantId',
+    type: Number,
+    description: 'ID del tenant',
+    example: 1,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Cross-branch insights obtenidos exitosamente',
+    type: GetCrossBranchInsightsResponse,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos o el tenant no pertenece a su partner',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Tenant no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  async getCrossBranchInsights(
+    @Param('tenantId', ParseIntPipe) tenantId: number,
+    @Query() query: Partial<GetCrossBranchInsightsRequest>,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<GetCrossBranchInsightsResponse> {
+    // Validar ownership del tenant
+    const tenant = await this.tenantRepository.findById(tenantId);
+    if (!tenant) {
+      throw new NotFoundException(`Tenant with ID ${tenantId} not found`);
+    }
+
+    // Para ADMIN/ADMIN_STAFF, permitir acceso a cualquier recurso
+    const isAdmin = user.roles.includes('ADMIN') || user.roles.includes('ADMIN_STAFF');
+    if (!isAdmin) {
+      const userEntity = await this.userRepository.findById(user.userId);
+      if (!userEntity || !userEntity.partnerId) {
+        throw new ForbiddenException('User does not belong to a partner');
+      }
+
+      if (tenant.partnerId !== userEntity.partnerId) {
+        throw new ForbiddenException(
+          'You can only access cross-branch insights from tenants of your partner',
+        );
+      }
+    }
+
+    const request = new GetCrossBranchInsightsRequest();
+    request.tenantId = tenantId;
+    request.period = query.period;
+    request.startDate = query.startDate;
+    request.endDate = query.endDate;
+
+    return this.getCrossBranchInsightsHandler.execute(request);
   }
 }

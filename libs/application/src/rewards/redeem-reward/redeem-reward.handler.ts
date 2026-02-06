@@ -142,6 +142,7 @@ export class RedeemRewardHandler {
         rewardId: reward.id,
         pointsUsed: Math.abs(existingTransaction.pointsDelta),
         newBalance: updatedMembership?.points || membership.points,
+        branchId: existingTransaction.branchId,
         redemptionCode: existingCode?.code,
       });
     }
@@ -165,6 +166,7 @@ export class RedeemRewardHandler {
         rewardName: reward.name,
         rewardCategory: reward.category,
       },
+      request.branchId || null, // branchId: sucursal donde se canjea
     );
 
     const savedTransaction = await this.pointsTransactionRepository.save(transaction);
@@ -215,6 +217,7 @@ export class RedeemRewardHandler {
       rewardId: reward.id,
       pointsUsed: reward.pointsRequired,
       newBalance: updatedMembership.points,
+      branchId: transaction.branchId,
       redemptionCode,
     });
   }

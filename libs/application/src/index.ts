@@ -271,6 +271,27 @@ export * from './branches/delete-branch/delete-branch.handler';
 export * from './branches/delete-branch/delete-branch.request';
 export * from './branches/delete-branch/delete-branch.response';
 
+export * from './branches/get-all-branches-metrics/get-all-branches-metrics.handler';
+export * from './branches/get-all-branches-metrics/get-all-branches-metrics.request';
+export * from './branches/get-all-branches-metrics/get-all-branches-metrics.response';
+
+// Analytics Handlers
+export * from './analytics/get-customer-segmentation/get-customer-segmentation.handler';
+export * from './analytics/get-customer-segmentation/get-customer-segmentation.request';
+export * from './analytics/get-customer-segmentation/get-customer-segmentation.response';
+
+export * from './analytics/get-advanced-reward-analytics/get-advanced-reward-analytics.handler';
+export * from './analytics/get-advanced-reward-analytics/get-advanced-reward-analytics.request';
+export * from './analytics/get-advanced-reward-analytics/get-advanced-reward-analytics.response';
+
+export * from './analytics/get-customer-growth/get-customer-growth.handler';
+export * from './analytics/get-customer-growth/get-customer-growth.request';
+export * from './analytics/get-customer-growth/get-customer-growth.response';
+
+export * from './analytics/get-cross-branch-insights/get-cross-branch-insights.handler';
+export * from './analytics/get-cross-branch-insights/get-cross-branch-insights.request';
+export * from './analytics/get-cross-branch-insights/get-cross-branch-insights.response';
+
 // Currencies Handlers
 export * from './currencies/get-currencies/get-currencies.handler';
 export * from './currencies/get-currencies/get-currencies.request';

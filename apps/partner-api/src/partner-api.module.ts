@@ -79,6 +79,7 @@ import {
   GetBranchesByTenantHandler,
   UpdateBranchHandler,
   DeleteBranchHandler,
+  GetAllBranchesMetricsHandler,
   // Currencies Handlers
   GetCurrenciesHandler,
   // Countries Handlers
@@ -154,6 +155,11 @@ import {
   GetTopRedeemedRewardsHandler,
   // Customer Memberships Handlers
   GetNewCustomersHandler,
+  // Analytics Handlers
+  GetCustomerSegmentationHandler,
+  GetAdvancedRewardAnalyticsHandler,
+  GetCustomerGrowthHandler,
+  GetCrossBranchInsightsHandler,
   // Partner Customers Handlers
   CreatePointsAdjustmentHandler,
   CreatePointsReversalHandler,
@@ -256,6 +262,7 @@ import {
     GetBranchesByTenantHandler,
     UpdateBranchHandler,
     DeleteBranchHandler,
+    GetAllBranchesMetricsHandler,
     // Currencies Handlers
     GetCurrenciesHandler,
     // Countries Handlers
@@ -334,6 +341,11 @@ import {
     GetTopRedeemedRewardsHandler,
     // Customer Memberships Handlers
     GetNewCustomersHandler,
+    // Analytics Handlers
+    GetCustomerSegmentationHandler,
+    GetAdvancedRewardAnalyticsHandler,
+    GetCustomerGrowthHandler,
+    GetCrossBranchInsightsHandler,
   ],
 })
 export class PartnerApiModule {}

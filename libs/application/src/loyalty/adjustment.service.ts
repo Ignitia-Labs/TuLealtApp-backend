@@ -35,6 +35,7 @@ export class AdjustmentService {
    * @param pointsDelta Cantidad de puntos a ajustar (positivo para agregar, negativo para quitar)
    * @param reasonCode Código de razón obligatorio (ej: 'CORRECTION', 'BONUS', 'PENALTY')
    * @param createdBy Usuario ADMIN que crea el ajuste
+   * @param branchId ID de la sucursal donde se realiza el ajuste (opcional)
    * @param metadata Metadatos adicionales
    * @returns Transacción de ajuste creada
    */
@@ -43,6 +44,7 @@ export class AdjustmentService {
     pointsDelta: number,
     reasonCode: string,
     createdBy: string,
+    branchId?: number | null,
     metadata?: Record<string, any>,
   ): Promise<PointsTransaction> {
     // 1. Validar que createdBy es ADMIN
@@ -96,6 +98,7 @@ export class AdjustmentService {
         adjustmentType: pointsDelta > 0 ? 'ADD' : 'SUBTRACT',
         previousBalance: await this.pointsTransactionRepository.calculateBalance(membershipId),
       },
+      branchId || null,
     );
 
     // 8. Guardar transacción
@@ -104,14 +107,31 @@ export class AdjustmentService {
     // 9. Sincronizar balance
     await this.balanceSyncService.syncAfterTransaction(membershipId);
 
-    // 10. Recalcular tier si el ajuste afecta puntos positivos
+    // 10. Recalcular tier si el ajuste afecta puntos positivos (opcional)
+    // Solo evaluar si hay una política de tier configurada
     if (pointsDelta > 0) {
-      const updatedMembership = await this.membershipRepository.findById(membershipId);
-      if (updatedMembership) {
-        await this.tierChangeService.evaluateAndApplyTierChange(
-          updatedMembership.id,
-          updatedMembership.tenantId,
-        );
+      try {
+        const updatedMembership = await this.membershipRepository.findById(membershipId);
+        if (updatedMembership) {
+          await this.tierChangeService.evaluateAndApplyTierChange(
+            updatedMembership.id,
+            updatedMembership.tenantId,
+          );
+        }
+      } catch (error) {
+        // Si no hay política de tier configurada, continuar sin error
+        // El ajuste de puntos se completó exitosamente
+        if (error instanceof Error && error.message.includes('No active tier policy')) {
+          console.log(
+            `[AdjustmentService] Tier evaluation skipped: No tier policy configured for tenant`,
+          );
+        } else {
+          // Otro tipo de error, log pero no fallar el ajuste
+          console.warn(
+            `[AdjustmentService] Error evaluating tier change after adjustment:`,
+            error,
+          );
+        }
       }
     }
 

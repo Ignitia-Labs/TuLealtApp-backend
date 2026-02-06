@@ -5,6 +5,7 @@ import {
   IPointsTransactionRepository,
   IRewardRuleRepository,
   IUserRepository,
+  IBranchRepository,
 } from '@libs/domain';
 import { GetLoyaltyDashboardRequest, DashboardPeriod } from './get-loyalty-dashboard.request';
 import {
@@ -35,6 +36,8 @@ export class GetLoyaltyDashboardHandler {
     private readonly rewardRuleRepository: IRewardRuleRepository,
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
+    @Inject('IBranchRepository')
+    private readonly branchRepository: IBranchRepository,
     private readonly cacheService: DashboardMetricsCacheService,
   ) {}
 
@@ -210,13 +213,10 @@ export class GetLoyaltyDashboardHandler {
     const ruleIds = tenantMetrics.topRewards.map((r) => r.ruleId);
     const rulesMap = new Map<number, { id: number; name: string }>();
     if (ruleIds.length > 0) {
-      const rules = await Promise.all(
-        ruleIds.map((ruleId) => this.rewardRuleRepository.findById(ruleId)),
-      );
+      // OPTIMIZACIÓN: Usar findByIds en lugar de Promise.all con findById individual
+      const rules = await this.rewardRuleRepository.findByIds(ruleIds);
       rules.forEach((rule) => {
-        if (rule) {
-          rulesMap.set(rule.id, { id: rule.id, name: rule.name });
-        }
+        rulesMap.set(rule.id, { id: rule.id, name: rule.name });
       });
     }
 
@@ -242,27 +242,25 @@ export class GetLoyaltyDashboardHandler {
 
     // Obtener información de usuarios si se solicita (batch query para evitar N+1)
     const usersMap = new Map<number, { id: number; name: string }>();
+    const branchesMap = new Map<number, { id: number; name: string }>();
+    
     if (request.includeCustomer) {
       // Obtener membershipIds únicos de las transacciones
       const membershipIds = [...new Set(recentTransactions.map((tx) => tx.membershipId))];
       if (membershipIds.length > 0) {
-        // Obtener memberships para obtener userIds
-        const memberships = await Promise.all(
-          membershipIds.map((membershipId) => this.membershipRepository.findById(membershipId)),
-        );
+        // OPTIMIZACIÓN: Usar findByIds en lugar de Promise.all con findById individual
+        const memberships = await this.membershipRepository.findByIds(membershipIds);
+        
         const userIds = memberships
           .filter((m) => m !== null)
-          .map((m) => m!.userId)
+          .map((m) => m.userId)
           .filter((id) => id !== undefined);
         
         if (userIds.length > 0) {
-          const users = await Promise.all(
-            [...new Set(userIds)].map((userId) => this.userRepository.findById(userId)),
-          );
+          // OPTIMIZACIÓN: Usar findByIds en lugar de Promise.all con findById individual
+          const users = await this.userRepository.findByIds([...new Set(userIds)]);
           users.forEach((user) => {
-            if (user) {
-              usersMap.set(user.id, { id: user.id, name: user.name });
-            }
+            usersMap.set(user.id, { id: user.id, name: user.name });
           });
         }
         
@@ -279,7 +277,28 @@ export class GetLoyaltyDashboardHandler {
       }
     }
 
-    // Construir recentTransactions DTOs con información del cliente y descripciones
+    if (request.includeBranch) {
+      // Obtener branchIds únicos de las transacciones
+      const branchIds = [
+        ...new Set(
+          recentTransactions
+            .map((tx) => tx.branchId)
+            .filter((id): id is number => id !== null && id !== undefined),
+        ),
+      ];
+      if (branchIds.length > 0) {
+        const branches = await Promise.all(
+          branchIds.map((id) => this.branchRepository.findById(id)),
+        );
+        branches
+          .filter((branch): branch is NonNullable<typeof branch> => branch !== null)
+          .forEach((branch) => {
+            branchesMap.set(branch.id, { id: branch.id, name: branch.name });
+          });
+      }
+    }
+
+    // Construir recentTransactions DTOs con información del cliente, branch y descripciones
     const membershipToUserMap = (usersMap as any).membershipToUserMap as Map<number, number> | undefined;
     const recentTransactionsDto: LoyaltyDashboardPointsTransactionDto[] = recentTransactions.map(
       (tx) => {
@@ -291,6 +310,13 @@ export class GetLoyaltyDashboardHandler {
             userName = user?.name;
           }
         }
+
+        let branchName: string | undefined;
+        if (request.includeBranch && tx.branchId) {
+          const branch = branchesMap.get(tx.branchId);
+          branchName = branch?.name;
+        }
+
         const description = this.generateTransactionDescription(
           tx.type,
           tx.reasonCode,
@@ -311,6 +337,8 @@ export class GetLoyaltyDashboardHandler {
           tx.membershipId,
           userName,
           description,
+          tx.branchId || undefined,
+          branchName,
         );
       },
     );
@@ -352,11 +380,12 @@ export class GetLoyaltyDashboardHandler {
       );
     }
 
-    // Calcular returnRate: (redemptionsInPeriod / totalCustomers) * 100
-    const returnRate =
-      totalCustomers > 0
-        ? Math.round((periodMetrics.redemptionsInPeriod / totalCustomers) * 10000) / 100
-        : 0;
+    // Calcular returnRate correctamente: (clientes con >=2 tx / clientes con >=1 tx) * 100
+    const returnRate = await this.pointsTransactionRepository.calculateReturnRate(
+      request.tenantId,
+      periodStart,
+      periodEnd,
+    );
 
     // Construir PeriodDto
     const periodDto = new PeriodDto(

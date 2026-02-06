@@ -38,6 +38,9 @@ export class PointsTransaction {
     public readonly reversalOfTransactionId: number | null, // ID de la transacción que se revierte (solo para REVERSAL)
     public readonly expiresAt: Date | null, // Fecha de expiración de los puntos (solo para EARNING)
     public readonly rewardId: number | null, // FK a rewards.id - Solo para transacciones tipo REDEEM
+    public readonly branchId: number | null, // FK a branches.id - Sucursal donde ocurrió la transacción
+    public readonly amount: number | null, // Monto monetario de la transacción (solo para EARNING de PURCHASE)
+    public readonly currency: string | null, // Moneda del monto (ISO 4217: GTQ, USD, etc.)
     public readonly createdAt: Date,
   ) {}
 
@@ -58,6 +61,9 @@ export class PointsTransaction {
     rewardRuleId: number | null = null,
     metadata: PointsTransactionMetadata | null = null,
     expiresAt: Date | null = null,
+    branchId: number | null = null,
+    amount: number | null = null, // ← NUEVO: Monto monetario (solo para PURCHASE)
+    currency: string | null = null, // ← NUEVO: Moneda (ISO 4217)
     id?: number,
   ): PointsTransaction {
     if (pointsDelta <= 0) {
@@ -82,6 +88,9 @@ export class PointsTransaction {
       null,
       expiresAt,
       null, // rewardId solo para REDEEM
+      branchId,
+      amount, // ← NUEVO
+      currency, // ← NUEVO
       id ? new Date() : new Date(),
     );
   }
@@ -103,6 +112,9 @@ export class PointsTransaction {
     reasonCode: string | null = null,
     programId: number | null = null,
     metadata: PointsTransactionMetadata | null = null,
+    branchId: number | null = null,
+    amount: number | null = null, // ← NUEVO: Normalmente NULL para REDEEM
+    currency: string | null = null, // ← NUEVO
     id?: number,
   ): PointsTransaction {
     if (pointsDelta >= 0) {
@@ -130,6 +142,9 @@ export class PointsTransaction {
       null,
       null,
       rewardId,
+      branchId,
+      amount, // ← NUEVO
+      currency, // ← NUEVO
       id ? new Date() : new Date(),
     );
   }
@@ -148,6 +163,9 @@ export class PointsTransaction {
     createdBy: string | null = null,
     reasonCode: string | null = null,
     metadata: PointsTransactionMetadata | null = null,
+    branchId: number | null = null,
+    amount: number | null = null, // ← NUEVO
+    currency: string | null = null, // ← NUEVO
     id?: number,
   ): PointsTransaction {
     return new PointsTransaction(
@@ -168,6 +186,9 @@ export class PointsTransaction {
       reversalOfTransactionId,
       null,
       null, // rewardId solo para REDEEM
+      branchId,
+      amount, // ← NUEVO
+      currency, // ← NUEVO
       id ? new Date() : new Date(),
     );
   }
@@ -185,6 +206,9 @@ export class PointsTransaction {
     reasonCode: string,
     correlationId: string | null = null,
     metadata: PointsTransactionMetadata | null = null,
+    branchId: number | null = null,
+    amount: number | null = null, // ← NUEVO: Normalmente NULL para ADJUSTMENT
+    currency: string | null = null, // ← NUEVO
     id?: number,
   ): PointsTransaction {
     if (pointsDelta === 0) {
@@ -209,6 +233,9 @@ export class PointsTransaction {
       null,
       null,
       null, // rewardId solo para REDEEM
+      branchId,
+      amount, // ← NUEVO
+      currency, // ← NUEVO
       id ? new Date() : new Date(),
     );
   }
@@ -226,6 +253,9 @@ export class PointsTransaction {
     createdBy: string | null = null,
     reasonCode: string | null = null,
     metadata: PointsTransactionMetadata | null = null,
+    branchId: number | null = null,
+    amount: number | null = null, // ← NUEVO
+    currency: string | null = null, // ← NUEVO
     id?: number,
   ): PointsTransaction {
     if (pointsDelta >= 0) {
@@ -250,6 +280,9 @@ export class PointsTransaction {
       null,
       null,
       null, // rewardId solo para REDEEM
+      branchId,
+      amount, // ← NUEVO
+      currency, // ← NUEVO
       id ? new Date() : new Date(),
     );
   }
@@ -268,6 +301,9 @@ export class PointsTransaction {
     createdBy: string | null = null,
     reasonCode: string | null = null,
     metadata: PointsTransactionMetadata | null = null,
+    branchId: number | null = null,
+    amount: number | null = null, // ← NUEVO
+    currency: string | null = null, // ← NUEVO
     id?: number,
   ): PointsTransaction {
     if (pointsDelta >= 0) {
@@ -292,6 +328,9 @@ export class PointsTransaction {
       null,
       null,
       null, // rewardId solo para REDEEM
+      branchId,
+      amount, // ← NUEVO
+      currency, // ← NUEVO
       id ? new Date() : new Date(),
     );
   }
@@ -310,6 +349,9 @@ export class PointsTransaction {
     createdBy: string | null = null,
     reasonCode: string | null = null,
     metadata: PointsTransactionMetadata | null = null,
+    branchId: number | null = null,
+    amount: number | null = null, // ← NUEVO
+    currency: string | null = null, // ← NUEVO
     id?: number,
   ): PointsTransaction {
     if (pointsDelta <= 0) {
@@ -334,6 +376,9 @@ export class PointsTransaction {
       null,
       null,
       null, // rewardId solo para REDEEM
+      branchId,
+      amount, // ← NUEVO
+      currency, // ← NUEVO
       id ? new Date() : new Date(),
     );
   }
@@ -374,5 +419,22 @@ export class PointsTransaction {
       return false;
     }
     return new Date() > this.expiresAt;
+  }
+
+  /**
+   * Método de dominio para verificar si la transacción tiene revenue asociado
+   */
+  hasRevenue(): boolean {
+    return this.amount !== null && this.amount > 0;
+  }
+
+  /**
+   * Método de dominio para obtener el monto formateado con moneda
+   */
+  getFormattedAmount(): string | null {
+    if (!this.amount || !this.currency) {
+      return null;
+    }
+    return `${this.currency} ${this.amount.toFixed(2)}`;
   }
 }

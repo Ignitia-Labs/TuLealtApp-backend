@@ -481,4 +481,21 @@ export class CustomerMembershipRepository implements ICustomerMembershipReposito
       };
     });
   }
+
+  /**
+   * Busca múltiples memberships por sus IDs (batch query)
+   * Optimización para evitar N+1 queries
+   */
+  async findByIds(ids: number[]): Promise<CustomerMembership[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const entities = await this.membershipRepository
+      .createQueryBuilder('membership')
+      .whereInIds(ids)
+      .getMany();
+
+    return entities.map((entity) => CustomerMembershipMapper.toDomain(entity));
+  }
 }

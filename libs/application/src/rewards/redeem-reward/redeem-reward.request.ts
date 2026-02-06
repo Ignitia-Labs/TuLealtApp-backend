@@ -1,5 +1,6 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumber, IsOptional, IsInt } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 /**
  * DTO de request para canjear una recompensa
@@ -22,4 +23,14 @@ export class RedeemRewardRequest {
   @IsNumber()
   @IsNotEmpty()
   rewardId: number;
+
+  @ApiPropertyOptional({
+    description: 'ID de la sucursal donde se canjea la recompensa (opcional)',
+    example: 2,
+    type: Number,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  branchId?: number | null;
 }

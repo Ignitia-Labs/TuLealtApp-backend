@@ -303,4 +303,68 @@ export class RewardRuleRepository implements IRewardRuleRepository {
   async delete(id: number): Promise<void> {
     await this.rewardRuleRepository.delete(id);
   }
+
+  /**
+   * Busca múltiples reglas por sus IDs (batch query)
+   * Optimización para evitar N+1 queries
+   */
+  async findByIds(ids: number[]): Promise<RewardRule[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const entities = await this.rewardRuleRepository
+      .createQueryBuilder('rule')
+      .leftJoinAndSelect('rule.eligibilityRelation', 'eligibility')
+      .leftJoinAndSelect('eligibility.membershipStatuses', 'membershipStatuses')
+      .leftJoinAndSelect('eligibility.flags', 'flags')
+      .leftJoinAndSelect('eligibility.categoryIds', 'categoryIds')
+      .leftJoinAndSelect('eligibility.skus', 'skus')
+      .leftJoinAndSelect('rule.pointsFormulaRelation', 'pointsFormula')
+      .leftJoinAndSelect('pointsFormula.tableEntries', 'tableEntries')
+      .leftJoinAndSelect('pointsFormula.bonuses', 'bonuses')
+      .leftJoinAndSelect('bonuses.bonusFormula', 'bonusFormula')
+      .leftJoinAndSelect('bonuses.eligibility', 'bonusEligibility')
+      .whereInIds(ids)
+      .getMany();
+
+    return entities.map((entity) => RewardRuleMapper.toDomain(entity));
+  }
+
+  /**
+   * Busca reglas activas de múltiples programas por trigger (batch query)
+   * Optimización para evitar N+1 queries en ProcessLoyaltyEventHandler
+   */
+  async findActiveByProgramIdsAndTrigger(
+    programIds: number[],
+    trigger: RewardRule['trigger'],
+  ): Promise<RewardRule[]> {
+    if (programIds.length === 0) {
+      return [];
+    }
+
+    const now = new Date();
+    const entities = await this.rewardRuleRepository
+      .createQueryBuilder('rule')
+      .leftJoinAndSelect('rule.eligibilityRelation', 'eligibility')
+      .leftJoinAndSelect('eligibility.membershipStatuses', 'membershipStatuses')
+      .leftJoinAndSelect('eligibility.flags', 'flags')
+      .leftJoinAndSelect('eligibility.categoryIds', 'categoryIds')
+      .leftJoinAndSelect('eligibility.skus', 'skus')
+      .leftJoinAndSelect('rule.pointsFormulaRelation', 'pointsFormula')
+      .leftJoinAndSelect('pointsFormula.tableEntries', 'tableEntries')
+      .leftJoinAndSelect('pointsFormula.bonuses', 'bonuses')
+      .leftJoinAndSelect('bonuses.bonusFormula', 'bonusFormula')
+      .leftJoinAndSelect('bonuses.eligibility', 'bonusEligibility')
+      .where('rule.programId IN (:...programIds)', { programIds })
+      .andWhere('rule.trigger = :trigger', { trigger })
+      .andWhere('rule.status = :status', { status: 'active' })
+      .andWhere('(rule.activeFrom IS NULL OR rule.activeFrom <= :now)', { now })
+      .andWhere('(rule.activeTo IS NULL OR rule.activeTo >= :now)', { now })
+      .orderBy('rule.conflictPriorityRank', 'DESC')
+      .addOrderBy('rule.createdAt', 'ASC')
+      .getMany();
+
+    return entities.map((entity) => RewardRuleMapper.toDomain(entity));
+  }
 }
