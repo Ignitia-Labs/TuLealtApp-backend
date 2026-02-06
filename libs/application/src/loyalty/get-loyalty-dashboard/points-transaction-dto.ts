@@ -57,6 +57,20 @@ export class LoyaltyDashboardPointsTransactionDto {
   })
   description?: string;
 
+  @ApiProperty({
+    example: 1,
+    description: 'ID de la sucursal donde ocurrió la transacción (incluido cuando includeBranch=true)',
+    required: false,
+  })
+  branchId?: number;
+
+  @ApiProperty({
+    example: 'Café Centro',
+    description: 'Nombre de la sucursal (incluido cuando includeBranch=true)',
+    required: false,
+  })
+  branchName?: string;
+
   constructor(
     id: number,
     type: 'EARNING' | 'REDEEM' | 'ADJUSTMENT' | 'REVERSAL' | 'EXPIRATION' | 'HOLD' | 'RELEASE',
@@ -71,6 +85,8 @@ export class LoyaltyDashboardPointsTransactionDto {
     membershipId: number,
     customerName?: string,
     description?: string,
+    branchId?: number,
+    branchName?: string,
   ) {
     this.id = id;
     this.type = type;
@@ -85,5 +101,7 @@ export class LoyaltyDashboardPointsTransactionDto {
     this.membershipId = membershipId;
     this.customerName = customerName;
     this.description = description;
+    this.branchId = branchId;
+    this.branchName = branchName;
   }
 }

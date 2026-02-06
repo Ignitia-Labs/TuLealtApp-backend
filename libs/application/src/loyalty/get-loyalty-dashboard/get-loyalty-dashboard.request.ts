@@ -46,4 +46,12 @@ export class GetLoyaltyDashboardRequest {
   })
   @IsOptional()
   includeCustomer?: boolean;
+
+  @ApiPropertyOptional({
+    example: false,
+    description: 'Si es true, incluye información de la sucursal en cada transacción',
+    default: false,
+  })
+  @IsOptional()
+  includeBranch?: boolean;
 }

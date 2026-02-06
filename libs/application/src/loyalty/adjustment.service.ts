@@ -107,14 +107,31 @@ export class AdjustmentService {
     // 9. Sincronizar balance
     await this.balanceSyncService.syncAfterTransaction(membershipId);
 
-    // 10. Recalcular tier si el ajuste afecta puntos positivos
+    // 10. Recalcular tier si el ajuste afecta puntos positivos (opcional)
+    // Solo evaluar si hay una política de tier configurada
     if (pointsDelta > 0) {
-      const updatedMembership = await this.membershipRepository.findById(membershipId);
-      if (updatedMembership) {
-        await this.tierChangeService.evaluateAndApplyTierChange(
-          updatedMembership.id,
-          updatedMembership.tenantId,
-        );
+      try {
+        const updatedMembership = await this.membershipRepository.findById(membershipId);
+        if (updatedMembership) {
+          await this.tierChangeService.evaluateAndApplyTierChange(
+            updatedMembership.id,
+            updatedMembership.tenantId,
+          );
+        }
+      } catch (error) {
+        // Si no hay política de tier configurada, continuar sin error
+        // El ajuste de puntos se completó exitosamente
+        if (error instanceof Error && error.message.includes('No active tier policy')) {
+          console.log(
+            `[AdjustmentService] Tier evaluation skipped: No tier policy configured for tenant`,
+          );
+        } else {
+          // Otro tipo de error, log pero no fallar el ajuste
+          console.warn(
+            `[AdjustmentService] Error evaluating tier change after adjustment:`,
+            error,
+          );
+        }
       }
     }
 

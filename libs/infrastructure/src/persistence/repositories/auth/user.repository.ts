@@ -192,4 +192,23 @@ export class UserRepository implements IUserRepository {
 
     return queryBuilder.getCount();
   }
+
+  /**
+   * Busca múltiples usuarios por sus IDs (batch query)
+   * Optimización para evitar N+1 queries
+   */
+  async findByIds(ids: number[]): Promise<User[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const entities = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.rolesRelation', 'userRole')
+      .leftJoinAndSelect('user.profileDataRelation', 'profileData')
+      .whereInIds(ids)
+      .getMany();
+
+    return entities.map((entity) => UserMapper.toDomain(entity));
+  }
 }

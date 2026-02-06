@@ -38,6 +38,9 @@ import {
   GetTopRedeemedRewardsRequest,
   GetTopRedeemedRewardsResponse,
   GetTopRedeemedRewardsBodyDto,
+  GetAdvancedRewardAnalyticsHandler,
+  GetAdvancedRewardAnalyticsRequest,
+  GetAdvancedRewardAnalyticsResponse,
   JwtPayload,
 } from '@libs/application';
 import { IUserRepository, ITenantRepository } from '@libs/domain';
@@ -71,6 +74,7 @@ export class RewardsController {
     private readonly deleteRewardHandler: DeleteRewardHandler,
     private readonly validateRedemptionCodeHandler: ValidateRedemptionCodeHandler,
     private readonly getTopRedeemedRewardsHandler: GetTopRedeemedRewardsHandler,
+    private readonly getAdvancedRewardAnalyticsHandler: GetAdvancedRewardAnalyticsHandler,
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
     @Inject('ITenantRepository')
@@ -112,6 +116,75 @@ export class RewardsController {
     const request = new GetRewardsRequest();
     request.tenantId = tenantId;
     return this.getRewardsHandler.execute(request);
+  }
+
+  @Get('analytics')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Obtener analytics avanzados de recompensas',
+    description:
+      'Obtiene métricas avanzadas de recompensas incluyendo ROI, eficiencia, segmento top, ' +
+      'sucursal top y tendencias. Útil para optimizar el catálogo de recompensas.',
+  })
+  @ApiParam({
+    name: 'tenantId',
+    type: Number,
+    description: 'ID del tenant',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'period',
+    required: false,
+    enum: ['all', 'month', 'week', 'custom'],
+    description: 'Período de tiempo para análisis',
+    example: 'month',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    type: String,
+    description: 'Fecha de inicio (ISO 8601). Requerido si period="custom"',
+    example: '2026-01-01T00:00:00Z',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    type: String,
+    description: 'Fecha de fin (ISO 8601). Requerido si period="custom"',
+    example: '2026-01-31T23:59:59Z',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Analytics avanzados obtenidos exitosamente',
+    type: GetAdvancedRewardAnalyticsResponse,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos o el tenant no pertenece a su partner',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Tenant no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  async getAdvancedRewardAnalytics(
+    @Param('tenantId', ParseIntPipe) tenantId: number,
+    @CurrentUser() _user: JwtPayload, // eslint-disable-line @typescript-eslint/no-unused-vars
+    @Query() query: Partial<GetAdvancedRewardAnalyticsRequest>,
+  ): Promise<GetAdvancedRewardAnalyticsResponse> {
+    const request = new GetAdvancedRewardAnalyticsRequest();
+    request.tenantId = tenantId;
+    request.period = query.period;
+    request.startDate = query.startDate;
+    request.endDate = query.endDate;
+
+    return this.getAdvancedRewardAnalyticsHandler.execute(request);
   }
 
   @Get(':rewardId')

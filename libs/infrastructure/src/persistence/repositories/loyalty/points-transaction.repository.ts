@@ -402,4 +402,502 @@ export class PointsTransactionRepository implements IPointsTransactionRepository
       pointsRedeemedInPeriod: Number(result?.pointsRedeemedInPeriod || 0),
     };
   }
+
+  /**
+   * Busca múltiples transacciones por idempotency keys (batch query)
+   * Optimización para evitar N+1 queries en ProcessLoyaltyEventHandler
+   */
+  async findByIdempotencyKeys(
+    idempotencyKeys: string[],
+  ): Promise<Map<string, PointsTransaction>> {
+    if (idempotencyKeys.length === 0) {
+      return new Map();
+    }
+
+    const entities = await this.pointsTransactionRepository
+      .createQueryBuilder('pt')
+      .where('pt.idempotencyKey IN (:...idempotencyKeys)', { idempotencyKeys })
+      .getMany();
+
+    const resultMap = new Map<string, PointsTransaction>();
+    entities.forEach((entity) => {
+      const domain = PointsTransactionMapper.toDomain(entity);
+      resultMap.set(entity.idempotencyKey, domain);
+    });
+
+    return resultMap;
+  }
+
+  /**
+   * Obtiene métricas de revenue agregadas por sucursal para un tenant
+   * Usa los nuevos campos amount y currency con índices optimizados
+   * Query optimizada usando índice IDX_POINTS_TRANSACTIONS_AMOUNT_BRANCH
+   */
+  async getBranchRevenueMetrics(
+    tenantId: number,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<
+    Array<{
+      branchId: number;
+      totalRevenue: number;
+      transactionCount: number;
+      avgTicket: number;
+      currency: string;
+    }>
+  > {
+    let query = this.pointsTransactionRepository
+      .createQueryBuilder('pt')
+      .innerJoin(CustomerMembershipEntity, 'cm', 'pt.membershipId = cm.id')
+      .where('cm.tenantId = :tenantId', { tenantId })
+      .andWhere('pt.type = :earningType', { earningType: 'EARNING' })
+      .andWhere('pt.branchId IS NOT NULL')
+      .andWhere('pt.amount IS NOT NULL') // ← Solo transacciones con revenue
+      .andWhere('pt.amount > 0');
+
+    if (startDate) {
+      query = query.andWhere('pt.createdAt >= :startDate', { startDate });
+    }
+
+    if (endDate) {
+      query = query.andWhere('pt.createdAt <= :endDate', { endDate });
+    }
+
+    const results = await query
+      .select([
+        'pt.branchId as branchId',
+        'COALESCE(pt.currency, "GTQ") as currency',
+        'COUNT(*) as transactionCount',
+        'ROUND(SUM(pt.amount), 2) as totalRevenue',
+        'ROUND(AVG(pt.amount), 2) as avgTicket',
+      ])
+      .groupBy('pt.branchId, pt.currency')
+      .orderBy('totalRevenue', 'DESC')
+      .getRawMany();
+
+    return results.map((row) => ({
+      branchId: Number(row.branchId),
+      totalRevenue: Number(row.totalRevenue || 0),
+      transactionCount: Number(row.transactionCount || 0),
+      avgTicket: Number(row.avgTicket || 0),
+      currency: String(row.currency || 'GTQ'),
+    }));
+  }
+
+  /**
+   * Obtiene el revenue total de un tenant para un período específico
+   * Query optimizada usando índice IDX_POINTS_TRANSACTIONS_AMOUNT_TENANT
+   */
+  async getTenantRevenueMetrics(
+    tenantId: number,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<{
+    totalRevenue: number;
+    transactionCount: number;
+    avgTicket: number;
+    currency: string;
+  }> {
+    let query = this.pointsTransactionRepository
+      .createQueryBuilder('pt')
+      .innerJoin(CustomerMembershipEntity, 'cm', 'pt.membershipId = cm.id')
+      .where('cm.tenantId = :tenantId', { tenantId })
+      .andWhere('pt.type = :earningType', { earningType: 'EARNING' })
+      .andWhere('pt.amount IS NOT NULL') // ← Solo transacciones con revenue
+      .andWhere('pt.amount > 0');
+
+    if (startDate) {
+      query = query.andWhere('pt.createdAt >= :startDate', { startDate });
+    }
+
+    if (endDate) {
+      query = query.andWhere('pt.createdAt <= :endDate', { endDate });
+    }
+
+    const result = await query
+      .select([
+        'COALESCE(pt.currency, "GTQ") as currency',
+        'COUNT(*) as transactionCount',
+        'ROUND(SUM(pt.amount), 2) as totalRevenue',
+        'ROUND(AVG(pt.amount), 2) as avgTicket',
+      ])
+      .groupBy('pt.currency')
+      .getRawOne();
+
+    if (!result) {
+      return {
+        totalRevenue: 0,
+        transactionCount: 0,
+        avgTicket: 0,
+        currency: 'GTQ',
+      };
+    }
+
+    return {
+      totalRevenue: Number(result.totalRevenue || 0),
+      transactionCount: Number(result.transactionCount || 0),
+      avgTicket: Number(result.avgTicket || 0),
+      currency: String(result.currency || 'GTQ'),
+    };
+  }
+
+  /**
+   * Obtiene métricas de revenue para una sucursal específica
+   * Query optimizada usando índice IDX_POINTS_TRANSACTIONS_AMOUNT_BRANCH
+   */
+  async getBranchRevenue(
+    branchId: number,
+    tenantId: number,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<{
+    totalRevenue: number;
+    transactionCount: number;
+    avgTicket: number;
+    currency: string;
+  }> {
+    let query = this.pointsTransactionRepository
+      .createQueryBuilder('pt')
+      .innerJoin(CustomerMembershipEntity, 'cm', 'pt.membershipId = cm.id')
+      .where('cm.tenantId = :tenantId', { tenantId })
+      .andWhere('pt.branchId = :branchId', { branchId })
+      .andWhere('pt.type = :earningType', { earningType: 'EARNING' })
+      .andWhere('pt.amount IS NOT NULL') // ← Solo transacciones con revenue
+      .andWhere('pt.amount > 0');
+
+    if (startDate) {
+      query = query.andWhere('pt.createdAt >= :startDate', { startDate });
+    }
+
+    if (endDate) {
+      query = query.andWhere('pt.createdAt <= :endDate', { endDate });
+    }
+
+    const result = await query
+      .select([
+        'COALESCE(pt.currency, "GTQ") as currency',
+        'COUNT(*) as transactionCount',
+        'ROUND(SUM(pt.amount), 2) as totalRevenue',
+        'ROUND(AVG(pt.amount), 2) as avgTicket',
+      ])
+      .groupBy('pt.currency')
+      .getRawOne();
+
+    if (!result) {
+      return {
+        totalRevenue: 0,
+        transactionCount: 0,
+        avgTicket: 0,
+        currency: 'GTQ',
+      };
+    }
+
+    return {
+      totalRevenue: Number(result.totalRevenue || 0),
+      transactionCount: Number(result.transactionCount || 0),
+      avgTicket: Number(result.avgTicket || 0),
+      currency: String(result.currency || 'GTQ'),
+    };
+  }
+
+  /**
+   * Obtiene métricas de clientes por sucursal
+   * Cuenta clientes únicos (all time) y activos (in period) por sucursal
+   */
+  async getBranchCustomerMetrics(
+    tenantId: number,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<
+    Array<{
+      branchId: number;
+      totalCustomers: number;
+      activeCustomers: number;
+    }>
+  > {
+    // Query con conteo de clientes únicos y activos por sucursal
+    let query = this.pointsTransactionRepository
+      .createQueryBuilder('pt')
+      .innerJoin(CustomerMembershipEntity, 'cm', 'pt.membershipId = cm.id')
+      .where('cm.tenantId = :tenantId', { tenantId })
+      .andWhere('pt.branchId IS NOT NULL');
+
+    const results = await query
+      .select([
+        'pt.branchId as branchId',
+        'COUNT(DISTINCT pt.membershipId) as totalCustomers',
+        startDate && endDate
+          ? `COUNT(DISTINCT CASE 
+               WHEN pt.createdAt >= :startDate AND pt.createdAt <= :endDate 
+               THEN pt.membershipId 
+             END) as activeCustomers`
+          : 'COUNT(DISTINCT pt.membershipId) as activeCustomers',
+      ])
+      .setParameters(
+        startDate && endDate
+          ? { tenantId, startDate, endDate }
+          : { tenantId },
+      )
+      .groupBy('pt.branchId')
+      .getRawMany();
+
+    return results.map((row) => ({
+      branchId: Number(row.branchId),
+      totalCustomers: Number(row.totalCustomers || 0),
+      activeCustomers: Number(row.activeCustomers || 0),
+    }));
+  }
+
+  /**
+   * Obtiene métricas de redemptions por sucursal
+   * Cuenta transacciones de tipo REDEEM por sucursal en un período
+   */
+  async getBranchRedemptionMetrics(
+    tenantId: number,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<
+    Array<{
+      branchId: number;
+      rewardsRedeemed: number;
+    }>
+  > {
+    let query = this.pointsTransactionRepository
+      .createQueryBuilder('pt')
+      .innerJoin(CustomerMembershipEntity, 'cm', 'pt.membershipId = cm.id')
+      .where('cm.tenantId = :tenantId', { tenantId })
+      .andWhere('pt.type = :redeemType', { redeemType: 'REDEEM' })
+      .andWhere('pt.branchId IS NOT NULL');
+
+    if (startDate) {
+      query = query.andWhere('pt.createdAt >= :startDate', { startDate });
+    }
+
+    if (endDate) {
+      query = query.andWhere('pt.createdAt <= :endDate', { endDate });
+    }
+
+    const results = await query
+      .select(['pt.branchId as branchId', 'COUNT(*) as rewardsRedeemed'])
+      .groupBy('pt.branchId')
+      .getRawMany();
+
+    return results.map((row) => ({
+      branchId: Number(row.branchId),
+      rewardsRedeemed: Number(row.rewardsRedeemed || 0),
+    }));
+  }
+
+  /**
+   * Calcula la tasa de retorno para un tenant en un período
+   * Return rate = (memberships con >=2 transacciones / total memberships con >=1 transacción) * 100
+   */
+  async calculateReturnRate(tenantId: number, startDate: Date, endDate: Date): Promise<number> {
+    const result = await this.pointsTransactionRepository
+      .createQueryBuilder('pt')
+      .innerJoin(CustomerMembershipEntity, 'cm', 'pt.membershipId = cm.id')
+      .where('cm.tenantId = :tenantId', { tenantId })
+      .andWhere('pt.createdAt >= :startDate', { startDate })
+      .andWhere('pt.createdAt <= :endDate', { endDate })
+      .select([
+        'COUNT(DISTINCT pt.membershipId) as totalCustomers',
+        'COUNT(DISTINCT CASE WHEN tx_count.count >= 2 THEN pt.membershipId END) as returningCustomers',
+      ])
+      .innerJoin(
+        (qb) =>
+          qb
+            .select(['membershipId', 'COUNT(*) as count'])
+            .from('points_transactions', 'pt2')
+            .innerJoin(CustomerMembershipEntity, 'cm2', 'pt2.membershipId = cm2.id')
+            .where('cm2.tenantId = :tenantId', { tenantId })
+            .andWhere('pt2.createdAt >= :startDate', { startDate })
+            .andWhere('pt2.createdAt <= :endDate', { endDate })
+            .groupBy('membershipId'),
+        'tx_count',
+        'tx_count.membershipId = pt.membershipId',
+      )
+      .getRawOne();
+
+    const totalCustomers = Number(result?.totalCustomers || 0);
+    const returningCustomers = Number(result?.returningCustomers || 0);
+
+    if (totalCustomers === 0) {
+      return 0;
+    }
+
+    return Math.round((returningCustomers / totalCustomers) * 10000) / 100;
+  }
+
+  /**
+   * Obtiene datos agregados por cliente para segmentación
+   * Query optimizada con índices en tenantId, createdAt, y amount
+   */
+  async getCustomerDataForSegmentation(
+    tenantId: number,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<
+    Array<{
+      membershipId: number;
+      transactionCount: number;
+      totalRevenue: number;
+      totalPoints: number;
+    }>
+  > {
+    const results = await this.pointsTransactionRepository
+      .createQueryBuilder('pt')
+      .innerJoin(CustomerMembershipEntity, 'cm', 'pt.membershipId = cm.id')
+      .where('cm.tenantId = :tenantId', { tenantId })
+      .andWhere('pt.createdAt >= :startDate', { startDate })
+      .andWhere('pt.createdAt <= :endDate', { endDate })
+      .select([
+        'pt.membershipId as membershipId',
+        'COUNT(*) as transactionCount',
+        'COALESCE(SUM(CASE WHEN pt.amount IS NOT NULL THEN pt.amount ELSE 0 END), 0) as totalRevenue',
+        'COALESCE(SUM(CASE WHEN pt.type = "EARNING" THEN pt.pointsDelta ELSE 0 END), 0) as totalPoints',
+      ])
+      .groupBy('pt.membershipId')
+      .getRawMany();
+
+    return results.map((row) => ({
+      membershipId: Number(row.membershipId),
+      transactionCount: Number(row.transactionCount),
+      totalRevenue: Number(row.totalRevenue),
+      totalPoints: Number(row.totalPoints),
+    }));
+  }
+
+  /**
+   * Obtiene revenue generado por clientes que canjearon una recompensa específica
+   * Busca todas las memberships que canjearon esa reward, y suma su revenue en el período
+   */
+  async getRevenueByReward(
+    ruleId: number,
+    tenantId: number,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<number> {
+    // 1. Obtener memberships que canjearon esta reward
+    const redemptionMembers = await this.pointsTransactionRepository
+      .createQueryBuilder('pt')
+      .innerJoin(CustomerMembershipEntity, 'cm', 'pt.membershipId = cm.id')
+      .where('cm.tenantId = :tenantId', { tenantId })
+      .andWhere('pt.type = :redeemType', { redeemType: 'REDEEM' })
+      .andWhere('pt.ruleId = :ruleId', { ruleId })
+      .andWhere('pt.createdAt >= :startDate', { startDate })
+      .andWhere('pt.createdAt <= :endDate', { endDate })
+      .select('DISTINCT pt.membershipId as membershipId')
+      .getRawMany();
+
+    if (redemptionMembers.length === 0) {
+      return 0;
+    }
+
+    const membershipIds = redemptionMembers.map((m) => Number(m.membershipId));
+
+    // 2. Sumar revenue de esas memberships (transacciones tipo EARNING con amount)
+    const result = await this.pointsTransactionRepository
+      .createQueryBuilder('pt')
+      .innerJoin(CustomerMembershipEntity, 'cm', 'pt.membershipId = cm.id')
+      .where('cm.tenantId = :tenantId', { tenantId })
+      .andWhere('pt.membershipId IN (:...membershipIds)', { membershipIds })
+      .andWhere('pt.type = :earningType', { earningType: 'EARNING' })
+      .andWhere('pt.amount IS NOT NULL')
+      .andWhere('pt.amount > 0')
+      .andWhere('pt.createdAt >= :startDate', { startDate })
+      .andWhere('pt.createdAt <= :endDate', { endDate })
+      .select('COALESCE(SUM(pt.amount), 0) as totalRevenue')
+      .getRawOne();
+
+    return Number(result?.totalRevenue || 0);
+  }
+
+  /**
+   * Obtiene el segmento de cliente que más canjea una recompensa
+   * Segmentación rápida basada en número de transacciones y revenue
+   */
+  async getTopSegmentByReward(
+    ruleId: number,
+    tenantId: number,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<string> {
+    // Obtener memberships que canjearon esta reward con sus métricas
+    const results = await this.pointsTransactionRepository
+      .createQueryBuilder('pt_redeem')
+      .innerJoin(CustomerMembershipEntity, 'cm', 'pt_redeem.membershipId = cm.id')
+      .where('cm.tenantId = :tenantId', { tenantId })
+      .andWhere('pt_redeem.type = :redeemType', { redeemType: 'REDEEM' })
+      .andWhere('pt_redeem.ruleId = :ruleId', { ruleId })
+      .andWhere('pt_redeem.createdAt >= :startDate', { startDate })
+      .andWhere('pt_redeem.createdAt <= :endDate', { endDate })
+      .innerJoin(
+        (qb) =>
+          qb
+            .select([
+              'pt.membershipId as membershipId',
+              'COUNT(*) as transactionCount',
+              'COALESCE(SUM(CASE WHEN pt.amount IS NOT NULL THEN pt.amount ELSE 0 END), 0) as totalRevenue',
+            ])
+            .from('points_transactions', 'pt')
+            .innerJoin(CustomerMembershipEntity, 'cm2', 'pt.membershipId = cm2.id')
+            .where('cm2.tenantId = :tenantId', { tenantId })
+            .andWhere('pt.createdAt >= :startDate', { startDate })
+            .andWhere('pt.createdAt <= :endDate', { endDate })
+            .groupBy('pt.membershipId'),
+        'metrics',
+        'metrics.membershipId = pt_redeem.membershipId',
+      )
+      .select([
+        'CASE ' +
+          'WHEN metrics.transactionCount >= 10 AND metrics.totalRevenue > 500 THEN "VIP" ' +
+          'WHEN metrics.transactionCount >= 5 OR metrics.totalRevenue >= 200 THEN "FREQUENT" ' +
+          'WHEN metrics.transactionCount >= 2 OR metrics.totalRevenue >= 50 THEN "OCCASIONAL" ' +
+          'ELSE "AT_RISK" ' +
+          'END as segment',
+        'COUNT(*) as count',
+      ])
+      .groupBy('segment')
+      .orderBy('count', 'DESC')
+      .getRawOne();
+
+    return results?.segment || 'OCCASIONAL';
+  }
+
+  /**
+   * Obtiene la sucursal donde más se canjea una recompensa
+   */
+  async getTopBranchByReward(
+    ruleId: number,
+    tenantId: number,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<{ branchId: number; branchName: string } | null> {
+    const result = await this.pointsTransactionRepository
+      .createQueryBuilder('pt')
+      .innerJoin(CustomerMembershipEntity, 'cm', 'pt.membershipId = cm.id')
+      .innerJoin('branches', 'b', 'pt.branchId = b.id')
+      .where('cm.tenantId = :tenantId', { tenantId })
+      .andWhere('pt.type = :redeemType', { redeemType: 'REDEEM' })
+      .andWhere('pt.ruleId = :ruleId', { ruleId })
+      .andWhere('pt.branchId IS NOT NULL')
+      .andWhere('pt.createdAt >= :startDate', { startDate })
+      .andWhere('pt.createdAt <= :endDate', { endDate })
+      .select(['pt.branchId as branchId', 'b.name as branchName', 'COUNT(*) as count'])
+      .groupBy('pt.branchId')
+      .addGroupBy('b.name')
+      .orderBy('count', 'DESC')
+      .limit(1)
+      .getRawOne();
+
+    if (!result) {
+      return null;
+    }
+
+    return {
+      branchId: Number(result.branchId),
+      branchName: String(result.branchName),
+    };
+  }
 }
+

@@ -100,6 +100,8 @@ describe('CreatePointsAdjustmentHandler - branchId Tests', () => {
         null,
         null,
         2, // branchId
+        null, // amount ← NUEVO: ADJUSTMENT no tiene revenue
+        null, // currency ← NUEVO
         new Date(),
       );
 
@@ -154,6 +156,8 @@ describe('CreatePointsAdjustmentHandler - branchId Tests', () => {
         null,
         null,
         null, // branchId null
+        null, // amount ← NUEVO
+        null, // currency ← NUEVO
         new Date(),
       );
 
@@ -226,6 +230,8 @@ describe('CreatePointsAdjustmentHandler - branchId Tests', () => {
         null,
         null,
         null, // branchId
+        null, // amount ← NUEVO
+        null, // currency ← NUEVO
         new Date(),
       );
 

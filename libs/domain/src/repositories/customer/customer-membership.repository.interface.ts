@@ -136,4 +136,11 @@ export interface ICustomerMembershipRepository {
    * @returns Membership actualizada con el nuevo balance
    */
   updateBalanceFromLedger(membershipId: number, balance: number): Promise<CustomerMembership>;
+
+  /**
+   * Busca múltiples memberships por sus IDs (batch query)
+   * Optimización para evitar N+1 queries
+   * @param ids Array de IDs de memberships
+   */
+  findByIds(ids: number[]): Promise<CustomerMembership[]>;
 }

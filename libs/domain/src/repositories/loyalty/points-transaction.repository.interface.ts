@@ -170,4 +170,187 @@ export interface IPointsTransactionRepository {
     pointsRedeemedInPeriod: number;
     redemptionsInPeriod: number;
   }>;
+
+  /**
+   * Busca múltiples transacciones por idempotency keys (batch query)
+   * Optimización para evitar N+1 queries en ProcessLoyaltyEventHandler
+   * @param idempotencyKeys Array de idempotency keys
+   * @returns Map con key = idempotencyKey, value = PointsTransaction
+   */
+  findByIdempotencyKeys(
+    idempotencyKeys: string[],
+  ): Promise<Map<string, PointsTransaction>>;
+
+  /**
+   * Obtiene métricas de revenue agregadas por sucursal para un tenant
+   * Usa los nuevos campos amount y currency con índices optimizados
+   * @param tenantId ID del tenant
+   * @param startDate Fecha de inicio del período (opcional)
+   * @param endDate Fecha de fin del período (opcional)
+   * @returns Array de métricas por sucursal
+   */
+  getBranchRevenueMetrics(
+    tenantId: number,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<
+    Array<{
+      branchId: number;
+      totalRevenue: number;
+      transactionCount: number;
+      avgTicket: number;
+      currency: string;
+    }>
+  >;
+
+  /**
+   * Obtiene el revenue total de un tenant para un período específico
+   * @param tenantId ID del tenant
+   * @param startDate Fecha de inicio del período (opcional)
+   * @param endDate Fecha de fin del período (opcional)
+   * @returns Revenue total y métricas agregadas
+   */
+  getTenantRevenueMetrics(
+    tenantId: number,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<{
+    totalRevenue: number;
+    transactionCount: number;
+    avgTicket: number;
+    currency: string;
+  }>;
+
+  /**
+   * Obtiene métricas de revenue para una sucursal específica
+   * @param branchId ID de la sucursal
+   * @param tenantId ID del tenant (para validación)
+   * @param startDate Fecha de inicio del período (opcional)
+   * @param endDate Fecha de fin del período (opcional)
+   * @returns Métricas de la sucursal
+   */
+  getBranchRevenue(
+    branchId: number,
+    tenantId: number,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<{
+    totalRevenue: number;
+    transactionCount: number;
+    avgTicket: number;
+    currency: string;
+  }>;
+
+  /**
+   * Obtiene métricas de clientes por sucursal
+   * @param tenantId ID del tenant
+   * @param startDate Fecha de inicio del período (opcional, para activeCustomers)
+   * @param endDate Fecha de fin del período (opcional, para activeCustomers)
+   * @returns Métricas de clientes por sucursal
+   */
+  getBranchCustomerMetrics(
+    tenantId: number,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<
+    Array<{
+      branchId: number;
+      totalCustomers: number; // COUNT DISTINCT membershipId (all time)
+      activeCustomers: number; // COUNT DISTINCT membershipId (in period)
+    }>
+  >;
+
+  /**
+   * Obtiene métricas de redemptions por sucursal
+   * @param tenantId ID del tenant
+   * @param startDate Fecha de inicio del período
+   * @param endDate Fecha de fin del período
+   * @returns Número de redemptions por sucursal
+   */
+  getBranchRedemptionMetrics(
+    tenantId: number,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<
+    Array<{
+      branchId: number;
+      rewardsRedeemed: number;
+    }>
+  >;
+
+  /**
+   * Calcula la tasa de retorno para un tenant en un período
+   * Return rate = (clientes con >=2 transacciones / total clientes con >=1 transacción) * 100
+   * @param tenantId ID del tenant
+   * @param startDate Fecha de inicio del período
+   * @param endDate Fecha de fin del período
+   * @returns Tasa de retorno como porcentaje
+   */
+  calculateReturnRate(tenantId: number, startDate: Date, endDate: Date): Promise<number>;
+
+  /**
+   * Obtiene datos agregados por cliente para segmentación
+   * Cuenta transacciones, suma revenue y puntos ganados por membershipId
+   * @param tenantId ID del tenant
+   * @param startDate Fecha de inicio del período
+   * @param endDate Fecha de fin del período
+   * @returns Array de datos agregados por cliente
+   */
+  getCustomerDataForSegmentation(
+    tenantId: number,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<
+    Array<{
+      membershipId: number;
+      transactionCount: number;
+      totalRevenue: number;
+      totalPoints: number;
+    }>
+  >;
+
+  /**
+   * Obtiene revenue generado por clientes que canjearon una recompensa específica
+   * @param ruleId ID de la reward rule
+   * @param tenantId ID del tenant
+   * @param startDate Fecha de inicio del período
+   * @param endDate Fecha de fin del período
+   * @returns Revenue total generado por esos clientes
+   */
+  getRevenueByReward(
+    ruleId: number,
+    tenantId: number,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<number>;
+
+  /**
+   * Obtiene el segmento de cliente que más canjea una recompensa
+   * @param ruleId ID de la reward rule
+   * @param tenantId ID del tenant
+   * @param startDate Fecha de inicio del período
+   * @param endDate Fecha de fin del período
+   * @returns Segmento top (VIP, FREQUENT, OCCASIONAL, AT_RISK)
+   */
+  getTopSegmentByReward(
+    ruleId: number,
+    tenantId: number,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<string>;
+
+  /**
+   * Obtiene la sucursal donde más se canjea una recompensa
+   * @param ruleId ID de la reward rule
+   * @param tenantId ID del tenant
+   * @param startDate Fecha de inicio del período
+   * @param endDate Fecha de fin del período
+   * @returns ID y nombre de la sucursal top
+   */
+  getTopBranchByReward(
+    ruleId: number,
+    tenantId: number,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<{ branchId: number; branchName: string } | null>;
 }

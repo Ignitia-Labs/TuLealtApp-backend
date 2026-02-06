@@ -96,6 +96,8 @@ export class ReversalService {
       null, // expiresAt (las reversiones no expiran)
       null, // rewardId (las reversiones no tienen rewardId)
       originalTransaction.branchId || null, // branchId del original
+      originalTransaction.amount || null, // amount del original ← NUEVO
+      originalTransaction.currency || null, // currency del original ← NUEVO
       new Date(),
     );
 

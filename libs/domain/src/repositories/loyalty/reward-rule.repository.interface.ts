@@ -86,4 +86,22 @@ export interface IRewardRuleRepository {
    * Elimina una regla por su ID
    */
   delete(id: number): Promise<void>;
+
+  /**
+   * Busca múltiples reglas por sus IDs (batch query)
+   * Optimización para evitar N+1 queries
+   * @param ids Array de IDs de reglas
+   */
+  findByIds(ids: number[]): Promise<RewardRule[]>;
+
+  /**
+   * Busca reglas activas de múltiples programas por trigger (batch query)
+   * Optimización para evitar N+1 queries en ProcessLoyaltyEventHandler
+   * @param programIds Array de IDs de programas
+   * @param trigger Tipo de trigger
+   */
+  findActiveByProgramIdsAndTrigger(
+    programIds: number[],
+    trigger: RewardRule['trigger'],
+  ): Promise<RewardRule[]>;
 }

@@ -118,6 +118,12 @@ export class PointsTransactionEntity {
   @Column('int', { nullable: true })
   branchId: number | null; // FK a branches.id - Sucursal donde ocurrió la transacción
 
+  @Column('decimal', { precision: 15, scale: 2, nullable: true }) // ← NUEVO
+  amount: number | null; // Monto monetario de la transacción (solo para EARNING de PURCHASE)
+
+  @Column('varchar', { length: 10, nullable: true, default: 'GTQ' }) // ← NUEVO
+  currency: string | null; // Moneda del monto (ISO 4217: GTQ, USD, etc.)
+
   @CreateDateColumn()
   createdAt: Date;
 }

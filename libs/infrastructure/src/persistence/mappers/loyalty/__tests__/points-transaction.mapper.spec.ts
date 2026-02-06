@@ -24,6 +24,8 @@ describe('PointsTransactionMapper', () => {
         expiresAt: new Date('2025-01-01T10:00:00Z'),
         rewardId: null,
         branchId: 2,
+        amount: null, // ← NUEVO: VISIT no tiene revenue
+        currency: null, // ← NUEVO
         createdAt: new Date('2024-01-01T10:00:00Z'),
         tenant: null as any,
         customer: null as any,
@@ -76,6 +78,8 @@ describe('PointsTransactionMapper', () => {
         expiresAt: null,
         rewardId: null,
         branchId: null,
+        amount: null, // ← NUEVO: ADJUSTMENT no tiene revenue
+        currency: null, // ← NUEVO
         createdAt: new Date('2024-01-02T10:00:00Z'),
         tenant: null as any,
         customer: null as any,
@@ -112,6 +116,8 @@ describe('PointsTransactionMapper', () => {
         expiresAt: null,
         rewardId: 456,
         branchId: 3,
+        amount: null, // ← NUEVO: REDEEM no tiene revenue
+        currency: null, // ← NUEVO
         createdAt: new Date('2024-01-03T10:00:00Z'),
         tenant: null as any,
         customer: null as any,
@@ -151,6 +157,8 @@ describe('PointsTransactionMapper', () => {
         new Date('2025-01-01T10:00:00Z'), // expiresAt
         null, // rewardId
         2, // branchId
+        null, // amount ← NUEVO: VISIT no tiene revenue
+        null, // currency ← NUEVO
         new Date('2024-01-01T10:00:00Z'),
       );
 
@@ -198,6 +206,8 @@ describe('PointsTransactionMapper', () => {
         null,
         null,
         null, // branchId
+        null, // amount ← NUEVO
+        null, // currency ← NUEVO
         new Date('2024-01-02T10:00:00Z'),
       );
 
@@ -229,6 +239,8 @@ describe('PointsTransactionMapper', () => {
         null,
         456, // rewardId
         3, // branchId
+        null, // amount ← NUEVO
+        null, // currency ← NUEVO
         new Date('2024-01-03T10:00:00Z'),
       );
 
@@ -261,6 +273,8 @@ describe('PointsTransactionMapper', () => {
         null,
         null,
         5, // branchId
+        null, // amount ← NUEVO
+        null, // currency ← NUEVO
         new Date(),
       );
 
@@ -294,6 +308,8 @@ describe('PointsTransactionMapper', () => {
         expiresAt: new Date('2026-01-01'),
         rewardId: null,
         branchId: 7,
+        amount: null, // ← NUEVO
+        currency: null, // ← NUEVO
         createdAt: new Date('2024-01-01'),
         tenant: null as any,
         customer: null as any,

@@ -76,4 +76,11 @@ export interface IUserRepository {
     roles: string[],
     includeInactive?: boolean,
   ): Promise<number>;
+
+  /**
+   * Busca múltiples usuarios por sus IDs (batch query)
+   * Optimización para evitar N+1 queries
+   * @param ids Array de IDs de usuarios
+   */
+  findByIds(ids: number[]): Promise<User[]>;
 }

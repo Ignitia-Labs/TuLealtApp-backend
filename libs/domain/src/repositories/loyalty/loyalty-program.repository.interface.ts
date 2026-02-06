@@ -62,4 +62,11 @@ export interface ILoyaltyProgramRepository {
    * Elimina un programa por su ID
    */
   delete(id: number): Promise<void>;
+
+  /**
+   * Busca múltiples programas por sus IDs (batch query)
+   * Optimización para evitar N+1 queries
+   * @param ids Array de IDs de programas
+   */
+  findByIds(ids: number[]): Promise<LoyaltyProgram[]>;
 }

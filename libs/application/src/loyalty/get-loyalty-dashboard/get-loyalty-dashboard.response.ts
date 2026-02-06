@@ -77,8 +77,8 @@ export class GetLoyaltyDashboardResponse {
   redemptionsInPeriod: number;
 
   @ApiProperty({
-    example: 2.08,
-    description: 'Tasa de retorno calculada: (redemptionsInPeriod / totalCustomers) * 100',
+    example: 42.5,
+    description: 'Tasa de retorno: (clientes con >=2 transacciones / total clientes con >=1 transacción) * 100',
   })
   returnRate: number;
 
