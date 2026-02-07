@@ -271,9 +271,31 @@ export class RewardsController {
     summary: 'Validar código de canje',
     description:
       'Valida un código de canje generado por un cliente y lo marca como usado. ' +
-      'El código debe pertenecer al tenant del partner autenticado.',
+      'El código debe pertenecer al tenant del partner autenticado. ' +
+      'Opcionalmente se puede incluir branchId para registrar la sucursal donde se validó el código.',
   })
-  @ApiBody({ type: ValidateRedemptionCodeRequest })
+  @ApiParam({ name: 'tenantId', type: Number, description: 'ID del tenant' })
+  @ApiBody({ 
+    type: ValidateRedemptionCodeRequest,
+    description: 'Datos del código de canje (opcional: incluir branchId)',
+    examples: {
+      validacionBasica: {
+        summary: 'Validación básica',
+        description: 'Validar código sin especificar sucursal',
+        value: {
+          code: 'REWARD-ABC123-XYZ789',
+        },
+      },
+      validacionConSucursal: {
+        summary: 'Validación con sucursal',
+        description: 'Validar código registrando la sucursal donde se validó',
+        value: {
+          code: 'REWARD-ABC123-XYZ789',
+          branchId: 2,
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 200,
     description: 'Código validado exitosamente',
@@ -296,6 +318,7 @@ export class RewardsController {
     type: NotFoundErrorResponseDto,
   })
   async validateRedemptionCode(
+    @Param('tenantId', ParseIntPipe) tenantId: number,
     @Body() body: ValidateRedemptionCodeRequest,
     @CurrentUser() user: JwtPayload,
   ): Promise<ValidateRedemptionCodeResponse> {
@@ -311,6 +334,11 @@ export class RewardsController {
 
     const request = new ValidateRedemptionCodeRequest();
     request.code = body.code;
+    request.tenantId = tenantId;
+    // Incluir branchId si se proporciona en el body
+    if (body.branchId) {
+      request.branchId = body.branchId;
+    }
     return this.validateRedemptionCodeHandler.execute(request, currentUser.id);
   }
 

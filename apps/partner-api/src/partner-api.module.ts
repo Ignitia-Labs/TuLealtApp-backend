@@ -47,6 +47,8 @@ import {
   GetPartnerUsersHandler,
   GetUserProfileHandler,
   UpdatePartnerUserAssignmentHandler,
+  LockUserHandler,
+  UnlockUserHandler,
   // User Permissions Handlers
   GetUserPermissionsHandler,
   // Catalogs Handlers
@@ -228,6 +230,8 @@ import {
     GetPartnerUsersHandler,
     GetUserProfileHandler,
     UpdatePartnerUserAssignmentHandler,
+    LockUserHandler,
+    UnlockUserHandler,
     // User Permissions Handlers
     GetUserPermissionsHandler,
     // Catalogs Handlers

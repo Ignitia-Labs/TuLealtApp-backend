@@ -97,6 +97,8 @@ export class ValidateRedemptionCodeHandler {
     }
 
     // 7. Marcar código como usado
+    // NOTA: request.branchId está disponible para registrar la sucursal donde se validó el código.
+    // Actualmente no se persiste, pero podría agregarse a RedemptionCode en el futuro.
     const updatedCode = redemptionCode.markAsUsed(userId);
     await this.redemptionCodeRepository.update(updatedCode);
 

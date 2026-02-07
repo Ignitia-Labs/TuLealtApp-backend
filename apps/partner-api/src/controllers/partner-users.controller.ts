@@ -36,6 +36,12 @@ import {
   UpdatePartnerUserAssignmentHandler,
   UpdatePartnerUserAssignmentRequest,
   UpdatePartnerUserAssignmentResponse,
+  LockUserHandler,
+  LockUserRequest,
+  LockUserResponse,
+  UnlockUserHandler,
+  UnlockUserRequest,
+  UnlockUserResponse,
   JwtPayload,
 } from '@libs/application';
 import {
@@ -61,6 +67,8 @@ import { IUserRepository } from '@libs/domain';
  * - GET /partner/partner-users - Obtener usuarios del partner (PARTNER y PARTNER_STAFF)
  * - GET /partner/partner-users/:userId - Obtener perfil de un usuario específico del partner
  * - PATCH /partner/partner-users/:userId/assignment - Asignar tenant y branch a usuario (solo PARTNER o ADMIN)
+ * - PATCH /partner/partner-users/:userId/lock - Bloquear usuario (solo PARTNER)
+ * - PATCH /partner/partner-users/:userId/unlock - Desbloquear usuario (solo PARTNER)
  */
 @ApiTags('Partner Users')
 @Controller('partner-users')
@@ -73,6 +81,8 @@ export class PartnerUsersController {
     private readonly getPartnerUsersHandler: GetPartnerUsersHandler,
     private readonly getUserProfileHandler: GetUserProfileHandler,
     private readonly updatePartnerUserAssignmentHandler: UpdatePartnerUserAssignmentHandler,
+    private readonly lockUserHandler: LockUserHandler,
+    private readonly unlockUserHandler: UnlockUserHandler,
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
   ) {}
@@ -587,5 +597,199 @@ export class PartnerUsersController {
     request.branchId = body.branchId;
 
     return this.updatePartnerUserAssignmentHandler.execute(request);
+  }
+
+  @Patch(':userId/lock')
+  @HttpCode(HttpStatus.OK)
+  @Roles('PARTNER') // Solo usuarios PARTNER pueden bloquear usuarios
+  @ApiOperation({
+    summary: 'Bloquear un usuario del partner',
+    description:
+      'Bloquea un usuario (PARTNER o PARTNER_STAFF) del partner autenticado, desactivando su cuenta. Solo usuarios con rol PARTNER pueden realizar esta operación. No se puede bloquear a sí mismo.',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'ID del usuario a bloquear',
+    type: Number,
+    example: 15,
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuario bloqueado exitosamente',
+    type: LockUserResponse,
+    example: {
+      id: 15,
+      isActive: false,
+      updatedAt: '2024-01-20T14:45:00.000Z',
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos inválidos o intento de auto-bloqueo',
+    type: BadRequestErrorResponseDto,
+    example: {
+      statusCode: 400,
+      message: 'You cannot lock yourself',
+      error: 'Bad Request',
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos de PARTNER o el usuario no pertenece a su partner',
+    type: ForbiddenErrorResponseDto,
+    example: {
+      statusCode: 403,
+      message: 'You can only lock users from your partner',
+      error: 'Forbidden',
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuario no encontrado',
+    type: NotFoundErrorResponseDto,
+    example: {
+      statusCode: 404,
+      message: 'User with ID 15 not found',
+      error: 'Not Found',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async lockUser(
+    @Param('userId', ParseIntPipe) userId: number,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<LockUserResponse> {
+    // Validar que el usuario autenticado tenga rol PARTNER
+    if (!user.roles.includes('PARTNER')) {
+      throw new ForbiddenException('Only users with PARTNER role can lock users');
+    }
+
+    // Prevenir auto-bloqueo
+    if (userId === user.userId) {
+      throw new ForbiddenException('You cannot lock yourself');
+    }
+
+    // Obtener usuario objetivo
+    const targetUser = await this.userRepository.findById(userId);
+    if (!targetUser) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    // Obtener partnerId del usuario autenticado
+    const currentUserEntity = await this.userRepository.findById(user.userId);
+    if (!currentUserEntity || !currentUserEntity.partnerId) {
+      throw new ForbiddenException('Current user does not belong to a partner');
+    }
+
+    // Validar que el usuario objetivo pertenezca al mismo partner
+    if (targetUser.partnerId !== currentUserEntity.partnerId) {
+      throw new ForbiddenException('You can only lock users from your partner');
+    }
+
+    // Ejecutar bloqueo
+    const request = new LockUserRequest();
+    request.userId = userId;
+    return this.lockUserHandler.execute(request, user.userId);
+  }
+
+  @Patch(':userId/unlock')
+  @HttpCode(HttpStatus.OK)
+  @Roles('PARTNER') // Solo usuarios PARTNER pueden desbloquear usuarios
+  @ApiOperation({
+    summary: 'Desbloquear un usuario del partner',
+    description:
+      'Desbloquea un usuario (PARTNER o PARTNER_STAFF) del partner autenticado, reactivando su cuenta. Solo usuarios con rol PARTNER pueden realizar esta operación.',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'ID del usuario a desbloquear',
+    type: Number,
+    example: 15,
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuario desbloqueado exitosamente',
+    type: UnlockUserResponse,
+    example: {
+      id: 15,
+      isActive: true,
+      updatedAt: '2024-01-20T14:45:00.000Z',
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos inválidos',
+    type: BadRequestErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos de PARTNER o el usuario no pertenece a su partner',
+    type: ForbiddenErrorResponseDto,
+    example: {
+      statusCode: 403,
+      message: 'You can only unlock users from your partner',
+      error: 'Forbidden',
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuario no encontrado',
+    type: NotFoundErrorResponseDto,
+    example: {
+      statusCode: 404,
+      message: 'User with ID 15 not found',
+      error: 'Not Found',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error interno del servidor',
+    type: InternalServerErrorResponseDto,
+  })
+  async unlockUser(
+    @Param('userId', ParseIntPipe) userId: number,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<UnlockUserResponse> {
+    // Validar que el usuario autenticado tenga rol PARTNER
+    if (!user.roles.includes('PARTNER')) {
+      throw new ForbiddenException('Only users with PARTNER role can unlock users');
+    }
+
+    // Obtener usuario objetivo
+    const targetUser = await this.userRepository.findById(userId);
+    if (!targetUser) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    // Obtener partnerId del usuario autenticado
+    const currentUserEntity = await this.userRepository.findById(user.userId);
+    if (!currentUserEntity || !currentUserEntity.partnerId) {
+      throw new ForbiddenException('Current user does not belong to a partner');
+    }
+
+    // Validar que el usuario objetivo pertenezca al mismo partner
+    if (targetUser.partnerId !== currentUserEntity.partnerId) {
+      throw new ForbiddenException('You can only unlock users from your partner');
+    }
+
+    // Ejecutar desbloqueo
+    const request = new UnlockUserRequest();
+    request.userId = userId;
+    return this.unlockUserHandler.execute(request, user.userId);
   }
 }
