@@ -34,10 +34,11 @@ export class CustomerPartnersController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Listar mis partners',
+    summary: 'Listar mis partners con información de tiers',
     description:
       'Obtiene todos los partners asociados al usuario autenticado a través de sus memberships. ' +
-      'Solo puede ver sus propias asociaciones. Los datos provienen de customer_memberships.',
+      'Solo puede ver sus propias asociaciones. Los datos provienen de customer_memberships. ' +
+      'Incluye información completa de tiers, thresholds, beneficios y políticas de evaluación de cada tenant.',
   })
   @ApiQuery({
     name: 'status',

@@ -9,7 +9,7 @@ import {
   AuthenticateUserResponse,
   GetUserProfileHandler,
   GetUserProfileRequest,
-  GetUserProfileResponse,
+  GetCustomerProfileResponse,
   JwtPayload,
 } from '@libs/application';
 import { JwtAuthGuard, CurrentUser } from '@libs/shared';
@@ -111,7 +111,7 @@ export class CustomerAuthController {
   @ApiResponse({
     status: 200,
     description: 'Perfil de cliente obtenido exitosamente',
-    type: GetUserProfileResponse,
+    type: GetCustomerProfileResponse,
     example: {
       id: 1,
       email: 'customer@example.com',
@@ -135,9 +135,12 @@ export class CustomerAuthController {
       error: 'Unauthorized',
     },
   })
-  async getProfile(@CurrentUser() user: JwtPayload): Promise<GetUserProfileResponse> {
+  async getProfile(@CurrentUser() user: JwtPayload): Promise<GetCustomerProfileResponse> {
     const request = new GetUserProfileRequest();
     request.userId = user.userId;
-    return this.getUserProfileHandler.execute(request);
+    const userProfile = await this.getUserProfileHandler.execute(request);
+    
+    // Transformar a respuesta específica para customer (sin campos de partner/tenant/branch)
+    return GetCustomerProfileResponse.fromUserProfile(userProfile);
   }
 }

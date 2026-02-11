@@ -8,6 +8,7 @@ import {
 import { GetCustomerMembershipRequest } from './get-customer-membership.request';
 import { GetCustomerMembershipResponse } from './get-customer-membership.response';
 import { CustomerMembershipDto } from '../dto/customer-membership.dto';
+import { GetCustomerMembershipsHandler } from '../get-customer-memberships/get-customer-memberships.handler';
 
 /**
  * Handler para el caso de uso de obtener una membership específica
@@ -83,30 +84,13 @@ export class GetCustomerMembershipHandler {
     // Calcular availableRewards (por ahora retornamos 0, se puede implementar lógica más adelante)
     const availableRewards = 0;
 
-    return new CustomerMembershipDto(
-      membership.id,
-      membership.userId,
-      membership.tenantId,
-      tenant.name,
-      tenant.logo,
-      tenant.logo, // tenantImage puede ser igual a logo
-      tenant.category,
-      tenant.primaryColor,
-      membership.registrationBranchId,
+    return GetCustomerMembershipsHandler.createDtoWithoutTierData(
+      membership,
+      tenant,
       branchName,
-      membership.points,
-      membership.tierId,
       tierName,
       tierColor,
-      membership.totalSpent,
-      membership.totalVisits,
-      membership.lastVisit,
-      membership.joinedDate,
       availableRewards,
-      membership.qrCode,
-      membership.status,
-      membership.createdAt,
-      membership.updatedAt,
     );
   }
 }

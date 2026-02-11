@@ -1,7 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
+import {
+  TierInfoDto,
+  TierPolicyDto,
+} from '../../customer-memberships/dto/customer-membership.dto';
 
 /**
  * DTO de response para obtener los partners de un customer
+ * @deprecated Use GET /customer/memberships instead - Este endpoint será deprecado
  */
 export class GetCustomerPartnersResponse {
   @ApiProperty({
@@ -49,6 +54,19 @@ export class CustomerPartnerItem {
   @ApiProperty({ description: 'Metadatos adicionales', nullable: true })
   metadata: Record<string, any> | null;
 
+  @ApiProperty({
+    description: 'Información de los tiers del tenant',
+    type: [TierInfoDto],
+  })
+  tiers: TierInfoDto[];
+
+  @ApiProperty({
+    description: 'Política de tiers del tenant',
+    type: TierPolicyDto,
+    nullable: true,
+  })
+  tierPolicy: TierPolicyDto | null;
+
   constructor(
     id: number,
     partnerId: number,
@@ -61,6 +79,8 @@ export class CustomerPartnerItem {
     joinedDate: Date,
     lastActivityDate: Date | null,
     metadata: Record<string, any> | null,
+    tiers: TierInfoDto[],
+    tierPolicy: TierPolicyDto | null,
   ) {
     this.id = id;
     this.partnerId = partnerId;
@@ -73,5 +93,7 @@ export class CustomerPartnerItem {
     this.joinedDate = joinedDate;
     this.lastActivityDate = lastActivityDate;
     this.metadata = metadata;
+    this.tiers = tiers;
+    this.tierPolicy = tierPolicy;
   }
 }

@@ -11,6 +11,7 @@ export * from './users/create-user/create-user.response';
 export * from './users/get-user-profile/get-user-profile.handler';
 export * from './users/get-user-profile/get-user-profile.request';
 export * from './users/get-user-profile/get-user-profile.response';
+export * from './users/get-user-profile/get-customer-profile.response';
 
 export * from './users/lock-user/lock-user.handler';
 export * from './users/lock-user/lock-user.request';

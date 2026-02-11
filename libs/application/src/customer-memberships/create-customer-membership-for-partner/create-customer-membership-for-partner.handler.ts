@@ -18,6 +18,7 @@ import { generateMembershipQrCode } from '@libs/shared';
 import { CreateCustomerMembershipRequest } from '../create-customer-membership/create-customer-membership.request';
 import { CreateCustomerMembershipResponse } from '../create-customer-membership/create-customer-membership.response';
 import { CustomerMembershipDto } from '../dto/customer-membership.dto';
+import { GetCustomerMembershipsHandler } from '../get-customer-memberships/get-customer-memberships.handler';
 import { SubscriptionUsageHelper } from '@libs/application';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -186,30 +187,13 @@ export class CreateCustomerMembershipForPartnerHandler {
 
     const availableRewards = 0;
 
-    return new CustomerMembershipDto(
-      membership.id,
-      membership.userId,
-      membership.tenantId,
-      tenant.name,
-      tenant.logo,
-      tenant.logo,
-      tenant.category,
-      tenant.primaryColor,
-      membership.registrationBranchId,
+    return GetCustomerMembershipsHandler.createDtoWithoutTierData(
+      membership,
+      tenant,
       branchName,
-      membership.points,
-      membership.tierId,
       tierName,
       tierColor,
-      membership.totalSpent,
-      membership.totalVisits,
-      membership.lastVisit,
-      membership.joinedDate,
       availableRewards,
-      membership.qrCode,
-      membership.status,
-      membership.createdAt,
-      membership.updatedAt,
     );
   }
 }

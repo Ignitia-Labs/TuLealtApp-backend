@@ -20,6 +20,7 @@ import { CreateUserRequest } from '../../users/create-user/create-user.request';
 import { CreateCustomerMembershipRequest } from '../create-customer-membership/create-customer-membership.request';
 import { CreateCustomerMembershipResponse } from '../create-customer-membership/create-customer-membership.response';
 import { CustomerMembershipDto } from '../dto/customer-membership.dto';
+import { GetCustomerMembershipsHandler } from '../get-customer-memberships/get-customer-memberships.handler';
 import { CreateCustomerForPartnerRequest } from './create-customer-for-partner.request';
 import { CreateCustomerForPartnerResponse } from './create-customer-for-partner.response';
 import { SubscriptionUsageHelper } from '@libs/application';
@@ -286,30 +287,13 @@ export class CreateCustomerForPartnerHandler {
 
     const availableRewards = 0;
 
-    return new CustomerMembershipDto(
-      membership.id,
-      membership.userId,
-      membership.tenantId,
-      tenant.name,
-      tenant.logo,
-      tenant.logo,
-      tenant.category,
-      tenant.primaryColor,
-      membership.registrationBranchId,
+    return GetCustomerMembershipsHandler.createDtoWithoutTierData(
+      membership,
+      tenant,
       branchName,
-      membership.points,
-      membership.tierId,
       tierName,
       tierColor,
-      membership.totalSpent,
-      membership.totalVisits,
-      membership.lastVisit,
-      membership.joinedDate,
       availableRewards,
-      membership.qrCode,
-      membership.status,
-      membership.createdAt,
-      membership.updatedAt,
     );
   }
 }

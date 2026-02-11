@@ -79,9 +79,7 @@ async function bootstrap() {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        name: 'JWT',
         description: 'Ingresa el token JWT obtenido del endpoint de login',
-        in: 'header',
       },
       'JWT-auth',
     )
