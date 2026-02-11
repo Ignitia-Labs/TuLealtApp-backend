@@ -4,10 +4,10 @@ import { HealthController, LoggerModule } from '@libs/shared';
 import { CustomerAuthModule } from './auth/customer-auth.module';
 import { PricingController } from './controllers/pricing.controller';
 import { CustomerMembershipsController } from './controllers/customer-memberships.controller';
-import { CustomerPartnersController } from './controllers/customer-partners.controller';
 import { RewardsController } from './controllers/rewards.controller';
 import { CurrenciesController } from './controllers/currencies.controller';
 import { InvitationCodesController } from './controllers/invitation-codes.controller';
+import { CatalogsController } from './controllers/catalogs.controller';
 import {
   GetPricingPlansHandler,
   GetPricingPlanByIdHandler,
@@ -19,6 +19,8 @@ import {
   GetCurrenciesHandler,
   GetCountriesHandler,
   ValidateInvitationCodeHandler,
+  // Catalog Handlers
+  GetCatalogsHandler,
   // Customer Loyalty Handlers
   GetPointsBalanceHandler,
   GetPointsTransactionsHandler,
@@ -52,10 +54,10 @@ import {
   controllers: [
     PricingController,
     CustomerMembershipsController,
-    CustomerPartnersController,
     RewardsController,
     CurrenciesController,
     InvitationCodesController,
+    CatalogsController,
     HealthController,
   ],
   providers: [
@@ -74,6 +76,8 @@ import {
     GetCountriesHandler,
     // Handlers de aplicación - Invitation Codes
     ValidateInvitationCodeHandler,
+    // Handlers de aplicación - Catalogs
+    GetCatalogsHandler,
     // Handlers de aplicación - Customer Loyalty
     GetPointsBalanceHandler,
     GetPointsTransactionsHandler,
