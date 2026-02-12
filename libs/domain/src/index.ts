@@ -5,6 +5,7 @@
 
 // Entities - Auth
 export * from './entities/auth/user.entity';
+export * from './entities/auth/refresh-token.entity';
 export * from './entities/auth/user-profile.entity';
 export * from './entities/auth/user-permission.entity';
 export * from './entities/auth/permission.entity';
@@ -74,6 +75,7 @@ export * from './events/loyalty-event.types';
 
 // Repository Interfaces - Auth
 export * from './repositories/auth/user.repository.interface';
+export * from './repositories/auth/refresh-token.repository.interface';
 export * from './repositories/auth/user-profile.repository.interface';
 export * from './repositories/auth/user-permission.repository.interface';
 export * from './repositories/auth/permission.repository.interface';

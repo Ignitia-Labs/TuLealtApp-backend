@@ -7,6 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import {
@@ -22,9 +23,16 @@ import {
   UpdateMyProfileHandler,
   UpdateMyProfileRequest,
   UpdateMyProfileResponse,
+  RefreshTokenHandler,
+  RefreshTokenRequest,
+  RefreshTokenResponse,
+  RevokeRefreshTokenHandler,
+  RevokeRefreshTokenRequest,
+  RevokeRefreshTokenResponse,
   JwtPayload,
 } from '@libs/application';
 import { JwtAuthGuard, RolesGuard, Roles, CurrentUser } from '@libs/shared';
+import { Request } from 'express';
 
 /**
  * Controlador de autenticación para Admin API
@@ -32,6 +40,8 @@ import { JwtAuthGuard, RolesGuard, Roles, CurrentUser } from '@libs/shared';
  *
  * Endpoints:
  * - POST /admin/auth/login - Iniciar sesión como administrador (requiere rol ADMIN)
+ * - POST /admin/auth/refresh - Refrescar access token usando refresh token
+ * - POST /admin/auth/logout - Cerrar sesión y revocar refresh token
  * - GET /admin/auth/me - Obtener perfil del administrador autenticado (requiere autenticación)
  * - PATCH /admin/auth/me - Actualizar perfil del administrador autenticado (requiere autenticación)
  * - PATCH /admin/auth/password - Actualizar contraseña del administrador autenticado (requiere autenticación)
@@ -44,6 +54,8 @@ export class AdminAuthController {
     private readonly getUserProfileHandler: GetUserProfileHandler,
     private readonly updateMyProfileHandler: UpdateMyProfileHandler,
     private readonly updatePasswordHandler: UpdatePasswordHandler,
+    private readonly refreshTokenHandler: RefreshTokenHandler,
+    private readonly revokeRefreshTokenHandler: RevokeRefreshTokenHandler,
   ) {}
 
   @Post('login')
@@ -56,6 +68,7 @@ export class AdminAuthController {
     type: AuthenticateUserResponse,
     example: {
       token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+      refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.refreshToken...',
       user: {
         id: 1,
         email: 'admin@example.com',
@@ -73,9 +86,15 @@ export class AdminAuthController {
       error: 'Unauthorized',
     },
   })
-  async login(@Body() request: AuthenticateUserRequest): Promise<AuthenticateUserResponse> {
+  async login(
+    @Body() request: AuthenticateUserRequest,
+    @Req() req: Request,
+  ): Promise<AuthenticateUserResponse> {
     // Validar que el usuario tenga rol ADMIN y generar token con contexto 'admin'
-    return this.authenticateUserHandler.execute(request, 'admin', 'ADMIN');
+    const userAgent = req.headers['user-agent'];
+    const ipAddress = req.ip || req.socket.remoteAddress;
+    
+    return this.authenticateUserHandler.execute(request, 'admin', 'ADMIN', userAgent, ipAddress);
   }
 
   @Get('me')
@@ -304,5 +323,116 @@ export class AdminAuthController {
     request.currentPassword = body.currentPassword;
     request.newPassword = body.newPassword;
     return this.updatePasswordHandler.execute(request);
+  }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Refrescar access token',
+    description:
+      'Genera un nuevo access token y refresh token usando un refresh token válido. Implementa estrategia de single-use tokens (el refresh token anterior se revoca automáticamente).',
+  })
+  @ApiBody({
+    type: RefreshTokenRequest,
+    description: 'Refresh token JWT',
+    examples: {
+      ejemplo1: {
+        summary: 'Refresh token válido',
+        value: {
+          refreshToken:
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJ0eXBlIjoicmVmcmVzaCJ9.example',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens refrescados exitosamente',
+    type: RefreshTokenResponse,
+    example: {
+      token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.newAccessToken...',
+      refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.newRefreshToken...',
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Refresh token inválido, expirado o revocado',
+    example: {
+      statusCode: 401,
+      message: 'Invalid or expired refresh token',
+      error: 'Unauthorized',
+    },
+  })
+  async refreshToken(
+    @Body() request: RefreshTokenRequest,
+    @Req() req: Request,
+  ): Promise<RefreshTokenResponse> {
+    const userAgent = req.headers['user-agent'];
+    const ipAddress = req.ip || req.socket.remoteAddress;
+
+    return this.refreshTokenHandler.execute(request, userAgent, ipAddress);
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: 'Cerrar sesión',
+    description:
+      'Revoca el refresh token especificado (logout de un dispositivo) o todos los refresh tokens del usuario (logout de todos los dispositivos). Requiere autenticación con access token.',
+  })
+  @ApiBody({
+    type: RevokeRefreshTokenRequest,
+    description: 'Datos de logout',
+    examples: {
+      ejemplo1: {
+        summary: 'Logout de un dispositivo específico',
+        value: {
+          refreshToken:
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInR5cGUiOiJyZWZyZXNoIn0.example',
+        },
+      },
+      ejemplo2: {
+        summary: 'Logout de todos los dispositivos',
+        value: {
+          revokeAll: true,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Logout exitoso',
+    type: RevokeRefreshTokenResponse,
+    example: {
+      message: 'Logged out successfully',
+      tokensRevoked: 1,
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos de entrada inválidos',
+    example: {
+      statusCode: 400,
+      message: 'Either refreshToken or revokeAll must be provided',
+      error: 'Bad Request',
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    example: {
+      statusCode: 401,
+      message: 'Unauthorized',
+      error: 'Unauthorized',
+    },
+  })
+  async logout(
+    @CurrentUser() user: JwtPayload,
+    @Body() request: RevokeRefreshTokenRequest,
+  ): Promise<RevokeRefreshTokenResponse> {
+    return this.revokeRefreshTokenHandler.execute(user.userId, request);
   }
 }

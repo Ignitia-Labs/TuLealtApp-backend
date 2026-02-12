@@ -9,6 +9,8 @@ import {
   GetUserProfileHandler,
   CreateUserHandler,
   CreateCustomerMembershipHandler,
+  RefreshTokenHandler,
+  RevokeRefreshTokenHandler,
   JwtAuthService,
 } from '@libs/application';
 import { InfrastructureModule } from '@libs/infrastructure';
@@ -17,8 +19,10 @@ import { InfrastructureModule } from '@libs/infrastructure';
  * Módulo de autenticación para Customer API
  *
  * Proporciona endpoints de autenticación específicos para clientes:
- * - POST /customer/auth/register (con creación automática de membership opcional)
+ * - POST /customer/auth/register
  * - POST /customer/auth/login
+ * - POST /customer/auth/refresh
+ * - POST /customer/auth/logout
  * - GET /customer/auth/me
  *
  * Reutiliza los handlers de la capa de aplicación (@libs/application)
@@ -45,6 +49,8 @@ import { InfrastructureModule } from '@libs/infrastructure';
     RegisterUserHandler,
     AuthenticateUserHandler,
     GetUserProfileHandler,
+    RefreshTokenHandler,
+    RevokeRefreshTokenHandler,
     // Servicio JWT
     JwtAuthService,
     // Estrategia Passport JWT

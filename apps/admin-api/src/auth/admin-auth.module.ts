@@ -8,6 +8,8 @@ import {
   GetUserProfileHandler,
   UpdateMyProfileHandler,
   UpdatePasswordHandler,
+  RefreshTokenHandler,
+  RevokeRefreshTokenHandler,
   JwtAuthService,
 } from '@libs/application';
 import { InfrastructureModule } from '@libs/infrastructure';
@@ -16,8 +18,10 @@ import { InfrastructureModule } from '@libs/infrastructure';
  * Módulo de autenticación para Admin API
  *
  * Proporciona endpoints de autenticación específicos para administradores:
- * - POST /admin/auth/login (el prefijo 'admin' se añade automáticamente por setGlobalPrefix)
- * - GET /admin/auth/me (el prefijo 'admin' se añade automáticamente por setGlobalPrefix)
+ * - POST /admin/auth/login
+ * - POST /admin/auth/refresh
+ * - POST /admin/auth/logout
+ * - GET /admin/auth/me
  *
  * Reutiliza los handlers de la capa de aplicación (@libs/application)
  * para mantener la lógica de negocio centralizada.
@@ -42,6 +46,8 @@ import { InfrastructureModule } from '@libs/infrastructure';
     GetUserProfileHandler,
     UpdateMyProfileHandler,
     UpdatePasswordHandler,
+    RefreshTokenHandler,
+    RevokeRefreshTokenHandler,
     // Servicio JWT
     JwtAuthService,
     // Estrategia Passport JWT

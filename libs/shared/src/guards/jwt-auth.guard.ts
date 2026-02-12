@@ -7,6 +7,7 @@ import { Observable } from 'rxjs';
  * Extiende AuthGuard de Passport para usar estrategias JWT
  *
  * Si el token es válido, inyecta el usuario en request.user
+ * Valida que solo se usen access tokens (no refresh tokens)
  */
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -19,6 +20,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (err || !user) {
       throw err || new UnauthorizedException('Invalid or expired token');
     }
+
+    // Validar que el token sea de tipo 'access' (no 'refresh')
+    if (user.type && user.type !== 'access') {
+      throw new UnauthorizedException('Invalid token type. Use access token for authentication.');
+    }
+
     return user;
   }
 }

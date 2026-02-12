@@ -10,6 +10,8 @@ import {
   IPartnerRepository,
   ITenantRepository,
   IBranchRepository,
+  IRefreshTokenRepository,
+  RefreshToken,
 } from '@libs/domain';
 import { AuthenticatePartnerUserRequest } from './authenticate-partner-user.request';
 import { AuthenticateUserResponse } from '../authenticate-user/authenticate-user.response';
@@ -18,11 +20,12 @@ import { PartnerInfoDto } from '../partner-info.dto';
 import { TenantInfoDto } from '../tenant-info.dto';
 import { BranchInfoDto } from '../branch-info.dto';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
 /**
  * Handler para el caso de uso de autenticar un usuario de partner
  * Valida que el usuario pertenezca al partner especificado por su dominio
- * Genera tokens JWT con información del partner incluida
+ * Genera tokens JWT (access y refresh) con información del partner incluida
  */
 @Injectable()
 export class AuthenticatePartnerUserHandler {
@@ -35,6 +38,8 @@ export class AuthenticatePartnerUserHandler {
     private readonly tenantRepository: ITenantRepository,
     @Inject('IBranchRepository')
     private readonly branchRepository: IBranchRepository,
+    @Inject('IRefreshTokenRepository')
+    private readonly refreshTokenRepository: IRefreshTokenRepository,
     @Optional()
     private readonly jwtAuthService?: JwtAuthService,
   ) {}
@@ -42,9 +47,15 @@ export class AuthenticatePartnerUserHandler {
   /**
    * Ejecuta la autenticación del usuario de partner
    * @param request Datos de autenticación incluyendo el dominio del partner
-   * @returns Token JWT y datos del usuario con información del partner
+   * @param userAgent User agent del cliente (opcional)
+   * @param ipAddress IP address del cliente (opcional)
+   * @returns Access token, refresh token y datos del usuario con información del partner
    */
-  async execute(request: AuthenticatePartnerUserRequest): Promise<AuthenticateUserResponse> {
+  async execute(
+    request: AuthenticatePartnerUserRequest,
+    userAgent?: string,
+    ipAddress?: string,
+  ): Promise<AuthenticateUserResponse> {
     // Buscar el partner por dominio
     const partner = await this.partnerRepository.findByDomain(request.partnerDomain);
 
@@ -93,8 +104,14 @@ export class AuthenticatePartnerUserHandler {
       );
     }
 
-    // Generar token JWT con información del partner
-    const token = this.generateJwtToken(user, partner.id, 'partner');
+    // Generar access token JWT con información del partner
+    const accessToken = this.generateAccessToken(user, partner.id, 'partner');
+
+    // Generar refresh token JWT
+    const refreshTokenJwt = this.generateRefreshToken(user, partner.id, 'partner');
+
+    // Guardar refresh token en BD (hasheado)
+    await this.saveRefreshToken(user.id, refreshTokenJwt, userAgent, ipAddress);
 
     // Obtener información del partner
     const partnerInfo = new PartnerInfoDto(
@@ -139,7 +156,8 @@ export class AuthenticatePartnerUserHandler {
     }
 
     return new AuthenticateUserResponse(
-      token,
+      accessToken,
+      refreshTokenJwt,
       {
         id: user.id,
         email: user.email,
@@ -153,20 +171,75 @@ export class AuthenticatePartnerUserHandler {
   }
 
   /**
-   * Genera un token JWT con la información del usuario y del partner
+   * Genera un access token JWT con la información del usuario y del partner
    */
-  private generateJwtToken(user: any, partnerId: number, context: string): string {
-    if (this.jwtAuthService) {
-      return this.jwtAuthService.generateAccessToken({
-        userId: user.id,
-        email: user.email,
-        roles: user.roles,
-        context,
-        partnerId, // Incluir partnerId en el token
-      });
+  private generateAccessToken(user: any, partnerId: number, context: string): string {
+    if (!this.jwtAuthService) {
+      throw new Error('JWT service is not available');
     }
 
-    // Fallback si el servicio JWT no está disponible (no debería pasar en producción)
-    throw new Error('JWT service is not available');
+    return this.jwtAuthService.generateAccessToken({
+      userId: user.id,
+      email: user.email,
+      roles: user.roles,
+      context,
+      partnerId, // Incluir partnerId en el token
+    });
+  }
+
+  /**
+   * Genera un refresh token JWT con la información del usuario y del partner
+   */
+  private generateRefreshToken(user: any, partnerId: number, context: string): string {
+    if (!this.jwtAuthService) {
+      throw new Error('JWT service is not available');
+    }
+
+    return this.jwtAuthService.generateRefreshToken({
+      userId: user.id,
+      email: user.email,
+      roles: user.roles,
+      context,
+      partnerId,
+    });
+  }
+
+  /**
+   * Guarda el refresh token en la base de datos (hasheado)
+   */
+  private async saveRefreshToken(
+    userId: number,
+    refreshTokenJwt: string,
+    userAgent: string | undefined,
+    ipAddress: string | undefined,
+  ): Promise<void> {
+    // Hashear el token antes de guardarlo
+    const tokenHash = this.hashToken(refreshTokenJwt);
+
+    // Calcular fecha de expiración
+    const expiresAt = this.jwtAuthService!.getRefreshTokenExpirationDate();
+
+    // Crear entidad de dominio
+    const refreshToken = RefreshToken.create(
+      userId,
+      tokenHash,
+      expiresAt,
+      userAgent || null,
+      ipAddress || null,
+    );
+
+    // Guardar en BD
+    await this.refreshTokenRepository.save(refreshToken);
+
+    // Limitar tokens activos por usuario
+    const maxTokens = parseInt(process.env.REFRESH_TOKEN_MAX_PER_USER || '5', 10);
+    await this.refreshTokenRepository.deleteOldestIfExceedsLimit(userId, maxTokens);
+  }
+
+  /**
+   * Hashea un token usando SHA-256
+   */
+  private hashToken(token: string): string {
+    return crypto.createHash('sha256').update(token).digest('hex');
   }
 }

@@ -6,6 +6,8 @@ import { PartnerJwtStrategy } from './strategies/partner-jwt.strategy';
 import {
   AuthenticatePartnerUserHandler,
   GetUserProfileHandler,
+  RefreshTokenHandler,
+  RevokeRefreshTokenHandler,
   JwtAuthService,
 } from '@libs/application';
 import { InfrastructureModule } from '@libs/infrastructure';
@@ -14,7 +16,9 @@ import { InfrastructureModule } from '@libs/infrastructure';
  * Módulo de autenticación para Partner API
  *
  * Proporciona endpoints de autenticación específicos para partners:
- * - POST /partner/auth/login - Requiere dominio del partner
+ * - POST /partner/auth/login
+ * - POST /partner/auth/refresh
+ * - POST /partner/auth/logout
  * - GET /partner/auth/me
  *
  * Reutiliza los handlers de la capa de aplicación (@libs/application)
@@ -38,6 +42,8 @@ import { InfrastructureModule } from '@libs/infrastructure';
     // Handler específico para autenticación de partner
     AuthenticatePartnerUserHandler,
     GetUserProfileHandler,
+    RefreshTokenHandler,
+    RevokeRefreshTokenHandler,
     // Servicio JWT
     JwtAuthService,
     // Estrategia Passport JWT

@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, HttpCode, HttpStatus, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import {
   RegisterUserHandler,
@@ -10,9 +10,16 @@ import {
   GetUserProfileHandler,
   GetUserProfileRequest,
   GetCustomerProfileResponse,
+  RefreshTokenHandler,
+  RefreshTokenRequest,
+  RefreshTokenResponse,
+  RevokeRefreshTokenHandler,
+  RevokeRefreshTokenRequest,
+  RevokeRefreshTokenResponse,
   JwtPayload,
 } from '@libs/application';
 import { JwtAuthGuard, CurrentUser } from '@libs/shared';
+import { Request } from 'express';
 
 /**
  * Controlador de autenticación para Customer API
@@ -21,6 +28,8 @@ import { JwtAuthGuard, CurrentUser } from '@libs/shared';
  * Endpoints:
  * - POST /customer/auth/register - Registrar un nuevo cliente
  * - POST /customer/auth/login - Iniciar sesión como cliente (requiere rol CUSTOMER o sin rol específico)
+ * - POST /customer/auth/refresh - Refrescar access token usando refresh token
+ * - POST /customer/auth/logout - Cerrar sesión y revocar refresh token
  * - GET /customer/auth/me - Obtener perfil del cliente autenticado (requiere autenticación)
  */
 @ApiTags('Auth')
@@ -30,6 +39,8 @@ export class CustomerAuthController {
     private readonly registerUserHandler: RegisterUserHandler,
     private readonly authenticateUserHandler: AuthenticateUserHandler,
     private readonly getUserProfileHandler: GetUserProfileHandler,
+    private readonly refreshTokenHandler: RefreshTokenHandler,
+    private readonly revokeRefreshTokenHandler: RevokeRefreshTokenHandler,
   ) {}
 
   @Post('register')
@@ -81,6 +92,7 @@ export class CustomerAuthController {
     type: AuthenticateUserResponse,
     example: {
       token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+      refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.refreshToken...',
       user: {
         id: 1,
         email: 'customer@example.com',
@@ -98,10 +110,16 @@ export class CustomerAuthController {
       error: 'Unauthorized',
     },
   })
-  async login(@Body() request: AuthenticateUserRequest): Promise<AuthenticateUserResponse> {
+  async login(
+    @Body() request: AuthenticateUserRequest,
+    @Req() req: Request,
+  ): Promise<AuthenticateUserResponse> {
     // Para customer, aceptamos usuarios con rol CUSTOMER o sin rol específico
     // Si el usuario tiene rol CUSTOMER, lo validamos; si no tiene rol específico, también es válido
-    return this.authenticateUserHandler.execute(request, 'customer', 'CUSTOMER');
+    const userAgent = req.headers['user-agent'];
+    const ipAddress = req.ip || req.socket.remoteAddress;
+    
+    return this.authenticateUserHandler.execute(request, 'customer', 'CUSTOMER', userAgent, ipAddress);
   }
 
   @Get('me')
@@ -142,5 +160,58 @@ export class CustomerAuthController {
     
     // Transformar a respuesta específica para customer (sin campos de partner/tenant/branch)
     return GetCustomerProfileResponse.fromUserProfile(userProfile);
+  }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Refrescar access token',
+    description:
+      'Genera un nuevo access token y refresh token usando un refresh token válido. Implementa estrategia de single-use tokens.',
+  })
+  @ApiBody({ type: RefreshTokenRequest })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens refrescados exitosamente',
+    type: RefreshTokenResponse,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Refresh token inválido, expirado o revocado',
+  })
+  async refreshToken(
+    @Body() request: RefreshTokenRequest,
+    @Req() req: Request,
+  ): Promise<RefreshTokenResponse> {
+    const userAgent = req.headers['user-agent'];
+    const ipAddress = req.ip || req.socket.remoteAddress;
+
+    return this.refreshTokenHandler.execute(request, userAgent, ipAddress);
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: 'Cerrar sesión',
+    description:
+      'Revoca el refresh token especificado o todos los refresh tokens del usuario.',
+  })
+  @ApiBody({ type: RevokeRefreshTokenRequest })
+  @ApiResponse({
+    status: 200,
+    description: 'Logout exitoso',
+    type: RevokeRefreshTokenResponse,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+  })
+  async logout(
+    @CurrentUser() user: JwtPayload,
+    @Body() request: RevokeRefreshTokenRequest,
+  ): Promise<RevokeRefreshTokenResponse> {
+    return this.revokeRefreshTokenHandler.execute(user.userId, request);
   }
 }

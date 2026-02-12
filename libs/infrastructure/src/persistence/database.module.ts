@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { getDatabaseConfig } from './database.config';
 import { UserEntity } from '@libs/infrastructure/entities/auth/user.entity';
+import { RefreshTokenEntity } from '@libs/infrastructure/entities/auth/refresh-token.entity';
 import { PricingPlanEntity } from '@libs/infrastructure/entities/billing/pricing-plan.entity';
 import { PricingPeriodEntity } from '@libs/infrastructure/entities/billing/pricing-period.entity';
 import { PricingPromotionEntity } from '@libs/infrastructure/entities/billing/pricing-promotion.entity';
@@ -73,6 +74,7 @@ import { ReferralEntity } from '@libs/infrastructure/entities/customer/referral.
 import { RewardEntity } from '@libs/infrastructure/entities/loyalty/reward.entity';
 import { RedemptionCodeEntity } from '@libs/infrastructure/entities/loyalty/redemption-code.entity';
 import { UserRepository } from '@libs/infrastructure/repositories/auth/user.repository';
+import { RefreshTokenRepository } from '@libs/infrastructure/repositories/auth/refresh-token.repository';
 import { PricingPlanRepository } from '@libs/infrastructure/repositories/billing/pricing-plan.repository';
 import { RateExchangeRepository } from '@libs/infrastructure/repositories/system/rate-exchange.repository';
 import { PartnerRepository } from '@libs/infrastructure/repositories/partner/partner.repository';
@@ -122,6 +124,7 @@ import { RedemptionCodeRepository } from '@libs/infrastructure/repositories/loya
 import { CustomerMembershipSubscriber } from './subscribers/customer-membership.subscriber';
 import {
   IUserRepository,
+  IRefreshTokenRepository,
   IPricingPlanRepository,
   IRateExchangeRepository,
   IPartnerRepository,
@@ -188,6 +191,7 @@ import {
     }),
     TypeOrmModule.forFeature([
       UserEntity,
+      RefreshTokenEntity,
       PricingPlanEntity,
       PricingPeriodEntity,
       PricingPromotionEntity,
@@ -265,6 +269,11 @@ import {
     {
       provide: 'IUserRepository',
       useClass: UserRepository,
+    },
+    RefreshTokenRepository,
+    {
+      provide: 'IRefreshTokenRepository',
+      useClass: RefreshTokenRepository,
     },
     PricingPlanRepository,
     {
@@ -497,6 +506,7 @@ import {
   ],
   exports: [
     'IUserRepository',
+    'IRefreshTokenRepository',
     'IPricingPlanRepository',
     'IRateExchangeRepository',
     'IPartnerRepository',
@@ -543,6 +553,7 @@ import {
     'IRewardRepository',
     'IRedemptionCodeRepository',
     UserRepository,
+    RefreshTokenRepository,
     PricingPlanRepository,
     RateExchangeRepository,
     PartnerRepository,

@@ -8,11 +8,18 @@ import { BranchInfoDto } from '../branch-info.dto';
  */
 export class AuthenticateUserResponse {
   @ApiProperty({
-    description: 'Token JWT de autenticación',
+    description: 'Token JWT de acceso (access token)',
     example:
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJyb2xlcyI6WyJBRE1JTiJdLCJpYXQiOjE3MDUzMjE2MDAsImV4cCI6MTcwNTQwODAwMH0.example',
   })
   token: string;
+
+  @ApiProperty({
+    description: 'Token JWT de refresco (refresh token) para renovar el access token',
+    example:
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTcwNTMyMTYwMCwiZXhwIjoxNzA1OTI2NDAwfQ.example',
+  })
+  refreshToken: string;
 
   @ApiProperty({
     description: 'Información del usuario autenticado',
@@ -56,12 +63,14 @@ export class AuthenticateUserResponse {
 
   constructor(
     token: string,
+    refreshToken: string,
     user: { id: number; email: string; name: string; roles: string[] },
     partner?: PartnerInfoDto | null,
     tenant?: TenantInfoDto | null,
     branch?: BranchInfoDto | null,
   ) {
     this.token = token;
+    this.refreshToken = refreshToken;
     this.user = user;
     this.partner = partner ?? null;
     this.tenant = tenant ?? null;
