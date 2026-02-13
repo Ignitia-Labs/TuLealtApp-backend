@@ -21,6 +21,11 @@ export interface IBillingCycleRepository {
   findPendingByPartnerId(partnerId: number): Promise<BillingCycle[]>;
 
   /**
+   * Busca todos los ciclos de un partner
+   */
+  findByPartnerId(partnerId: number): Promise<BillingCycle[]>;
+
+  /**
    * Busca el ciclo actual de una suscripción
    */
   findCurrentBySubscriptionId(subscriptionId: number): Promise<BillingCycle | null>;

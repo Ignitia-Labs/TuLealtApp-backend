@@ -46,7 +46,10 @@ export class GetLoyaltyDashboardResponse {
   @ApiProperty({ type: [TopCustomerDto], description: 'Top customers por puntos' })
   topCustomers: TopCustomerDto[];
 
-  @ApiProperty({ type: [LoyaltyDashboardPointsTransactionDto], description: 'Transacciones recientes' })
+  @ApiProperty({
+    type: [LoyaltyDashboardPointsTransactionDto],
+    description: 'Transacciones recientes',
+  })
   recentTransactions: LoyaltyDashboardPointsTransactionDto[];
 
   @ApiProperty({ example: '2025-01-28T10:00:00Z', description: 'Fecha de última actualización' })
@@ -78,7 +81,8 @@ export class GetLoyaltyDashboardResponse {
 
   @ApiProperty({
     example: 42.5,
-    description: 'Tasa de retorno: (clientes con >=2 transacciones / total clientes con >=1 transacción) * 100',
+    description:
+      'Tasa de retorno: (clientes con >=2 transacciones / total clientes con >=1 transacción) * 100',
   })
   returnRate: number;
 

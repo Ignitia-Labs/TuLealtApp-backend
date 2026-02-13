@@ -1,14 +1,7 @@
 import { Controller, Get, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
-import {
-  GetCatalogsHandler,
-  GetCatalogsRequest,
-  GetCatalogsResponse,
-} from '@libs/application';
-import {
-  BadRequestErrorResponseDto,
-  InternalServerErrorResponseDto,
-} from '@libs/shared';
+import { GetCatalogsHandler, GetCatalogsRequest, GetCatalogsResponse } from '@libs/application';
+import { BadRequestErrorResponseDto, InternalServerErrorResponseDto } from '@libs/shared';
 
 /**
  * Controlador de catálogos para Customer API

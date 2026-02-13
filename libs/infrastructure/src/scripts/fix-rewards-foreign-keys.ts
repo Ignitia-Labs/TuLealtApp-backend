@@ -26,7 +26,9 @@ async function fixRewardsForeignKeys() {
         if (fkPointsTransactionsRewardId) {
           try {
             await queryRunner.dropForeignKey('points_transactions', fkPointsTransactionsRewardId);
-            console.log('✅ Foreign key FK_points_transactions_rewardId eliminada de points_transactions');
+            console.log(
+              '✅ Foreign key FK_points_transactions_rewardId eliminada de points_transactions',
+            );
           } catch (error: any) {
             console.warn('⚠️  Error al eliminar FK_points_transactions_rewardId:', error.message);
           }
@@ -46,7 +48,9 @@ async function fixRewardsForeignKeys() {
         if (fkRedemptionCodesRewardId) {
           try {
             await queryRunner.dropForeignKey('redemption_codes', fkRedemptionCodesRewardId);
-            console.log('✅ Foreign key FK_redemption_codes_rewardId eliminada de redemption_codes');
+            console.log(
+              '✅ Foreign key FK_redemption_codes_rewardId eliminada de redemption_codes',
+            );
           } catch (error: any) {
             console.warn('⚠️  Error al eliminar FK_redemption_codes_rewardId:', error.message);
           }

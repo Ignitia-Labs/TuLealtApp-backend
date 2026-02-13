@@ -8,10 +8,16 @@ export class LoyaltyDashboardPointsTransactionDto {
   @ApiProperty({ example: 1001 })
   id: number;
 
-  @ApiProperty({ example: 'EARNING', enum: ['EARNING', 'REDEEM', 'ADJUSTMENT', 'REVERSAL', 'EXPIRATION', 'HOLD', 'RELEASE'] })
+  @ApiProperty({
+    example: 'EARNING',
+    enum: ['EARNING', 'REDEEM', 'ADJUSTMENT', 'REVERSAL', 'EXPIRATION', 'HOLD', 'RELEASE'],
+  })
   type: 'EARNING' | 'REDEEM' | 'ADJUSTMENT' | 'REVERSAL' | 'EXPIRATION' | 'HOLD' | 'RELEASE';
 
-  @ApiProperty({ example: 100, description: 'Delta de puntos (positivo para EARNING, negativo para REDEEM)' })
+  @ApiProperty({
+    example: 100,
+    description: 'Delta de puntos (positivo para EARNING, negativo para REDEEM)',
+  })
   pointsDelta: number;
 
   @ApiProperty({ example: 'PURCHASE_BASE', nullable: true })
@@ -59,7 +65,8 @@ export class LoyaltyDashboardPointsTransactionDto {
 
   @ApiProperty({
     example: 1,
-    description: 'ID de la sucursal donde ocurrió la transacción (incluido cuando includeBranch=true)',
+    description:
+      'ID de la sucursal donde ocurrió la transacción (incluido cuando includeBranch=true)',
     required: false,
   })
   branchId?: number;

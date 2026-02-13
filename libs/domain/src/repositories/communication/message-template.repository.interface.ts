@@ -1,4 +1,7 @@
-import { MessageTemplate, MessageTemplateType } from '@libs/domain/entities/communication/message-template.entity';
+import {
+  MessageTemplate,
+  MessageTemplateType,
+} from '@libs/domain/entities/communication/message-template.entity';
 
 /**
  * Interfaz del repositorio de MessageTemplate

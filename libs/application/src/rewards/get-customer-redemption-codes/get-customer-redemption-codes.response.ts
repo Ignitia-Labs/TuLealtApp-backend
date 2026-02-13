@@ -101,12 +101,7 @@ export class GetCustomerRedemptionCodesResponse {
   })
   limit: number;
 
-  constructor(
-    codes: RedemptionCodeDto[],
-    total: number,
-    page: number,
-    limit: number,
-  ) {
+  constructor(codes: RedemptionCodeDto[], total: number, page: number, limit: number) {
     this.codes = codes;
     this.total = total;
     this.page = page;

@@ -11,7 +11,8 @@ export class AddRewardIdToPointsTransactions1770090302000 implements MigrationIn
         name: 'rewardId',
         type: 'int',
         isNullable: true,
-        comment: 'FK a rewards.id - ID de la recompensa canjeada (solo para transacciones tipo REDEEM)',
+        comment:
+          'FK a rewards.id - ID de la recompensa canjeada (solo para transacciones tipo REDEEM)',
       }),
     );
 
@@ -51,7 +52,9 @@ export class AddRewardIdToPointsTransactions1770090302000 implements MigrationIn
   public async down(queryRunner: QueryRunner): Promise<void> {
     // 1. Eliminar foreign key
     const table = await queryRunner.getTable('points_transactions');
-    const foreignKey = table?.foreignKeys.find((fk) => fk.name === 'FK_points_transactions_rewardId');
+    const foreignKey = table?.foreignKeys.find(
+      (fk) => fk.name === 'FK_points_transactions_rewardId',
+    );
     if (foreignKey) {
       await queryRunner.dropForeignKey('points_transactions', foreignKey);
     }

@@ -31,7 +31,7 @@ export class BranchMetricsDto {
 
   @ApiProperty({
     description: 'Revenue total generado por esta sucursal',
-    example: 45230.50,
+    example: 45230.5,
   })
   totalRevenue: number;
 
@@ -60,7 +60,8 @@ export class BranchMetricsDto {
   currency: string;
 
   @ApiProperty({
-    description: 'Score de rendimiento de la sucursal (0-100, calculado con revenue, clientes y redemptions)',
+    description:
+      'Score de rendimiento de la sucursal (0-100, calculado con revenue, clientes y redemptions)',
     example: 85.5,
   })
   performanceScore: number;
@@ -84,7 +85,7 @@ export class GetAllBranchesMetricsResponse {
       totalActiveCustomers: 320,
       totalRevenue: 125340.75,
       totalRewardsRedeemed: 120,
-      avgTicket: 145.50,
+      avgTicket: 145.5,
     },
   })
   totals: {

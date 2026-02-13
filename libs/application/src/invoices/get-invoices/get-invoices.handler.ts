@@ -27,7 +27,12 @@ export class GetInvoicesHandler {
     if (request.subscriptionId) {
       invoices = await this.invoiceRepository.findBySubscriptionId(request.subscriptionId);
     } else if (request.partnerId) {
-      invoices = await this.invoiceRepository.findByPartnerId(request.partnerId, skip, take);
+      invoices = await this.invoiceRepository.findByPartnerId(
+        request.partnerId,
+        undefined, // status
+        skip ? skip + 1 : 1, // page
+        take, // limit
+      );
       // Ordenar por fecha de vencimiento (más antigua primero) para facturas pendientes
       invoices.sort((a, b) => {
         // Primero las pendientes ordenadas por dueDate ASC

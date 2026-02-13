@@ -342,11 +342,7 @@ export class CustomerMembershipRepository implements ICustomerMembershipReposito
     const results = await this.membershipRepository
       .createQueryBuilder('membership')
       .innerJoin('membership.user', 'user')
-      .leftJoin(
-        PointsTransactionEntity,
-        'pt',
-        'pt.membershipId = membership.id',
-      )
+      .leftJoin(PointsTransactionEntity, 'pt', 'pt.membershipId = membership.id')
       .select([
         'membership.userId as userId',
         'user.name as userName',

@@ -1,4 +1,7 @@
-import { SubscriptionEvent, SubscriptionEventType } from '@libs/domain/entities/billing/subscription-event.entity';
+import {
+  SubscriptionEvent,
+  SubscriptionEventType,
+} from '@libs/domain/entities/billing/subscription-event.entity';
 
 /**
  * Interfaz del repositorio de SubscriptionEvent

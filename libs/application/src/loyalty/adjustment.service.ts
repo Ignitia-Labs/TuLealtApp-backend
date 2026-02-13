@@ -127,10 +127,7 @@ export class AdjustmentService {
           );
         } else {
           // Otro tipo de error, log pero no fallar el ajuste
-          console.warn(
-            `[AdjustmentService] Error evaluating tier change after adjustment:`,
-            error,
-          );
+          console.warn(`[AdjustmentService] Error evaluating tier change after adjustment:`, error);
         }
       }
     }

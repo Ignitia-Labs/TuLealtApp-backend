@@ -36,15 +36,53 @@ export class PaymentRepository implements IPaymentRepository {
     return entities.map((entity) => PaymentMapper.toDomain(entity));
   }
 
-  async findByPartnerId(partnerId: number, skip = 0, take = 100): Promise<Payment[]> {
-    const entities = await this.paymentRepository.find({
-      where: { partnerId },
-      skip,
-      take,
-      order: { paymentDate: 'DESC' },
-    });
+  async findByPartnerId(
+    partnerId: number,
+    status?: 'pending' | 'paid' | 'failed' | 'refunded' | 'cancelled',
+    page: number | null = 1,
+    limit: number | null = 100,
+    includeDerived = false,
+  ): Promise<Payment[]> {
+    const queryBuilder = this.paymentRepository
+      .createQueryBuilder('payment')
+      .where('payment.partnerId = :partnerId', { partnerId });
 
+    // Filtrar por status si se proporciona
+    if (status) {
+      queryBuilder.andWhere('payment.status = :status', { status });
+    }
+
+    // Excluir pagos derivados por defecto
+    if (!includeDerived) {
+      queryBuilder.andWhere('(payment.originalPaymentId IS NULL OR payment.originalPaymentId = 0)');
+    }
+
+    // Aplicar paginación solo si page y limit no son null
+    if (page !== null && limit !== null) {
+      const skip = (page - 1) * limit;
+      queryBuilder.skip(skip).take(limit);
+    }
+
+    queryBuilder.orderBy('payment.paymentDate', 'DESC');
+
+    const entities = await queryBuilder.getMany();
     return entities.map((entity) => PaymentMapper.toDomain(entity));
+  }
+
+  async countByPartnerId(
+    partnerId: number,
+    status?: 'pending' | 'paid' | 'failed' | 'refunded' | 'cancelled',
+  ): Promise<number> {
+    const queryBuilder = this.paymentRepository
+      .createQueryBuilder('payment')
+      .where('payment.partnerId = :partnerId', { partnerId })
+      .andWhere('(payment.originalPaymentId IS NULL OR payment.originalPaymentId = 0)'); // Solo originales
+
+    if (status) {
+      queryBuilder.andWhere('payment.status = :status', { status });
+    }
+
+    return queryBuilder.getCount();
   }
 
   async findByInvoiceId(invoiceId: number): Promise<Payment[]> {

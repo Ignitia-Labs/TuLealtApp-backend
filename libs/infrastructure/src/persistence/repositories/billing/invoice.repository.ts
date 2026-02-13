@@ -51,16 +51,47 @@ export class InvoiceRepository implements IInvoiceRepository {
     return entities.map((entity) => InvoiceMapper.toDomain(entity));
   }
 
-  async findByPartnerId(partnerId: number, skip = 0, take = 100): Promise<Invoice[]> {
-    const entities = await this.invoiceRepository.find({
-      where: { partnerId },
-      relations: ['items'],
-      skip,
-      take,
-      order: { issueDate: 'DESC' },
-    });
+  async findByPartnerId(
+    partnerId: number,
+    status?: 'pending' | 'paid' | 'overdue' | 'cancelled',
+    page: number | null = 1,
+    limit: number | null = 100,
+  ): Promise<Invoice[]> {
+    const queryBuilder = this.invoiceRepository
+      .createQueryBuilder('invoice')
+      .leftJoinAndSelect('invoice.items', 'items')
+      .where('invoice.partnerId = :partnerId', { partnerId });
 
+    // Filtrar por status si se proporciona
+    if (status) {
+      queryBuilder.andWhere('invoice.status = :status', { status });
+    }
+
+    // Aplicar paginación solo si page y limit no son null
+    if (page !== null && limit !== null) {
+      const skip = (page - 1) * limit;
+      queryBuilder.skip(skip).take(limit);
+    }
+
+    queryBuilder.orderBy('invoice.issueDate', 'DESC');
+
+    const entities = await queryBuilder.getMany();
     return entities.map((entity) => InvoiceMapper.toDomain(entity));
+  }
+
+  async countByPartnerId(
+    partnerId: number,
+    status?: 'pending' | 'paid' | 'overdue' | 'cancelled',
+  ): Promise<number> {
+    const queryBuilder = this.invoiceRepository
+      .createQueryBuilder('invoice')
+      .where('invoice.partnerId = :partnerId', { partnerId });
+
+    if (status) {
+      queryBuilder.andWhere('invoice.status = :status', { status });
+    }
+
+    return queryBuilder.getCount();
   }
 
   async findPendingByPartnerId(partnerId: number): Promise<Invoice[]> {

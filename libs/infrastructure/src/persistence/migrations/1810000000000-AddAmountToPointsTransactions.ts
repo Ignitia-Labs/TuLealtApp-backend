@@ -2,23 +2,23 @@ import { MigrationInterface, QueryRunner, TableColumn, TableIndex } from 'typeor
 
 /**
  * Migración para agregar columnas amount y currency a points_transactions
- * 
+ *
  * Esta migración permite capturar el revenue (monto monetario) de las transacciones:
  * - amount: Monto en moneda (solo para transacciones EARNING de tipo PURCHASE)
  * - currency: Código de moneda ISO 4217 (GTQ, USD, etc.)
- * 
+ *
  * Beneficios:
  * - Queries de revenue 10-100x más rápidas vs JSON parsing
  * - Indexable nativamente para agregaciones eficientes
  * - Analytics multi-sucursal con métricas de negocio
  * - ROI y efficiency de recompensas calculables
- * 
+ *
  * Manejo de diferentes tipos de transacciones:
  * - PURCHASE (EARNING): amount = netAmount del evento ✅
  * - VISIT, REFERRAL, etc.: amount = NULL (no generan revenue) ✅
  * - REDEEM: amount = NULL (no es revenue) ✅
  * - ADJUSTMENT: amount = NULL (ajuste manual sin compra) ✅
- * 
+ *
  * Compatibilidad:
  * - Columnas nullable para backward compatibility
  * - Metadata JSON preservado para auditoría
@@ -87,7 +87,7 @@ export class AddAmountToPointsTransactions1810000000000 implements MigrationInte
     // 3. Migrar datos históricos desde metadata JSON
     console.log('  ⏳ Migrating historical data from metadata JSON...');
     console.log('     This may take a while depending on the number of transactions...');
-    
+
     const updateQuery = `
       UPDATE points_transactions
       SET 
@@ -98,7 +98,7 @@ export class AddAmountToPointsTransactions1810000000000 implements MigrationInte
         AND JSON_EXTRACT(metadata, '$.netAmount') IS NOT NULL
         AND amount IS NULL
     `;
-    
+
     const result = await queryRunner.query(updateQuery);
     console.log(`  ✅ Historical data migrated: ${result.affectedRows || 0} rows updated`);
 
@@ -152,16 +152,21 @@ export class AddAmountToPointsTransactions1810000000000 implements MigrationInte
     const table = await queryRunner.getTable('points_transactions');
     const amountColumnCheck = table?.columns.find((col) => col.name === 'amount');
     const currencyColumnCheck = table?.columns.find((col) => col.name === 'currency');
-    
+
     if (amountColumnCheck && currencyColumnCheck) {
       console.log('  ✅ Verification: amount and currency columns exist');
-      console.log(`     - amount: ${amountColumnCheck.type}(${amountColumnCheck.precision},${amountColumnCheck.scale}), nullable: ${amountColumnCheck.isNullable}`);
-      console.log(`     - currency: ${currencyColumnCheck.type}(${currencyColumnCheck.length}), nullable: ${currencyColumnCheck.isNullable}`);
+      console.log(
+        `     - amount: ${amountColumnCheck.type}(${amountColumnCheck.precision},${amountColumnCheck.scale}), nullable: ${amountColumnCheck.isNullable}`,
+      );
+      console.log(
+        `     - currency: ${currencyColumnCheck.type}(${currencyColumnCheck.length}), nullable: ${currencyColumnCheck.isNullable}`,
+      );
     }
 
-    const indices = table?.indices.filter((idx) => 
-      idx.name === 'IDX_POINTS_TRANSACTIONS_AMOUNT_BRANCH' || 
-      idx.name === 'IDX_POINTS_TRANSACTIONS_AMOUNT_TENANT'
+    const indices = table?.indices.filter(
+      (idx) =>
+        idx.name === 'IDX_POINTS_TRANSACTIONS_AMOUNT_BRANCH' ||
+        idx.name === 'IDX_POINTS_TRANSACTIONS_AMOUNT_TENANT',
     );
     console.log(`  ✅ Verification: ${indices?.length || 0} indices created for revenue queries`);
 
@@ -183,7 +188,9 @@ export class AddAmountToPointsTransactions1810000000000 implements MigrationInte
 
     console.log('  📊 Migration Statistics:');
     stats.forEach((row: any) => {
-      console.log(`     - ${row.type} (${row.reasonCode || 'N/A'}): ${row.with_amount}/${row.total} with amount, revenue: ${row.total_revenue || 0}`);
+      console.log(
+        `     - ${row.type} (${row.reasonCode || 'N/A'}): ${row.with_amount}/${row.total} with amount, revenue: ${row.total_revenue || 0}`,
+      );
     });
 
     console.log('✅ [Migration] Migration completed successfully!');
@@ -199,18 +206,12 @@ export class AddAmountToPointsTransactions1810000000000 implements MigrationInte
 
     // 1. Eliminar índice de revenue por tenant
     console.log('  ⏳ Dropping tenant revenue index...');
-    await queryRunner.dropIndex(
-      'points_transactions',
-      'IDX_POINTS_TRANSACTIONS_AMOUNT_TENANT',
-    );
+    await queryRunner.dropIndex('points_transactions', 'IDX_POINTS_TRANSACTIONS_AMOUNT_TENANT');
     console.log('  ✅ Tenant revenue index dropped successfully');
 
     // 2. Eliminar índice de revenue por sucursal
     console.log('  ⏳ Dropping branch revenue index...');
-    await queryRunner.dropIndex(
-      'points_transactions',
-      'IDX_POINTS_TRANSACTIONS_AMOUNT_BRANCH',
-    );
+    await queryRunner.dropIndex('points_transactions', 'IDX_POINTS_TRANSACTIONS_AMOUNT_BRANCH');
     console.log('  ✅ Branch revenue index dropped successfully');
 
     // 3. Eliminar columna currency

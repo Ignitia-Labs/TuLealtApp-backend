@@ -78,6 +78,7 @@ import { RefreshTokenRepository } from '@libs/infrastructure/repositories/auth/r
 import { PricingPlanRepository } from '@libs/infrastructure/repositories/billing/pricing-plan.repository';
 import { RateExchangeRepository } from '@libs/infrastructure/repositories/system/rate-exchange.repository';
 import { PartnerRepository } from '@libs/infrastructure/repositories/partner/partner.repository';
+import { PartnerSubscriptionRepository } from '@libs/infrastructure/repositories/partner/partner-subscription.repository';
 import { TenantRepository } from '@libs/infrastructure/repositories/system/tenant.repository';
 import { BranchRepository } from '@libs/infrastructure/repositories/partner/branch.repository';
 import { CurrencyRepository } from '@libs/infrastructure/repositories/system/currency.repository';
@@ -128,6 +129,7 @@ import {
   IPricingPlanRepository,
   IRateExchangeRepository,
   IPartnerRepository,
+  IPartnerSubscriptionRepository,
   ITenantRepository,
   IBranchRepository,
   ICurrencyRepository,
@@ -167,9 +169,9 @@ import {
   ITierPolicyRepository,
   ITierStatusRepository,
   ITierBenefitRepository,
-      IReferralRepository,
-      IRewardRepository,
-      IRedemptionCodeRepository,
+  IReferralRepository,
+  IRewardRepository,
+  IRedemptionCodeRepository,
 } from '@libs/domain';
 
 /**
@@ -289,6 +291,11 @@ import {
     {
       provide: 'IPartnerRepository',
       useClass: PartnerRepository,
+    },
+    PartnerSubscriptionRepository,
+    {
+      provide: 'IPartnerSubscriptionRepository',
+      useClass: PartnerSubscriptionRepository,
     },
     TenantRepository,
     {
@@ -510,6 +517,7 @@ import {
     'IPricingPlanRepository',
     'IRateExchangeRepository',
     'IPartnerRepository',
+    'IPartnerSubscriptionRepository',
     'ITenantRepository',
     'IBranchRepository',
     'ICurrencyRepository',
@@ -557,6 +565,7 @@ import {
     PricingPlanRepository,
     RateExchangeRepository,
     PartnerRepository,
+    PartnerSubscriptionRepository,
     TenantRepository,
     BranchRepository,
     CurrencyRepository,

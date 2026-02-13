@@ -86,7 +86,12 @@ export class RewardRepository implements IRewardRepository {
       }
 
       // Validar stock si se está reduciendo (excepto si es ilimitado)
-      if (currentEntity.stock !== -1 && reward.stock !== -1 && currentEntity.stock <= 0 && reward.stock <= 0) {
+      if (
+        currentEntity.stock !== -1 &&
+        reward.stock !== -1 &&
+        currentEntity.stock <= 0 &&
+        reward.stock <= 0
+      ) {
         throw new Error('Reward is out of stock');
       }
 
@@ -102,11 +107,12 @@ export class RewardRepository implements IRewardRepository {
 
   async countRedemptionsByUser(rewardId: number, membershipId: number): Promise<number> {
     // Usar método optimizado con filtro directo en BD en lugar de filtrar en memoria
-    const rewardRedemptions = await this.pointsTransactionRepository.findByMembershipIdAndTypeAndRewardId(
-      membershipId,
-      'REDEEM',
-      rewardId,
-    );
+    const rewardRedemptions =
+      await this.pointsTransactionRepository.findByMembershipIdAndTypeAndRewardId(
+        membershipId,
+        'REDEEM',
+        rewardId,
+      );
 
     return rewardRedemptions.length;
   }

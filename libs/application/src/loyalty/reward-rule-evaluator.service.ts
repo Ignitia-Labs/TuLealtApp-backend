@@ -54,10 +54,11 @@ export class RewardRuleEvaluator {
       event.eventType,
     );
 
-    this.logger.debug(
-      `Found ${rules.length} active rules for trigger ${event.eventType}`,
-      { programId, eventType: event.eventType, ruleIds: rules.map(r => r.id) },
-    );
+    this.logger.debug(`Found ${rules.length} active rules for trigger ${event.eventType}`, {
+      programId,
+      eventType: event.eventType,
+      ruleIds: rules.map((r) => r.id),
+    });
 
     if (rules.length === 0) {
       this.logger.debug(`No active rules found for trigger ${event.eventType}`);
@@ -81,10 +82,9 @@ export class RewardRuleEvaluator {
       `Eligibility check - Eligible: ${eligibleRules.length}, Ineligible: ${ineligibleRules.length}`,
     );
     if (ineligibleRules.length > 0) {
-      this.logger.debug(
-        'Ineligible rules',
-        { ineligible: ineligibleRules.map((ir) => ({ ruleId: ir.rule.id, reason: ir.reason })) },
-      );
+      this.logger.debug('Ineligible rules', {
+        ineligible: ineligibleRules.map((ir) => ({ ruleId: ir.rule.id, reason: ir.reason })),
+      });
     }
 
     if (eligibleRules.length === 0) {
@@ -109,10 +109,9 @@ export class RewardRuleEvaluator {
       `Frequency limits check - Passing: ${rulesPassingLimits.length}, Failing: ${rulesFailingLimits.length}`,
     );
     if (rulesFailingLimits.length > 0) {
-      this.logger.debug(
-        'Rules failing limits',
+      this.logger.debug('Rules failing limits', {
         failing: rulesFailingLimits.map((rfl) => ({ ruleId: rfl.rule.id, reason: rfl.reason })),
-      );
+      });
     }
 
     if (rulesPassingLimits.length === 0) {

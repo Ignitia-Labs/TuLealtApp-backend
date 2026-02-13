@@ -48,6 +48,15 @@ export class BillingCycleRepository implements IBillingCycleRepository {
     return entities.map((entity) => BillingCycleMapper.toDomain(entity));
   }
 
+  async findByPartnerId(partnerId: number): Promise<BillingCycle[]> {
+    const entities = await this.billingCycleRepository.find({
+      where: { partnerId },
+      order: { cycleNumber: 'DESC' },
+    });
+
+    return entities.map((entity) => BillingCycleMapper.toDomain(entity));
+  }
+
   async findCurrentBySubscriptionId(subscriptionId: number): Promise<BillingCycle | null> {
     const now = new Date();
     const entity = await this.billingCycleRepository.findOne({

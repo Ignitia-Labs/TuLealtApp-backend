@@ -30,7 +30,7 @@ export class RevokeRefreshTokenHandler {
     // Opción 1: Revocar todos los tokens del usuario (logout global)
     if (request.revokeAll) {
       tokensRevoked = await this.refreshTokenRepository.revokeAllByUserId(userId);
-      
+
       return new RevokeRefreshTokenResponse(
         'Logged out from all devices successfully',
         tokensRevoked,
@@ -46,16 +46,11 @@ export class RevokeRefreshTokenHandler {
       await this.refreshTokenRepository.revokeByTokenHash(tokenHash);
       tokensRevoked = 1;
 
-      return new RevokeRefreshTokenResponse(
-        'Logged out successfully',
-        tokensRevoked,
-      );
+      return new RevokeRefreshTokenResponse('Logged out successfully', tokensRevoked);
     }
 
     // Si no se especifica ni refreshToken ni revokeAll, error
-    throw new BadRequestException(
-      'Either refreshToken or revokeAll must be provided',
-    );
+    throw new BadRequestException('Either refreshToken or revokeAll must be provided');
   }
 
   /**

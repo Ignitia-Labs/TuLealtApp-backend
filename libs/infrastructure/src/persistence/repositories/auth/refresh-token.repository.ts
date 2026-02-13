@@ -114,7 +114,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
 
   async countActiveByUserId(userId: number): Promise<number> {
     const now = new Date();
-    
+
     // Contar tokens no revocados del usuario
     const tokens = await this.refreshTokenRepository.find({
       where: {
@@ -140,16 +140,14 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
     const tokensToDelete = activeTokens.length - maxTokens;
 
     // Ordenar por fecha de creación (más antiguos primero)
-    const sortedTokens = activeTokens.sort(
-      (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
-    );
+    const sortedTokens = activeTokens.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
     // Tomar los más antiguos
     const oldestTokens = sortedTokens.slice(0, tokensToDelete);
 
     // Eliminar los tokens más antiguos
     const idsToDelete = oldestTokens.map((token) => token.id);
-    
+
     if (idsToDelete.length > 0) {
       const result = await this.refreshTokenRepository.delete(idsToDelete);
       return result.affected || 0;

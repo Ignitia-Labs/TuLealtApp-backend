@@ -83,16 +83,12 @@ export class AuthenticateUserHandler {
     // Guardar refresh token en BD (hasheado)
     await this.saveRefreshToken(user.id, refreshTokenJwt, userAgent, ipAddress);
 
-    return new AuthenticateUserResponse(
-      accessToken,
-      refreshTokenJwt,
-      {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        roles: user.roles,
-      },
-    );
+    return new AuthenticateUserResponse(accessToken, refreshTokenJwt, {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      roles: user.roles,
+    });
   }
 
   /**

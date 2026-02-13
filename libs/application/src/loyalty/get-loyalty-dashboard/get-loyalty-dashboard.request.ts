@@ -14,7 +14,8 @@ export class GetLoyaltyDashboardRequest {
   @ApiPropertyOptional({
     example: 'month',
     enum: ['all', 'month', 'week', 'custom'],
-    description: 'Período de tiempo para las métricas. Si es "custom", se requieren startDate y endDate',
+    description:
+      'Período de tiempo para las métricas. Si es "custom", se requieren startDate y endDate',
     default: 'all',
   })
   @IsOptional()

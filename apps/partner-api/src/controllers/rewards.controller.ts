@@ -15,7 +15,15 @@ import {
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+  ApiBearerAuth,
+  ApiBody,
+} from '@nestjs/swagger';
 import {
   CreateRewardHandler,
   CreateRewardRequest,
@@ -275,7 +283,7 @@ export class RewardsController {
       'Opcionalmente se puede incluir branchId para registrar la sucursal donde se validó el código.',
   })
   @ApiParam({ name: 'tenantId', type: Number, description: 'ID del tenant' })
-  @ApiBody({ 
+  @ApiBody({
     type: ValidateRedemptionCodeRequest,
     description: 'Datos del código de canje (opcional: incluir branchId)',
     examples: {

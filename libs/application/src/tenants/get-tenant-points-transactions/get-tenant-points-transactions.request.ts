@@ -2,7 +2,13 @@ import { IsInt, IsOptional, IsEnum, IsDateString, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
-export type PointsTransactionTypeFilter = 'EARNING' | 'REDEEM' | 'ADJUSTMENT' | 'REVERSAL' | 'EXPIRATION' | 'all';
+export type PointsTransactionTypeFilter =
+  | 'EARNING'
+  | 'REDEEM'
+  | 'ADJUSTMENT'
+  | 'REVERSAL'
+  | 'EXPIRATION'
+  | 'all';
 
 export class GetTenantPointsTransactionsRequest {
   @ApiProperty({ example: 1, description: 'ID del tenant' })
@@ -46,7 +52,12 @@ export class GetTenantPointsTransactionsRequest {
   @Min(1)
   page?: number;
 
-  @ApiProperty({ example: 20, description: 'Límite de resultados por página', required: false, default: 20 })
+  @ApiProperty({
+    example: 20,
+    description: 'Límite de resultados por página',
+    required: false,
+    default: 20,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()

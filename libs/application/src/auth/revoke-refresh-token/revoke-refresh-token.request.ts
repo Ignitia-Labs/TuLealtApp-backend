@@ -16,7 +16,8 @@ export class RevokeRefreshTokenRequest {
   refreshToken?: string;
 
   @ApiProperty({
-    description: 'Si es true, revoca todos los refresh tokens del usuario (logout de todos los dispositivos)',
+    description:
+      'Si es true, revoca todos los refresh tokens del usuario (logout de todos los dispositivos)',
     example: false,
     required: false,
     default: false,

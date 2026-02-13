@@ -265,7 +265,10 @@ export class PointsTransactionRepository implements IPointsTransactionRepository
     };
   }
 
-  async getRecentTransactionsByTenant(tenantId: number, limit: number): Promise<PointsTransaction[]> {
+  async getRecentTransactionsByTenant(
+    tenantId: number,
+    limit: number,
+  ): Promise<PointsTransaction[]> {
     // Query optimizada con JOIN directo para obtener transacciones recientes
     const entities = await this.pointsTransactionRepository
       .createQueryBuilder('pt')
@@ -407,9 +410,7 @@ export class PointsTransactionRepository implements IPointsTransactionRepository
    * Busca múltiples transacciones por idempotency keys (batch query)
    * Optimización para evitar N+1 queries en ProcessLoyaltyEventHandler
    */
-  async findByIdempotencyKeys(
-    idempotencyKeys: string[],
-  ): Promise<Map<string, PointsTransaction>> {
+  async findByIdempotencyKeys(idempotencyKeys: string[]): Promise<Map<string, PointsTransaction>> {
     if (idempotencyKeys.length === 0) {
       return new Map();
     }
@@ -633,11 +634,7 @@ export class PointsTransactionRepository implements IPointsTransactionRepository
              END) as activeCustomers`
           : 'COUNT(DISTINCT pt.membershipId) as activeCustomers',
       ])
-      .setParameters(
-        startDate && endDate
-          ? { tenantId, startDate, endDate }
-          : { tenantId },
-      )
+      .setParameters(startDate && endDate ? { tenantId, startDate, endDate } : { tenantId })
       .groupBy('pt.branchId')
       .getRawMany();
 
@@ -900,4 +897,3 @@ export class PointsTransactionRepository implements IPointsTransactionRepository
     };
   }
 }
-

@@ -23,7 +23,20 @@ export interface IInvoiceRepository {
   /**
    * Busca todas las facturas de un partner
    */
-  findByPartnerId(partnerId: number, skip?: number, take?: number): Promise<Invoice[]>;
+  findByPartnerId(
+    partnerId: number,
+    status?: 'pending' | 'paid' | 'overdue' | 'cancelled',
+    page?: number | null,
+    limit?: number | null,
+  ): Promise<Invoice[]>;
+
+  /**
+   * Cuenta todas las facturas de un partner con filtros opcionales
+   */
+  countByPartnerId(
+    partnerId: number,
+    status?: 'pending' | 'paid' | 'overdue' | 'cancelled',
+  ): Promise<number>;
 
   /**
    * Busca facturas pendientes de pago

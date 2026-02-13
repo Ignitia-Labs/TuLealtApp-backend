@@ -20,6 +20,7 @@ import { LoyaltyProgramsController } from './controllers/loyalty-programs.contro
 import { RewardRulesController } from './controllers/reward-rules.controller';
 import { RewardsController } from './controllers/rewards.controller';
 import { EnrollmentsController } from './controllers/enrollments.controller';
+import { PartnerBillingController } from './controllers/partner-billing.controller';
 import { LoyaltyDashboardController } from './controllers/loyalty-dashboard.controller';
 import { InfrastructureModule } from '@libs/infrastructure';
 import { HealthController, LoggerModule } from '@libs/shared';
@@ -168,6 +169,7 @@ import {
   // Loyalty Services
   AdjustmentService,
   ReversalService,
+  PartnerBillingModule,
 } from '@libs/application';
 
 /**
@@ -175,7 +177,7 @@ import {
  * Configura todos los controladores y servicios necesarios
  */
 @Module({
-  imports: [InfrastructureModule, PartnerAuthModule, LoggerModule],
+  imports: [InfrastructureModule, PartnerAuthModule, PartnerBillingModule, LoggerModule],
   controllers: [
     PricingController,
     ProfilesController,
@@ -198,6 +200,7 @@ import {
     RewardRulesController,
     RewardsController,
     EnrollmentsController,
+    PartnerBillingController,
     LoyaltyDashboardController,
     HealthController,
   ],

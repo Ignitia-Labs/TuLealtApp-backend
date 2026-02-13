@@ -2,22 +2,22 @@ import { MigrationInterface, QueryRunner, Table, TableIndex, TableForeignKey } f
 
 /**
  * Migración para crear la tabla refresh_tokens
- * 
+ *
  * Esta tabla almacena tokens de refresco (refresh tokens) para mantener
  * sesiones activas sin requerir re-autenticación frecuente.
- * 
+ *
  * Características:
  * - tokenHash: Hash del token (no el token en texto plano) para seguridad
  * - expiresAt: Fecha de expiración (típicamente 7 días)
  * - isRevoked: Flag para revocar tokens manualmente (logout)
  * - userAgent, ipAddress: Metadata de seguridad para detectar uso sospechoso
- * 
+ *
  * Índices:
  * - UNIQUE en tokenHash para búsquedas rápidas y prevenir duplicados
  * - INDEX en userId para listar tokens por usuario
  * - INDEX en expiresAt para cleanup eficiente de tokens expirados
  * - INDEX en isRevoked para queries de tokens activos
- * 
+ *
  * Seguridad:
  * - CASCADE delete cuando se elimina el usuario
  * - Tokens de un solo uso (revocados después de refresh)

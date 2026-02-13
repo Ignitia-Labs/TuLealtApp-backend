@@ -20,7 +20,11 @@ export class TopRedeemedRewardDto {
   @ApiProperty({ example: 25, description: 'Número de veces que fue canjeada en el período' })
   timesRedeemed: number;
 
-  @ApiProperty({ example: '☕', required: false, description: 'Icono/emoji asociado a la recompensa' })
+  @ApiProperty({
+    example: '☕',
+    required: false,
+    description: 'Icono/emoji asociado a la recompensa',
+  })
   icon?: string;
 
   @ApiProperty({

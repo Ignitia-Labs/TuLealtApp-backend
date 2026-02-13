@@ -83,12 +83,7 @@ export class RefreshTokenHandler {
     });
 
     // 10. Guardar nuevo refresh token en BD (hasheado)
-    await this.saveRefreshToken(
-      payload.userId,
-      newRefreshTokenJwt,
-      userAgent,
-      ipAddress,
-    );
+    await this.saveRefreshToken(payload.userId, newRefreshTokenJwt, userAgent, ipAddress);
 
     // 11. Retornar nuevos tokens
     return new RefreshTokenResponse(newAccessToken, newRefreshTokenJwt);

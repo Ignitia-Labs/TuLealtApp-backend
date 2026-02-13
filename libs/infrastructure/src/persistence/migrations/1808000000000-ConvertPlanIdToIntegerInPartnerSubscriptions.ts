@@ -289,7 +289,9 @@ export class ConvertPlanIdToIntegerInPartnerSubscriptions1808000000000
 
       const pricingPlansIdColumn = pricingPlansTable.findColumnByName('id');
       if (!pricingPlansIdColumn) {
-        throw new Error('La columna id no existe en pricing_plans. No se puede crear la foreign key.');
+        throw new Error(
+          'La columna id no existe en pricing_plans. No se puede crear la foreign key.',
+        );
       }
 
       // Verificar que planId tenga el mismo tipo que pricing_plans.id
@@ -298,7 +300,9 @@ export class ConvertPlanIdToIntegerInPartnerSubscriptions1808000000000
         throw new Error('La columna planId no existe en partner_subscriptions.');
       }
 
-      console.log(`ℹ️ Tipo de planId: ${planIdColumn.type}, Tipo de pricing_plans.id: ${pricingPlansIdColumn.type}`);
+      console.log(
+        `ℹ️ Tipo de planId: ${planIdColumn.type}, Tipo de pricing_plans.id: ${pricingPlansIdColumn.type}`,
+      );
 
       // Verificar la estructura real usando SQL directo para debugging
       const planIdInfo = await queryRunner.query(`
@@ -323,7 +327,9 @@ export class ConvertPlanIdToIntegerInPartnerSubscriptions1808000000000
 
       // Verificar que pricing_plans.id sea PRIMARY KEY
       if (pricingPlansIdInfo[0]?.COLUMN_KEY !== 'PRI') {
-        throw new Error('La columna pricing_plans.id no es PRIMARY KEY. No se puede crear la foreign key.');
+        throw new Error(
+          'La columna pricing_plans.id no es PRIMARY KEY. No se puede crear la foreign key.',
+        );
       }
 
       // Verificar que los tipos coincidan exactamente (incluyendo UNSIGNED)
@@ -365,13 +371,17 @@ export class ConvertPlanIdToIntegerInPartnerSubscriptions1808000000000
       }
 
       // Verificar que todos los valores existan en pricing_plans
-      const countPricingPlans = await queryRunner.query('SELECT COUNT(*) as count FROM pricing_plans');
+      const countPricingPlans = await queryRunner.query(
+        'SELECT COUNT(*) as count FROM pricing_plans',
+      );
       console.log(`ℹ️ Total de registros en pricing_plans: ${countPricingPlans[0]?.count}`);
 
       const countSubscriptions = await queryRunner.query(
         'SELECT COUNT(*) as count FROM partner_subscriptions',
       );
-      console.log(`ℹ️ Total de registros en partner_subscriptions: ${countSubscriptions[0]?.count}`);
+      console.log(
+        `ℹ️ Total de registros en partner_subscriptions: ${countSubscriptions[0]?.count}`,
+      );
 
       // Paso 8: Agregar foreign key constraint hacia pricing_plans
       const existingFK = tableWithFK.foreignKeys.find(

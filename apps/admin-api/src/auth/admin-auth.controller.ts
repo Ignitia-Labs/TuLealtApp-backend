@@ -93,7 +93,7 @@ export class AdminAuthController {
     // Validar que el usuario tenga rol ADMIN y generar token con contexto 'admin'
     const userAgent = req.headers['user-agent'];
     const ipAddress = req.ip || req.socket.remoteAddress;
-    
+
     return this.authenticateUserHandler.execute(request, 'admin', 'ADMIN', userAgent, ipAddress);
   }
 

@@ -986,9 +986,7 @@ export class SubscriptionUsageHelper {
             .getRawMany();
 
           branchCountsByTenant.forEach(({ tenantId, count }) => {
-            console.log(
-              `[SubscriptionUsageHelper] Tenant ${tenantId} has ${count} branches`,
-            );
+            console.log(`[SubscriptionUsageHelper] Tenant ${tenantId} has ${count} branches`);
           });
         }
       }
@@ -1017,9 +1015,7 @@ export class SubscriptionUsageHelper {
             .getRawMany();
 
           customerCountsByTenant.forEach(({ tenantId, count }) => {
-            console.log(
-              `[SubscriptionUsageHelper] Tenant ${tenantId} has ${count} customers`,
-            );
+            console.log(`[SubscriptionUsageHelper] Tenant ${tenantId} has ${count} customers`);
           });
         }
       }

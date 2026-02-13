@@ -1,10 +1,9 @@
 import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { ITenantRepository, IRewardRepository, ILoyaltyProgramRepository } from '@libs/domain';
 import {
-  ITenantRepository,
-  IRewardRepository,
-  ILoyaltyProgramRepository,
-} from '@libs/domain';
-import { GetTopRedeemedRewardsRequest, TopRedeemedRewardsPeriod } from './get-top-redeemed-rewards.request';
+  GetTopRedeemedRewardsRequest,
+  TopRedeemedRewardsPeriod,
+} from './get-top-redeemed-rewards.request';
 import {
   GetTopRedeemedRewardsResponse,
   TopRedeemedRewardDto,
@@ -68,9 +67,7 @@ export class GetTopRedeemedRewardsHandler {
     return { start, end: now, periodType: 'all' };
   }
 
-  async execute(
-    request: GetTopRedeemedRewardsRequest,
-  ): Promise<GetTopRedeemedRewardsResponse> {
+  async execute(request: GetTopRedeemedRewardsRequest): Promise<GetTopRedeemedRewardsResponse> {
     // Validar que el tenant existe
     const tenant = await this.tenantRepository.findById(request.tenantId);
     if (!tenant) {
@@ -79,11 +76,11 @@ export class GetTopRedeemedRewardsHandler {
 
     // Calcular período
     const period = request.period || 'month';
-    const { start: periodStart, end: periodEnd, periodType } = this.calculatePeriodDates(
-      period,
-      request.startDate,
-      request.endDate,
-    );
+    const {
+      start: periodStart,
+      end: periodEnd,
+      periodType,
+    } = this.calculatePeriodDates(period, request.startDate, request.endDate);
 
     const limit = request.limit || 5;
 
@@ -131,11 +128,7 @@ export class GetTopRedeemedRewardsHandler {
       })
       .filter((r): r is TopRedeemedRewardDto => r !== null);
 
-    const periodDto = new PeriodDto(
-      periodStart.toISOString(),
-      periodEnd.toISOString(),
-      periodType,
-    );
+    const periodDto = new PeriodDto(periodStart.toISOString(), periodEnd.toISOString(), periodType);
 
     return new GetTopRedeemedRewardsResponse(rewardDtos, periodDto);
   }

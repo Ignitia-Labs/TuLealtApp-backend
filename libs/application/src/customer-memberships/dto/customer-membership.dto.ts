@@ -131,10 +131,18 @@ export class TierBenefitDetailsDto {
   @ApiProperty({ description: 'Multiplicador global de puntos', example: 1.5, nullable: true })
   pointsMultiplier: number | null;
 
-  @ApiProperty({ description: 'IDs de recompensas exclusivas', type: [String], example: ['reward-1', 'reward-2'] })
+  @ApiProperty({
+    description: 'IDs de recompensas exclusivas',
+    type: [String],
+    example: ['reward-1', 'reward-2'],
+  })
   exclusiveRewards: string[];
 
-  @ApiProperty({ description: 'Límites más altos', nullable: true, example: { maxPointsPerDay: 5000 } })
+  @ApiProperty({
+    description: 'Límites más altos',
+    nullable: true,
+    example: { maxPointsPerDay: 5000 },
+  })
   higherCaps: {
     maxPointsPerEvent?: number | null;
     maxPointsPerDay?: number | null;
@@ -182,7 +190,11 @@ export class TierDetailDto {
   @ApiProperty({ description: 'Puntos mínimos requeridos', example: 1000 })
   minPoints: number;
 
-  @ApiProperty({ description: 'Puntos máximos (null para tier más alto)', example: 4999, nullable: true })
+  @ApiProperty({
+    description: 'Puntos máximos (null para tier más alto)',
+    example: 4999,
+    nullable: true,
+  })
   maxPoints: number | null;
 
   @ApiProperty({ description: 'Color del tier', example: '#FFD700' })
@@ -259,7 +271,11 @@ export class TierInfoDto {
   @ApiProperty({ description: 'Prioridad/orden del tier', example: 3 })
   priority: number;
 
-  @ApiProperty({ description: 'Detalles adicionales de beneficios', type: TierBenefitDetailsDto, nullable: true })
+  @ApiProperty({
+    description: 'Detalles adicionales de beneficios',
+    type: TierBenefitDetailsDto,
+    nullable: true,
+  })
   tierBenefitDetails: TierBenefitDetailsDto | null;
 
   constructor(
@@ -293,10 +309,18 @@ export class TierInfoDto {
  * DTO para política de tiers del tenant
  */
 export class TierPolicyDto {
-  @ApiProperty({ description: 'Ventana de evaluación', example: 'MONTHLY', enum: ['MONTHLY', 'QUARTERLY', 'ROLLING_30', 'ROLLING_90'] })
+  @ApiProperty({
+    description: 'Ventana de evaluación',
+    example: 'MONTHLY',
+    enum: ['MONTHLY', 'QUARTERLY', 'ROLLING_30', 'ROLLING_90'],
+  })
   evaluationWindow: string;
 
-  @ApiProperty({ description: 'Tipo de evaluación', example: 'ROLLING', enum: ['FIXED', 'ROLLING'] })
+  @ApiProperty({
+    description: 'Tipo de evaluación',
+    example: 'ROLLING',
+    enum: ['FIXED', 'ROLLING'],
+  })
   evaluationType: string;
 
   @ApiProperty({ description: 'Días de gracia antes de downgrade', example: 30 })
@@ -305,7 +329,11 @@ export class TierPolicyDto {
   @ApiProperty({ description: 'Días mínimos en un tier', example: 7 })
   minTierDuration: number;
 
-  @ApiProperty({ description: 'Estrategia de downgrade', example: 'GRACE_PERIOD', enum: ['IMMEDIATE', 'GRACE_PERIOD', 'NEVER'] })
+  @ApiProperty({
+    description: 'Estrategia de downgrade',
+    example: 'GRACE_PERIOD',
+    enum: ['IMMEDIATE', 'GRACE_PERIOD', 'NEVER'],
+  })
   downgradeStrategy: string;
 
   @ApiProperty({ description: 'Estado de la política', example: 'active' })
@@ -314,7 +342,10 @@ export class TierPolicyDto {
   @ApiProperty({ description: 'Descripción de la política', nullable: true })
   description: string | null;
 
-  @ApiProperty({ description: 'Thresholds de puntos por tier', example: { '1': 0, '2': 500, '3': 1000 } })
+  @ApiProperty({
+    description: 'Thresholds de puntos por tier',
+    example: { '1': 0, '2': 500, '3': 1000 },
+  })
   thresholds: Record<string, number>;
 
   constructor(

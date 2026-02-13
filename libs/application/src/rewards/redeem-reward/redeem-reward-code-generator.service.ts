@@ -33,9 +33,7 @@ export class RedeemRewardCodeGeneratorService {
       attempts++;
     }
 
-    throw new Error(
-      `Failed to generate unique redemption code after ${maxAttempts} attempts`,
-    );
+    throw new Error(`Failed to generate unique redemption code after ${maxAttempts} attempts`);
   }
 
   /**

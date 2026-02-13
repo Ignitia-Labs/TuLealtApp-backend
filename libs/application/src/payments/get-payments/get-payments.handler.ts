@@ -27,7 +27,12 @@ export class GetPaymentsHandler {
       if (request.status) {
         payments = await this.paymentRepository.findByStatus(request.partnerId, request.status);
       } else {
-        payments = await this.paymentRepository.findByPartnerId(request.partnerId, skip, take);
+        payments = await this.paymentRepository.findByPartnerId(
+          request.partnerId,
+          undefined, // status
+          skip ? skip + 1 : 1, // page
+          take, // limit
+        );
       }
     } else {
       throw new BadRequestException(

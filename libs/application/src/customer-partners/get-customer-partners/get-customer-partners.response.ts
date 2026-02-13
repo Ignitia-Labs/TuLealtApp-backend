@@ -1,8 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  TierInfoDto,
-  TierPolicyDto,
-} from '../../customer-memberships/dto/customer-membership.dto';
+import { TierInfoDto, TierPolicyDto } from '../../customer-memberships/dto/customer-membership.dto';
 
 /**
  * DTO de response para obtener los partners de un customer

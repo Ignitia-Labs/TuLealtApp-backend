@@ -18,7 +18,21 @@ export interface IPaymentRepository {
   /**
    * Busca todos los pagos de un partner
    */
-  findByPartnerId(partnerId: number, skip?: number, take?: number): Promise<Payment[]>;
+  findByPartnerId(
+    partnerId: number,
+    status?: 'pending' | 'paid' | 'failed' | 'refunded' | 'cancelled',
+    page?: number | null,
+    limit?: number | null,
+    includeDerived?: boolean,
+  ): Promise<Payment[]>;
+
+  /**
+   * Cuenta todos los pagos de un partner con filtros opcionales
+   */
+  countByPartnerId(
+    partnerId: number,
+    status?: 'pending' | 'paid' | 'failed' | 'refunded' | 'cancelled',
+  ): Promise<number>;
 
   /**
    * Busca pagos por factura

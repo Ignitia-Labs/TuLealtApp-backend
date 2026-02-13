@@ -127,6 +127,7 @@ export * from './persistence/repositories/loyalty/redemption-code.repository';
 
 // Repositories - Partner
 export * from './persistence/repositories/partner/partner.repository';
+export * from './persistence/repositories/partner/partner-subscription.repository';
 export * from './persistence/repositories/partner/partner-archive.repository';
 export * from './persistence/repositories/partner/partner-request.repository';
 export * from './persistence/repositories/partner/partner-staff-assignment.repository';
@@ -191,6 +192,7 @@ export * from './persistence/mappers/loyalty/redemption-code.mapper';
 
 // Mappers - Partner
 export * from './persistence/mappers/partner/partner.mapper';
+export * from './persistence/mappers/partner/partner-subscription.mapper';
 export * from './persistence/mappers/partner/partner-subscription-usage.mapper';
 export * from './persistence/mappers/partner/partner-request.mapper';
 export * from './persistence/mappers/partner/partner-staff-assignment.mapper';

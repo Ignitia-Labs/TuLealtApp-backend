@@ -512,6 +512,9 @@ export * from './billing-cycles/get-billing-cycle-payments/get-billing-cycle-pay
 // Billing Cycles Services
 export * from './billing-cycles/billing-cycle-generator.service';
 
+// Partner Billing Handlers
+export * from './partner-billing';
+
 // Subscriptions Services
 export * from './subscriptions/credit-balance.service';
 

@@ -241,9 +241,9 @@ describe('PointsTransaction Entity', () => {
       expect(transaction.createdBy).toBe('PARTNER_USER_456');
       expect(transaction.reasonCode).toBe('BONUS_BIRTHDAY');
       expect(transaction.branchId).toBe(5);
-      expect(transaction.metadata).toEqual({ 
-        birthdayMonth: 3, 
-        appliedBy: 'Store Manager' 
+      expect(transaction.metadata).toEqual({
+        birthdayMonth: 3,
+        appliedBy: 'Store Manager',
       });
     });
 

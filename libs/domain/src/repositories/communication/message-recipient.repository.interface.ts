@@ -1,4 +1,7 @@
-import { MessageRecipient, RecipientStatus } from '@libs/domain/entities/communication/message-recipient.entity';
+import {
+  MessageRecipient,
+  RecipientStatus,
+} from '@libs/domain/entities/communication/message-recipient.entity';
 
 /**
  * Interfaz del repositorio de MessageRecipient

@@ -107,7 +107,9 @@ export class RemovePointsRulesRewardsTransactionsTables1784000000000 implements 
       if (fkPointsTransactionsRewardId) {
         try {
           await queryRunner.dropForeignKey('points_transactions', fkPointsTransactionsRewardId);
-          console.log('✅ Foreign key FK_points_transactions_rewardId eliminada de points_transactions');
+          console.log(
+            '✅ Foreign key FK_points_transactions_rewardId eliminada de points_transactions',
+          );
         } catch (error) {
           console.warn('⚠️  Error al eliminar FK_points_transactions_rewardId:', error);
         }

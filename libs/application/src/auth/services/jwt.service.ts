@@ -68,7 +68,7 @@ export class JwtAuthService {
    */
   verifyAccessToken(token: string): JwtPayload | null {
     const payload = this.verifyToken(token);
-    
+
     if (!payload || payload.type !== 'access') {
       return null;
     }
@@ -84,7 +84,7 @@ export class JwtAuthService {
    */
   verifyRefreshToken(token: string): JwtPayload | null {
     const payload = this.verifyToken(token);
-    
+
     if (!payload || payload.type !== 'refresh') {
       return null;
     }
@@ -110,10 +110,10 @@ export class JwtAuthService {
    */
   getRefreshTokenExpirationDate(): Date {
     const expirationString = process.env.JWT_REFRESH_TOKEN_EXPIRATION || '7d';
-    
+
     // Parsear el string de expiración (ej: "7d", "24h", "60m")
     const match = expirationString.match(/^(\d+)([dhms])$/);
-    
+
     if (!match) {
       // Default: 7 días
       const now = new Date();

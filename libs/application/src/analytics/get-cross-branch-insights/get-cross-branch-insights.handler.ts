@@ -1,9 +1,5 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import {
-  IPointsTransactionRepository,
-  ITenantRepository,
-  IBranchRepository,
-} from '@libs/domain';
+import { IPointsTransactionRepository, ITenantRepository, IBranchRepository } from '@libs/domain';
 import { GetCrossBranchInsightsRequest } from './get-cross-branch-insights.request';
 import {
   GetCrossBranchInsightsResponse,
@@ -27,9 +23,7 @@ export class GetCrossBranchInsightsHandler {
     private readonly branchRepository: IBranchRepository,
   ) {}
 
-  async execute(
-    request: GetCrossBranchInsightsRequest,
-  ): Promise<GetCrossBranchInsightsResponse> {
+  async execute(request: GetCrossBranchInsightsRequest): Promise<GetCrossBranchInsightsResponse> {
     // 1. Validar tenant
     const tenant = await this.tenantRepository.findById(request.tenantId);
     if (!tenant) {

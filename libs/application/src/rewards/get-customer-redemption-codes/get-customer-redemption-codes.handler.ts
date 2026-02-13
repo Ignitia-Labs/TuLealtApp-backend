@@ -30,9 +30,7 @@ export class GetCustomerRedemptionCodesHandler {
     // 1. Validar que la membership existe
     const membership = await this.membershipRepository.findById(request.membershipId);
     if (!membership) {
-      throw new NotFoundException(
-        `Membership with ID ${request.membershipId} not found`,
-      );
+      throw new NotFoundException(`Membership with ID ${request.membershipId} not found`);
     }
 
     // 2. Obtener códigos según filtros
@@ -79,11 +77,6 @@ export class GetCustomerRedemptionCodesHandler {
     const endIndex = startIndex + limit;
     const paginatedCodes = codeDtos.slice(startIndex, endIndex);
 
-    return new GetCustomerRedemptionCodesResponse(
-      paginatedCodes,
-      codeDtos.length,
-      page,
-      limit,
-    );
+    return new GetCustomerRedemptionCodesResponse(paginatedCodes, codeDtos.length, page, limit);
   }
 }

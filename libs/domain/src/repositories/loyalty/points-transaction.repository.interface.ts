@@ -177,9 +177,7 @@ export interface IPointsTransactionRepository {
    * @param idempotencyKeys Array de idempotency keys
    * @returns Map con key = idempotencyKey, value = PointsTransaction
    */
-  findByIdempotencyKeys(
-    idempotencyKeys: string[],
-  ): Promise<Map<string, PointsTransaction>>;
+  findByIdempotencyKeys(idempotencyKeys: string[]): Promise<Map<string, PointsTransaction>>;
 
   /**
    * Obtiene métricas de revenue agregadas por sucursal para un tenant

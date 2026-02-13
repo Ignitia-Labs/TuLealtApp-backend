@@ -118,8 +118,14 @@ export class CustomerAuthController {
     // Si el usuario tiene rol CUSTOMER, lo validamos; si no tiene rol específico, también es válido
     const userAgent = req.headers['user-agent'];
     const ipAddress = req.ip || req.socket.remoteAddress;
-    
-    return this.authenticateUserHandler.execute(request, 'customer', 'CUSTOMER', userAgent, ipAddress);
+
+    return this.authenticateUserHandler.execute(
+      request,
+      'customer',
+      'CUSTOMER',
+      userAgent,
+      ipAddress,
+    );
   }
 
   @Get('me')
@@ -157,7 +163,7 @@ export class CustomerAuthController {
     const request = new GetUserProfileRequest();
     request.userId = user.userId;
     const userProfile = await this.getUserProfileHandler.execute(request);
-    
+
     // Transformar a respuesta específica para customer (sin campos de partner/tenant/branch)
     return GetCustomerProfileResponse.fromUserProfile(userProfile);
   }
@@ -195,8 +201,7 @@ export class CustomerAuthController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Cerrar sesión',
-    description:
-      'Revoca el refresh token especificado o todos los refresh tokens del usuario.',
+    description: 'Revoca el refresh token especificado o todos los refresh tokens del usuario.',
   })
   @ApiBody({ type: RevokeRefreshTokenRequest })
   @ApiResponse({

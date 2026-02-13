@@ -107,11 +107,12 @@ export class RedeemRewardHandler {
 
     // 8. Verificar límite por usuario (contar redemptions previas)
     // Usar método optimizado con filtro directo en BD en lugar de filtrar en memoria
-    const redemptionTransactions = await this.pointsTransactionRepository.findByMembershipIdAndTypeAndRewardId(
-      membership.id,
-      'REDEEM',
-      reward.id,
-    );
+    const redemptionTransactions =
+      await this.pointsTransactionRepository.findByMembershipIdAndTypeAndRewardId(
+        membership.id,
+        'REDEEM',
+        reward.id,
+      );
 
     const userRedemptions = redemptionTransactions.length;
 
@@ -174,15 +175,13 @@ export class RedeemRewardHandler {
 
     // 10. Generar código único de canje (después de guardar transacción)
     // Verificar si ya existe código para esta transacción (idempotencia)
-    let existingCode = await this.redemptionCodeRepository.findByTransactionId(
-      savedTransaction.id,
-    );
+    let existingCode = await this.redemptionCodeRepository.findByTransactionId(savedTransaction.id);
     let redemptionCode: string | undefined;
 
     if (!existingCode) {
       // Generar nuevo código
       const codeString = await this.codeGenerator.generateUniqueCode(membership.tenantId);
-      
+
       // Calcular expiresAt usando TTL del tenant (método de dominio)
       const expiresAt = tenant.calculateRedemptionCodeExpirationDate();
 

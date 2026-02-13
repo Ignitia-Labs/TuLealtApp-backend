@@ -13,10 +13,7 @@ import {
   TierBenefit,
 } from '@libs/domain';
 import { GetCustomerPartnersRequest } from './get-customer-partners.request';
-import {
-  GetCustomerPartnersResponse,
-  CustomerPartnerItem,
-} from './get-customer-partners.response';
+import { GetCustomerPartnersResponse, CustomerPartnerItem } from './get-customer-partners.response';
 import {
   TierInfoDto,
   TierPolicyDto,

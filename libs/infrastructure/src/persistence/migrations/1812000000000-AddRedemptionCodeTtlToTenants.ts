@@ -4,7 +4,7 @@ import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
  * Migración para agregar columna redemptionCodeTtlMinutes a tenants
  * Esta columna almacena el TTL (Time To Live) en minutos para códigos de canje
  * generados cuando un cliente canjea una recompensa.
- * 
+ *
  * Valor por defecto: 15 minutos
  * Mínimo permitido: 15 minutos
  */
@@ -17,7 +17,9 @@ export class AddRedemptionCodeTtlToTenants1812000000000 implements MigrationInte
     const column = table?.findColumnByName('redemptionCodeTtlMinutes');
 
     if (column) {
-      console.log('⚠️  Column redemptionCodeTtlMinutes already exists in tenants. Skipping creation.');
+      console.log(
+        '⚠️  Column redemptionCodeTtlMinutes already exists in tenants. Skipping creation.',
+      );
       return;
     }
 

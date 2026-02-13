@@ -8,10 +8,7 @@ import {
   IBranchRepository,
 } from '@libs/domain';
 import { GetLoyaltyDashboardRequest, DashboardPeriod } from './get-loyalty-dashboard.request';
-import {
-  GetLoyaltyDashboardResponse,
-  TopRewardRuleDto,
-} from './get-loyalty-dashboard.response';
+import { GetLoyaltyDashboardResponse, TopRewardRuleDto } from './get-loyalty-dashboard.response';
 import { TopCustomerDto } from './top-customer-dto';
 import { LoyaltyDashboardPointsTransactionDto } from './points-transaction-dto';
 import { DailyActivityDto } from './daily-activity-dto';
@@ -44,7 +41,11 @@ export class GetLoyaltyDashboardHandler {
   /**
    * Calcula las fechas de inicio y fin según el período especificado
    */
-  private calculatePeriodDates(period: DashboardPeriod, startDate?: string, endDate?: string): {
+  private calculatePeriodDates(
+    period: DashboardPeriod,
+    startDate?: string,
+    endDate?: string,
+  ): {
     start: Date;
     end: Date;
     periodType: 'all' | 'month' | 'week' | 'custom';
@@ -147,11 +148,11 @@ export class GetLoyaltyDashboardHandler {
 
     // Calcular período
     const period = request.period || 'all';
-    const { start: periodStart, end: periodEnd, periodType } = this.calculatePeriodDates(
-      period,
-      request.startDate,
-      request.endDate,
-    );
+    const {
+      start: periodStart,
+      end: periodEnd,
+      periodType,
+    } = this.calculatePeriodDates(period, request.startDate, request.endDate);
 
     // Intentar obtener métricas por período desde caché (solo para períodos comunes)
     const cacheKey =
@@ -237,25 +238,30 @@ export class GetLoyaltyDashboardHandler {
     // Construir topCustomers DTOs
     const topCustomers: TopCustomerDto[] = topCustomersWithStats.map(
       (customer) =>
-        new TopCustomerDto(customer.userId, customer.userName, customer.points, customer.transactions),
+        new TopCustomerDto(
+          customer.userId,
+          customer.userName,
+          customer.points,
+          customer.transactions,
+        ),
     );
 
     // Obtener información de usuarios si se solicita (batch query para evitar N+1)
     const usersMap = new Map<number, { id: number; name: string }>();
     const branchesMap = new Map<number, { id: number; name: string }>();
-    
+
     if (request.includeCustomer) {
       // Obtener membershipIds únicos de las transacciones
       const membershipIds = [...new Set(recentTransactions.map((tx) => tx.membershipId))];
       if (membershipIds.length > 0) {
         // OPTIMIZACIÓN: Usar findByIds en lugar de Promise.all con findById individual
         const memberships = await this.membershipRepository.findByIds(membershipIds);
-        
+
         const userIds = memberships
           .filter((m) => m !== null)
           .map((m) => m.userId)
           .filter((id) => id !== undefined);
-        
+
         if (userIds.length > 0) {
           // OPTIMIZACIÓN: Usar findByIds en lugar de Promise.all con findById individual
           const users = await this.userRepository.findByIds([...new Set(userIds)]);
@@ -263,7 +269,7 @@ export class GetLoyaltyDashboardHandler {
             usersMap.set(user.id, { id: user.id, name: user.name });
           });
         }
-        
+
         // Crear mapa de membershipId -> userId para acceso rápido
         const membershipToUserMap = new Map<number, number>();
         memberships.forEach((m) => {
@@ -271,7 +277,7 @@ export class GetLoyaltyDashboardHandler {
             membershipToUserMap.set(m.id, m.userId);
           }
         });
-        
+
         // Agregar el mapa al contexto para usarlo después
         (usersMap as any).membershipToUserMap = membershipToUserMap;
       }
@@ -299,7 +305,9 @@ export class GetLoyaltyDashboardHandler {
     }
 
     // Construir recentTransactions DTOs con información del cliente, branch y descripciones
-    const membershipToUserMap = (usersMap as any).membershipToUserMap as Map<number, number> | undefined;
+    const membershipToUserMap = (usersMap as any).membershipToUserMap as
+      | Map<number, number>
+      | undefined;
     const recentTransactionsDto: LoyaltyDashboardPointsTransactionDto[] = recentTransactions.map(
       (tx) => {
         let userName: string | undefined;
@@ -347,7 +355,7 @@ export class GetLoyaltyDashboardHandler {
     // Generar array de los últimos 7 días para asegurar que todos los días estén presentes
     const today = new Date();
     const dailyActivityMap = new Map<string, { pointsEarned: number; pointsRedeemed: number }>();
-    
+
     // Mapear datos obtenidos de la BD
     dailyActivityData.forEach((day) => {
       dailyActivityMap.set(day.date, {
@@ -359,16 +367,16 @@ export class GetLoyaltyDashboardHandler {
     // Generar array completo de los últimos 7 días
     const dailyActivity: DailyActivityDto[] = [];
     const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-    
+
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
       date.setHours(0, 0, 0, 0);
-      
+
       const dateStr = date.toISOString().split('T')[0];
       const dayData = dailyActivityMap.get(dateStr) || { pointsEarned: 0, pointsRedeemed: 0 };
       const dayOfWeek = date.getDay();
-      
+
       dailyActivity.push(
         new DailyActivityDto(
           dateStr,
@@ -388,11 +396,7 @@ export class GetLoyaltyDashboardHandler {
     );
 
     // Construir PeriodDto
-    const periodDto = new PeriodDto(
-      periodStart.toISOString(),
-      periodEnd.toISOString(),
-      periodType,
-    );
+    const periodDto = new PeriodDto(periodStart.toISOString(), periodEnd.toISOString(), periodType);
 
     return new GetLoyaltyDashboardResponse(
       totalCustomers,

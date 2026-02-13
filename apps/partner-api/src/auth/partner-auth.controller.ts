@@ -153,7 +153,7 @@ export class PartnerAuthController {
   ): Promise<AuthenticateUserResponse> {
     const userAgent = req.headers['user-agent'];
     const ipAddress = req.ip || req.socket.remoteAddress;
-    
+
     return this.authenticatePartnerUserHandler.execute(request, userAgent, ipAddress);
   }
 
@@ -265,8 +265,7 @@ export class PartnerAuthController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Cerrar sesión',
-    description:
-      'Revoca el refresh token especificado o todos los refresh tokens del usuario.',
+    description: 'Revoca el refresh token especificado o todos los refresh tokens del usuario.',
   })
   @ApiBody({ type: RevokeRefreshTokenRequest })
   @ApiResponse({

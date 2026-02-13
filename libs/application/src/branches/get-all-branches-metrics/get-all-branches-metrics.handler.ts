@@ -45,9 +45,21 @@ export class GetAllBranchesMetricsHandler {
 
     // 3. Ejecutar todas las queries en paralelo para mejorar performance
     const [revenueMetrics, customerMetrics, redemptionMetrics, allBranches] = await Promise.all([
-      this.pointsTransactionRepository.getBranchRevenueMetrics(request.tenantId, startDate, endDate),
-      this.pointsTransactionRepository.getBranchCustomerMetrics(request.tenantId, startDate, endDate),
-      this.pointsTransactionRepository.getBranchRedemptionMetrics(request.tenantId, startDate, endDate),
+      this.pointsTransactionRepository.getBranchRevenueMetrics(
+        request.tenantId,
+        startDate,
+        endDate,
+      ),
+      this.pointsTransactionRepository.getBranchCustomerMetrics(
+        request.tenantId,
+        startDate,
+        endDate,
+      ),
+      this.pointsTransactionRepository.getBranchRedemptionMetrics(
+        request.tenantId,
+        startDate,
+        endDate,
+      ),
       this.branchRepository.findByTenantId(request.tenantId),
     ]);
 
@@ -102,9 +114,13 @@ export class GetAllBranchesMetricsHandler {
       totalActiveCustomers: branchMetrics.reduce((sum, b) => sum + b.activeCustomers, 0),
       totalRevenue: branchMetrics.reduce((sum, b) => sum + b.totalRevenue, 0),
       totalRewardsRedeemed: branchMetrics.reduce((sum, b) => sum + b.rewardsRedeemed, 0),
-      avgTicket: totalTransactionCount > 0 
-        ? Math.round((branchMetrics.reduce((sum, b) => sum + b.totalRevenue, 0) / totalTransactionCount) * 100) / 100
-        : 0,
+      avgTicket:
+        totalTransactionCount > 0
+          ? Math.round(
+              (branchMetrics.reduce((sum, b) => sum + b.totalRevenue, 0) / totalTransactionCount) *
+                100,
+            ) / 100
+          : 0,
     };
 
     // 8. Ordenar branches por performance score (descendente)

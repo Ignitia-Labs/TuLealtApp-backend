@@ -443,9 +443,7 @@ export class ProcessLoyaltyEventHandler {
           message: 'Skipping tier evaluation',
           membershipId: membership.id,
           reason:
-            transactionsCreated.length === 0
-              ? 'No transactions created'
-              : 'No points awarded',
+            transactionsCreated.length === 0 ? 'No transactions created' : 'No points awarded',
         });
       }
 

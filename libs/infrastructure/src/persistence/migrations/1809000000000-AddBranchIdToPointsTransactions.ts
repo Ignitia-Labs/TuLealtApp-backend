@@ -2,18 +2,18 @@ import { MigrationInterface, QueryRunner, TableColumn, TableForeignKey, TableInd
 
 /**
  * Migración para agregar columna branchId a points_transactions
- * 
+ *
  * Esta migración permite registrar la sucursal específica donde ocurrió cada transacción de puntos:
  * - Eventos de EARNING (compras, visitas, etc.)
  * - Ajustes manuales (ADJUSTMENT)
  * - Redenciones de recompensas (REDEEM)
- * 
+ *
  * Beneficios:
  * - Analytics detallados por sucursal
  * - Reportes de performance por ubicación
  * - Mejor trazabilidad de operaciones
  * - Queries eficientes con índices dedicados
- * 
+ *
  * NOTA: La columna es nullable para:
  * - Backward compatibility con transacciones existentes
  * - Permitir transacciones sin sucursal específica
@@ -33,7 +33,8 @@ export class AddBranchIdToPointsTransactions1809000000000 implements MigrationIn
         name: 'branchId',
         type: 'int',
         isNullable: true,
-        comment: 'FK a branches - Sucursal donde ocurrió la transacción (nullable para backward compatibility)',
+        comment:
+          'FK a branches - Sucursal donde ocurrió la transacción (nullable para backward compatibility)',
       }),
     );
     console.log('  ✅ Column branchId added successfully');
@@ -83,7 +84,7 @@ export class AddBranchIdToPointsTransactions1809000000000 implements MigrationIn
     // 5. Verificar resultado
     const table = await queryRunner.getTable('points_transactions');
     const branchIdColumn = table?.columns.find((col) => col.name === 'branchId');
-    
+
     if (branchIdColumn) {
       console.log('  ✅ Verification: branchId column exists');
       console.log(`     - Type: ${branchIdColumn.type}`);
@@ -91,9 +92,10 @@ export class AddBranchIdToPointsTransactions1809000000000 implements MigrationIn
       console.log(`     - Comment: ${branchIdColumn.comment}`);
     }
 
-    const indices = table?.indices.filter((idx) => 
-      idx.name === 'IDX_POINTS_TRANSACTIONS_BRANCH_ID' || 
-      idx.name === 'IDX_POINTS_TRANSACTIONS_TENANT_BRANCH_DATE'
+    const indices = table?.indices.filter(
+      (idx) =>
+        idx.name === 'IDX_POINTS_TRANSACTIONS_BRANCH_ID' ||
+        idx.name === 'IDX_POINTS_TRANSACTIONS_TENANT_BRANCH_DATE',
     );
     console.log(`  ✅ Verification: ${indices?.length || 0} indices created`);
 

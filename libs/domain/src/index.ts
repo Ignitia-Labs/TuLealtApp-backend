@@ -104,6 +104,7 @@ export * from './repositories/loyalty/redemption-code.repository.interface';
 
 // Repository Interfaces - Partner
 export * from './repositories/partner/partner.repository.interface';
+export * from './repositories/partner/partner-subscription.repository.interface';
 export * from './repositories/partner/partner-request.repository.interface';
 export * from './repositories/partner/partner-staff-assignment.repository.interface';
 export * from './repositories/partner/branch.repository.interface';

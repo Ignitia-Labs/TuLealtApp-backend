@@ -16,7 +16,7 @@ import { CustomerSegment } from '../get-customer-segmentation/get-customer-segme
 /**
  * Handler para obtener analytics avanzados de reward rules
  * Analiza reglas de acumulación y su impacto en revenue y engagement
- * 
+ *
  * NOTA: Versión funcional básica. Métricas calculadas con aproximaciones.
  */
 @Injectable()
@@ -65,7 +65,7 @@ export class GetAdvancedRewardAnalyticsHandler {
 
     // 4. Obtener reward rules activas del programa
     const allRules = await this.rewardRuleRepository.findActiveByProgramId(program.id);
-    
+
     // Filtrar solo reglas de tipo PURCHASE que generan revenue
     const purchaseRules = allRules.filter((rule) => rule.trigger === 'PURCHASE').slice(0, 10); // Top 10
 

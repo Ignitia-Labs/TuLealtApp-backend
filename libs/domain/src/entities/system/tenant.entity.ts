@@ -48,10 +48,10 @@ export class Tenant {
      * @example
      * // Códigos válidos por 1 hora
      * redemptionCodeTtlMinutes: 60
-     * 
+     *
      * // Códigos válidos por 24 horas
      * redemptionCodeTtlMinutes: 1440
-     * 
+     *
      * // Códigos válidos por 7 días
      * redemptionCodeTtlMinutes: 10080
      */
@@ -174,7 +174,7 @@ export class Tenant {
   /**
    * Calcula la fecha de expiración para un código de canje
    * basado en el TTL configurado en este tenant.
-   * 
+   *
    * @param fromDate Fecha desde la cual calcular (default: ahora UTC)
    * @returns Fecha de expiración (fromDate + redemptionCodeTtlMinutes)
    * @example

@@ -60,9 +60,7 @@ export class ValidateRedemptionCodeHandler {
     }
 
     if (tenant.partnerId !== validatingUser.partnerId) {
-      throw new ForbiddenException(
-        'This redemption code does not belong to your partner',
-      );
+      throw new ForbiddenException('This redemption code does not belong to your partner');
     }
 
     // 4. Validar que el código es válido para usar
@@ -81,9 +79,7 @@ export class ValidateRedemptionCodeHandler {
     // 5. Obtener información de la recompensa
     const reward = await this.rewardRepository.findById(redemptionCode.rewardId);
     if (!reward) {
-      throw new NotFoundException(
-        `Reward with ID ${redemptionCode.rewardId} not found`,
-      );
+      throw new NotFoundException(`Reward with ID ${redemptionCode.rewardId} not found`);
     }
 
     // 6. Obtener información de la transacción
@@ -91,9 +87,7 @@ export class ValidateRedemptionCodeHandler {
       redemptionCode.transactionId,
     );
     if (!transaction) {
-      throw new NotFoundException(
-        `Transaction with ID ${redemptionCode.transactionId} not found`,
-      );
+      throw new NotFoundException(`Transaction with ID ${redemptionCode.transactionId} not found`);
     }
 
     // 7. Marcar código como usado

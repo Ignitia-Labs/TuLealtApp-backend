@@ -44,7 +44,7 @@ export class TierChangeService {
 
   /**
    * Evaluar y aplicar cambios de tier para un membership
-   * 
+   *
    * Si existe TierPolicy: usa evaluación completa con grace periods y políticas
    * Si NO existe TierPolicy: usa evaluación simplificada basada solo en puntos
    */
@@ -67,9 +67,7 @@ export class TierChangeService {
 
     if (!policy) {
       // FALLBACK: Evaluación simplificada sin política
-      this.logger.debug(
-        `No TierPolicy found for tenant ${tenantId}, using simple evaluation`,
-      );
+      this.logger.debug(`No TierPolicy found for tenant ${tenantId}, using simple evaluation`);
       return this.evaluateAndApplyTierChangeSimple(membership, tenantId);
     }
 
@@ -359,7 +357,7 @@ export class TierChangeService {
   /**
    * Evaluación simplificada de tier SIN TierPolicy configurado
    * Basado solo en puntos actuales y rangos de customer_tiers
-   * 
+   *
    * Este método es un FALLBACK para que el sistema funcione incluso
    * si no se ha configurado un TierPolicy todavía.
    */
@@ -373,9 +371,7 @@ export class TierChangeService {
 
     // 1. Obtener tiers activos del tenant ordenados por prioridad
     const tiers = await this.tierRepository.findByTenantId(tenantId);
-    const activeTiers = tiers
-      .filter((t) => t.isActive())
-      .sort((a, b) => b.priority - a.priority); // Mayor prioridad primero
+    const activeTiers = tiers.filter((t) => t.isActive()).sort((a, b) => b.priority - a.priority); // Mayor prioridad primero
 
     if (activeTiers.length === 0) {
       this.logger.warn(`No active tiers found for tenant ${tenantId}`);
@@ -434,9 +430,7 @@ export class TierChangeService {
       const currentTier = tiers.find((t) => t.id === currentTierId);
       const newTier = tiers.find((t) => t.id === newTierId);
       changeType =
-        newTier && currentTier && newTier.priority > currentTier.priority
-          ? 'upgrade'
-          : 'downgrade';
+        newTier && currentTier && newTier.priority > currentTier.priority ? 'upgrade' : 'downgrade';
     }
 
     // 7. Generar razón
