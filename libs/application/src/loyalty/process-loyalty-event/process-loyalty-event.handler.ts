@@ -122,20 +122,20 @@ export class ProcessLoyaltyEventHandler {
       const skipped: Array<{ reason: string; ruleId?: number; programId?: number }> = [];
 
       for (const program of compatiblePrograms) {
-        console.log(
-          `[PROCESS_EVENT] Processing program ${program.id} (${program.name}) - type: ${program.programType}`,
+        this.logger.debug(
+          `Processing program ${program.id} (${program.name}) - type: ${program.programType}`,
         );
 
         // OPTIMIZACIÓN: Obtener reglas desde el Map en lugar de query
         const rules = rulesByProgram.get(program.id) || [];
 
-        console.log(
-          `[PROCESS_EVENT] Found ${rules.length} active rules for program ${program.id} with trigger ${normalizedEvent.eventType}`,
+        this.logger.debug(
+          `Found ${rules.length} active rules for program ${program.id} with trigger ${normalizedEvent.eventType}`,
         );
 
         if (rules.length === 0) {
-          console.log(
-            `[PROCESS_EVENT] No active rules found for trigger ${normalizedEvent.eventType} in program ${program.id}`,
+          this.logger.debug(
+            `No active rules found for trigger ${normalizedEvent.eventType} in program ${program.id}`,
           );
           skipped.push({
             reason: `No active rules found for trigger ${normalizedEvent.eventType}`,
@@ -152,12 +152,12 @@ export class ProcessLoyaltyEventHandler {
           tier,
         );
 
-        console.log(
-          `[PROCESS_EVENT] Rule evaluation returned ${evaluations.length} evaluations for program ${program.id}`,
+        this.logger.debug(
+          `Rule evaluation returned ${evaluations.length} evaluations for program ${program.id}`,
         );
 
         if (evaluations.length === 0) {
-          console.log(`[PROCESS_EVENT] No eligible rules matched for program ${program.id}`);
+          this.logger.debug(`No eligible rules matched for program ${program.id}`);
           skipped.push({
             reason: 'No eligible rules matched',
             programId: program.id,
@@ -384,7 +384,10 @@ export class ProcessLoyaltyEventHandler {
                 await this.execute(referralEvent);
               } catch (error) {
                 // Log error pero no fallar el procesamiento del evento original
-                console.warn(`Error processing referral event for referral ${referral.id}:`, error);
+                this.logger.warn(
+                  `Error processing referral event for referral ${referral.id}`,
+                  error instanceof Error ? error.stack : String(error),
+                );
               }
             }
           }

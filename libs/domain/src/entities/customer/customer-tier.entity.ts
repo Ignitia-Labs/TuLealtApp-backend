@@ -82,6 +82,7 @@ export class CustomerTier {
 
   /**
    * Método de dominio para calcular puntos con el multiplicador del tier
+   * Usa Math.floor() para consistencia con TierBenefit.applyMultiplier()
    */
   applyMultiplier(basePoints: number): number {
     if (this.multiplier === null) {

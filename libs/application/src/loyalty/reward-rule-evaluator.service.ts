@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import {
   IRewardRuleRepository,
   RewardRule,
@@ -17,6 +17,8 @@ import {
  */
 @Injectable()
 export class RewardRuleEvaluator {
+  private readonly logger = new Logger(RewardRuleEvaluator.name);
+
   constructor(
     @Inject('IRewardRuleRepository')
     private readonly ruleRepository: IRewardRuleRepository,
@@ -28,6 +30,12 @@ export class RewardRuleEvaluator {
 
   /**
    * Evalúa reglas activas de un programa para un evento dado
+   * 
+   * Orden de aplicación de multiplicadores:
+   * 1. Calcular puntos base según fórmula (fixed, rate, table, hybrid)
+   * 2. Aplicar CustomerTier.multiplier (si existe) - Bonus de tier global
+   * 3. Aplicar TierBenefit.pointsMultiplier (si existe) - Bonus de tier por programa
+   * 
    * @returns Lista de resultados de evaluación (reglas que aplican)
    */
   async evaluateRules(
@@ -36,8 +44,8 @@ export class RewardRuleEvaluator {
     membership: CustomerMembership,
     tier: CustomerTier | null,
   ): Promise<RuleEvaluationResult[]> {
-    console.log(
-      `[RULE_EVAL] Starting evaluation - programId: ${programId}, eventType: ${event.eventType}, membershipId: ${membership.id}, tierId: ${tier?.id || 'null'}`,
+    this.logger.debug(
+      `Starting evaluation - programId: ${programId}, eventType: ${event.eventType}, membershipId: ${membership.id}, tierId: ${tier?.id || 'null'}`,
     );
 
     // 1. Obtener reglas activas del programa que coincidan con el trigger
@@ -46,19 +54,13 @@ export class RewardRuleEvaluator {
       event.eventType,
     );
 
-    console.log(
-      `[RULE_EVAL] Found ${rules.length} active rules for trigger ${event.eventType}:`,
-      rules.map((r) => ({
-        id: r.id,
-        name: r.name,
-        trigger: r.trigger,
-        earningDomain: r.earningDomain,
-        scope: r.scope,
-      })),
+    this.logger.debug(
+      `Found ${rules.length} active rules for trigger ${event.eventType}`,
+      { programId, eventType: event.eventType, ruleIds: rules.map(r => r.id) },
     );
 
     if (rules.length === 0) {
-      console.log(`[RULE_EVAL] No active rules found for trigger ${event.eventType}`);
+      this.logger.debug(`No active rules found for trigger ${event.eventType}`);
       return [];
     }
 
@@ -75,22 +77,18 @@ export class RewardRuleEvaluator {
       }
     }
 
-    console.log(
-      `[RULE_EVAL] Eligibility check - Eligible: ${eligibleRules.length}, Ineligible: ${ineligibleRules.length}`,
+    this.logger.debug(
+      `Eligibility check - Eligible: ${eligibleRules.length}, Ineligible: ${ineligibleRules.length}`,
     );
     if (ineligibleRules.length > 0) {
-      console.log(
-        `[RULE_EVAL] Ineligible rules:`,
-        ineligibleRules.map((ir) => ({
-          ruleId: ir.rule.id,
-          ruleName: ir.rule.name,
-          reason: ir.reason,
-        })),
+      this.logger.debug(
+        'Ineligible rules',
+        { ineligible: ineligibleRules.map((ir) => ({ ruleId: ir.rule.id, reason: ir.reason })) },
       );
     }
 
     if (eligibleRules.length === 0) {
-      console.log(`[RULE_EVAL] No eligible rules after filtering`);
+      this.logger.debug('No eligible rules after filtering');
       return [];
     }
 
@@ -107,22 +105,18 @@ export class RewardRuleEvaluator {
       }
     }
 
-    console.log(
-      `[RULE_EVAL] Frequency limits check - Passing: ${rulesPassingLimits.length}, Failing: ${rulesFailingLimits.length}`,
+    this.logger.debug(
+      `Frequency limits check - Passing: ${rulesPassingLimits.length}, Failing: ${rulesFailingLimits.length}`,
     );
     if (rulesFailingLimits.length > 0) {
-      console.log(
-        `[RULE_EVAL] Rules failing limits:`,
-        rulesFailingLimits.map((rfl) => ({
-          ruleId: rfl.rule.id,
-          ruleName: rfl.rule.name,
-          reason: rfl.reason,
-        })),
+      this.logger.debug(
+        'Rules failing limits',
+        { failing: rulesFailingLimits.map((rfl) => ({ ruleId: rfl.rule.id, reason: rfl.reason })) },
       );
     }
 
     if (rulesPassingLimits.length === 0) {
-      console.log(`[RULE_EVAL] No rules passing frequency limits`);
+      this.logger.debug('No rules passing frequency limits');
       return [];
     }
 
@@ -135,23 +129,33 @@ export class RewardRuleEvaluator {
       tierBenefit = await this.tierBenefitRepository.findByProgramIdAndTierId(programId, tier.id);
     }
 
-    console.log(`[RULE_EVAL] Evaluating ${rulesPassingLimits.length} rules for points calculation`);
+    this.logger.debug(`Evaluating ${rulesPassingLimits.length} rules for points calculation`);
 
     for (const rule of rulesPassingLimits) {
       try {
-        const basePoints = this.calculatePoints(rule, event, tier);
-        console.log(
-          `[RULE_EVAL] Rule ${rule.id} (${rule.name}) - Base points: ${basePoints}, Formula: ${rule.pointsFormula.type}`,
+        // Calcular puntos base según fórmula (SIN aplicar multiplicadores de tier)
+        const basePoints = this.calculatePoints(rule, event, null);
+        this.logger.debug(
+          `Rule ${rule.id} (${rule.name}) - Base points: ${basePoints}, Formula: ${rule.pointsFormula.type}`,
         );
 
         let points = basePoints;
 
-        // Aplicar TierBenefits si existe
+        // Aplicar CustomerTier.multiplier si existe (1er multiplicador)
+        if (tier && tier.multiplier) {
+          const beforeTierMultiplier = points;
+          points = tier.applyMultiplier(points);
+          this.logger.debug(
+            `Rule ${rule.id} - CustomerTier multiplier applied: ${beforeTierMultiplier} -> ${points} (multiplier: ${tier.multiplier})`,
+          );
+        }
+
+        // Aplicar TierBenefit.pointsMultiplier si existe (2do multiplicador)
         if (tierBenefit && tierBenefit.isActive()) {
-          const beforeMultiplier = points;
+          const beforeBenefitMultiplier = points;
           points = tierBenefit.applyMultiplier(points);
-          console.log(
-            `[RULE_EVAL] Rule ${rule.id} - Tier benefit applied: ${beforeMultiplier} -> ${points} (multiplier: ${tierBenefit.pointsMultiplier})`,
+          this.logger.debug(
+            `Rule ${rule.id} - TierBenefit multiplier applied: ${beforeBenefitMultiplier} -> ${points} (multiplier: ${tierBenefit.pointsMultiplier})`,
           );
         }
 
@@ -169,21 +173,22 @@ export class RewardRuleEvaluator {
             metadata: {
               ruleName: rule.name,
               formulaType: rule.pointsFormula.type,
-              tierBenefitApplied: tierBenefit ? tierBenefit.pointsMultiplier : null,
+              customerTierMultiplier: tier?.multiplier || null,
+              tierBenefitMultiplier: tierBenefit ? tierBenefit.pointsMultiplier : null,
             },
           };
           results.push(evaluation);
-          console.log(`[RULE_EVAL] Rule ${rule.id} - Evaluation added:`, evaluation);
+          this.logger.debug(`Rule ${rule.id} - Evaluation added`, { evaluation });
         } else {
-          console.log(`[RULE_EVAL] Rule ${rule.id} - Points <= 0, skipping`);
+          this.logger.debug(`Rule ${rule.id} - Points <= 0, skipping`);
         }
       } catch (error) {
         // Log error pero continuar con otras reglas
-        console.error(`[RULE_EVAL] Error evaluating rule ${rule.id}:`, error);
+        this.logger.error(`Error evaluating rule ${rule.id}`, error);
       }
     }
 
-    console.log(`[RULE_EVAL] Evaluation complete - ${results.length} evaluations returned`);
+    this.logger.debug(`Evaluation complete - ${results.length} evaluations returned`);
     return results;
   }
 
@@ -707,11 +712,6 @@ export class RewardRuleEvaluator {
           }
         }
       }
-    }
-
-    // Aplicar multiplicador de tier si existe
-    if (tier && tier.multiplier) {
-      basePoints = Math.round(basePoints * tier.multiplier);
     }
 
     return Math.max(0, basePoints); // Asegurar que no sea negativo
