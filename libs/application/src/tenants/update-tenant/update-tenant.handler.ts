@@ -62,6 +62,9 @@ export class UpdateTenantHandler {
       request.pointsExpireDays ?? existingTenant.pointsExpireDays,
       request.minPointsToRedeem ?? existingTenant.minPointsToRedeem,
       request.taxPercentage !== undefined ? request.taxPercentage : existingTenant.taxPercentage,
+      request.redemptionCodeTtlMinutes !== undefined
+        ? request.redemptionCodeTtlMinutes
+        : existingTenant.redemptionCodeTtlMinutes,
       existingTenant.quickSearchCode, // No se puede cambiar el quickSearchCode
       request.status ?? existingTenant.status,
       existingTenant.createdAt, // Preservar fecha de creación
@@ -145,6 +148,7 @@ export class UpdateTenantHandler {
       finalTenant.pointsExpireDays,
       finalTenant.minPointsToRedeem,
       finalTenant.taxPercentage,
+      finalTenant.redemptionCodeTtlMinutes,
       finalTenant.status,
       finalTenant.createdAt,
       finalTenant.updatedAt,

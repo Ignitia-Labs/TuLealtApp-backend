@@ -12,9 +12,11 @@ services:
       - MYSQL_DATABASE=${DB_NAME:-tulealtapp}
       - MYSQL_USER=${DB_USER:-tulealtapp}
       - MYSQL_PASSWORD=${DB_PASSWORD:-tulealtapp}
+      - TZ=America/Guatemala
     volumes:
       - mariadb_data:/var/lib/mysql
       - ./docker/mariadb/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./docker/mariadb/my.cnf:/etc/mysql/conf.d/custom.cnf:ro
     networks:
       - tulealtapp-network
     restart: unless-stopped
@@ -195,6 +197,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3002
+      - TZ=America/Guatemala
       - DB_HOST=mariadb
       - DB_PORT=3306
       - DB_USER=${DB_USER:-tulealtapp}

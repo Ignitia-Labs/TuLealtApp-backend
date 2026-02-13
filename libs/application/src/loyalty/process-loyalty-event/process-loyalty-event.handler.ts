@@ -6,8 +6,6 @@ import {
   ICustomerTierRepository,
   IPointsTransactionRepository,
   PointsTransaction,
-  CustomerMembership,
-  CustomerTier,
 } from '@libs/domain';
 import { EventNormalizer } from '../event-normalizer.service';
 import { MembershipResolver } from '../membership-resolver.service';
@@ -102,7 +100,7 @@ export class ProcessLoyaltyEventHandler {
 
       // 5. OPTIMIZACIÓN: Cargar TODAS las reglas de TODOS los programas en batch
       // Esto evita N queries (una por programa) en el loop siguiente
-      const allProgramIds = compatiblePrograms.map(p => p.id);
+      const allProgramIds = compatiblePrograms.map((p) => p.id);
       const allRules = await this.ruleRepository.findActiveByProgramIdsAndTrigger(
         allProgramIds,
         normalizedEvent.eventType,
@@ -110,7 +108,7 @@ export class ProcessLoyaltyEventHandler {
 
       // Agrupar reglas por programId para acceso rápido en O(1)
       const rulesByProgram = new Map<number, typeof allRules>();
-      allRules.forEach(rule => {
+      allRules.forEach((rule) => {
         if (!rulesByProgram.has(rule.programId)) {
           rulesByProgram.set(rule.programId, []);
         }
@@ -192,27 +190,26 @@ export class ProcessLoyaltyEventHandler {
 
       // 8. OPTIMIZACIÓN: Cargar datos necesarios en batch ANTES del loop
       // Esto evita 4N queries (N evaluaciones × 4 queries cada una)
-      
+
       // 8.1. Verificar idempotencia en batch
-      const idempotencyKeys = resolvedEvaluations.map(e => e.idempotencyKey);
-      const existingTransactionsMap = await this.pointsTransactionRepository.findByIdempotencyKeys(
-        idempotencyKeys,
-      );
+      const idempotencyKeys = resolvedEvaluations.map((e) => e.idempotencyKey);
+      const existingTransactionsMap =
+        await this.pointsTransactionRepository.findByIdempotencyKeys(idempotencyKeys);
 
       // 8.2. Cargar todas las reglas necesarias en batch
-      const ruleIds = [...new Set(resolvedEvaluations.map(e => e.ruleId))];
+      const ruleIds = [...new Set(resolvedEvaluations.map((e) => e.ruleId))];
       const rulesMap = new Map<number, any>();
       if (ruleIds.length > 0) {
         const rules = await this.ruleRepository.findByIds(ruleIds);
-        rules.forEach(r => rulesMap.set(r.id, r));
+        rules.forEach((r) => rulesMap.set(r.id, r));
       }
 
       // 8.3. Cargar todos los programas necesarios en batch
-      const programIds = [...new Set(Array.from(rulesMap.values()).map(r => r.programId))];
+      const programIds = [...new Set(Array.from(rulesMap.values()).map((r) => r.programId))];
       const programsMap = new Map<number, any>();
       if (programIds.length > 0) {
         const programs = await this.programRepository.findByIds(programIds);
-        programs.forEach(p => programsMap.set(p.id, p));
+        programs.forEach((p) => programsMap.set(p.id, p));
       }
 
       // 8.4. Cargar tenant una sola vez (no cambia entre evaluaciones)
@@ -404,6 +401,13 @@ export class ProcessLoyaltyEventHandler {
       // Solo evaluar si se crearon transacciones que afectan puntos
       if (transactionsCreated.length > 0 && totalPointsAwarded > 0) {
         try {
+          this.logger.debug({
+            message: 'Starting tier evaluation after points awarded',
+            membershipId: membership.id,
+            pointsBefore: membership.points,
+            pointsAwarded: totalPointsAwarded,
+          });
+
           // Usar membership actualizada si se actualizó totalVisits
           const membershipForTierEvaluation =
             normalizedEvent.eventType === 'VISIT' && transactionsCreated.length > 0
@@ -411,10 +415,19 @@ export class ProcessLoyaltyEventHandler {
               : membership;
 
           if (membershipForTierEvaluation) {
-            await this.tierChangeService.evaluateAndApplyTierChange(
+            const tierChangeResult = await this.tierChangeService.evaluateAndApplyTierChange(
               membershipForTierEvaluation.id,
               normalizedEvent.tenantId,
             );
+
+            this.logger.log({
+              message: 'Tier evaluation completed',
+              membershipId: membership.id,
+              changeType: tierChangeResult.changeType,
+              previousTier: tierChangeResult.previousTierId,
+              newTier: tierChangeResult.newTierId,
+              reason: tierChangeResult.reason,
+            });
           }
         } catch (error) {
           // Log error pero no fallar el procesamiento del evento
@@ -422,8 +435,18 @@ export class ProcessLoyaltyEventHandler {
             message: 'Error evaluating tier change',
             membershipId: membership.id,
             error: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
           });
         }
+      } else {
+        this.logger.debug({
+          message: 'Skipping tier evaluation',
+          membershipId: membership.id,
+          reason:
+            transactionsCreated.length === 0
+              ? 'No transactions created'
+              : 'No points awarded',
+        });
       }
 
       // 12. Retornar respuesta

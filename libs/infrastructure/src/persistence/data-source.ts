@@ -96,6 +96,9 @@ export const dataSourceOptions: DataSourceOptions = {
   username: process.env.DB_USER || 'tulealtapp',
   password: process.env.DB_PASSWORD || 'tulealtapp',
   database: process.env.DB_NAME || 'tulealtapp',
+  // Configurar timezone para que TypeORM use America/Guatemala
+  // Esto asegura que @CreateDateColumn y @UpdateDateColumn usen el mismo timezone
+  timezone: 'Z', // UTC - Las fechas se guardan en UTC y se convierten según TZ del sistema
   entities: [
     UserEntity,
     PricingPlanEntity,

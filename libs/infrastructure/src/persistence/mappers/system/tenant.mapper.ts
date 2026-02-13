@@ -25,6 +25,7 @@ export class TenantMapper {
       persistenceEntity.banner,
       persistenceEntity.status,
       Number(persistenceEntity.taxPercentage),
+      persistenceEntity.redemptionCodeTtlMinutes || 15, // Fallback a 15 mins si es null/undefined
       persistenceEntity.id,
     );
   }
@@ -49,6 +50,7 @@ export class TenantMapper {
     entity.pointsExpireDays = domainEntity.pointsExpireDays;
     entity.minPointsToRedeem = domainEntity.minPointsToRedeem;
     entity.taxPercentage = domainEntity.taxPercentage;
+    entity.redemptionCodeTtlMinutes = domainEntity.redemptionCodeTtlMinutes;
     entity.quickSearchCode = domainEntity.quickSearchCode;
     entity.status = domainEntity.status;
     if (domainEntity.id > 0) {

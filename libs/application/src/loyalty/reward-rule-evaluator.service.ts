@@ -30,12 +30,12 @@ export class RewardRuleEvaluator {
 
   /**
    * Evalúa reglas activas de un programa para un evento dado
-   * 
+   *
    * Orden de aplicación de multiplicadores:
    * 1. Calcular puntos base según fórmula (fixed, rate, table, hybrid)
    * 2. Aplicar CustomerTier.multiplier (si existe) - Bonus de tier global
    * 3. Aplicar TierBenefit.pointsMultiplier (si existe) - Bonus de tier por programa
-   * 
+   *
    * @returns Lista de resultados de evaluación (reglas que aplican)
    */
   async evaluateRules(
@@ -111,7 +111,7 @@ export class RewardRuleEvaluator {
     if (rulesFailingLimits.length > 0) {
       this.logger.debug(
         'Rules failing limits',
-        { failing: rulesFailingLimits.map((rfl) => ({ ruleId: rfl.rule.id, reason: rfl.reason })) },
+        failing: rulesFailingLimits.map((rfl) => ({ ruleId: rfl.rule.id, reason: rfl.reason })),
       );
     }
 

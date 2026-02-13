@@ -127,6 +127,18 @@ export class CreateTenantRequest {
   @IsOptional()
   taxPercentage?: number;
 
+  @ApiProperty({
+    description: 'TTL en minutos para códigos de canje de recompensas (mínimo: 15 minutos)',
+    example: 60,
+    type: Number,
+    required: false,
+    default: 15,
+    minimum: 15,
+  })
+  @IsNumber()
+  @IsOptional()
+  redemptionCodeTtlMinutes?: number;
+
   // Features
   @ApiProperty({
     description: 'Habilitar escaneo QR',

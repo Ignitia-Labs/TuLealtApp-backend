@@ -99,6 +99,13 @@ export class UpdateTenantResponse {
   taxPercentage: number;
 
   @ApiProperty({
+    description: 'TTL en minutos para códigos de canje',
+    example: 15,
+    type: Number,
+  })
+  redemptionCodeTtlMinutes: number;
+
+  @ApiProperty({
     description: 'Estado del tenant',
     example: 'active',
     type: String,
@@ -133,6 +140,7 @@ export class UpdateTenantResponse {
     pointsExpireDays: number,
     minPointsToRedeem: number,
     taxPercentage: number,
+    redemptionCodeTtlMinutes: number,
     status: string,
     createdAt: Date,
     updatedAt: Date,
@@ -150,6 +158,7 @@ export class UpdateTenantResponse {
     this.pointsExpireDays = pointsExpireDays;
     this.minPointsToRedeem = minPointsToRedeem;
     this.taxPercentage = taxPercentage;
+    this.redemptionCodeTtlMinutes = redemptionCodeTtlMinutes;
     this.status = status;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;

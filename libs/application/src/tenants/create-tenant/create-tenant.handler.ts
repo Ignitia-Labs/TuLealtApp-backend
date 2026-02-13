@@ -81,6 +81,7 @@ export class CreateTenantHandler {
       request.banner || null,
       'active',
       request.taxPercentage || 0,
+      request.redemptionCodeTtlMinutes || 15, // Default 15 minutos
     );
 
     // Guardar el tenant (la BD asignará el ID automáticamente)

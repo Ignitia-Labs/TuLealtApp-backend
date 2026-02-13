@@ -78,7 +78,9 @@ export class GetCustomerMembershipsHandler {
     }
 
     // Obtener todos los tenantIds únicos para batch fetching
-    const uniqueTenantIds: number[] = Array.from(new Set(memberships.map((m) => m.tenantId as number)));
+    const uniqueTenantIds: number[] = Array.from(
+      new Set(memberships.map((m) => m.tenantId as number)),
+    );
 
     // Batch fetch: obtener tier data para todos los tenants de una vez
     const tierDataMap = await this.batchFetchTierData(uniqueTenantIds);
@@ -95,9 +97,7 @@ export class GetCustomerMembershipsHandler {
    * Batch fetch de tier data para múltiples tenants
    * Optimización para evitar N+1 queries
    */
-  private async batchFetchTierData(
-    tenantIds: number[],
-  ): Promise<
+  private async batchFetchTierData(tenantIds: number[]): Promise<
     Map<
       number,
       {
@@ -318,20 +318,42 @@ export class GetCustomerMembershipsHandler {
       }
     }
 
-    // Crear TierDetailDto (si tiene tier actual)
-    let currentTierDetail: TierDetailDto | null = null;
-    if (membership.tierId) {
-      const tier = await this.tierRepository.findById(membership.tierId);
-      if (tier) {
-        currentTierDetail = this.mapTierToDetailDto(tier);
-      }
-    }
-
     // Obtener tier data desde el map (ya pre-cargado)
     const tierData = tierDataMap.get(membership.tenantId) || {
       tiers: [],
       policy: null,
     };
+
+    // Calcular el tier correcto basado en los puntos actuales
+    // En lugar de confiar en membership.tierId (que puede estar desincronizado),
+    // calculamos el tier correcto evaluando los rangos de puntos
+    let currentTierDetail: TierDetailDto | null = null;
+    if (tierData.tiers.length > 0) {
+      const currentPoints = membership.points;
+
+      // Buscar el tier que corresponde a los puntos actuales
+      const correctTier = tierData.tiers.find((tier) => {
+        const meetsMinimum = currentPoints >= tier.minPoints;
+        const meetsMaximum = tier.maxPoints === null || currentPoints <= tier.maxPoints;
+        return meetsMinimum && meetsMaximum;
+      });
+
+      if (correctTier) {
+        // Convertir TierInfoDto a TierDetailDto
+        currentTierDetail = new TierDetailDto(
+          correctTier.id,
+          correctTier.name,
+          correctTier.description,
+          correctTier.minPoints,
+          correctTier.maxPoints,
+          correctTier.color,
+          correctTier.icon,
+          correctTier.benefits,
+          correctTier.multiplier,
+          correctTier.priority,
+        );
+      }
+    }
 
     // Crear TierSystemDto
     const tierSystem = new TierSystemDto(tierData.tiers, tierData.policy);

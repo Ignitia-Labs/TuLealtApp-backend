@@ -46,6 +46,13 @@ export class RedeemRewardResponse {
   })
   redemptionCode?: string;
 
+  @ApiPropertyOptional({
+    description: 'Fecha de expiración del código de canje (UTC)',
+    example: '2026-02-12T10:15:00.000Z',
+    type: Date,
+  })
+  expiresAt?: Date | null;
+
   constructor(data: {
     transactionId: number;
     rewardId: number;
@@ -53,6 +60,7 @@ export class RedeemRewardResponse {
     newBalance: number;
     branchId?: number | null;
     redemptionCode?: string;
+    expiresAt?: Date | null;
   }) {
     this.transactionId = data.transactionId;
     this.rewardId = data.rewardId;
@@ -60,5 +68,6 @@ export class RedeemRewardResponse {
     this.newBalance = data.newBalance;
     this.branchId = data.branchId;
     this.redemptionCode = data.redemptionCode;
+    this.expiresAt = data.expiresAt;
   }
 }

@@ -76,6 +76,9 @@ export class TenantEntity {
   @Column('decimal', { precision: 5, scale: 2, default: 0 })
   taxPercentage: number;
 
+  @Column('int', { default: 15 })
+  redemptionCodeTtlMinutes: number;
+
   @Column('varchar', { length: 20, unique: true })
   quickSearchCode: string;
 

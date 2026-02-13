@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import {
   TierStatus,
   TierPolicy,
@@ -28,6 +28,8 @@ export interface TierChangeResult {
  */
 @Injectable()
 export class TierChangeService {
+  private readonly logger = new Logger(TierChangeService.name);
+
   constructor(
     private readonly evaluationService: TierEvaluationService,
     @Inject('ICustomerMembershipRepository')
@@ -42,6 +44,9 @@ export class TierChangeService {
 
   /**
    * Evaluar y aplicar cambios de tier para un membership
+   * 
+   * Si existe TierPolicy: usa evaluación completa con grace periods y políticas
+   * Si NO existe TierPolicy: usa evaluación simplificada basada solo en puntos
    */
   async evaluateAndApplyTierChange(
     membershipId: number,
@@ -53,10 +58,29 @@ export class TierChangeService {
       throw new Error(`Membership ${membershipId} not found`);
     }
 
-    // 2. Evaluar tier
+    this.logger.debug(
+      `Evaluating tier change for membership ${membershipId} (current points: ${membership.points}, current tier: ${membership.tierId})`,
+    );
+
+    // 2. Verificar si existe política activa
+    const policy = await this.policyRepository.findActiveByTenantId(tenantId);
+
+    if (!policy) {
+      // FALLBACK: Evaluación simplificada sin política
+      this.logger.debug(
+        `No TierPolicy found for tenant ${tenantId}, using simple evaluation`,
+      );
+      return this.evaluateAndApplyTierChangeSimple(membership, tenantId);
+    }
+
+    this.logger.debug(
+      `Using TierPolicy ${policy.id} for evaluation (window: ${policy.evaluationWindow})`,
+    );
+
+    // 3. Evaluar tier con política completa
     const evaluation = await this.evaluationService.evaluateTier(membershipId, tenantId);
 
-    // 3. Aplicar cambios según evaluación
+    // 4. Aplicar cambios según evaluación
     return this.applyTierChange(membershipId, tenantId, evaluation);
   }
 
@@ -329,6 +353,109 @@ export class TierChangeService {
       changeType: 'downgrade',
       status: savedStatus,
       reason: `Forced downgrade to tier ${newTierId ?? 'none'}`,
+    };
+  }
+
+  /**
+   * Evaluación simplificada de tier SIN TierPolicy configurado
+   * Basado solo en puntos actuales y rangos de customer_tiers
+   * 
+   * Este método es un FALLBACK para que el sistema funcione incluso
+   * si no se ha configurado un TierPolicy todavía.
+   */
+  private async evaluateAndApplyTierChangeSimple(
+    membership: CustomerMembership,
+    tenantId: number,
+  ): Promise<TierChangeResult> {
+    this.logger.debug(
+      `Simple tier evaluation for membership ${membership.id} (points: ${membership.points})`,
+    );
+
+    // 1. Obtener tiers activos del tenant ordenados por prioridad
+    const tiers = await this.tierRepository.findByTenantId(tenantId);
+    const activeTiers = tiers
+      .filter((t) => t.isActive())
+      .sort((a, b) => b.priority - a.priority); // Mayor prioridad primero
+
+    if (activeTiers.length === 0) {
+      this.logger.warn(`No active tiers found for tenant ${tenantId}`);
+      throw new Error(`No active tiers found for tenant ${tenantId}`);
+    }
+
+    this.logger.debug(
+      `Found ${activeTiers.length} active tiers: ${activeTiers.map((t) => `${t.name} (${t.minPoints}-${t.maxPoints ?? '∞'})`).join(', ')}`,
+    );
+
+    // 2. Obtener puntos y tier actuales
+    const currentPoints = membership.points;
+    const currentTierId = membership.tierId;
+
+    // 3. Encontrar tier correcto basado en puntos
+    const correctTier = activeTiers.find((tier) => {
+      const meetsMin = currentPoints >= tier.minPoints;
+      const meetsMax = tier.maxPoints === null || currentPoints <= tier.maxPoints;
+      return meetsMin && meetsMax;
+    });
+
+    const newTierId = correctTier?.id ?? null;
+
+    this.logger.debug(
+      `Tier calculation: ${currentPoints} points → Tier ${newTierId} (${correctTier?.name || 'None'})`,
+    );
+
+    // 4. Verificar si hay cambio
+    if (currentTierId === newTierId) {
+      this.logger.debug(`No tier change needed: tier ${currentTierId} is correct`);
+      return {
+        membershipId: membership.id,
+        previousTierId: currentTierId,
+        newTierId: currentTierId,
+        changeType: 'no_change',
+        status: null as any, // No hay TierStatus sin TierPolicy
+        reason: `No change: ${currentPoints} points maintain tier ${currentTierId} (${correctTier?.name || 'N/A'})`,
+      };
+    }
+
+    // 5. Aplicar cambio de tier en membership
+    this.logger.log(
+      `Applying tier change for membership ${membership.id}: ${currentTierId} → ${newTierId} (${currentPoints} points)`,
+    );
+
+    const updatedMembership = membership.updateTier(newTierId);
+    await this.membershipRepository.update(updatedMembership);
+
+    // 6. Determinar tipo de cambio
+    let changeType: 'upgrade' | 'downgrade' | 'initial_assignment';
+    if (currentTierId === null) {
+      changeType = 'initial_assignment';
+    } else if (newTierId === null) {
+      changeType = 'downgrade';
+    } else {
+      const currentTier = tiers.find((t) => t.id === currentTierId);
+      const newTier = tiers.find((t) => t.id === newTierId);
+      changeType =
+        newTier && currentTier && newTier.priority > currentTier.priority
+          ? 'upgrade'
+          : 'downgrade';
+    }
+
+    // 7. Generar razón
+    const oldTierName = currentTierId
+      ? tiers.find((t) => t.id === currentTierId)?.name || 'Unknown'
+      : 'None';
+    const newTierName = correctTier?.name || 'None';
+
+    this.logger.log(
+      `Tier change applied successfully: ${oldTierName} → ${newTierName} (${changeType})`,
+    );
+
+    return {
+      membershipId: membership.id,
+      previousTierId: currentTierId,
+      newTierId: newTierId,
+      changeType,
+      status: null as any, // No hay TierStatus sin TierPolicy
+      reason: `Tier changed: ${oldTierName} → ${newTierName} (${currentPoints} points, simple evaluation)`,
     };
   }
 }

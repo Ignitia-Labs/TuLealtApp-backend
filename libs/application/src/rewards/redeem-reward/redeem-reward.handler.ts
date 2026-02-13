@@ -144,6 +144,7 @@ export class RedeemRewardHandler {
         newBalance: updatedMembership?.points || membership.points,
         branchId: existingTransaction.branchId,
         redemptionCode: existingCode?.code,
+        expiresAt: existingCode?.expiresAt, // Incluir fecha de expiración
       });
     }
 
@@ -181,8 +182,9 @@ export class RedeemRewardHandler {
     if (!existingCode) {
       // Generar nuevo código
       const codeString = await this.codeGenerator.generateUniqueCode(membership.tenantId);
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 30); // 30 días de validez
+      
+      // Calcular expiresAt usando TTL del tenant (método de dominio)
+      const expiresAt = tenant.calculateRedemptionCodeExpirationDate();
 
       const redemptionCodeEntity = RedemptionCode.create(
         codeString,
@@ -190,7 +192,7 @@ export class RedeemRewardHandler {
         reward.id,
         membership.id,
         membership.tenantId,
-        expiresAt,
+        expiresAt, // Usando expiresAt calculado con TTL configurable
       );
 
       existingCode = await this.redemptionCodeRepository.save(redemptionCodeEntity);
@@ -213,12 +215,13 @@ export class RedeemRewardHandler {
     }
 
     return new RedeemRewardResponse({
-      transactionId: transaction.id,
+      transactionId: savedTransaction.id,
       rewardId: reward.id,
       pointsUsed: reward.pointsRequired,
       newBalance: updatedMembership.points,
-      branchId: transaction.branchId,
+      branchId: savedTransaction.branchId,
       redemptionCode,
+      expiresAt: existingCode?.expiresAt, // Incluir fecha de expiración del código
     });
   }
 }

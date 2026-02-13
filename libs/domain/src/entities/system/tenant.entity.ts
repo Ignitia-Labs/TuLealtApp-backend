@@ -39,6 +39,23 @@ export class Tenant {
      * Valor por defecto: 0 (sin impuestos)
      */
     public readonly taxPercentage: number,
+    /**
+     * TTL (Time To Live) para códigos de canje en minutos
+     * Determina cuánto tiempo son válidos los códigos generados al redimir rewards.
+     * Valor por defecto: 15 minutos
+     * Mínimo permitido: 15 minutos
+     * @see RedemptionCode.expiresAt
+     * @example
+     * // Códigos válidos por 1 hora
+     * redemptionCodeTtlMinutes: 60
+     * 
+     * // Códigos válidos por 24 horas
+     * redemptionCodeTtlMinutes: 1440
+     * 
+     * // Códigos válidos por 7 días
+     * redemptionCodeTtlMinutes: 10080
+     */
+    public readonly redemptionCodeTtlMinutes: number,
     public readonly quickSearchCode: string,
     public readonly status: 'active' | 'inactive' | 'suspended',
     public readonly createdAt: Date,
@@ -64,8 +81,14 @@ export class Tenant {
     banner: string | null = null,
     status: 'active' | 'inactive' | 'suspended' = 'active',
     taxPercentage: number = 0,
+    redemptionCodeTtlMinutes: number = 15, // 15 minutos por defecto
     id?: number,
   ): Tenant {
+    // Validaciones de dominio
+    if (redemptionCodeTtlMinutes < 15) {
+      throw new Error('redemptionCodeTtlMinutes must be at least 15 minutes');
+    }
+
     const now = new Date();
     return new Tenant(
       id || 0,
@@ -81,6 +104,7 @@ export class Tenant {
       pointsExpireDays,
       minPointsToRedeem,
       taxPercentage,
+      redemptionCodeTtlMinutes,
       quickSearchCode,
       status,
       now,
@@ -113,6 +137,7 @@ export class Tenant {
       this.pointsExpireDays,
       this.minPointsToRedeem,
       this.taxPercentage,
+      this.redemptionCodeTtlMinutes,
       this.quickSearchCode,
       'suspended',
       this.createdAt,
@@ -138,10 +163,28 @@ export class Tenant {
       this.pointsExpireDays,
       this.minPointsToRedeem,
       this.taxPercentage,
+      this.redemptionCodeTtlMinutes,
       this.quickSearchCode,
       'active',
       this.createdAt,
       new Date(),
     );
+  }
+
+  /**
+   * Calcula la fecha de expiración para un código de canje
+   * basado en el TTL configurado en este tenant.
+   * 
+   * @param fromDate Fecha desde la cual calcular (default: ahora UTC)
+   * @returns Fecha de expiración (fromDate + redemptionCodeTtlMinutes)
+   * @example
+   * const tenant = await tenantRepo.findById(1);
+   * const expiresAt = tenant.calculateRedemptionCodeExpirationDate();
+   * // expiresAt = now + 15 minutos (si TTL es 15)
+   */
+  calculateRedemptionCodeExpirationDate(fromDate: Date = new Date()): Date {
+    const expiresAt = new Date(fromDate);
+    expiresAt.setMinutes(expiresAt.getMinutes() + this.redemptionCodeTtlMinutes);
+    return expiresAt;
   }
 }

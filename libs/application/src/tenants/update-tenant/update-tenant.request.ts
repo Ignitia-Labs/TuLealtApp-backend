@@ -122,6 +122,17 @@ export class UpdateTenantRequest {
   taxPercentage?: number;
 
   @ApiProperty({
+    description: 'TTL en minutos para códigos de canje de recompensas (mínimo: 15 minutos)',
+    example: 60,
+    type: Number,
+    required: false,
+    minimum: 15,
+  })
+  @IsNumber()
+  @IsOptional()
+  redemptionCodeTtlMinutes?: number;
+
+  @ApiProperty({
     description: 'Estado del tenant',
     example: 'active',
     enum: ['active', 'inactive', 'suspended'],
