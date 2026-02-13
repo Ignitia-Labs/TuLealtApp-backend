@@ -6,6 +6,7 @@ import {
   IPartnerRepository,
   IPricingPlanRepository,
   ICurrencyRepository,
+  IRateExchangeRepository,
 } from '@libs/domain';
 import { PartnerSubscriptionEntity, PartnerMapper } from '@libs/infrastructure';
 import { CreateSubscriptionRequest } from './create-subscription.request';
@@ -26,6 +27,8 @@ export class CreateSubscriptionHandler {
     private readonly pricingPlanRepository: IPricingPlanRepository,
     @Inject('ICurrencyRepository')
     private readonly currencyRepository: ICurrencyRepository,
+    @Inject('IRateExchangeRepository')
+    private readonly rateExchangeRepository: IRateExchangeRepository,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
     @InjectRepository(PartnerSubscriptionUsageEntity)
@@ -71,35 +74,117 @@ export class CreateSubscriptionHandler {
       }
     }
 
-    // Convertir planId de string a number
+    // Convertir planId de string a number y obtener el plan completo
     let numericPlanId: number;
+    let pricingPlan = null;
+
     const numericPlanIdParsed = parseInt(request.planId, 10);
     if (!isNaN(numericPlanIdParsed) && numericPlanIdParsed.toString() === request.planId.trim()) {
       // Ya es numérico
       numericPlanId = numericPlanIdParsed;
+      pricingPlan = await this.pricingPlanRepository.findById(numericPlanId);
     } else {
       // Es un slug, buscar el plan
-      let pricingPlan = await this.pricingPlanRepository.findBySlug(request.planId);
+      pricingPlan = await this.pricingPlanRepository.findBySlug(request.planId);
       if (!pricingPlan) {
         // Intentar sin prefijo "plan-"
         const slugWithoutPrefix = request.planId.replace(/^plan-/, '');
         pricingPlan = await this.pricingPlanRepository.findBySlug(slugWithoutPrefix);
       }
+
       if (!pricingPlan) {
         throw new NotFoundException(`Pricing plan with ID or slug "${request.planId}" not found`);
       }
       numericPlanId = pricingPlan.id;
     }
 
-    // Calcular valores de impuestos si no se proporcionan
-    let basePrice = request.basePrice ?? request.billingAmount;
-    let taxAmount = request.taxAmount ?? 0;
-    let totalPrice = request.totalPrice ?? request.billingAmount;
+    // Validar que se encontró el plan
+    if (!pricingPlan) {
+      throw new NotFoundException(
+        `Pricing plan not found in database for ID or slug "${request.planId}"`,
+      );
+    }
 
-    if (request.includeTax && request.taxPercent && request.taxPercent > 0) {
-      basePrice = request.billingAmount;
-      taxAmount = basePrice * (request.taxPercent / 100);
+    // Calcular valores de precio, conversión de moneda e impuestos
+    let basePrice: number;
+    let taxAmount: number;
+    let totalPrice: number;
+
+    // Si se proporcionan valores explícitos de precio, usarlos directamente
+    if (
+      request.basePrice !== undefined &&
+      request.taxAmount !== undefined &&
+      request.totalPrice !== undefined
+    ) {
+      basePrice = request.basePrice;
+      taxAmount = request.taxAmount;
+      totalPrice = request.totalPrice;
+    } else {
+      // Paso 1: Obtener el precio del plan en USD
+      const usdPrice = pricingPlan.pricing?.[request.billingFrequency];
+      if (usdPrice === undefined || usdPrice === null) {
+        throw new BadRequestException(
+          `No price found for billing frequency "${request.billingFrequency}" in plan "${pricingPlan.name}"`,
+        );
+      }
+
+      // Paso 2: Determinar la moneda de destino
+      let targetCurrency = null;
+      if (currencyId) {
+        targetCurrency = await this.currencyRepository.findById(currencyId);
+        if (!targetCurrency) {
+          throw new NotFoundException(`Currency with ID ${currencyId} not found`);
+        }
+      } else if (currencyCode) {
+        targetCurrency = await this.currencyRepository.findByCode(currencyCode);
+      }
+      // Paso 3: Convertir de USD a la moneda de destino si es necesario
+      if (targetCurrency && targetCurrency.code !== 'USD') {
+        // Necesitamos convertir de USD a la moneda de destino
+        const rateExchange = await this.rateExchangeRepository.getCurrent();
+
+        if (!rateExchange) {
+          throw new BadRequestException(
+            `Exchange rate not found. Cannot convert from USD to ${targetCurrency.code}. Please configure the exchange rate first.`,
+          );
+        }
+
+        // RateExchange almacena: rate GTQ por 1 USD
+        // Para convertir USD a GTQ: usdAmount * rate
+        // Si la moneda destino es GTQ
+        if (targetCurrency.code === 'GTQ') {
+          basePrice = usdPrice * rateExchange.rate;
+        } else {
+          // Si hay otras monedas en el futuro, aquí se agregarían sus conversiones
+          throw new BadRequestException(
+            `Currency conversion not supported for ${targetCurrency.code}. Only USD and GTQ are currently supported.`,
+          );
+        }
+
+        // Redondear según los decimales de la moneda
+        const decimals = targetCurrency.decimalPlaces ?? 2;
+        basePrice = Math.round(basePrice * Math.pow(10, decimals)) / Math.pow(10, decimals);
+      } else {
+        // La moneda es USD o no hay conversión necesaria
+        basePrice = usdPrice;
+      }
+
+      // Paso 4: Calcular impuestos si aplica
+      taxAmount = 0;
+      if (request.includeTax && request.taxPercent && request.taxPercent > 0) {
+        taxAmount = basePrice * (request.taxPercent / 100);
+
+        // Redondear el monto de impuestos
+        const decimals = targetCurrency?.decimalPlaces ?? 2;
+        taxAmount = Math.round(taxAmount * Math.pow(10, decimals)) / Math.pow(10, decimals);
+      }
+
+      // Paso 5: Calcular precio total
       totalPrice = basePrice + taxAmount;
+
+      // Redondear el precio total
+      const decimals = targetCurrency?.decimalPlaces ?? 2;
+      totalPrice = Math.round(totalPrice * Math.pow(10, decimals)) / Math.pow(10, decimals);
     }
 
     // Crear la entidad de dominio
@@ -154,10 +239,9 @@ export class CreateSubscriptionHandler {
       billingFrequency: savedSubscription.billingFrequency,
     });
 
-    // Obtener el plan de precios para obtener el slug (planId ya es numérico)
-    const plan = await this.pricingPlanRepository.findById(savedEntity.planId);
-    const planId = plan?.id ?? savedEntity.planId;
-    const planSlug = plan?.slug ?? 'unknown';
+    // Usar el plan ya obtenido anteriormente (evitar consulta duplicada)
+    const planId = pricingPlan.id;
+    const planSlug = pricingPlan.slug;
 
     return new CreateSubscriptionResponse(
       savedEntity.id,

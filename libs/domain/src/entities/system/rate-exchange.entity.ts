@@ -8,7 +8,7 @@
 export class RateExchange {
   constructor(
     public readonly id: number,
-    public readonly rate: number, // GTQ por USD (ej: 7.85 significa 7.85 GTQ = 1 USD)
+    public readonly rate: number, // GTQ por USD (ej: 8 significa 8 GTQ = 1 USD)
     public readonly fromCurrency: string, // Siempre 'GTQ'
     public readonly toCurrency: string, // Siempre 'USD'
     public readonly createdAt: Date,

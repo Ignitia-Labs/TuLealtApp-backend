@@ -9,7 +9,7 @@ export class SetRateExchangeResponse {
     description: 'Tipo de cambio actualizado',
     example: {
       id: 1,
-      rate: 7.85,
+      rate: 8,
       fromCurrency: 'GTQ',
       toCurrency: 'USD',
       createdAt: '2024-01-01T00:00:00.000Z',
@@ -20,7 +20,7 @@ export class SetRateExchangeResponse {
 
   @ApiProperty({
     description: 'Tasa de cambio (GTQ por USD)',
-    example: 7.85,
+    example: 8,
   })
   rate: number;
 

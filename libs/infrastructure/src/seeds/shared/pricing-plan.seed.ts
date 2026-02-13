@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { IPricingPlanRepository, PricingPlan } from '@libs/domain';
+import { IPricingPlanRepository, PricingPlan, IRateExchangeRepository } from '@libs/domain';
 import { BaseSeed } from '../base/base-seed';
 
 /**
@@ -10,6 +10,8 @@ export class PricingPlanSeed extends BaseSeed {
   constructor(
     @Inject('IPricingPlanRepository')
     private readonly pricingPlanRepository: IPricingPlanRepository,
+    @Inject('IRateExchangeRepository')
+    private readonly rateExchangeRepository: IRateExchangeRepository,
   ) {
     super();
   }
@@ -22,6 +24,8 @@ export class PricingPlanSeed extends BaseSeed {
     this.log('Iniciando seed de planes de precios...');
 
     try {
+      await this.initializeRateExchange();
+
       // Plan 1: Esencia
       await this.createPlanIfNotExists('esencia', {
         name: 'Esencia',
@@ -252,5 +256,17 @@ export class PricingPlanSeed extends BaseSeed {
 
     const savedPlan = await this.pricingPlanRepository.save(plan);
     this.log(`Plan ${slug} creado exitosamente con ID: ${savedPlan.id}`);
+  }
+
+  private async initializeRateExchange(): Promise<void> {
+    const currentRate = await this.rateExchangeRepository.getCurrent();
+
+    if (currentRate) {
+      this.log(`Tipo de cambio ya existe: ${currentRate.rate} GTQ por USD`);
+      return;
+    }
+
+    const defaultRate = await this.rateExchangeRepository.setRate(8);
+    this.log(`Tipo de cambio inicializado: ${defaultRate.rate} GTQ por USD`);
   }
 }

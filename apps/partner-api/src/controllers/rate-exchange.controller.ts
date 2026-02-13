@@ -44,7 +44,7 @@ export class RateExchangeController {
     example: {
       rateExchange: {
         id: 1,
-        rate: 7.85,
+        rate: 8,
         createdAt: '2024-01-15T10:30:00.000Z',
         updatedAt: '2024-01-15T10:30:00.000Z',
       },

@@ -7,8 +7,8 @@ import { Type } from 'class-transformer';
  */
 export class SetRateExchangeRequest {
   @ApiProperty({
-    description: 'Tasa de cambio (GTQ por USD). Ejemplo: 7.85 significa que 7.85 GTQ = 1 USD',
-    example: 7.85,
+    description: 'Tasa de cambio (GTQ por USD). Ejemplo: 8 significa que 8 GTQ = 1 USD',
+    example: 8,
   })
   @Type(() => Number)
   @IsNumber()
