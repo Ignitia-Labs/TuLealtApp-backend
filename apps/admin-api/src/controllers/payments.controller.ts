@@ -613,7 +613,7 @@ export class PaymentsController {
   async getPaymentByReference(@Param('reference') reference: string): Promise<GetPaymentResponse> {
     // Buscar por reference
     const payment = await this.paymentRepository.findByReference(reference);
-    
+
     if (!payment) {
       throw new NotFoundException(`No payment found with reference: ${reference}`);
     }

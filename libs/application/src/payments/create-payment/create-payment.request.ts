@@ -82,14 +82,40 @@ export class CreatePaymentRequest {
 
   @ApiProperty({
     description: 'Estado del pago',
-    example: 'paid',
-    enum: ['pending', 'paid', 'failed', 'refunded', 'cancelled'],
+    example: 'pending_validation',
+    enum: [
+      'pending',
+      'pending_validation',
+      'validated',
+      'rejected',
+      'paid',
+      'failed',
+      'refunded',
+      'cancelled',
+    ],
     required: false,
-    default: 'pending',
+    default: 'pending_validation',
   })
-  @IsEnum(['pending', 'paid', 'failed', 'refunded', 'cancelled'])
+  @IsEnum([
+    'pending',
+    'pending_validation',
+    'validated',
+    'rejected',
+    'paid',
+    'failed',
+    'refunded',
+    'cancelled',
+  ])
   @IsOptional()
-  status?: 'pending' | 'paid' | 'failed' | 'refunded' | 'cancelled';
+  status?:
+    | 'pending'
+    | 'pending_validation'
+    | 'validated'
+    | 'rejected'
+    | 'paid'
+    | 'failed'
+    | 'refunded'
+    | 'cancelled';
 
   @ApiProperty({
     description: 'Fecha del pago',

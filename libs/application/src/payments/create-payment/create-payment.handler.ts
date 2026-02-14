@@ -465,7 +465,7 @@ export class CreatePaymentHandler {
         paymentDate,
         'validated',
         originalPayment?.transactionId || null, // Heredar transactionId del original
-        originalPayment?.reference || null, // Heredar reference del original
+        null, // ← CAMBIO: NO heredar reference (es único del payment original)
         null, // confirmationCode
         null, // gateway
         null, // gatewayTransactionId
@@ -579,7 +579,7 @@ export class CreatePaymentHandler {
         paymentDate,
         'validated',
         originalPayment?.transactionId || null, // Heredar transactionId del original
-        originalPayment?.reference || null, // Heredar reference del original
+        null, // ← CAMBIO: NO heredar reference (es único del payment original)
         null, // confirmationCode
         null, // gateway
         null, // gatewayTransactionId

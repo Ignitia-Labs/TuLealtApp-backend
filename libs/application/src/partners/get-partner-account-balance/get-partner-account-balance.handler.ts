@@ -142,7 +142,8 @@ export class GetPartnerAccountBalanceHandler {
 
     // NUEVO: Calcular pagos pendientes de validación
     const pendingValidationPayments = allPayments.filter(
-      (p) => p.status === 'pending_validation' && (!p.originalPaymentId || p.originalPaymentId === 0),
+      (p) =>
+        p.status === 'pending_validation' && (!p.originalPaymentId || p.originalPaymentId === 0),
     );
     const totalPendingValidation = pendingValidationPayments.reduce(
       (sum, p) => sum + Number(p.amount),
@@ -184,9 +185,7 @@ export class GetPartnerAccountBalanceHandler {
     const partiallyPaidCycles = allCycles
       .filter(
         (cycle) =>
-          cycle.paidAmount > 0 &&
-          cycle.paidAmount < cycle.totalAmount &&
-          cycle.status !== 'paid',
+          cycle.paidAmount > 0 && cycle.paidAmount < cycle.totalAmount && cycle.status !== 'paid',
       )
       .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime())
       .slice(0, 5);

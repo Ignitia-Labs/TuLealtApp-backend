@@ -25,7 +25,7 @@ export class AddPaymentValidationFields1813000000000 implements MigrationInterfa
     // 2. Agregar campo isPartialPayment
     const table = await queryRunner.getTable('payments');
     const hasIsPartialPayment = table?.findColumnByName('isPartialPayment');
-    
+
     if (!hasIsPartialPayment) {
       console.log('📝 Agregando campo isPartialPayment...');
       await queryRunner.addColumn(
@@ -132,7 +132,9 @@ export class AddPaymentValidationFields1813000000000 implements MigrationInterfa
 
     // 9. Crear índice único para reference (solo cuando no es NULL)
     // Nota: MySQL soporta índices únicos con WHERE clause usando índices funcionales
-    const hasReferenceIndex = table?.indices.find((idx) => idx.name === 'idx_payments_reference_unique');
+    const hasReferenceIndex = table?.indices.find(
+      (idx) => idx.name === 'idx_payments_reference_unique',
+    );
     if (!hasReferenceIndex) {
       console.log('📝 Creando índice único para reference...');
       // En MySQL, necesitamos un approach diferente ya que no soporta WHERE clause directo
@@ -170,7 +172,9 @@ export class AddPaymentValidationFields1813000000000 implements MigrationInterfa
 
     // 2. Eliminar índice único de reference
     const table = await queryRunner.getTable('payments');
-    const hasReferenceIndex = table?.indices.find((idx) => idx.name === 'idx_payments_reference_unique');
+    const hasReferenceIndex = table?.indices.find(
+      (idx) => idx.name === 'idx_payments_reference_unique',
+    );
     if (hasReferenceIndex) {
       await queryRunner.dropIndex('payments', 'idx_payments_reference_unique');
     }

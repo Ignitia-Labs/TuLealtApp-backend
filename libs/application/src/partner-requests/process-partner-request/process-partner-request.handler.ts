@@ -164,7 +164,8 @@ export class ProcessPartnerRequestHandler {
     createPartnerRequest.subscriptionRenewalDate =
       request.subscriptionRenewalDate ||
       new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(); // 1 año desde ahora
-    createPartnerRequest.subscriptionLastPaymentAmount = request.subscriptionLastPaymentAmount ?? null;
+    createPartnerRequest.subscriptionLastPaymentAmount =
+      request.subscriptionLastPaymentAmount ?? null;
     createPartnerRequest.subscriptionAutoRenew =
       request.subscriptionAutoRenew !== undefined ? request.subscriptionAutoRenew : true;
     // Usar billingFrequency del partnerRequest si está disponible, sino usar el del request o 'monthly' por defecto
