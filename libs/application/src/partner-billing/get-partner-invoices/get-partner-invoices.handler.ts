@@ -1,4 +1,4 @@
-import { Injectable, Inject, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, BadRequestException, Logger } from '@nestjs/common';
 import { IInvoiceRepository, ICurrencyRepository } from '@libs/domain';
 import { GetPartnerInvoicesRequest } from './get-partner-invoices.request';
 import { GetPartnerInvoicesResponse, InvoiceDto } from './get-partner-invoices.response';
@@ -9,6 +9,7 @@ import { GetPartnerInvoicesResponse, InvoiceDto } from './get-partner-invoices.r
  */
 @Injectable()
 export class GetPartnerInvoicesHandler {
+  private readonly logger = new Logger(GetPartnerInvoicesHandler.name);
   constructor(
     @Inject('IInvoiceRepository')
     private readonly invoiceRepository: IInvoiceRepository,
@@ -17,12 +18,20 @@ export class GetPartnerInvoicesHandler {
   ) {}
 
   async execute(request: GetPartnerInvoicesRequest): Promise<GetPartnerInvoicesResponse> {
+    this.logger.log(
+      `📋 GetPartnerInvoicesHandler.execute called. partnerId=${request.partnerId}, ` +
+        `all=${request.all}, status=${request.status || 'ALL (undefined)'}, ` +
+        `page=${request.page || 'undefined'}, limit=${request.limit || 'undefined'}`,
+    );
+
     // Si all=true, verificar límite de registros
     if (request.all === true) {
+      this.logger.log(`🔄 Executing WITHOUT pagination (all=true)`);
       return this.executeWithoutPagination(request);
     }
 
     // Lógica con paginación
+    this.logger.log(`📄 Executing WITH pagination`);
     return this.executeWithPagination(request);
   }
 
@@ -32,12 +41,21 @@ export class GetPartnerInvoicesHandler {
     // Contar registros primero
     const total = await this.invoiceRepository.countByPartnerId(request.partnerId, request.status);
 
+    this.logger.log(
+      `🔢 Total invoices found for partnerId=${request.partnerId}, status=${request.status || 'ALL'}: ${total}`,
+    );
+
     // Validar límite máximo de 1000 registros
     if (total > 1000) {
       throw new BadRequestException(
         `Too many records (${total}). Please use pagination with limit max 100`,
       );
     }
+
+    this.logger.log(
+      '🚀 ~ GetPartnerInvoicesHandler ~ executeWithoutPagination ~ request:',
+      request,
+    );
 
     // Obtener todas las facturas sin paginación
     const invoices = await this.invoiceRepository.findByPartnerId(
@@ -47,8 +65,24 @@ export class GetPartnerInvoicesHandler {
       null, // no limit
     );
 
+    this.logger.log(
+      `✅ Retrieved ${invoices.length} invoices. ` +
+        `Invoice IDs: [${invoices.map((inv) => inv.id).join(', ')}]`,
+    );
+
+    if (invoices.length > 0) {
+      this.logger.log(
+        `📊 First invoice details: id=${invoices[0].id}, ` +
+          `invoiceNumber=${invoices[0].invoiceNumber}, ` +
+          `status=${invoices[0].status}, ` +
+          `paymentStatus=${invoices[0].paymentStatus}`,
+      );
+    }
+
     // Mapear a DTOs
+    this.logger.log(`🔄 Starting DTO mapping for ${invoices.length} invoices...`);
     const invoiceDtos = await Promise.all(invoices.map((invoice) => this.mapInvoiceToDto(invoice)));
+    this.logger.log(`✅ DTO mapping completed. Mapped ${invoiceDtos.length} invoices.`);
 
     return new GetPartnerInvoicesResponse(
       invoiceDtos,
@@ -68,6 +102,10 @@ export class GetPartnerInvoicesHandler {
     // Contar total de registros
     const total = await this.invoiceRepository.countByPartnerId(request.partnerId, request.status);
 
+    this.logger.log(
+      `🔢 Total invoices found for partnerId=${request.partnerId}, status=${request.status || 'ALL'}: ${total}`,
+    );
+
     // Calcular total de páginas
     const totalPages = Math.ceil(total / limit);
 
@@ -79,8 +117,24 @@ export class GetPartnerInvoicesHandler {
       limit,
     );
 
+    this.logger.log(
+      `✅ Retrieved ${invoices.length} invoices for page ${page}/${totalPages}. ` +
+        `Invoice IDs: [${invoices.map((inv) => inv.id).join(', ')}]`,
+    );
+
+    if (invoices.length > 0) {
+      this.logger.log(
+        `📊 First invoice details: id=${invoices[0].id}, ` +
+          `invoiceNumber=${invoices[0].invoiceNumber}, ` +
+          `status=${invoices[0].status}, ` +
+          `paymentStatus=${invoices[0].paymentStatus}`,
+      );
+    }
+
     // Mapear a DTOs
+    this.logger.log(`🔄 Starting DTO mapping for ${invoices.length} invoices...`);
     const invoiceDtos = await Promise.all(invoices.map((invoice) => this.mapInvoiceToDto(invoice)));
+    this.logger.log(`✅ DTO mapping completed. Mapped ${invoiceDtos.length} invoices.`);
 
     // Calcular navegación
     const hasNextPage = page < totalPages;

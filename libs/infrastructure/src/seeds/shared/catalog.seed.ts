@@ -79,11 +79,11 @@ export class CatalogSeed extends BaseSeed {
 
       // PAYMENT_METHODS - Métodos de pago
       const PAYMENT_METHODS = [
-        { value: 'tarjeta-credito', label: 'Tarjeta de crédito' },
-        { value: 'tarjeta-debito', label: 'Tarjeta de débito' },
-        { value: 'transferencia-bancaria', label: 'Transferencia bancaria' },
+        { value: 'credit_card', label: 'Tarjeta de crédito' },
+        { value: 'debit_card', label: 'Tarjeta de débito' },
+        { value: 'bank_transfer', label: 'Transferencia bancaria' },
         { value: 'paypal', label: 'PayPal' },
-        { value: 'efectivo', label: 'Efectivo' },
+        { value: 'cash', label: 'Efectivo' },
       ];
 
       // PAYMENT_CATEGORIES - Categorías de pago

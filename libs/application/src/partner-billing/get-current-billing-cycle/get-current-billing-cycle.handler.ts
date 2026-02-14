@@ -51,7 +51,7 @@ export class GetCurrentBillingCycleHandler {
 
     // Calcular días hasta vencimiento
     const daysUntilDue = Math.ceil(
-      (currentCycle.dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+      (currentCycle.endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
     );
 
     // Verificar si está vencido

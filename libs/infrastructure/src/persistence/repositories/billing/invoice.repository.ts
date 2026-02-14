@@ -75,7 +75,18 @@ export class InvoiceRepository implements IInvoiceRepository {
 
     queryBuilder.orderBy('invoice.issueDate', 'DESC');
 
+    // Log de la consulta SQL que se ejecutará
+    const sql = queryBuilder.getQuery();
+    console.log(
+      `[InvoiceRepository] Executing query for partnerId=${partnerId}, status=${status || 'ALL'}, page=${page}, limit=${limit}`,
+    );
+    console.log(`[InvoiceRepository] SQL: ${sql}`);
+
     const entities = await queryBuilder.getMany();
+    console.log(
+      `[InvoiceRepository] Query returned ${entities.length} entities. IDs: [${entities.map((e) => e.id).join(', ')}]`,
+    );
+
     return entities.map((entity) => InvoiceMapper.toDomain(entity));
   }
 
@@ -91,7 +102,13 @@ export class InvoiceRepository implements IInvoiceRepository {
       queryBuilder.andWhere('invoice.status = :status', { status });
     }
 
-    return queryBuilder.getCount();
+    console.log(
+      `[InvoiceRepository] Counting invoices for partnerId=${partnerId}, status=${status || 'ALL'}`,
+    );
+    const count = await queryBuilder.getCount();
+    console.log(`[InvoiceRepository] Count result: ${count}`);
+
+    return count;
   }
 
   async findPendingByPartnerId(partnerId: number): Promise<Invoice[]> {

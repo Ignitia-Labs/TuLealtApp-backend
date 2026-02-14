@@ -56,18 +56,6 @@ export class AuthenticatePartnerUserHandler {
     userAgent?: string,
     ipAddress?: string,
   ): Promise<AuthenticateUserResponse> {
-    // Buscar el partner por dominio
-    const partner = await this.partnerRepository.findByDomain(request.partnerDomain);
-
-    if (!partner) {
-      throw new NotFoundException(`Partner with domain '${request.partnerDomain}' not found`);
-    }
-
-    // Verificar que el partner esté activo
-    if (partner.status !== 'active') {
-      throw new UnauthorizedException(`Partner '${request.partnerDomain}' is not active`);
-    }
-
     // Buscar usuario por email
     const user = await this.userRepository.findByEmail(request.email);
 
@@ -93,6 +81,17 @@ export class AuthenticatePartnerUserHandler {
       throw new UnauthorizedException('User does not have partner role (PARTNER or PARTNER_STAFF)');
     }
 
+    const partner = await this.partnerRepository.findById(user.partnerId);
+
+    if (!partner) {
+      throw new NotFoundException(`Partner with domain and for user '${user.name}' not found`);
+    }
+
+    // Verificar que el partner esté activo
+    if (partner.status !== 'active') {
+      throw new UnauthorizedException(`Partner '${partner.domain}' is not active`);
+    }
+
     // Validar que el usuario pertenezca al partner especificado
     // Un usuario puede pertenecer a un partner de dos formas:
     // 1. Tiene partnerId directo igual al partner.id
@@ -100,7 +99,7 @@ export class AuthenticatePartnerUserHandler {
     // Por ahora validamos solo el partnerId directo
     if (user.partnerId !== partner.id) {
       throw new UnauthorizedException(
-        `User does not belong to partner '${request.partnerDomain}'. User belongs to a different partner.`,
+        `User does not belong to partner '${partner.domain}'. User belongs to a different partner.`,
       );
     }
 

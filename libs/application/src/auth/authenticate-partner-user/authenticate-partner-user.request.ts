@@ -25,14 +25,4 @@ export class AuthenticatePartnerUserRequest {
   @IsNotEmpty()
   @MinLength(6)
   password: string;
-
-  @ApiProperty({
-    description:
-      'Dominio del partner al que pertenece el usuario (identificador único del partner)',
-    example: 'miempresa.gt',
-    type: String,
-  })
-  @IsString()
-  @IsNotEmpty()
-  partnerDomain: string;
 }
