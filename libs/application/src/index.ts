@@ -870,6 +870,9 @@ export * from './customer-memberships/get-user-enrollments/get-user-enrollments.
 export * from './customer-memberships/enroll-in-program/enroll-in-program.handler';
 export * from './customer-memberships/enroll-in-program/enroll-in-program.request';
 export * from './customer-memberships/enroll-in-program/enroll-in-program.response';
+export * from './customer-memberships/enroll-with-invitation-code/enroll-with-invitation-code.handler';
+export * from './customer-memberships/enroll-with-invitation-code/enroll-with-invitation-code.request';
+export * from './customer-memberships/enroll-with-invitation-code/enroll-with-invitation-code.response';
 export * from './customer-memberships/unenroll-from-program/unenroll-from-program.handler';
 export * from './customer-memberships/unenroll-from-program/unenroll-from-program.request';
 export * from './customer-memberships/get-current-tier/get-current-tier.handler';

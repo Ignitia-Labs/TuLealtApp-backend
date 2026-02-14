@@ -5,6 +5,7 @@ import {
   Delete,
   Param,
   Query,
+  Body,
   HttpCode,
   HttpStatus,
   ParseIntPipe,
@@ -41,10 +42,13 @@ import {
   GetUserEnrollmentsRequest,
   GetUserEnrollmentsResponse,
   EnrollInProgramHandler,
+  EnrollWithInvitationCodeHandler,
   UnenrollFromProgramHandler,
   UnenrollFromProgramRequest,
   EnrollInProgramRequest,
   EnrollInProgramResponse,
+  EnrollWithInvitationCodeRequest,
+  EnrollWithInvitationCodeResponse,
   GetCurrentTierHandler,
   GetCurrentTierRequest,
   GetCurrentTierResponse,
@@ -98,6 +102,7 @@ export class CustomerMembershipsController {
     private readonly getMembershipEnrollmentsHandler: GetMembershipEnrollmentsHandler,
     private readonly getUserEnrollmentsHandler: GetUserEnrollmentsHandler,
     private readonly enrollInProgramHandler: EnrollInProgramHandler,
+    private readonly enrollWithInvitationCodeHandler: EnrollWithInvitationCodeHandler,
     private readonly unenrollFromProgramHandler: UnenrollFromProgramHandler,
     private readonly getCurrentTierHandler: GetCurrentTierHandler,
     private readonly getTierHistoryHandler: GetTierHistoryHandler,
@@ -486,6 +491,41 @@ export class CustomerMembershipsController {
     request.membershipId = id;
     request.programId = programId;
     return this.enrollInProgramHandler.execute(request, user!.userId);
+  }
+
+  @Post('enroll/invitation-code')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Inscribirse con código de invitación',
+    description:
+      'Crea una membership en el tenant del código (si no existe) y enrolla automáticamente al customer en el programa BASE activo del tenant',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Inscripción exitosa con membership y enrollment creados',
+    type: EnrollWithInvitationCodeResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Código de invitación inválido, expirado o deshabilitado',
+    type: BadRequestErrorResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado', type: UnauthorizedErrorResponseDto })
+  @ApiResponse({
+    status: 404,
+    description: 'Código de invitación o programa BASE no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Ya está enrollado en el programa BASE',
+    type: BadRequestErrorResponseDto,
+  })
+  async enrollWithInvitationCode(
+    @Body() body: EnrollWithInvitationCodeRequest,
+    @CurrentUser() user?: JwtPayload,
+  ): Promise<EnrollWithInvitationCodeResponse> {
+    return this.enrollWithInvitationCodeHandler.execute(body, user!.userId);
   }
 
   @Delete(':id/loyalty-programs/:programId/enroll')
