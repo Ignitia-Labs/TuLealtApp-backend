@@ -64,10 +64,27 @@ export class CreatePaymentResponse {
 
   @ApiProperty({
     description: 'Estado del pago',
-    example: 'paid',
-    enum: ['pending', 'paid', 'failed', 'refunded', 'cancelled'],
+    example: 'pending_validation',
+    enum: [
+      'pending',
+      'pending_validation',
+      'validated',
+      'rejected',
+      'paid',
+      'failed',
+      'refunded',
+      'cancelled',
+    ],
   })
-  status: 'pending' | 'paid' | 'failed' | 'refunded' | 'cancelled';
+  status:
+    | 'pending'
+    | 'pending_validation'
+    | 'validated'
+    | 'rejected'
+    | 'paid'
+    | 'failed'
+    | 'refunded'
+    | 'cancelled';
 
   @ApiProperty({
     description: 'Fecha del pago',
@@ -202,7 +219,15 @@ export class CreatePaymentResponse {
     amount: number,
     currency: string,
     paymentMethod: 'credit_card' | 'bank_transfer' | 'cash' | 'other',
-    status: 'pending' | 'paid' | 'failed' | 'refunded' | 'cancelled',
+    status:
+      | 'pending'
+      | 'pending_validation'
+      | 'validated'
+      | 'rejected'
+      | 'paid'
+      | 'failed'
+      | 'refunded'
+      | 'cancelled',
     paymentDate: Date,
     processedDate: Date | null,
     transactionId: number | null,

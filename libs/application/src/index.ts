@@ -545,6 +545,9 @@ export * from './payments/get-payments/get-payments.response';
 export * from './payments/delete-payment/delete-payment.handler';
 export * from './payments/delete-payment/delete-payment.request';
 export * from './payments/delete-payment/delete-payment.response';
+export * from './payments/update-payment-status/update-payment-status.handler';
+export * from './payments/update-payment-status/update-payment-status.request';
+export * from './payments/update-payment-status/update-payment-status.response';
 
 // Invoice Services
 export * from './invoices/invoice-reminder.service';

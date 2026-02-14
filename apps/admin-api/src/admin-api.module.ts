@@ -163,6 +163,7 @@ import {
   GetPaymentHandler,
   GetPaymentsHandler,
   DeletePaymentHandler,
+  UpdatePaymentStatusHandler,
   BillingCycleGeneratorService,
   InvoiceReminderService,
   CreditBalanceService,
@@ -444,6 +445,7 @@ import { AdminAuthModule } from './auth/admin-auth.module';
     GetPaymentHandler,
     GetPaymentsHandler,
     DeletePaymentHandler,
+    UpdatePaymentStatusHandler,
     // Servicios de aplicación - Billing Cycles
     BillingCycleGeneratorService,
     // Servicios de aplicación - Subscriptions

@@ -121,6 +121,80 @@ export class PaymentSummary {
 }
 
 /**
+ * DTO para ciclos con pagos parciales
+ */
+export class PartiallyPaidCycleSummary {
+  @ApiProperty({
+    description: 'ID del ciclo de facturación',
+    example: 3,
+    type: Number,
+  })
+  cycleId: number;
+
+  @ApiProperty({
+    description: 'Número del ciclo',
+    example: 2,
+    type: Number,
+  })
+  cycleNumber: number;
+
+  @ApiProperty({
+    description: 'Monto total del ciclo',
+    example: 100.0,
+    type: Number,
+  })
+  totalAmount: number;
+
+  @ApiProperty({
+    description: 'Monto pagado del ciclo',
+    example: 50.0,
+    type: Number,
+  })
+  paidAmount: number;
+
+  @ApiProperty({
+    description: 'Monto restante por pagar',
+    example: 50.0,
+    type: Number,
+  })
+  remainingAmount: number;
+
+  @ApiProperty({
+    description: 'Porcentaje pagado',
+    example: 50,
+    type: Number,
+  })
+  percentagePaid: number;
+
+  @ApiProperty({
+    description: 'Fecha de vencimiento',
+    example: '2026-02-28T00:00:00.000Z',
+    type: Date,
+  })
+  dueDate: Date;
+
+  @ApiProperty({
+    description: 'Pagos aplicados a este ciclo',
+    type: 'array',
+    items: {
+      type: 'object',
+      properties: {
+        id: { type: 'number', example: 126 },
+        amount: { type: 'number', example: 50.0 },
+        paymentDate: { type: 'string', format: 'date-time' },
+        reference: { type: 'string', nullable: true },
+      },
+    },
+  })
+  payments: Array<{
+    id: number;
+    amount: number;
+    paymentDate: Date;
+    reference: string | null;
+  }>;
+}
+
+/**
  * DTO de response para obtener el estado de cuenta del partner
  */
 export class GetPartnerAccountBalanceResponse {
@@ -203,6 +277,41 @@ export class GetPartnerAccountBalanceResponse {
   })
   recentPayments: PaymentSummary[];
 
+  @ApiProperty({
+    description: 'Total de pagos pendientes de validación',
+    example: 150.0,
+    type: Number,
+  })
+  totalPendingValidation: number;
+
+  @ApiProperty({
+    description: 'Total de pagos rechazados',
+    example: 50.0,
+    type: Number,
+  })
+  totalRejected: number;
+
+  @ApiProperty({
+    description: 'Lista de pagos pendientes de validación (máximo 10)',
+    type: PaymentSummary,
+    isArray: true,
+  })
+  pendingValidationPayments: PaymentSummary[];
+
+  @ApiProperty({
+    description: 'Lista de pagos rechazados (máximo 10)',
+    type: PaymentSummary,
+    isArray: true,
+  })
+  rejectedPayments: PaymentSummary[];
+
+  @ApiProperty({
+    description: 'Lista de ciclos con pagos parciales (máximo 5)',
+    type: PartiallyPaidCycleSummary,
+    isArray: true,
+  })
+  partiallyPaidCycles: PartiallyPaidCycleSummary[];
+
   constructor(
     partnerId: number,
     totalPaid: number,
@@ -215,6 +324,11 @@ export class GetPartnerAccountBalanceResponse {
     lastPaymentAmount: number | null,
     pendingInvoices: InvoiceSummary[],
     recentPayments: PaymentSummary[],
+    totalPendingValidation: number,
+    totalRejected: number,
+    pendingValidationPayments: PaymentSummary[],
+    rejectedPayments: PaymentSummary[],
+    partiallyPaidCycles: PartiallyPaidCycleSummary[],
   ) {
     this.partnerId = partnerId;
     this.totalPaid = totalPaid;
@@ -227,5 +341,10 @@ export class GetPartnerAccountBalanceResponse {
     this.lastPaymentAmount = lastPaymentAmount;
     this.pendingInvoices = pendingInvoices;
     this.recentPayments = recentPayments;
+    this.totalPendingValidation = totalPendingValidation;
+    this.totalRejected = totalRejected;
+    this.pendingValidationPayments = pendingValidationPayments;
+    this.rejectedPayments = rejectedPayments;
+    this.partiallyPaidCycles = partiallyPaidCycles;
   }
 }

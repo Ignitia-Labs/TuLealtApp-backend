@@ -124,6 +124,39 @@ export class CreatePaymentHandler {
       );
     }
 
+    // Validar reference duplicado
+    if (request.reference) {
+      const existingPayment = await this.paymentRepository.findByReference(request.reference);
+      if (existingPayment) {
+        throw new BadRequestException(
+          `Payment with reference ${request.reference} already exists (Payment ID: ${existingPayment.id}). ` +
+            `Cannot register the same payment twice.`,
+        );
+      }
+    }
+
+    // Validar reference obligatorio para transferencias bancarias
+    if (request.paymentMethod === 'bank_transfer' && !request.reference) {
+      throw new BadRequestException(
+        'Reference number is required for bank transfers to prevent duplicate payments',
+      );
+    }
+
+    // Detectar si es pago parcial
+    let isPartialPayment = false;
+    if (billingCycle) {
+      const remainingAmount = billingCycle.totalAmount - billingCycle.paidAmount;
+      isPartialPayment =
+        request.amount < remainingAmount && request.amount < billingCycle.totalAmount;
+
+      if (isPartialPayment) {
+        this.logger.log(
+          `Partial payment detected: ${request.amount} ${request.currency} of ${remainingAmount} remaining ` +
+            `(Total: ${billingCycle.totalAmount}) for billing cycle ${billingCycle.id}`,
+        );
+      }
+    }
+
     // Generar transactionId automáticamente
     const transactionId: number = await this.paymentRepository.getNextTransactionId();
 
@@ -137,7 +170,7 @@ export class CreatePaymentHandler {
       request.invoiceId || null,
       request.billingCycleId || null,
       request.paymentDate ? new Date(request.paymentDate) : new Date(),
-      request.status || 'pending',
+      request.status || 'pending_validation',
       transactionId,
       request.reference || null,
       request.confirmationCode || null,
@@ -150,6 +183,8 @@ export class CreatePaymentHandler {
       request.retryAttempt || null,
       request.notes || null,
       null, // processedBy (se puede obtener del contexto de autenticación)
+      null, // originalPaymentId
+      isPartialPayment,
     );
 
     // Guardar el pago
@@ -216,7 +251,14 @@ export class CreatePaymentHandler {
     }
 
     // Si el pago es exitoso, actualizar estados
-    if (savedPayment.status === 'paid') {
+    if (savedPayment.status === 'paid' || savedPayment.status === 'validated') {
+      // Soporte para backward compatibility con 'paid'
+      if (savedPayment.status === 'paid') {
+        this.logger.warn(
+          'Payment created with deprecated status "paid". Use "validated" instead for new payments.',
+        );
+      }
+
       // Marcar como procesado
       const processedPayment = savedPayment.markAsProcessed();
       await this.paymentRepository.update(processedPayment);
@@ -421,7 +463,7 @@ export class CreatePaymentHandler {
         null, // invoiceId (se asignará cuando se cree la factura)
         cycle.id, // billingCycleId
         paymentDate,
-        'paid',
+        'validated',
         originalPayment?.transactionId || null, // Heredar transactionId del original
         originalPayment?.reference || null, // Heredar reference del original
         null, // confirmationCode
@@ -435,6 +477,7 @@ export class CreatePaymentHandler {
         `Pago aplicado automáticamente a billing cycle ${cycle.cycleNumber}`,
         null, // processedBy
         originalPaymentId, // originalPaymentId - ID del payment original del cual este es derivado
+        amountToApply < cycleRemaining, // isPartialPayment
       );
 
       await this.paymentRepository.save(cyclePayment);
@@ -534,7 +577,7 @@ export class CreatePaymentHandler {
         pendingInvoice.id,
         pendingInvoice.billingCycleId,
         paymentDate,
-        'paid',
+        'validated',
         originalPayment?.transactionId || null, // Heredar transactionId del original
         originalPayment?.reference || null, // Heredar reference del original
         null, // confirmationCode
@@ -548,6 +591,7 @@ export class CreatePaymentHandler {
         `Pago aplicado automáticamente desde pago sin factura`, // notes
         null, // processedBy
         originalPaymentId, // originalPaymentId - ID del payment original del cual este es derivado
+        false, // isPartialPayment
       );
 
       await this.paymentRepository.save(invoicePayment);

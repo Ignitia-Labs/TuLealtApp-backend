@@ -1,7 +1,12 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IPartnerRepository, IPaymentRepository, IInvoiceRepository } from '@libs/domain';
+import {
+  IPartnerRepository,
+  IPaymentRepository,
+  IInvoiceRepository,
+  IBillingCycleRepository,
+} from '@libs/domain';
 import { PartnerSubscriptionEntity, PartnerMapper } from '@libs/infrastructure';
 import { GetPartnerAccountBalanceRequest } from './get-partner-account-balance.request';
 import {
@@ -22,6 +27,8 @@ export class GetPartnerAccountBalanceHandler {
     private readonly paymentRepository: IPaymentRepository,
     @Inject('IInvoiceRepository')
     private readonly invoiceRepository: IInvoiceRepository,
+    @Inject('IBillingCycleRepository')
+    private readonly billingCycleRepository: IBillingCycleRepository,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
   ) {}
@@ -52,7 +59,9 @@ export class GetPartnerAccountBalanceHandler {
     // Filtrar solo payments originales (no derivados) para el cálculo de total pagado
     // Un payment es original si no tiene originalPaymentId o es 0
     const originalPayments = allPayments.filter(
-      (p) => p.status === 'paid' && (!p.originalPaymentId || p.originalPaymentId === 0),
+      (p) =>
+        (p.status === 'validated' || p.status === 'paid') &&
+        (!p.originalPaymentId || p.originalPaymentId === 0),
     );
     // Asegurar conversión a número para evitar concatenación de strings
     const totalPaid = originalPayments.reduce((sum, p) => sum + Number(p.amount), 0);
@@ -131,6 +140,82 @@ export class GetPartnerAccountBalanceHandler {
       }),
     );
 
+    // NUEVO: Calcular pagos pendientes de validación
+    const pendingValidationPayments = allPayments.filter(
+      (p) => p.status === 'pending_validation' && (!p.originalPaymentId || p.originalPaymentId === 0),
+    );
+    const totalPendingValidation = pendingValidationPayments.reduce(
+      (sum, p) => sum + Number(p.amount),
+      0,
+    );
+
+    // NUEVO: Calcular pagos rechazados
+    const rejectedPayments = allPayments.filter(
+      (p) => p.status === 'rejected' && (!p.originalPaymentId || p.originalPaymentId === 0),
+    );
+    const totalRejected = rejectedPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+
+    // NUEVO: Mapear pagos pendientes de validación
+    const pendingValidationSummaries: PaymentSummary[] = pendingValidationPayments
+      .slice(0, 10)
+      .map((p) => ({
+        id: p.id,
+        amount: p.amount,
+        paymentDate: p.paymentDate,
+        status: p.status,
+        originalPaymentId: p.originalPaymentId,
+        isDerived: false,
+        reference: p.reference,
+      }));
+
+    // NUEVO: Mapear pagos rechazados
+    const rejectedPaymentSummaries: PaymentSummary[] = rejectedPayments.slice(0, 10).map((p) => ({
+      id: p.id,
+      amount: p.amount,
+      paymentDate: p.paymentDate,
+      status: p.status,
+      originalPaymentId: p.originalPaymentId,
+      isDerived: false,
+      reference: p.reference,
+    }));
+
+    // NUEVO: Obtener billing cycles con pagos parciales
+    const allCycles = await this.billingCycleRepository.findBySubscriptionId(subscription.id);
+    const partiallyPaidCycles = allCycles
+      .filter(
+        (cycle) =>
+          cycle.paidAmount > 0 &&
+          cycle.paidAmount < cycle.totalAmount &&
+          cycle.status !== 'paid',
+      )
+      .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime())
+      .slice(0, 5);
+
+    const partiallyPaidCycleSummaries = await Promise.all(
+      partiallyPaidCycles.map(async (cycle) => {
+        const cyclePayments = await this.paymentRepository.findByBillingCycleId(cycle.id);
+        const validatedCyclePayments = cyclePayments.filter(
+          (p) => p.status === 'validated' || p.status === 'paid',
+        );
+
+        return {
+          cycleId: cycle.id,
+          cycleNumber: cycle.cycleNumber,
+          totalAmount: cycle.totalAmount,
+          paidAmount: cycle.paidAmount,
+          remainingAmount: cycle.totalAmount - cycle.paidAmount,
+          percentagePaid: Math.round((cycle.paidAmount / cycle.totalAmount) * 100),
+          dueDate: cycle.dueDate,
+          payments: validatedCyclePayments.map((p) => ({
+            id: p.id,
+            amount: p.amount,
+            paymentDate: p.paymentDate,
+            reference: p.reference,
+          })),
+        };
+      }),
+    );
+
     return new GetPartnerAccountBalanceResponse(
       request.partnerId,
       totalPaid,
@@ -143,6 +228,11 @@ export class GetPartnerAccountBalanceHandler {
       lastPaymentAmount,
       invoiceSummaries,
       paymentSummaries,
+      totalPendingValidation,
+      totalRejected,
+      pendingValidationSummaries,
+      rejectedPaymentSummaries,
+      partiallyPaidCycleSummaries,
     );
   }
 }

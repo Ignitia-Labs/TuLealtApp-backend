@@ -74,8 +74,16 @@ export class PaymentEntity {
   @Column('varchar', { length: 50 })
   paymentMethod: 'credit_card' | 'bank_transfer' | 'cash' | 'other';
 
-  @Column('varchar', { length: 20, default: 'pending' })
-  status: 'pending' | 'paid' | 'failed' | 'refunded' | 'cancelled';
+  @Column('varchar', { length: 20, default: 'pending_validation' })
+  status:
+    | 'pending'
+    | 'pending_validation'
+    | 'validated'
+    | 'rejected'
+    | 'paid'
+    | 'failed'
+    | 'refunded'
+    | 'cancelled';
 
   @Column('datetime')
   paymentDate: Date;
@@ -121,6 +129,24 @@ export class PaymentEntity {
 
   @Column('int', { nullable: true })
   originalPaymentId: number | null;
+
+  @Column('boolean', { default: false })
+  isPartialPayment: boolean;
+
+  @Column('int', { nullable: true })
+  validatedBy: number | null;
+
+  @Column('datetime', { nullable: true })
+  validatedAt: Date | null;
+
+  @Column('int', { nullable: true })
+  rejectedBy: number | null;
+
+  @Column('datetime', { nullable: true })
+  rejectedAt: Date | null;
+
+  @Column('text', { nullable: true })
+  rejectionReason: string | null;
 
   @CreateDateColumn()
   createdAt: Date;

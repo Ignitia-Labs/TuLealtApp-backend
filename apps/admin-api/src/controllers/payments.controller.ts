@@ -3,6 +3,7 @@ import {
   Post,
   Get,
   Delete,
+  Patch,
   Body,
   Param,
   Query,
@@ -10,6 +11,9 @@ import {
   HttpStatus,
   UseGuards,
   ParseIntPipe,
+  Request,
+  NotFoundException,
+  Inject,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -33,7 +37,11 @@ import {
   DeletePaymentHandler,
   DeletePaymentRequest,
   DeletePaymentResponse,
+  UpdatePaymentStatusHandler,
+  UpdatePaymentStatusRequest,
+  UpdatePaymentStatusResponse,
 } from '@libs/application';
+import { IPaymentRepository } from '@libs/domain';
 import { JwtAuthGuard, RolesGuard, Roles } from '@libs/shared';
 
 /**
@@ -55,6 +63,9 @@ export class PaymentsController {
     private readonly getPaymentHandler: GetPaymentHandler,
     private readonly getPaymentsHandler: GetPaymentsHandler,
     private readonly deletePaymentHandler: DeletePaymentHandler,
+    private readonly updatePaymentStatusHandler: UpdatePaymentStatusHandler,
+    @Inject('IPaymentRepository')
+    private readonly paymentRepository: IPaymentRepository,
   ) {}
 
   @Post()
@@ -447,5 +458,169 @@ export class PaymentsController {
     const request = new DeletePaymentRequest();
     request.paymentId = id;
     return this.deletePaymentHandler.execute(request);
+  }
+
+  @Patch(':id/status')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: 'Actualizar estado de un pago',
+    description:
+      'Permite validar o rechazar un pago que está pendiente de validación. ' +
+      'Solo los administradores pueden realizar esta acción. ' +
+      'Si el pago es validado, se aplicará automáticamente a billing cycles e invoices pendientes.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID del pago a actualizar',
+    type: Number,
+    example: 123,
+  })
+  @ApiBody({
+    description: 'Datos para actualizar el estado del pago',
+    schema: {
+      type: 'object',
+      required: ['newStatus'],
+      properties: {
+        newStatus: {
+          type: 'string',
+          enum: ['validated', 'rejected'],
+          description: 'Nuevo estado del pago',
+          example: 'validated',
+        },
+        rejectionReason: {
+          type: 'string',
+          description: 'Razón del rechazo (requerido si newStatus es rejected)',
+          example: 'Comprobante de pago inválido',
+        },
+      },
+    },
+    examples: {
+      validar: {
+        summary: 'Validar pago',
+        description: 'Ejemplo para validar un pago pendiente',
+        value: {
+          newStatus: 'validated',
+        },
+      },
+      rechazar: {
+        summary: 'Rechazar pago',
+        description: 'Ejemplo para rechazar un pago pendiente',
+        value: {
+          newStatus: 'rejected',
+          rejectionReason: 'Comprobante de pago inválido',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Estado actualizado exitosamente',
+    type: UpdatePaymentStatusResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Request inválido (ej: payment no está en estado pending_validation)',
+    example: {
+      statusCode: 400,
+      message:
+        'Payment can only be validated/rejected when status is pending_validation. Current status: validated',
+      error: 'Bad Request',
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    example: {
+      statusCode: 401,
+      message: 'Unauthorized',
+      error: 'Unauthorized',
+    },
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos de administrador',
+    example: {
+      statusCode: 403,
+      message: 'Forbidden resource',
+      error: 'Forbidden',
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Pago no encontrado',
+    example: {
+      statusCode: 404,
+      message: 'Payment with ID 123 not found',
+      error: 'Not Found',
+    },
+  })
+  async updatePaymentStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { newStatus: 'validated' | 'rejected'; rejectionReason?: string },
+    @Request() req: any,
+  ): Promise<UpdatePaymentStatusResponse> {
+    const request = new UpdatePaymentStatusRequest();
+    request.paymentId = id;
+    request.newStatus = body.newStatus;
+    request.rejectionReason = body.rejectionReason;
+    request.processedBy = req.user?.userId || 0; // Obtener del token JWT
+
+    return this.updatePaymentStatusHandler.execute(request);
+  }
+
+  @Get('by-reference/:reference')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'STAFF')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: 'Buscar pago por número de referencia',
+    description:
+      'Busca un pago existente por su número de referencia. ' +
+      'Útil para validar antes de crear un nuevo pago y evitar duplicados.',
+  })
+  @ApiParam({
+    name: 'reference',
+    description: 'Número de referencia del pago',
+    type: String,
+    example: 'TRANSFER-20260213-001',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Pago encontrado',
+    type: GetPaymentResponse,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No se encontró pago con ese número de referencia',
+    example: {
+      statusCode: 404,
+      message: 'No payment found with reference: TRANSFER-20260213-001',
+      error: 'Not Found',
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    example: {
+      statusCode: 401,
+      message: 'Unauthorized',
+      error: 'Unauthorized',
+    },
+  })
+  async getPaymentByReference(@Param('reference') reference: string): Promise<GetPaymentResponse> {
+    // Buscar por reference
+    const payment = await this.paymentRepository.findByReference(reference);
+    
+    if (!payment) {
+      throw new NotFoundException(`No payment found with reference: ${reference}`);
+    }
+
+    // Usar el handler existente para obtener la respuesta completa
+    const request = new GetPaymentRequest();
+    request.paymentId = payment.id;
+    return this.getPaymentHandler.execute(request);
   }
 }

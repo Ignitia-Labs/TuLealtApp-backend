@@ -38,7 +38,15 @@ export class PaymentRepository implements IPaymentRepository {
 
   async findByPartnerId(
     partnerId: number,
-    status?: 'pending' | 'paid' | 'failed' | 'refunded' | 'cancelled',
+    status?:
+      | 'pending'
+      | 'pending_validation'
+      | 'validated'
+      | 'rejected'
+      | 'paid'
+      | 'failed'
+      | 'refunded'
+      | 'cancelled',
     page: number | null = 1,
     limit: number | null = 100,
     includeDerived = false,
@@ -71,7 +79,15 @@ export class PaymentRepository implements IPaymentRepository {
 
   async countByPartnerId(
     partnerId: number,
-    status?: 'pending' | 'paid' | 'failed' | 'refunded' | 'cancelled',
+    status?:
+      | 'pending'
+      | 'pending_validation'
+      | 'validated'
+      | 'rejected'
+      | 'paid'
+      | 'failed'
+      | 'refunded'
+      | 'cancelled',
   ): Promise<number> {
     const queryBuilder = this.paymentRepository
       .createQueryBuilder('payment')
@@ -96,7 +112,15 @@ export class PaymentRepository implements IPaymentRepository {
 
   async findByStatus(
     partnerId: number,
-    status: 'pending' | 'paid' | 'failed' | 'refunded' | 'cancelled',
+    status:
+      | 'pending'
+      | 'pending_validation'
+      | 'validated'
+      | 'rejected'
+      | 'paid'
+      | 'failed'
+      | 'refunded'
+      | 'cancelled',
   ): Promise<Payment[]> {
     const entities = await this.paymentRepository.find({
       where: { partnerId, status },
@@ -182,6 +206,43 @@ export class PaymentRepository implements IPaymentRepository {
     const entities = await this.paymentRepository.find({
       where: { originalPaymentId },
       order: { createdAt: 'ASC' },
+    });
+
+    return entities.map((entity) => PaymentMapper.toDomain(entity));
+  }
+
+  async findByReference(reference: string): Promise<Payment | null> {
+    if (!reference) return null;
+
+    const entity = await this.paymentRepository.findOne({
+      where: { reference },
+    });
+
+    if (!entity) return null;
+    return PaymentMapper.toDomain(entity);
+  }
+
+  async findPendingValidationByPartnerId(partnerId: number): Promise<Payment[]> {
+    const entities = await this.paymentRepository.find({
+      where: {
+        partnerId,
+        status: 'pending_validation',
+        originalPaymentId: null,
+      },
+      order: { createdAt: 'DESC' },
+    });
+
+    return entities.map((entity) => PaymentMapper.toDomain(entity));
+  }
+
+  async findRejectedByPartnerId(partnerId: number): Promise<Payment[]> {
+    const entities = await this.paymentRepository.find({
+      where: {
+        partnerId,
+        status: 'rejected',
+        originalPaymentId: null,
+      },
+      order: { rejectedAt: 'DESC' },
     });
 
     return entities.map((entity) => PaymentMapper.toDomain(entity));

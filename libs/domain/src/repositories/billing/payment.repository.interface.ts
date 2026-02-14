@@ -20,7 +20,15 @@ export interface IPaymentRepository {
    */
   findByPartnerId(
     partnerId: number,
-    status?: 'pending' | 'paid' | 'failed' | 'refunded' | 'cancelled',
+    status?:
+      | 'pending'
+      | 'pending_validation'
+      | 'validated'
+      | 'rejected'
+      | 'paid'
+      | 'failed'
+      | 'refunded'
+      | 'cancelled',
     page?: number | null,
     limit?: number | null,
     includeDerived?: boolean,
@@ -31,7 +39,15 @@ export interface IPaymentRepository {
    */
   countByPartnerId(
     partnerId: number,
-    status?: 'pending' | 'paid' | 'failed' | 'refunded' | 'cancelled',
+    status?:
+      | 'pending'
+      | 'pending_validation'
+      | 'validated'
+      | 'rejected'
+      | 'paid'
+      | 'failed'
+      | 'refunded'
+      | 'cancelled',
   ): Promise<number>;
 
   /**
@@ -44,7 +60,15 @@ export interface IPaymentRepository {
    */
   findByStatus(
     partnerId: number,
-    status: 'pending' | 'paid' | 'failed' | 'refunded' | 'cancelled',
+    status:
+      | 'pending'
+      | 'pending_validation'
+      | 'validated'
+      | 'rejected'
+      | 'paid'
+      | 'failed'
+      | 'refunded'
+      | 'cancelled',
   ): Promise<Payment[]>;
 
   /**
@@ -86,4 +110,19 @@ export interface IPaymentRepository {
    * Busca todos los payments derivados de un payment original
    */
   findDerivedByOriginalPaymentId(originalPaymentId: number): Promise<Payment[]>;
+
+  /**
+   * Busca un pago por su número de referencia
+   */
+  findByReference(reference: string): Promise<Payment | null>;
+
+  /**
+   * Busca payments pendientes de validación de un partner
+   */
+  findPendingValidationByPartnerId(partnerId: number): Promise<Payment[]>;
+
+  /**
+   * Busca payments rechazados de un partner
+   */
+  findRejectedByPartnerId(partnerId: number): Promise<Payment[]>;
 }

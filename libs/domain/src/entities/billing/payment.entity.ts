@@ -3,7 +3,15 @@
  * Representa un pago realizado para una suscripción/factura
  * No depende de frameworks ni librerías externas
  */
-export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded' | 'cancelled';
+export type PaymentStatus =
+  | 'pending' // Pago iniciado pero no completado
+  | 'pending_validation' // Pago completado, pendiente de validación por backoffice
+  | 'validated' // Pago validado por backoffice (reemplaza 'paid')
+  | 'rejected' // Pago rechazado por backoffice
+  | 'failed' // Pago fallido técnicamente
+  | 'refunded' // Pago reembolsado
+  | 'cancelled' // Pago cancelado
+  | 'paid'; // Deprecated: usar 'validated' en su lugar (se mantiene por compatibilidad)
 export type PaymentMethod = 'credit_card' | 'bank_transfer' | 'cash' | 'other';
 
 export class Payment {
@@ -32,6 +40,12 @@ export class Payment {
     public readonly notes: string | null,
     public readonly processedBy: number | null,
     public readonly originalPaymentId: number | null,
+    public readonly isPartialPayment: boolean,
+    public readonly validatedBy: number | null,
+    public readonly validatedAt: Date | null,
+    public readonly rejectedBy: number | null,
+    public readonly rejectedAt: Date | null,
+    public readonly rejectionReason: string | null,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
   ) {}
@@ -48,7 +62,7 @@ export class Payment {
     invoiceId: number | null = null,
     billingCycleId: number | null = null,
     paymentDate: Date = new Date(),
-    status: PaymentStatus = 'pending',
+    status: PaymentStatus = 'pending_validation',
     transactionId: number | null = null,
     reference: string | null = null,
     confirmationCode: string | null = null,
@@ -62,6 +76,7 @@ export class Payment {
     notes: string | null = null,
     processedBy: number | null = null,
     originalPaymentId: number | null = null,
+    isPartialPayment: boolean = false,
     id?: number,
   ): Payment {
     const now = new Date();
@@ -90,6 +105,12 @@ export class Payment {
       notes,
       processedBy,
       originalPaymentId,
+      isPartialPayment,
+      null, // validatedBy
+      null, // validatedAt
+      null, // rejectedBy
+      null, // rejectedAt
+      null, // rejectionReason
       now,
       now,
     );
@@ -99,7 +120,21 @@ export class Payment {
    * Método de dominio para verificar si el pago está completado
    */
   isCompleted(): boolean {
-    return this.status === 'paid';
+    return this.status === 'validated' || this.status === 'paid';
+  }
+
+  /**
+   * Método de dominio para verificar si el pago está validado
+   */
+  isValidated(): boolean {
+    return this.status === 'validated' || this.status === 'paid';
+  }
+
+  /**
+   * Método de dominio para verificar si el pago puede ser procesado
+   */
+  canBeProcessed(): boolean {
+    return this.status === 'validated' || this.status === 'paid';
   }
 
   /**
@@ -115,7 +150,7 @@ export class Payment {
       this.amount,
       this.currency,
       this.paymentMethod,
-      'paid',
+      'validated',
       this.paymentDate,
       processedDate,
       this.transactionId,
@@ -131,6 +166,96 @@ export class Payment {
       this.notes,
       this.processedBy,
       this.originalPaymentId,
+      this.isPartialPayment,
+      this.validatedBy,
+      this.validatedAt,
+      this.rejectedBy,
+      this.rejectedAt,
+      this.rejectionReason,
+      this.createdAt,
+      new Date(),
+    );
+  }
+
+  /**
+   * Método de dominio para marcar el pago como validado
+   */
+  markAsValidated(validatedBy: number, validatedAt: Date = new Date()): Payment {
+    return new Payment(
+      this.id,
+      this.subscriptionId,
+      this.partnerId,
+      this.invoiceId,
+      this.billingCycleId,
+      this.amount,
+      this.currency,
+      this.paymentMethod,
+      'validated',
+      this.paymentDate,
+      validatedAt,
+      this.transactionId,
+      this.reference,
+      this.confirmationCode,
+      this.gateway,
+      this.gatewayTransactionId,
+      this.cardLastFour,
+      this.cardBrand,
+      this.cardExpiry,
+      this.isRetry,
+      this.retryAttempt,
+      this.notes,
+      this.processedBy,
+      this.originalPaymentId,
+      this.isPartialPayment,
+      validatedBy,
+      validatedAt,
+      this.rejectedBy,
+      this.rejectedAt,
+      this.rejectionReason,
+      this.createdAt,
+      new Date(),
+    );
+  }
+
+  /**
+   * Método de dominio para marcar el pago como rechazado
+   */
+  markAsRejected(
+    rejectedBy: number,
+    rejectionReason: string,
+    rejectedAt: Date = new Date(),
+  ): Payment {
+    return new Payment(
+      this.id,
+      this.subscriptionId,
+      this.partnerId,
+      this.invoiceId,
+      this.billingCycleId,
+      this.amount,
+      this.currency,
+      this.paymentMethod,
+      'rejected',
+      this.paymentDate,
+      this.processedDate,
+      this.transactionId,
+      this.reference,
+      this.confirmationCode,
+      this.gateway,
+      this.gatewayTransactionId,
+      this.cardLastFour,
+      this.cardBrand,
+      this.cardExpiry,
+      this.isRetry,
+      this.retryAttempt,
+      this.notes,
+      this.processedBy,
+      this.originalPaymentId,
+      this.isPartialPayment,
+      this.validatedBy,
+      this.validatedAt,
+      rejectedBy,
+      rejectedAt,
+      rejectionReason,
       this.createdAt,
       new Date(),
     );
@@ -165,6 +290,12 @@ export class Payment {
       notes,
       this.processedBy,
       this.originalPaymentId,
+      this.isPartialPayment,
+      this.validatedBy,
+      this.validatedAt,
+      this.rejectedBy,
+      this.rejectedAt,
+      this.rejectionReason,
       this.createdAt,
       new Date(),
     );

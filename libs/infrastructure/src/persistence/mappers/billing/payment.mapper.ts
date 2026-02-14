@@ -34,6 +34,12 @@ export class PaymentMapper {
       persistenceEntity.notes,
       persistenceEntity.processedBy,
       persistenceEntity.originalPaymentId,
+      persistenceEntity.isPartialPayment || false,
+      persistenceEntity.validatedBy,
+      persistenceEntity.validatedAt,
+      persistenceEntity.rejectedBy,
+      persistenceEntity.rejectedAt,
+      persistenceEntity.rejectionReason,
       persistenceEntity.createdAt,
       persistenceEntity.updatedAt,
     );
@@ -70,6 +76,12 @@ export class PaymentMapper {
     entity.notes = domainEntity.notes;
     entity.processedBy = domainEntity.processedBy;
     entity.originalPaymentId = domainEntity.originalPaymentId;
+    entity.isPartialPayment = domainEntity.isPartialPayment;
+    entity.validatedBy = domainEntity.validatedBy;
+    entity.validatedAt = domainEntity.validatedAt;
+    entity.rejectedBy = domainEntity.rejectedBy;
+    entity.rejectedAt = domainEntity.rejectedAt;
+    entity.rejectionReason = domainEntity.rejectionReason;
     entity.createdAt = domainEntity.createdAt;
     entity.updatedAt = domainEntity.updatedAt;
     return entity;

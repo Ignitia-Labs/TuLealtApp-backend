@@ -64,7 +64,7 @@ export class BillingCycleGeneratorService {
    * Cron job que se ejecuta diariamente a las 2:00 AM
    * Revisa suscripciones activas y genera ciclos de facturación automáticamente
    */
-  @Cron(CronExpression.EVERY_DAY_AT_2AM)
+  @Cron(CronExpression.EVERY_30_SECONDS)
   async handleDailyBillingCycleGeneration() {
     this.logger.log('Iniciando generación automática de ciclos de facturación...');
 
@@ -196,12 +196,12 @@ export class BillingCycleGeneratorService {
       );
 
       // billingDate es hoy
-      const billingDate = new Date();
+      const billingDate = subscription.startDate;
       billingDate.setHours(0, 0, 0, 0);
 
       // Calcular dueDate usando gracePeriodDays de la suscripción
       const gracePeriodDays = subscription.gracePeriodDays || 7; // Default 7 días si no está definido
-      const dueDate = new Date(billingDate);
+      const dueDate = new Date(subscription.renewalDate);
       dueDate.setDate(dueDate.getDate() + gracePeriodDays);
       dueDate.setHours(23, 59, 59, 999); // Fin del día
       this.logger.log(
@@ -573,6 +573,12 @@ export class BillingCycleGeneratorService {
           derivedPayment.notes,
           derivedPayment.processedBy,
           derivedPayment.originalPaymentId,
+          derivedPayment.isPartialPayment,
+          derivedPayment.validatedBy,
+          derivedPayment.validatedAt,
+          derivedPayment.rejectedBy,
+          derivedPayment.rejectedAt,
+          derivedPayment.rejectionReason,
           derivedPayment.createdAt,
           new Date(), // updatedAt
         );
