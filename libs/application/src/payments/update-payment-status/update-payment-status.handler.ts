@@ -248,14 +248,18 @@ export class UpdatePaymentStatusHandler {
 
               // Enviar email de confirmación
               try {
-                this.logger.log(`📧 Sending payment confirmation email to ${partner.billingEmail}...`);
+                this.logger.log(
+                  `📧 Sending payment confirmation email to ${partner.billingEmail}...`,
+                );
                 await this.emailService.sendPaymentReceivedEmail(
                   paidInvoice,
                   partner.billingEmail,
                   payment.amount,
                   payment.paymentMethod,
                 );
-                this.logger.log(`✅ Email confirmation sent successfully to ${partner.billingEmail}`);
+                this.logger.log(
+                  `✅ Email confirmation sent successfully to ${partner.billingEmail}`,
+                );
               } catch (error) {
                 this.logger.error(`❌ Error sending payment confirmation email:`, error);
               }
@@ -494,7 +498,10 @@ export class UpdatePaymentStatusHandler {
           await this.commissionCalculationService.calculateCommissionsForBillingCycle(updatedCycle);
           this.logger.log(`✅ Commissions calculated for cycle ${updatedCycle.id}`);
         } catch (error) {
-          this.logger.error(`❌ Error calculating commissions for cycle ${updatedCycle.id}:`, error);
+          this.logger.error(
+            `❌ Error calculating commissions for cycle ${updatedCycle.id}:`,
+            error,
+          );
         }
 
         // 🔥 CRÍTICO: Si el billing cycle tiene una invoice asociada, marcarla como paid
