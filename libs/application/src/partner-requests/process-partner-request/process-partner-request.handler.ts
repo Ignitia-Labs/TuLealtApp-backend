@@ -6,7 +6,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
-import { Repository, DataSource, EntityManager, In } from 'typeorm';
+import { Repository, DataSource, EntityManager } from 'typeorm';
 import {
   IPartnerRequestRepository,
   IPartnerRepository,
@@ -14,11 +14,13 @@ import {
   ICountryRepository,
   IUserRepository,
   IPricingPlanRepository,
+  ILoyaltyProgramRepository,
   SubscriptionEvent,
   Tenant,
   TenantFeatures,
   Branch,
   User,
+  LoyaltyProgram,
 } from '@libs/domain';
 import {
   PartnerSubscriptionEntity,
@@ -28,9 +30,11 @@ import {
   TenantFeaturesEntity,
   BranchEntity,
   UserEntity,
+  LoyaltyProgramEntity,
   TenantMapper,
   BranchMapper,
   UserMapper,
+  LoyaltyProgramMapper,
 } from '@libs/infrastructure';
 import {
   generateColorsFromString,
@@ -63,6 +67,8 @@ export class ProcessPartnerRequestHandler {
     private readonly userRepository: IUserRepository,
     @Inject('IPricingPlanRepository')
     private readonly pricingPlanRepository: IPricingPlanRepository,
+    @Inject('ILoyaltyProgramRepository')
+    private readonly loyaltyProgramRepository: ILoyaltyProgramRepository,
     @InjectRepository(PartnerSubscriptionEntity)
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
     @InjectDataSource()
@@ -309,12 +315,17 @@ export class ProcessPartnerRequestHandler {
         country.name,
       );
 
-      // Crear usuario partner automáticamente
+      // Crear usuario partner automáticamente y asignarlo al tenant y branch
       const { user: createdUser, temporaryPassword } = await this.createPartnerUserWithManager(
         manager,
         createPartnerResponse.id,
         updatedPartnerRequest,
+        tenantEntity.id,
+        branchEntity.id,
       );
+
+      // Crear programa de lealtad BASE por defecto
+      await this.createDefaultLoyaltyProgramWithManager(manager, tenantEntity.id);
 
       // Marcar la solicitud como enrolled usando manager si es necesario
       // Nota: El repositorio puede usar su propia conexión, pero como estamos en transacción,
@@ -566,6 +577,8 @@ export class ProcessPartnerRequestHandler {
     manager: EntityManager,
     partnerId: number,
     partnerRequest: any,
+    tenantId: number,
+    branchId: number,
   ): Promise<{ user: UserEntity; temporaryPassword: string }> {
     // Validar que el partner exista
     const partnerEntity = await manager.findOne(PartnerEntity, {
@@ -609,8 +622,8 @@ export class ProcessPartnerRequestHandler {
       ['PARTNER'], // roles
       null, // profile
       partnerId, // partnerId
-      null, // tenantId
-      null, // branchId
+      tenantId, // tenantId - asignado al tenant creado
+      branchId, // branchId - asignado al branch creado
       null, // avatar
       'active', // status
     );
@@ -622,5 +635,113 @@ export class ProcessPartnerRequestHandler {
     const savedUserEntity = await manager.save(UserEntity, userEntity);
 
     return { user: savedUserEntity, temporaryPassword };
+  }
+
+  /**
+   * Crea un programa de lealtad BASE por defecto usando el EntityManager de la transacción
+   * Retorna el programa creado
+   */
+  private async createDefaultLoyaltyProgramWithManager(
+    manager: EntityManager,
+    tenantId: number,
+  ): Promise<LoyaltyProgramEntity> {
+    // Validar que el tenant exista
+    const tenantEntity = await manager.findOne(TenantEntity, {
+      where: { id: tenantId },
+      relations: ['currency'],
+    });
+    if (!tenantEntity) {
+      throw new NotFoundException(`Tenant with ID ${tenantId} not found`);
+    }
+
+    // Obtener código de la moneda del tenant
+    const currencyCode = tenantEntity.currency?.code || 'GTQ';
+
+    // Crear programa de lealtad BASE por defecto
+    const program = LoyaltyProgram.create(
+      tenantId,
+      'Programa de Lealtad Base',
+      'BASE',
+      [{ domain: 'BASE_PURCHASE' }], // Earning domain por defecto
+      10, // priorityRank alto para programa base
+      {
+        allowed: false, // No permitir stacking por defecto
+        maxProgramsPerEvent: 1,
+        maxProgramsPerPeriod: null,
+        period: null,
+        selectionStrategy: 'PRIORITY_RANK',
+      },
+      {
+        enabled: true,
+        type: 'simple',
+        daysToExpire: 365, // 1 año por defecto
+        gracePeriodDays: 30,
+      },
+      100, // minPointsToRedeem
+      'Programa de lealtad base creado automáticamente',
+      {
+        maxPointsPerEvent: null,
+        maxPointsPerDay: null,
+        maxPointsPerMonth: null,
+        maxPointsPerYear: null,
+      },
+      currencyCode, // Usar currency del tenant
+      'active', // Activar inmediatamente
+      1, // version
+      new Date(), // activeFrom: ahora
+      null, // activeTo: sin fecha de fin
+    );
+
+    // Convertir a entidad de persistencia
+    const programEntity = LoyaltyProgramMapper.toPersistence(program);
+
+    // Guardar usando manager
+    const savedProgramEntity = await manager.save(LoyaltyProgramEntity, programEntity);
+
+    // Incrementar contador de loyalty programs en uso de suscripción
+    const subscriptionEntity = await manager.findOne(PartnerSubscriptionEntity, {
+      where: { partnerId: tenantEntity.partnerId },
+      order: { createdAt: 'DESC' },
+    });
+
+    if (subscriptionEntity) {
+      const usageRepository = manager.getRepository(PartnerSubscriptionUsageEntity);
+      const existingUsage = await usageRepository.findOne({
+        where: { partnerSubscriptionId: subscriptionEntity.id },
+      });
+
+      if (existingUsage) {
+        // Incrementar contador general de loyalty programs
+        await usageRepository.increment(
+          { partnerSubscriptionId: subscriptionEntity.id },
+          'loyaltyProgramsCount',
+          1,
+        );
+        // Incrementar contador específico de programas BASE
+        await usageRepository.increment(
+          { partnerSubscriptionId: subscriptionEntity.id },
+          'loyaltyProgramsBaseCount',
+          1,
+        );
+      } else {
+        // Crear registro de uso si no existe
+        const usageEntity = usageRepository.create({
+          partnerSubscriptionId: subscriptionEntity.id,
+          tenantsCount: 0,
+          branchesCount: 0,
+          customersCount: 0,
+          rewardsCount: 0,
+          loyaltyProgramsCount: 1,
+          loyaltyProgramsBaseCount: 1,
+          loyaltyProgramsPromoCount: 0,
+          loyaltyProgramsPartnerCount: 0,
+          loyaltyProgramsSubscriptionCount: 0,
+          loyaltyProgramsExperimentalCount: 0,
+        });
+        await usageRepository.save(usageEntity);
+      }
+    }
+
+    return savedProgramEntity;
   }
 }

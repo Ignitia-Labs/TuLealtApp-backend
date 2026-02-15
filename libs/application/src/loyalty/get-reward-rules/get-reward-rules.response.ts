@@ -23,6 +23,23 @@ export class RewardRuleDto {
   @ApiProperty({ example: 'active', enum: ['active', 'inactive', 'draft'] })
   status: string;
 
+  @ApiProperty({
+    example: { tenantId: 1, programId: 1, storeId: null, branchId: null, channel: null },
+  })
+  scope: any;
+
+  @ApiProperty({
+    example: {
+      minTierId: null,
+      maxTierId: null,
+      membershipStatus: ['active'],
+      minAmount: 10,
+      maxAmount: null,
+    },
+    nullable: true,
+  })
+  eligibility: any;
+
   @ApiProperty({ example: { type: 'rate', rate: 0.1 } })
   pointsFormula: any;
 
@@ -34,14 +51,28 @@ export class RewardRuleDto {
   })
   conflict: any;
 
+  @ApiProperty({
+    example: { strategy: 'default', bucketTimezone: null, periodDays: null },
+  })
+  idempotencyScope: any;
+
   @ApiProperty({ example: 'BASE_PURCHASE' })
   earningDomain: string;
+
+  @ApiProperty({ example: 1 })
+  version: number;
 
   @ApiProperty({ example: '2025-01-01T00:00:00Z', nullable: true })
   activeFrom: Date | null;
 
   @ApiProperty({ example: null, nullable: true })
   activeTo: Date | null;
+
+  @ApiProperty({ example: '2025-01-01T00:00:00Z' })
+  createdAt: Date;
+
+  @ApiProperty({ example: '2025-01-01T00:00:00Z' })
+  updatedAt: Date;
 }
 
 export class GetRewardRulesResponse {
@@ -56,12 +87,18 @@ export class GetRewardRulesResponse {
       description: r.description,
       trigger: r.trigger,
       status: r.status,
+      scope: r.scope,
+      eligibility: r.eligibility,
       pointsFormula: r.pointsFormula,
       limits: r.limits,
       conflict: r.conflict,
+      idempotencyScope: r.idempotencyScope,
       earningDomain: r.earningDomain,
+      version: r.version,
       activeFrom: r.activeFrom,
       activeTo: r.activeTo,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
     }));
   }
 }
