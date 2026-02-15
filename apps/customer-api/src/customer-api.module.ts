@@ -8,6 +8,7 @@ import { RewardsController } from './controllers/rewards.controller';
 import { CurrenciesController } from './controllers/currencies.controller';
 import { InvitationCodesController } from './controllers/invitation-codes.controller';
 import { CatalogsController } from './controllers/catalogs.controller';
+import { TenantSearchController } from './controllers/tenant-search.controller';
 import {
   GetPricingPlansHandler,
   GetPricingPlanByIdHandler,
@@ -21,6 +22,8 @@ import {
   ValidateInvitationCodeHandler,
   // Catalog Handlers
   GetCatalogsHandler,
+  // Tenant Handlers
+  SearchTenantByCodeHandler,
   // Customer Loyalty Handlers
   GetPointsBalanceHandler,
   GetPointsTransactionsHandler,
@@ -59,6 +62,7 @@ import {
     CurrenciesController,
     InvitationCodesController,
     CatalogsController,
+    TenantSearchController,
     HealthController,
   ],
   providers: [
@@ -79,6 +83,8 @@ import {
     ValidateInvitationCodeHandler,
     // Handlers de aplicación - Catalogs
     GetCatalogsHandler,
+    // Handlers de aplicación - Tenant Search
+    SearchTenantByCodeHandler,
     // Handlers de aplicación - Customer Loyalty
     GetPointsBalanceHandler,
     GetPointsTransactionsHandler,

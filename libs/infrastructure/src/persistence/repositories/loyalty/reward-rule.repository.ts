@@ -91,7 +91,18 @@ export class RewardRuleRepository implements IRewardRuleRepository {
   async findById(id: number): Promise<RewardRule | null> {
     const entity = await this.rewardRuleRepository.findOne({
       where: { id },
-      relations: ['eligibilityRelation', 'pointsFormulaRelation'],
+      relations: [
+        'eligibilityRelation',
+        'eligibilityRelation.membershipStatuses',
+        'eligibilityRelation.flags',
+        'eligibilityRelation.categoryIds',
+        'eligibilityRelation.skus',
+        'pointsFormulaRelation',
+        'pointsFormulaRelation.tableEntries',
+        'pointsFormulaRelation.bonuses',
+        'pointsFormulaRelation.bonuses.bonusFormula',
+        'pointsFormulaRelation.bonuses.eligibility',
+      ],
     });
 
     if (!entity) {
@@ -102,11 +113,22 @@ export class RewardRuleRepository implements IRewardRuleRepository {
   }
 
   async findByProgramId(programId: number): Promise<RewardRule[]> {
-    const entities = await this.rewardRuleRepository.find({
-      where: { programId },
-      relations: ['eligibilityRelation', 'pointsFormulaRelation'],
-      order: { conflictPriorityRank: 'DESC', createdAt: 'ASC' },
-    });
+    const entities = await this.rewardRuleRepository
+      .createQueryBuilder('rule')
+      .leftJoinAndSelect('rule.eligibilityRelation', 'eligibility')
+      .leftJoinAndSelect('eligibility.membershipStatuses', 'membershipStatuses')
+      .leftJoinAndSelect('eligibility.flags', 'flags')
+      .leftJoinAndSelect('eligibility.categoryIds', 'categoryIds')
+      .leftJoinAndSelect('eligibility.skus', 'skus')
+      .leftJoinAndSelect('rule.pointsFormulaRelation', 'pointsFormula')
+      .leftJoinAndSelect('pointsFormula.tableEntries', 'tableEntries')
+      .leftJoinAndSelect('pointsFormula.bonuses', 'bonuses')
+      .leftJoinAndSelect('bonuses.bonusFormula', 'bonusFormula')
+      .leftJoinAndSelect('bonuses.eligibility', 'bonusEligibility')
+      .where('rule.programId = :programId', { programId })
+      .orderBy('rule.conflictPriorityRank', 'DESC')
+      .addOrderBy('rule.createdAt', 'ASC')
+      .getMany();
 
     return entities.map((entity) => RewardRuleMapper.toDomain(entity));
   }
@@ -140,11 +162,23 @@ export class RewardRuleRepository implements IRewardRuleRepository {
     programId: number,
     trigger: RewardRule['trigger'],
   ): Promise<RewardRule[]> {
-    const entities = await this.rewardRuleRepository.find({
-      where: { programId, trigger },
-      relations: ['eligibilityRelation', 'pointsFormulaRelation'],
-      order: { conflictPriorityRank: 'DESC', createdAt: 'ASC' },
-    });
+    const entities = await this.rewardRuleRepository
+      .createQueryBuilder('rule')
+      .leftJoinAndSelect('rule.eligibilityRelation', 'eligibility')
+      .leftJoinAndSelect('eligibility.membershipStatuses', 'membershipStatuses')
+      .leftJoinAndSelect('eligibility.flags', 'flags')
+      .leftJoinAndSelect('eligibility.categoryIds', 'categoryIds')
+      .leftJoinAndSelect('eligibility.skus', 'skus')
+      .leftJoinAndSelect('rule.pointsFormulaRelation', 'pointsFormula')
+      .leftJoinAndSelect('pointsFormula.tableEntries', 'tableEntries')
+      .leftJoinAndSelect('pointsFormula.bonuses', 'bonuses')
+      .leftJoinAndSelect('bonuses.bonusFormula', 'bonusFormula')
+      .leftJoinAndSelect('bonuses.eligibility', 'bonusEligibility')
+      .where('rule.programId = :programId', { programId })
+      .andWhere('rule.trigger = :trigger', { trigger })
+      .orderBy('rule.conflictPriorityRank', 'DESC')
+      .addOrderBy('rule.createdAt', 'ASC')
+      .getMany();
 
     return entities.map((entity) => RewardRuleMapper.toDomain(entity));
   }
@@ -181,11 +215,23 @@ export class RewardRuleRepository implements IRewardRuleRepository {
     programId: number,
     earningDomain: string,
   ): Promise<RewardRule[]> {
-    const entities = await this.rewardRuleRepository.find({
-      where: { programId, earningDomain },
-      relations: ['eligibilityRelation', 'pointsFormulaRelation'],
-      order: { conflictPriorityRank: 'DESC', createdAt: 'ASC' },
-    });
+    const entities = await this.rewardRuleRepository
+      .createQueryBuilder('rule')
+      .leftJoinAndSelect('rule.eligibilityRelation', 'eligibility')
+      .leftJoinAndSelect('eligibility.membershipStatuses', 'membershipStatuses')
+      .leftJoinAndSelect('eligibility.flags', 'flags')
+      .leftJoinAndSelect('eligibility.categoryIds', 'categoryIds')
+      .leftJoinAndSelect('eligibility.skus', 'skus')
+      .leftJoinAndSelect('rule.pointsFormulaRelation', 'pointsFormula')
+      .leftJoinAndSelect('pointsFormula.tableEntries', 'tableEntries')
+      .leftJoinAndSelect('pointsFormula.bonuses', 'bonuses')
+      .leftJoinAndSelect('bonuses.bonusFormula', 'bonusFormula')
+      .leftJoinAndSelect('bonuses.eligibility', 'bonusEligibility')
+      .where('rule.programId = :programId', { programId })
+      .andWhere('rule.earningDomain = :earningDomain', { earningDomain })
+      .orderBy('rule.conflictPriorityRank', 'DESC')
+      .addOrderBy('rule.createdAt', 'ASC')
+      .getMany();
 
     return entities.map((entity) => RewardRuleMapper.toDomain(entity));
   }
@@ -222,11 +268,23 @@ export class RewardRuleRepository implements IRewardRuleRepository {
     programId: number,
     conflictGroup: string,
   ): Promise<RewardRule[]> {
-    const entities = await this.rewardRuleRepository.find({
-      where: { programId, conflictGroup },
-      relations: ['eligibilityRelation', 'pointsFormulaRelation'],
-      order: { conflictPriorityRank: 'DESC', createdAt: 'ASC' },
-    });
+    const entities = await this.rewardRuleRepository
+      .createQueryBuilder('rule')
+      .leftJoinAndSelect('rule.eligibilityRelation', 'eligibility')
+      .leftJoinAndSelect('eligibility.membershipStatuses', 'membershipStatuses')
+      .leftJoinAndSelect('eligibility.flags', 'flags')
+      .leftJoinAndSelect('eligibility.categoryIds', 'categoryIds')
+      .leftJoinAndSelect('eligibility.skus', 'skus')
+      .leftJoinAndSelect('rule.pointsFormulaRelation', 'pointsFormula')
+      .leftJoinAndSelect('pointsFormula.tableEntries', 'tableEntries')
+      .leftJoinAndSelect('pointsFormula.bonuses', 'bonuses')
+      .leftJoinAndSelect('bonuses.bonusFormula', 'bonusFormula')
+      .leftJoinAndSelect('bonuses.eligibility', 'bonusEligibility')
+      .where('rule.programId = :programId', { programId })
+      .andWhere('rule.conflictGroup = :conflictGroup', { conflictGroup })
+      .orderBy('rule.conflictPriorityRank', 'DESC')
+      .addOrderBy('rule.createdAt', 'ASC')
+      .getMany();
 
     return entities.map((entity) => RewardRuleMapper.toDomain(entity));
   }

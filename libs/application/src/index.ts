@@ -257,6 +257,10 @@ export * from './tenants/get-tenant-points-transactions/get-tenant-points-transa
 export * from './tenants/get-tenant-points-transactions/get-tenant-points-transactions.request';
 export * from './tenants/get-tenant-points-transactions/get-tenant-points-transactions.response';
 
+export * from './tenants/search-tenant-by-code/search-tenant-by-code.handler';
+export * from './tenants/search-tenant-by-code/search-tenant-by-code.request';
+export * from './tenants/search-tenant-by-code/search-tenant-by-code.response';
+
 export * from './tenants/tenant-analytics-updater.service';
 
 // Branches Handlers
