@@ -31,9 +31,7 @@ export class ImageOptimizerService {
         });
       }
 
-      const outBuffer = await pipeline
-        .webp({ quality: WEBP_QUALITY })
-        .toBuffer();
+      const outBuffer = await pipeline.webp({ quality: WEBP_QUALITY }).toBuffer();
 
       const baseName = file.originalname.replace(/\.[^.]+$/i, '');
       return {

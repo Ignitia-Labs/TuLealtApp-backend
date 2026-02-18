@@ -22,9 +22,7 @@ export class SearchTenantByCodeHandler {
 
   async execute(request: SearchTenantByCodeRequest): Promise<SearchTenantByCodeResponse> {
     // Buscar tenant por código (case-insensitive)
-    const tenant = await this.tenantRepository.findByQuickSearchCode(
-      request.code.toUpperCase(),
-    );
+    const tenant = await this.tenantRepository.findByQuickSearchCode(request.code.toUpperCase());
 
     if (!tenant) {
       throw new NotFoundException(`Tenant with code ${request.code} not found`);

@@ -77,7 +77,10 @@ describe('RewardsController', () => {
         { provide: DeleteRewardHandler, useValue: mockDeleteRewardHandler },
         { provide: ValidateRedemptionCodeHandler, useValue: mockValidateRedemptionCodeHandler },
         { provide: GetTopRedeemedRewardsHandler, useValue: mockGetTopRedeemedRewardsHandler },
-        { provide: GetAdvancedRewardAnalyticsHandler, useValue: mockGetAdvancedRewardAnalyticsHandler },
+        {
+          provide: GetAdvancedRewardAnalyticsHandler,
+          useValue: mockGetAdvancedRewardAnalyticsHandler,
+        },
         { provide: 'IUserRepository', useValue: mockUserRepository },
         { provide: 'ITenantRepository', useValue: mockTenantRepository },
         { provide: S3Service, useValue: mockS3Service },
@@ -124,7 +127,10 @@ describe('RewardsController', () => {
 
       imageOptimizerService.optimize.mockResolvedValue(optimizedFile as any);
       s3Service.uploadFile.mockResolvedValue(imageUrl);
-      createRewardHandler.execute.mockResolvedValue({ ...mockCreateResponse, image: imageUrl } as CreateRewardResponse);
+      createRewardHandler.execute.mockResolvedValue({
+        ...mockCreateResponse,
+        image: imageUrl,
+      } as CreateRewardResponse);
 
       const result = await controller.createReward(tenantId, body);
 
@@ -155,7 +161,9 @@ describe('RewardsController', () => {
       const body = { ...validBody, image: `data:image/png;base64,${bigPayload}` };
 
       await expect(controller.createReward(tenantId, body)).rejects.toThrow(BadRequestException);
-      await expect(controller.createReward(tenantId, body)).rejects.toThrow('Image size exceeds 5MB limit');
+      await expect(controller.createReward(tenantId, body)).rejects.toThrow(
+        'Image size exceeds 5MB limit',
+      );
       expect(createRewardHandler.execute).not.toHaveBeenCalled();
     });
 
