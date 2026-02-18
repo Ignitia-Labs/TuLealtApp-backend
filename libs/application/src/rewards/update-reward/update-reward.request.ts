@@ -51,7 +51,10 @@ export class UpdateRewardRequest {
   description?: string | null;
 
   @ApiPropertyOptional({
-    description: 'URL de la imagen',
+    description:
+      'URL de la imagen o base64 (data:image/png;base64,...). Si es base64 se sube a S3 y se reemplaza por la URL. png/jpg/webp, máx. 5MB.',
+    example:
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
     type: String,
   })
   @IsOptional()

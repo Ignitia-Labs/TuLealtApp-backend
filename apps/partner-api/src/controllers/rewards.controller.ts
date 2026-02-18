@@ -12,6 +12,7 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
+  BadRequestException,
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
@@ -52,6 +53,7 @@ import {
   JwtPayload,
 } from '@libs/application';
 import { IUserRepository, ITenantRepository } from '@libs/domain';
+import { S3Service, ImageOptimizerService } from '@libs/infrastructure';
 import {
   JwtAuthGuard,
   RolesGuard,
@@ -63,6 +65,30 @@ import {
   UnauthorizedErrorResponseDto,
   ForbiddenErrorResponseDto,
 } from '@libs/shared';
+
+const REWARD_IMAGE_ALLOWED_MIMES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const REWARD_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+const DATA_URL_IMAGE_REGEX = /^data:image\/([a-z]+);base64,(.+)$/i;
+
+function isBase64Image(value: string | null | undefined): boolean {
+  if (!value || typeof value !== 'string') return false;
+  if (DATA_URL_IMAGE_REGEX.test(value)) return true;
+  if (value.length > 200 && /^[A-Za-z0-9+/]+=*$/.test(value) && !value.startsWith('http'))
+    return true;
+  return false;
+}
+
+function parseBase64ToFile(value: string): { buffer: Buffer; mimetype: string } {
+  const dataUrlMatch = value.match(DATA_URL_IMAGE_REGEX);
+  if (dataUrlMatch) {
+    const ext = dataUrlMatch[1].toLowerCase();
+    const mime = ext === 'jpg' ? 'image/jpeg' : `image/${ext}`;
+    const buffer = Buffer.from(dataUrlMatch[2], 'base64');
+    return { buffer, mimetype: mime };
+  }
+  const buffer = Buffer.from(value, 'base64');
+  return { buffer, mimetype: 'image/png' };
+}
 
 /**
  * Controlador de recompensas canjeables para Partner API
@@ -87,18 +113,66 @@ export class RewardsController {
     private readonly userRepository: IUserRepository,
     @Inject('ITenantRepository')
     private readonly tenantRepository: ITenantRepository,
+    private readonly s3Service: S3Service,
+    private readonly imageOptimizerService: ImageOptimizerService,
   ) {}
+
+  private async uploadBase64Image(base64Value: string): Promise<string> {
+    let buffer: Buffer;
+    let mimetype: string;
+    try {
+      const parsed = parseBase64ToFile(base64Value);
+      buffer = parsed.buffer;
+      mimetype = parsed.mimetype;
+    } catch {
+      throw new BadRequestException('Invalid base64 image data');
+    }
+    if (!REWARD_IMAGE_ALLOWED_MIMES.includes(mimetype)) {
+      throw new BadRequestException(
+        'Invalid image format. Only png, jpg, jpeg and webp are allowed',
+      );
+    }
+    if (buffer.length > REWARD_IMAGE_MAX_BYTES) {
+      throw new BadRequestException('Image size exceeds 5MB limit');
+    }
+    const fileLike = {
+      fieldname: 'image',
+      originalname: `image.${mimetype.split('/')[1]}`,
+      encoding: '7bit',
+      mimetype,
+      size: buffer.length,
+      buffer,
+    };
+    try {
+      const optimized = await this.imageOptimizerService.optimize(fileLike);
+      return await this.s3Service.uploadFile(optimized, 'rewards');
+    } catch (error) {
+      throw new BadRequestException(`Failed to upload image: ${(error as Error).message}`);
+    }
+  }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Crear recompensa' })
+  @ApiOperation({
+    summary: 'Crear recompensa',
+    description:
+      'Crea una recompensa. El campo "image" puede ser una URL o un string en base64 (data URL: data:image/png;base64,... o base64 puro). Si es base64, se optimiza y se sube a S3; se persiste la URL en la recompensa.',
+  })
   @ApiParam({ name: 'tenantId', type: Number, description: 'ID del tenant' })
+  @ApiBody({
+    type: CreateRewardRequest,
+    description: 'Datos de la recompensa. image: URL o base64 (png/jpg/webp, máx. 5MB).',
+  })
   @ApiResponse({
     status: 201,
     description: 'Recompensa creada exitosamente',
     type: CreateRewardResponse,
   })
-  @ApiResponse({ status: 400, description: 'Datos inválidos', type: BadRequestErrorResponseDto })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos inválidos o imagen no permitida',
+    type: BadRequestErrorResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'No autorizado', type: UnauthorizedErrorResponseDto })
   @ApiResponse({ status: 403, description: 'Prohibido', type: ForbiddenErrorResponseDto })
   @ApiResponse({ status: 404, description: 'Tenant no encontrado', type: NotFoundErrorResponseDto })
@@ -107,6 +181,9 @@ export class RewardsController {
     @Body() body: CreateRewardRequest,
   ): Promise<CreateRewardResponse> {
     body.tenantId = tenantId;
+    if (body.image && isBase64Image(body.image)) {
+      body.image = await this.uploadBase64Image(body.image);
+    }
     return this.createRewardHandler.execute(body);
   }
 
@@ -247,6 +324,26 @@ export class RewardsController {
     request.tenantId = tenantId;
     request.rewardId = rewardId;
     Object.assign(request, body);
+
+    if (request.image && isBase64Image(request.image)) {
+      const getRequest = { tenantId, rewardId } as GetRewardRequest;
+      const currentReward = await this.getRewardHandler.execute(getRequest);
+      const oldImageUrl = currentReward?.image ?? null;
+
+      request.image = await this.uploadBase64Image(request.image);
+
+      if (oldImageUrl) {
+        try {
+          const oldKey = this.s3Service.extractKeyFromUrl(oldImageUrl);
+          if (oldKey.startsWith('rewards/')) {
+            await this.s3Service.deleteFile(oldKey);
+          }
+        } catch (error) {
+          console.warn(`Failed to delete old reward image from S3: ${(error as Error).message}`);
+        }
+      }
+    }
+
     return this.updateRewardHandler.execute(request);
   }
 

@@ -57,6 +57,7 @@ import {
 } from '@libs/application';
 import { IUserRepository, ITenantRepository, IPricingPlanRepository } from '@libs/domain';
 import {
+  ImageOptimizerService,
   PartnerSubscriptionEntity,
   PartnerSubscriptionUsageEntity,
   S3Service,
@@ -73,6 +74,8 @@ import {
   UnauthorizedErrorResponseDto,
   ForbiddenErrorResponseDto,
 } from '@libs/shared';
+import { extname } from 'path';
+import { randomUUID } from 'crypto';
 
 // Tipo para archivos subidos con Multer
 type MulterFile = {
@@ -128,6 +131,7 @@ export class TenantsController {
     private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
     @InjectRepository(PartnerSubscriptionUsageEntity)
     private readonly usageRepository: Repository<PartnerSubscriptionUsageEntity>,
+    private readonly imageOptimizerService: ImageOptimizerService,
   ) {}
 
   @Get()
@@ -624,8 +628,13 @@ export class TenantsController {
       // Obtener logo anterior si existe para eliminarlo después
       const oldLogoUrl = tenant.logo;
 
+      const optimized = await this.imageOptimizerService.optimize(file);
+      const ext = extname(optimized.originalname).toLowerCase(); // ".png", ".jpg", etc.
+      const random = randomUUID().slice(0, 12); // corto pero único
+      const fileName = `logo-${id}-${random}${ext}`;
+
       // Subir nuevo logo a S3
-      const url = await this.s3Service.uploadFile(file, 'tenants');
+      const url = await this.s3Service.uploadFile(optimized, 'tenants', fileName);
 
       // Actualizar tenant con el nuevo logo
       const updateRequest = new UpdateTenantRequest();
@@ -844,8 +853,13 @@ export class TenantsController {
       // Obtener banner anterior si existe para eliminarlo después
       const oldBannerUrl = tenant.banner;
 
+      const optimized = await this.imageOptimizerService.optimize(file);
+      const ext = extname(optimized.originalname).toLowerCase(); // ".png", ".jpg", etc.
+      const random = randomUUID().slice(0, 12); // corto pero único
+      const fileName = `banner-${id}-${random}${ext}`;
+
       // Subir nuevo banner a S3
-      const url = await this.s3Service.uploadFile(file, 'tenants', 'banner');
+      const url = await this.s3Service.uploadFile(optimized, 'tenants', fileName);
 
       // Actualizar tenant con el nuevo banner
       const updateRequest = new UpdateTenantRequest();

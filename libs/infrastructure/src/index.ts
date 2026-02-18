@@ -228,6 +228,7 @@ export * from './persistence/mappers/system/rate-exchange.mapper';
 
 // Storage Services
 export * from './storage/s3.service';
+export * from './storage/image-optimizer.service';
 
 // Infrastructure Services
 export * from './services/invoice-pdf.service';

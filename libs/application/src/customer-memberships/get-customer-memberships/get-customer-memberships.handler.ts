@@ -304,7 +304,7 @@ export class GetCustomerMembershipsHandler {
       tenant.id,
       tenant.name,
       tenant.logo,
-      tenant.logo, // image = logo
+      tenant.banner, // image = logo
       tenant.category,
       tenant.primaryColor,
     );

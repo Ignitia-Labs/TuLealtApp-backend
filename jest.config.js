@@ -15,6 +15,8 @@ module.exports = {
     '^@libs/application$': '<rootDir>/libs/application/src/index',
     '^@libs/application/(.*)$': '<rootDir>/libs/application/src/$1',
     '^@libs/infrastructure$': '<rootDir>/libs/infrastructure/src/index',
+    '^@libs/infrastructure/(entities|repositories|mappers)/(.*)$':
+      '<rootDir>/libs/infrastructure/src/persistence/$1/$2',
     '^@libs/infrastructure/(.*)$': '<rootDir>/libs/infrastructure/src/$1',
     '^@libs/shared$': '<rootDir>/libs/shared/src/index',
     '^@libs/shared/(.*)$': '<rootDir>/libs/shared/src/$1',

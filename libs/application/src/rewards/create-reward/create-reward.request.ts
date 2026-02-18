@@ -45,8 +45,10 @@ export class CreateRewardRequest {
   description?: string | null;
 
   @ApiPropertyOptional({
-    description: 'URL de la imagen de la recompensa',
-    example: 'https://example.com/reward-image.jpg',
+    description:
+      'URL de la imagen o string en base64 (data URL: data:image/png;base64,... o base64 puro). Si es base64 se sube a S3 y se reemplaza por la URL. Formatos: png, jpg, webp. Máx. 5MB.',
+    example:
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
     type: String,
   })
   @IsOptional()
@@ -62,6 +64,7 @@ export class CreateRewardRequest {
   @IsNumber()
   @IsNotEmpty()
   @Min(1)
+  @Type(() => Number)
   pointsRequired: number;
 
   @ApiProperty({
@@ -73,6 +76,7 @@ export class CreateRewardRequest {
   @IsNumber()
   @IsNotEmpty()
   @Min(-1)
+  @Type(() => Number)
   stock: number;
 
   @ApiPropertyOptional({

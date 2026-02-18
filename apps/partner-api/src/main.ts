@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { PartnerApiModule } from './partner-api.module';
 import { HttpExceptionFilter, AllExceptionsFilter, FileLoggerService } from '@libs/shared';
@@ -26,8 +27,12 @@ if (process.env.NODE_ENV !== 'production') {
 /**
  * Bootstrap de la aplicación Partner API
  */
+const JSON_BODY_LIMIT = '10mb';
+
 async function bootstrap() {
-  const app = await NestFactory.create(PartnerApiModule);
+  const app = await NestFactory.create<NestExpressApplication>(PartnerApiModule);
+  app.useBodyParser('json', { limit: JSON_BODY_LIMIT });
+  app.useBodyParser('urlencoded', { limit: JSON_BODY_LIMIT, extended: true });
 
   // Obtener FileLoggerService del contenedor de la aplicación
   let fileLogger: FileLoggerService | undefined;
