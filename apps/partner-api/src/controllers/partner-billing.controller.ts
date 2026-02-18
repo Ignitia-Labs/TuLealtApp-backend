@@ -1,16 +1,28 @@
 import {
   Controller,
   Get,
+  Post,
+  Body,
   Query,
   UseGuards,
   HttpCode,
   HttpStatus,
   ForbiddenException,
+  BadRequestException,
   Inject,
   ParseIntPipe,
   ParseBoolPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 import {
   GetCurrentBillingCycleHandler,
   GetCurrentBillingCycleRequest,
@@ -24,9 +36,13 @@ import {
   GetPartnerSubscriptionHandler,
   GetPartnerSubscriptionRequest,
   GetPartnerSubscriptionResponse,
+  CreatePaymentHandler,
+  CreatePaymentRequest,
+  CreatePaymentResponse,
   JwtPayload,
 } from '@libs/application';
 import { IUserRepository } from '@libs/domain';
+import { PartnerSubscriptionEntity, S3Service, ImageOptimizerService } from '@libs/infrastructure';
 import {
   JwtAuthGuard,
   RolesGuard,
@@ -36,6 +52,8 @@ import {
   UnauthorizedErrorResponseDto,
   ForbiddenErrorResponseDto,
   BadRequestErrorResponseDto,
+  isBase64Image,
+  validateBase64Image,
 } from '@libs/shared';
 
 /**
@@ -46,6 +64,7 @@ import {
  * Endpoints:
  * - GET /partner/billing/current-cycle - Obtener ciclo de facturación actual
  * - GET /partner/billing/payments - Obtener historial de pagos
+ * - POST /partner/billing/payments - Registrar un nuevo pago
  * - GET /partner/billing/invoices - Obtener historial de facturas
  * - GET /partner/billing/subscription - Obtener información de la suscripción
  */
@@ -57,9 +76,32 @@ export class PartnerBillingController {
     private readonly getPartnerPaymentsHandler: GetPartnerPaymentsHandler,
     private readonly getPartnerInvoicesHandler: GetPartnerInvoicesHandler,
     private readonly getPartnerSubscriptionHandler: GetPartnerSubscriptionHandler,
+    private readonly createPaymentHandler: CreatePaymentHandler,
+    private readonly s3Service: S3Service,
+    private readonly imageOptimizerService: ImageOptimizerService,
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
+    @InjectRepository(PartnerSubscriptionEntity)
+    private readonly subscriptionRepository: Repository<PartnerSubscriptionEntity>,
   ) {}
+
+  private async uploadBase64Image(base64Value: string): Promise<string> {
+    const { buffer, mimetype } = validateBase64Image(base64Value);
+    const fileLike = {
+      fieldname: 'image',
+      originalname: `image.${mimetype.split('/')[1]}`,
+      encoding: '7bit',
+      mimetype,
+      size: buffer.length,
+      buffer,
+    };
+    try {
+      const optimized = await this.imageOptimizerService.optimize(fileLike);
+      return await this.s3Service.uploadFile(optimized, 'payments');
+    } catch (error) {
+      throw new BadRequestException(`Failed to upload image: ${(error as Error).message}`);
+    }
+  }
 
   @Get('current-cycle')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -214,6 +256,104 @@ export class PartnerBillingController {
     request.all = all;
 
     return this.getPartnerPaymentsHandler.execute(request);
+  }
+
+  @Post('payments')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PARTNER', 'PARTNER_STAFF')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: 'Registrar un nuevo pago',
+    description:
+      'Registra un nuevo pago para la suscripción del partner autenticado. El pago queda en estado pending_validation hasta que un administrador lo confirme.',
+  })
+  @ApiBody({
+    type: CreatePaymentRequest,
+    description: 'Datos del pago a registrar',
+    examples: {
+      transferencia: {
+        summary: 'Pago con transferencia bancaria',
+        value: {
+          subscriptionId: 1,
+          invoiceId: 1,
+          amount: 99.99,
+          currency: 'USD',
+          paymentMethod: 'bank_transfer',
+          reference: 'REF-2024-001',
+          notes: 'Transferencia enviada',
+        },
+      },
+      efectivo: {
+        summary: 'Pago en efectivo',
+        value: {
+          subscriptionId: 1,
+          billingCycleId: 1,
+          amount: 99.99,
+          currency: 'USD',
+          paymentMethod: 'cash',
+          confirmationCode: 'CASH-123456',
+          image: 'data:image/png;base64,iVBORw0KGgo...',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Pago registrado exitosamente en estado pending_validation',
+    type: CreatePaymentResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos de entrada inválidos',
+    type: BadRequestErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+    type: UnauthorizedErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene permisos o la suscripción no pertenece al partner',
+    type: ForbiddenErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Suscripción, factura o ciclo de facturación no encontrado',
+    type: NotFoundErrorResponseDto,
+  })
+  async createPayment(
+    @CurrentUser() user: JwtPayload,
+    @Body() request: CreatePaymentRequest,
+  ): Promise<CreatePaymentResponse> {
+    const userEntity = await this.userRepository.findById(user.userId);
+    if (!userEntity || !userEntity.partnerId) {
+      throw new ForbiddenException('User does not belong to a partner');
+    }
+
+    const subscription = await this.subscriptionRepository.findOne({
+      where: { id: request.subscriptionId },
+    });
+    if (!subscription) {
+      throw new ForbiddenException(
+        `Subscription ${request.subscriptionId} not found or does not belong to your partner account`,
+      );
+    }
+    if (subscription.partnerId !== userEntity.partnerId) {
+      throw new ForbiddenException(
+        `Subscription ${request.subscriptionId} does not belong to your partner account`,
+      );
+    }
+
+    // Partners can only submit payments for validation; status is always forced
+    request.status = 'pending_validation';
+
+    if (request.image && isBase64Image(request.image)) {
+      request.image = await this.uploadBase64Image(request.image);
+    }
+
+    return this.createPaymentHandler.execute(request);
   }
 
   @Get('invoices')

@@ -579,6 +579,7 @@ export class BillingCycleGeneratorService {
           derivedPayment.rejectedBy,
           derivedPayment.rejectedAt,
           derivedPayment.rejectionReason,
+          derivedPayment.image,
           derivedPayment.createdAt,
           new Date(), // updatedAt
         );

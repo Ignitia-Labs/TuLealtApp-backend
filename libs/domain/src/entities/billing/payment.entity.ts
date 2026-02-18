@@ -46,6 +46,7 @@ export class Payment {
     public readonly rejectedBy: number | null,
     public readonly rejectedAt: Date | null,
     public readonly rejectionReason: string | null,
+    public readonly image: string | null,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
   ) {}
@@ -77,6 +78,7 @@ export class Payment {
     processedBy: number | null = null,
     originalPaymentId: number | null = null,
     isPartialPayment: boolean = false,
+    image: string | null = null,
     id?: number,
   ): Payment {
     const now = new Date();
@@ -111,6 +113,7 @@ export class Payment {
       null, // rejectedBy
       null, // rejectedAt
       null, // rejectionReason
+      image,
       now,
       now,
     );
@@ -172,6 +175,7 @@ export class Payment {
       this.rejectedBy,
       this.rejectedAt,
       this.rejectionReason,
+      this.image,
       this.createdAt,
       new Date(),
     );
@@ -212,6 +216,7 @@ export class Payment {
       this.rejectedBy,
       this.rejectedAt,
       this.rejectionReason,
+      this.image,
       this.createdAt,
       new Date(),
     );
@@ -256,6 +261,7 @@ export class Payment {
       rejectedBy,
       rejectedAt,
       rejectionReason,
+      this.image,
       this.createdAt,
       new Date(),
     );
@@ -296,6 +302,7 @@ export class Payment {
       this.rejectedBy,
       this.rejectedAt,
       this.rejectionReason,
+      this.image,
       this.createdAt,
       new Date(),
     );

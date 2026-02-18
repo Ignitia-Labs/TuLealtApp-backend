@@ -55,6 +55,7 @@ export * from './utils/subscription-event.util';
 export * from './utils/color.util';
 export * from './utils/password.util';
 export * from './utils/name.util';
+export * from './utils/base64-image.util';
 
 // Logger
 export * from './logger/file-logger.service';

@@ -14,6 +14,7 @@ import {
   Request,
   NotFoundException,
   Inject,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -42,7 +43,8 @@ import {
   UpdatePaymentStatusResponse,
 } from '@libs/application';
 import { IPaymentRepository } from '@libs/domain';
-import { JwtAuthGuard, RolesGuard, Roles } from '@libs/shared';
+import { S3Service, ImageOptimizerService } from '@libs/infrastructure';
+import { JwtAuthGuard, RolesGuard, Roles, isBase64Image, validateBase64Image } from '@libs/shared';
 
 /**
  * Controlador de pagos para Admin API
@@ -66,7 +68,27 @@ export class PaymentsController {
     private readonly updatePaymentStatusHandler: UpdatePaymentStatusHandler,
     @Inject('IPaymentRepository')
     private readonly paymentRepository: IPaymentRepository,
+    private readonly s3Service: S3Service,
+    private readonly imageOptimizerService: ImageOptimizerService,
   ) {}
+
+  private async uploadBase64Image(base64Value: string): Promise<string> {
+    const { buffer, mimetype } = validateBase64Image(base64Value);
+    const fileLike = {
+      fieldname: 'image',
+      originalname: `image.${mimetype.split('/')[1]}`,
+      encoding: '7bit',
+      mimetype,
+      size: buffer.length,
+      buffer,
+    };
+    try {
+      const optimized = await this.imageOptimizerService.optimize(fileLike);
+      return await this.s3Service.uploadFile(optimized, 'payments');
+    } catch (error) {
+      throw new BadRequestException(`Failed to upload image: ${(error as Error).message}`);
+    }
+  }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -211,6 +233,9 @@ export class PaymentsController {
     },
   })
   async createPayment(@Body() request: CreatePaymentRequest): Promise<CreatePaymentResponse> {
+    if (request.image && isBase64Image(request.image)) {
+      request.image = await this.uploadBase64Image(request.image);
+    }
     return this.createPaymentHandler.execute(request);
   }
 

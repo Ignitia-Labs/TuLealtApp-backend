@@ -148,6 +148,9 @@ export class PaymentEntity {
   @Column('text', { nullable: true })
   rejectionReason: string | null;
 
+  @Column('text', { nullable: true })
+  image: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

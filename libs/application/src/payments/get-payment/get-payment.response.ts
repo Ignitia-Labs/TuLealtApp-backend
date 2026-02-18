@@ -197,6 +197,15 @@ export class GetPaymentResponse {
   processedBy: number | null;
 
   @ApiProperty({
+    description: 'URL de la imagen del comprobante de pago',
+    example: 'https://cdn.example.com/payments/image.webp',
+    type: String,
+    nullable: true,
+    required: false,
+  })
+  image: string | null;
+
+  @ApiProperty({
     description: 'ID del pago original del cual este es derivado (null si es un pago original)',
     example: null,
     type: Number,
@@ -311,6 +320,7 @@ export class GetPaymentResponse {
     retryAttempt: number | null,
     notes: string | null,
     processedBy: number | null,
+    image: string | null,
     originalPaymentId: number | null,
     createdAt: Date,
     updatedAt: Date,
@@ -360,6 +370,7 @@ export class GetPaymentResponse {
     this.retryAttempt = retryAttempt;
     this.notes = notes;
     this.processedBy = processedBy;
+    this.image = image;
     this.originalPaymentId = originalPaymentId;
     this.isDerived = originalPaymentId !== null && originalPaymentId > 0;
     this.appliedAmount = appliedAmount;

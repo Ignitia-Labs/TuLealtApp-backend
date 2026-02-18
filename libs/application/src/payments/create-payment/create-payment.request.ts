@@ -227,4 +227,15 @@ export class CreatePaymentRequest {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @ApiProperty({
+    description:
+      'Imagen del comprobante de pago en base64 (data URL o base64 puro). Formatos admitidos: png, jpg, jpeg, webp. Máx. 5MB. Se optimiza y convierte a webp antes de persistir.',
+    example: 'data:image/png;base64,iVBORw0KGgo...',
+    type: String,
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  image?: string;
 }

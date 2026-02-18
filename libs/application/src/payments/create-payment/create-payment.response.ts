@@ -197,6 +197,15 @@ export class CreatePaymentResponse {
   processedBy: number | null;
 
   @ApiProperty({
+    description: 'URL de la imagen del comprobante de pago',
+    example: 'https://cdn.example.com/payments/image.webp',
+    type: String,
+    nullable: true,
+    required: false,
+  })
+  image: string | null;
+
+  @ApiProperty({
     description: 'Fecha de creación',
     example: '2024-02-05T10:30:00.000Z',
     type: Date,
@@ -242,6 +251,7 @@ export class CreatePaymentResponse {
     retryAttempt: number | null,
     notes: string | null,
     processedBy: number | null,
+    image: string | null,
     createdAt: Date,
     updatedAt: Date,
   ) {
@@ -268,6 +278,7 @@ export class CreatePaymentResponse {
     this.retryAttempt = retryAttempt;
     this.notes = notes;
     this.processedBy = processedBy;
+    this.image = image;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
   }

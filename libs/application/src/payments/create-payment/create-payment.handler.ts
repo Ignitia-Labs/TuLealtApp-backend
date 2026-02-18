@@ -185,6 +185,7 @@ export class CreatePaymentHandler {
       null, // processedBy (se puede obtener del contexto de autenticación)
       null, // originalPaymentId
       isPartialPayment,
+      request.image || null,
     );
 
     // Guardar el pago
@@ -400,6 +401,7 @@ export class CreatePaymentHandler {
       savedPayment.retryAttempt,
       savedPayment.notes,
       savedPayment.processedBy,
+      savedPayment.image,
       savedPayment.createdAt,
       savedPayment.updatedAt,
     );

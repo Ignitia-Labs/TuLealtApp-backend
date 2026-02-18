@@ -40,6 +40,7 @@ export class PaymentMapper {
       persistenceEntity.rejectedBy,
       persistenceEntity.rejectedAt,
       persistenceEntity.rejectionReason,
+      persistenceEntity.image ?? null,
       persistenceEntity.createdAt,
       persistenceEntity.updatedAt,
     );
@@ -82,6 +83,7 @@ export class PaymentMapper {
     entity.rejectedBy = domainEntity.rejectedBy;
     entity.rejectedAt = domainEntity.rejectedAt;
     entity.rejectionReason = domainEntity.rejectionReason;
+    entity.image = domainEntity.image;
     entity.createdAt = domainEntity.createdAt;
     entity.updatedAt = domainEntity.updatedAt;
     return entity;
