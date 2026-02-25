@@ -17,6 +17,7 @@ export class InvitationCode {
     public readonly currentUses: number,
     public readonly expiresAt: Date | null,
     public readonly status: InvitationCodeStatus,
+    public readonly blocked: boolean,
     public readonly createdBy: number, // ID del usuario que creó el código
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
@@ -34,6 +35,7 @@ export class InvitationCode {
     maxUses: number | null = null,
     expiresAt: Date | null = null,
     status: InvitationCodeStatus = 'active',
+    blocked = false,
     id?: number,
   ): InvitationCode {
     const now = new Date();
@@ -47,6 +49,7 @@ export class InvitationCode {
       0,
       expiresAt,
       status,
+      blocked,
       createdBy,
       now,
       now,
@@ -81,10 +84,17 @@ export class InvitationCode {
   }
 
   /**
+   * Método de dominio para verificar si el código está bloqueado
+   */
+  isBlocked(): boolean {
+    return this.blocked;
+  }
+
+  /**
    * Método de dominio para verificar si el código es válido para usar
    */
   isValid(): boolean {
-    return this.isActive() && !this.isExpired() && !this.hasReachedLimit();
+    return this.isActive() && !this.blocked && !this.isExpired() && !this.hasReachedLimit();
   }
 
   /**
@@ -101,6 +111,7 @@ export class InvitationCode {
       this.currentUses + 1,
       this.expiresAt,
       this.hasReachedLimit() ? 'expired' : this.status,
+      this.blocked,
       this.createdBy,
       this.createdAt,
       new Date(),
@@ -121,6 +132,7 @@ export class InvitationCode {
       this.currentUses,
       this.expiresAt,
       'disabled',
+      this.blocked,
       this.createdBy,
       this.createdAt,
       new Date(),

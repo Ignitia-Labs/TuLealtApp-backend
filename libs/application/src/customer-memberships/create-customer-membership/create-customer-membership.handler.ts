@@ -228,25 +228,18 @@ export class CreateCustomerMembershipHandler {
    * Utiliza el servicio utilitario y verifica unicidad en la base de datos
    */
   private async generateUniqueQrCode(userId: number, tenantId: number): Promise<string> {
-    let qrCode: string;
-    let attempts = 0;
     const maxAttempts = 10;
-
-    do {
-      // Generar QR code usando el servicio utilitario
-      qrCode = generateMembershipQrCode({ userId, tenantId });
-      attempts++;
-
-      // Verificar que el QR code sea único
-      const existing = await this.membershipRepository.findByQrCode(qrCode);
+    for (let attempts = 0; attempts < maxAttempts; attempts++) {
+      const candidate = generateMembershipQrCode({ userId, tenantId });
+      const existing = await this.membershipRepository.findByQrCode(candidate);
       if (!existing) {
-        return qrCode;
+        return candidate;
       }
-
-      if (attempts >= maxAttempts) {
+      if (attempts === maxAttempts - 1) {
         throw new Error('Failed to generate unique QR code after multiple attempts');
       }
-    } while (true);
+    }
+    throw new Error('Failed to generate unique QR code after multiple attempts');
   }
 
   /**

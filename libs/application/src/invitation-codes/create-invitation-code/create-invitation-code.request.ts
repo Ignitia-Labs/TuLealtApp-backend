@@ -74,6 +74,16 @@ export class CreateInvitationCodeRequest {
 
   @ApiPropertyOptional({
     description:
+      'Si el código debe crearse bloqueado (no usable hasta desbloquear). Default false.',
+    example: false,
+    type: Boolean,
+  })
+  @IsBoolean()
+  @IsOptional()
+  blocked?: boolean;
+
+  @ApiPropertyOptional({
+    description:
       'Email del destinatario al que se enviará la invitación. Si se proporciona, se enviará un email automáticamente con el magic link.',
     example: 'customer@example.com',
     type: String,

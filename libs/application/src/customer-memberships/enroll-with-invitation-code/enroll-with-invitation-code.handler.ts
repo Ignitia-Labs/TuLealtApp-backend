@@ -262,23 +262,18 @@ export class EnrollWithInvitationCodeHandler {
    * Genera un QR code único para la membership
    */
   private async generateUniqueQrCode(userId: number, tenantId: number): Promise<string> {
-    let qrCode: string;
-    let attempts = 0;
     const maxAttempts = 10;
-
-    do {
-      qrCode = generateMembershipQrCode({ userId, tenantId });
-      attempts++;
-
-      const existing = await this.membershipRepository.findByQrCode(qrCode);
+    for (let attempts = 0; attempts < maxAttempts; attempts++) {
+      const candidate = generateMembershipQrCode({ userId, tenantId });
+      const existing = await this.membershipRepository.findByQrCode(candidate);
       if (!existing) {
-        return qrCode;
+        return candidate;
       }
-
-      if (attempts >= maxAttempts) {
+      if (attempts === maxAttempts - 1) {
         throw new Error('Failed to generate unique QR code after multiple attempts');
       }
-    } while (true);
+    }
+    throw new Error('Failed to generate unique QR code after multiple attempts');
   }
 
   /**

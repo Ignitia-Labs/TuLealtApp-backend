@@ -71,6 +71,13 @@ export class GetInvitationCodeByCodeResponse {
   status: 'active' | 'expired' | 'disabled';
 
   @ApiProperty({
+    description: 'Si el código está bloqueado',
+    example: false,
+    type: Boolean,
+  })
+  blocked: boolean;
+
+  @ApiProperty({
     description: 'ID del usuario que creó el código',
     example: 1,
     type: Number,
@@ -108,6 +115,7 @@ export class GetInvitationCodeByCodeResponse {
     currentUses: number,
     expiresAt: Date | null,
     status: 'active' | 'expired' | 'disabled',
+    blocked: boolean,
     createdBy: number,
     createdAt: Date,
     updatedAt: Date,
@@ -122,6 +130,7 @@ export class GetInvitationCodeByCodeResponse {
     this.currentUses = currentUses;
     this.expiresAt = expiresAt;
     this.status = status;
+    this.blocked = blocked;
     this.createdBy = createdBy;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;

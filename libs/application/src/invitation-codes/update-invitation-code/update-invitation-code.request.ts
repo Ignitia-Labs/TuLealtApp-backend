@@ -1,4 +1,4 @@
-import { IsOptional, IsNumber, IsDateString, IsEnum, Min, IsInt } from 'class-validator';
+import { IsOptional, IsNumber, IsDateString, IsEnum, Min, IsInt, IsBoolean } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
@@ -51,4 +51,14 @@ export class UpdateInvitationCodeRequest {
   @IsEnum(['active', 'expired', 'disabled'])
   @IsOptional()
   status?: 'active' | 'expired' | 'disabled';
+
+  @ApiProperty({
+    description: 'Si el código está bloqueado (no se puede usar hasta desbloquear)',
+    example: false,
+    type: Boolean,
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  blocked?: boolean;
 }

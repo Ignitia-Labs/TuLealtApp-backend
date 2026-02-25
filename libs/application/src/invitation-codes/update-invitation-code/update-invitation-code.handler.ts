@@ -61,17 +61,18 @@ export class UpdateInvitationCodeHandler {
     // La entidad es inmutable, así que creamos una nueva instancia
     const updatedCode = new InvitationCode(
       existingCode.id,
-      existingCode.code, // No se puede cambiar el código
-      existingCode.tenantId, // No se puede cambiar el tenantId
+      existingCode.code,
+      existingCode.tenantId,
       request.branchId !== undefined ? request.branchId : existingCode.branchId,
-      existingCode.type, // No se puede cambiar el tipo
+      existingCode.type,
       request.maxUses !== undefined ? request.maxUses : existingCode.maxUses,
-      existingCode.currentUses, // No se puede cambiar manualmente los usos actuales
+      existingCode.currentUses,
       expiresAtDate,
       request.status !== undefined ? request.status : existingCode.status,
-      existingCode.createdBy, // No se puede cambiar el creador
-      existingCode.createdAt, // Preservar fecha de creación
-      new Date(), // Actualizar fecha de modificación
+      request.blocked !== undefined ? request.blocked : existingCode.blocked,
+      existingCode.createdBy,
+      existingCode.createdAt,
+      new Date(),
     );
 
     // Guardar el código actualizado
@@ -88,6 +89,7 @@ export class UpdateInvitationCodeHandler {
       savedCode.currentUses,
       savedCode.expiresAt,
       savedCode.status,
+      savedCode.blocked,
       savedCode.createdBy,
       savedCode.createdAt,
       savedCode.updatedAt,

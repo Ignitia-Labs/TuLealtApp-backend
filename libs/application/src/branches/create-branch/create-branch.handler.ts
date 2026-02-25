@@ -46,23 +46,26 @@ export class CreateBranchHandler {
     }
 
     // Generar código único de búsqueda rápida
-    let quickSearchCode: string;
-    let attempts = 0;
     const maxAttempts = 10;
-
-    do {
-      quickSearchCode = generateBranchQuickSearchCode();
-      const existingBranch = await this.branchRepository.findByQuickSearchCode(quickSearchCode);
+    let quickSearchCode: string | null = null;
+    for (let attempts = 0; attempts < maxAttempts; attempts++) {
+      const candidate = generateBranchQuickSearchCode();
+      const existingBranch = await this.branchRepository.findByQuickSearchCode(candidate);
       if (!existingBranch) {
+        quickSearchCode = candidate;
         break;
       }
-      attempts++;
-      if (attempts >= maxAttempts) {
+      if (attempts === maxAttempts - 1) {
         throw new BadRequestException(
           'Failed to generate unique quick search code after multiple attempts',
         );
       }
-    } while (true);
+    }
+    if (quickSearchCode === null) {
+      throw new BadRequestException(
+        'Failed to generate unique quick search code after multiple attempts',
+      );
+    }
 
     // Crear la entidad de dominio de la branch sin ID (la BD lo generará automáticamente)
     const branch = Branch.create(

@@ -42,7 +42,9 @@ export class ValidateInvitationCodeHandler {
     let message = 'Código válido';
 
     if (!isValid) {
-      if (invitationCode.status === 'expired') {
+      if (invitationCode.isBlocked()) {
+        message = 'El código de invitación está bloqueado';
+      } else if (invitationCode.status === 'expired') {
         message = 'El código de invitación ha expirado';
       } else if (invitationCode.status === 'disabled') {
         message = 'El código de invitación está deshabilitado';

@@ -34,6 +34,7 @@ export class GetInvitationCodeHandler {
       code.currentUses,
       code.expiresAt,
       code.status,
+      code.blocked,
       code.createdBy,
       code.createdAt,
       code.updatedAt,

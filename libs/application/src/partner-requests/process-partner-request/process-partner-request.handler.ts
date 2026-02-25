@@ -21,6 +21,7 @@ import {
   Branch,
   User,
   LoyaltyProgram,
+  InvitationCode,
 } from '@libs/domain';
 import {
   PartnerSubscriptionEntity,
@@ -35,6 +36,8 @@ import {
   BranchMapper,
   UserMapper,
   LoyaltyProgramMapper,
+  InvitationCodeEntity,
+  InvitationCodeMapper,
 } from '@libs/infrastructure';
 import {
   generateColorsFromString,
@@ -42,6 +45,7 @@ import {
   extractFirstNameAndLastName,
   generateTenantQuickSearchCode,
   generateBranchQuickSearchCode,
+  generateInvitationCode,
 } from '@libs/shared';
 import * as bcrypt from 'bcrypt';
 import { CreatePartnerHandler } from '../../partners/create-partner/create-partner.handler';
@@ -333,6 +337,33 @@ export class ProcessPartnerRequestHandler {
       const enrolledRequest = updatedPartnerRequest.markEnrolled();
       await this.partnerRequestRepository.update(enrolledRequest);
 
+      // Default invitation code for first branch, blocked until partner enables it
+      const codeRepo = manager.getRepository(InvitationCodeEntity);
+      const maxAttempts = 10;
+      let defaultCode: string | null = null;
+      for (let attempts = 0; attempts < maxAttempts; attempts++) {
+        const candidate = generateInvitationCode();
+        const existing = await codeRepo.findOne({ where: { code: candidate } });
+        if (!existing) {
+          defaultCode = candidate;
+          break;
+        }
+      }
+      if (defaultCode !== null) {
+        const defaultInvitationCode = InvitationCode.create(
+          defaultCode,
+          tenantEntity.id,
+          createdUser.id,
+          'text',
+          branchEntity.id,
+          null,
+          null,
+          'active',
+          true, // blocked by default
+        );
+        await codeRepo.save(InvitationCodeMapper.toPersistence(defaultInvitationCode));
+      }
+
       return new ProcessPartnerRequestResponse(
         createPartnerResponse.id,
         updatedPartnerRequest.id,
@@ -389,25 +420,28 @@ export class ProcessPartnerRequestHandler {
     }
 
     // Generar código único de búsqueda rápida para el tenant
-    let tenantQuickSearchCode: string;
-    let attempts = 0;
     const maxAttempts = 10;
-
-    do {
-      tenantQuickSearchCode = generateTenantQuickSearchCode();
+    let tenantQuickSearchCode: string | null = null;
+    for (let attempts = 0; attempts < maxAttempts; attempts++) {
+      const candidate = generateTenantQuickSearchCode();
       const existingTenant = await manager.findOne(TenantEntity, {
-        where: { quickSearchCode: tenantQuickSearchCode },
+        where: { quickSearchCode: candidate },
       });
       if (!existingTenant) {
+        tenantQuickSearchCode = candidate;
         break;
       }
-      attempts++;
-      if (attempts >= maxAttempts) {
+      if (attempts === maxAttempts - 1) {
         throw new BadRequestException(
           'Failed to generate unique tenant quick search code after multiple attempts',
         );
       }
-    } while (true);
+    }
+    if (tenantQuickSearchCode === null) {
+      throw new BadRequestException(
+        'Failed to generate unique tenant quick search code after multiple attempts',
+      );
+    }
 
     // Crear entidad de dominio del tenant usando el currencyId directamente como number
     const tenant = Tenant.create(
@@ -497,25 +531,28 @@ export class ProcessPartnerRequestHandler {
     }
 
     // Generar código único de búsqueda rápida para la branch
-    let branchQuickSearchCode: string;
-    let attempts = 0;
-    const maxAttempts = 10;
-
-    do {
-      branchQuickSearchCode = generateBranchQuickSearchCode();
+    const maxAttemptsBranch = 10;
+    let branchQuickSearchCode: string | null = null;
+    for (let attempts = 0; attempts < maxAttemptsBranch; attempts++) {
+      const candidate = generateBranchQuickSearchCode();
       const existingBranch = await manager.findOne(BranchEntity, {
-        where: { quickSearchCode: branchQuickSearchCode },
+        where: { quickSearchCode: candidate },
       });
       if (!existingBranch) {
+        branchQuickSearchCode = candidate;
         break;
       }
-      attempts++;
-      if (attempts >= maxAttempts) {
+      if (attempts === maxAttemptsBranch - 1) {
         throw new BadRequestException(
           'Failed to generate unique branch quick search code after multiple attempts',
         );
       }
-    } while (true);
+    }
+    if (branchQuickSearchCode === null) {
+      throw new BadRequestException(
+        'Failed to generate unique branch quick search code after multiple attempts',
+      );
+    }
 
     // Crear entidad de dominio de la branch
     const branch = Branch.create(

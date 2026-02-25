@@ -60,6 +60,9 @@ export class InvitationCodeEntity {
   @Column('varchar', { length: 20, default: 'active' })
   status: 'active' | 'expired' | 'disabled';
 
+  @Column('boolean', { default: false })
+  blocked: boolean;
+
   @ManyToOne(() => UserEntity, {
     onDelete: 'SET NULL',
     nullable: true,

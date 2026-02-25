@@ -60,25 +60,27 @@ export class CreateInvitationCodeHandler {
     }
 
     // Generar código único
-    let code: string;
-    let attempts = 0;
     const maxAttempts = 10;
-
-    do {
-      code = generateInvitationCode();
-      const existingCode = await this.invitationCodeRepository.findByCode(code);
+    let code: string | null = null;
+    for (let attempts = 0; attempts < maxAttempts; attempts++) {
+      const candidate = generateInvitationCode();
+      const existingCode = await this.invitationCodeRepository.findByCode(candidate);
       if (!existingCode) {
+        code = candidate;
         break;
       }
-      attempts++;
-      if (attempts >= maxAttempts) {
+      if (attempts === maxAttempts - 1) {
         throw new BadRequestException(
           'Failed to generate unique invitation code after multiple attempts',
         );
       }
-    } while (true);
+    }
+    if (code === null) {
+      throw new BadRequestException(
+        'Failed to generate unique invitation code after multiple attempts',
+      );
+    }
 
-    // Crear la entidad de dominio del código de invitación
     const invitationCode = InvitationCode.create(
       code,
       request.tenantId,
@@ -88,6 +90,7 @@ export class CreateInvitationCodeHandler {
       request.maxUses || null,
       expiresAtDate,
       'active',
+      request.blocked ?? false,
     );
 
     // Guardar el código
@@ -137,6 +140,7 @@ export class CreateInvitationCodeHandler {
       savedCode.currentUses,
       savedCode.expiresAt,
       savedCode.status,
+      savedCode.blocked,
       savedCode.createdBy,
       savedCode.createdAt,
       savedCode.updatedAt,

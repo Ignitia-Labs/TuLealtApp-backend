@@ -1,0 +1,16 @@
+---
+description: No usar do-while; preferir for o while con condición clara
+globs: "**/*.ts"
+alwaysApply: false
+---
+
+# Evitar do-while
+
+No usar `do { ... } while (condition)` en el código. Preferir `for` o `while` con condición explícita al inicio.
+
+- **for**: cuando hay un número máximo de intentos o un rango conocido.
+- **while**: cuando la condición es clara y se evalúa antes del cuerpo.
+
+Ejemplo de reemplazo: en lugar de un do-while que genera un valor único hasta encontrarlo, usar un `for` con `maxAttempts` y una variable `result: T | null` que se asigna al encontrar; después del bucle, comprobar `result !== null` antes de usar el valor.
+
+Ver también: `z-docs/ARCHITECTURE-V2.md` sección "Mejores Prácticas" → "8. Evitar do-while".

@@ -19,6 +19,7 @@ export class InvitationCodeMapper {
       persistenceEntity.currentUses,
       persistenceEntity.expiresAt,
       persistenceEntity.status,
+      persistenceEntity.blocked ?? false,
       persistenceEntity.createdBy,
       persistenceEntity.createdAt,
       persistenceEntity.updatedAt,
@@ -41,6 +42,7 @@ export class InvitationCodeMapper {
     entity.currentUses = domainEntity.currentUses;
     entity.expiresAt = domainEntity.expiresAt;
     entity.status = domainEntity.status;
+    entity.blocked = domainEntity.blocked;
     entity.createdBy = domainEntity.createdBy;
     entity.createdAt = domainEntity.createdAt;
     entity.updatedAt = domainEntity.updatedAt;
