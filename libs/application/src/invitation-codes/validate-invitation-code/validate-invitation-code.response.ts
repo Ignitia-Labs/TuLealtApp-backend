@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { TierDetailDto } from '../../customer-memberships/dto/customer-membership.dto';
 
 /**
  * DTO de response para validar un código de invitación
@@ -80,6 +81,13 @@ export class ValidateInvitationCodeResponse {
   })
   publicUrl: string;
 
+  @ApiProperty({
+    description: 'Tier más bajo (0 puntos) del tenant, para mostrar al nuevo usuario',
+    type: () => TierDetailDto,
+    nullable: true,
+  })
+  lowestTier: TierDetailDto | null;
+
   constructor(
     isValid: boolean,
     code: string,
@@ -100,6 +108,7 @@ export class ValidateInvitationCodeResponse {
     maxUses: number | null,
     currentUses: number,
     publicUrl: string,
+    lowestTier: TierDetailDto | null,
   ) {
     this.isValid = isValid;
     this.code = code;
@@ -110,5 +119,6 @@ export class ValidateInvitationCodeResponse {
     this.maxUses = maxUses;
     this.currentUses = currentUses;
     this.publicUrl = publicUrl;
+    this.lowestTier = lowestTier;
   }
 }

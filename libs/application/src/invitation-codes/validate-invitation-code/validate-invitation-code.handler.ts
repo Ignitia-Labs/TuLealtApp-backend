@@ -1,5 +1,11 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { IInvitationCodeRepository, ITenantRepository, IBranchRepository } from '@libs/domain';
+import { Injectable, Inject } from '@nestjs/common';
+import {
+  IInvitationCodeRepository,
+  ITenantRepository,
+  IBranchRepository,
+  ICustomerTierRepository,
+} from '@libs/domain';
+import { TierDetailDto } from '../../customer-memberships/dto/customer-membership.dto';
 import { ValidateInvitationCodeRequest } from './validate-invitation-code.request';
 import { ValidateInvitationCodeResponse } from './validate-invitation-code.response';
 import { buildInvitationUrl } from '@libs/shared';
@@ -17,6 +23,8 @@ export class ValidateInvitationCodeHandler {
     private readonly tenantRepository: ITenantRepository,
     @Inject('IBranchRepository')
     private readonly branchRepository: IBranchRepository,
+    @Inject('ICustomerTierRepository')
+    private readonly tierRepository: ICustomerTierRepository,
   ) {}
 
   async execute(request: ValidateInvitationCodeRequest): Promise<ValidateInvitationCodeResponse> {
@@ -34,6 +42,7 @@ export class ValidateInvitationCodeHandler {
         null,
         0,
         buildInvitationUrl(request.code),
+        null,
       );
     }
 
@@ -91,6 +100,25 @@ export class ValidateInvitationCodeHandler {
     // Construir URL pública
     const publicUrl = buildInvitationUrl(invitationCode.code);
 
+    let lowestTier: TierDetailDto | null = null;
+    if (invitationCode.tenantId) {
+      const tier = await this.tierRepository.findByPoints(invitationCode.tenantId, 0);
+      if (tier) {
+        lowestTier = new TierDetailDto(
+          tier.id,
+          tier.name,
+          tier.description,
+          tier.minPoints,
+          tier.maxPoints,
+          tier.color,
+          tier.icon,
+          tier.benefits ?? [],
+          tier.multiplier,
+          tier.priority,
+        );
+      }
+    }
+
     return new ValidateInvitationCodeResponse(
       isValid,
       invitationCode.code,
@@ -101,6 +129,7 @@ export class ValidateInvitationCodeHandler {
       invitationCode.maxUses,
       invitationCode.currentUses,
       publicUrl,
+      lowestTier,
     );
   }
 }
