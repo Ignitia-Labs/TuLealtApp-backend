@@ -39,9 +39,13 @@ export * from './users/update-my-profile/update-my-profile.handler';
 export * from './users/update-my-profile/update-my-profile.request';
 export * from './users/update-my-profile/update-my-profile.response';
 
+export * from './users/patch-customer-profile/patch-customer-profile.handler';
+export * from './users/patch-customer-profile/patch-customer-profile.request';
+
 export * from './users/update-password/update-password.handler';
 export * from './users/update-password/update-password.request';
 export * from './users/update-password/update-password.response';
+export * from './users/update-password/update-password-body.dto';
 
 export * from './users/update-user-password/update-user-password.handler';
 export * from './users/update-user-password/update-user-password.request';

@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, UnauthorizedException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+  BadRequestException,
+  Inject,
+} from '@nestjs/common';
 import { IUserRepository } from '@libs/domain';
 import { UpdatePasswordRequest } from './update-password.request';
 import { UpdatePasswordResponse } from './update-password.response';
@@ -32,7 +38,7 @@ export class UpdatePasswordHandler {
     const isCurrentPasswordValid = await bcrypt.compare(request.currentPassword, user.passwordHash);
 
     if (!isCurrentPasswordValid) {
-      throw new UnauthorizedException('Current password is incorrect');
+      throw new BadRequestException('Current password is incorrect');
     }
 
     // Generar hash de la nueva contraseña

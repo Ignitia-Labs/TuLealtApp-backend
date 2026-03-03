@@ -1,4 +1,14 @@
-import { Controller, Post, Get, Body, HttpCode, HttpStatus, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Put,
+  Body,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import {
   RegisterUserHandler,
@@ -16,6 +26,10 @@ import {
   RevokeRefreshTokenHandler,
   RevokeRefreshTokenRequest,
   RevokeRefreshTokenResponse,
+  UpdatePasswordHandler,
+  UpdatePasswordRequest,
+  UpdatePasswordResponse,
+  UpdatePasswordBodyDto,
   JwtPayload,
 } from '@libs/application';
 import { JwtAuthGuard, CurrentUser } from '@libs/shared';
@@ -31,6 +45,7 @@ import { Request } from 'express';
  * - POST /customer/auth/refresh - Refrescar access token usando refresh token
  * - POST /customer/auth/logout - Cerrar sesión y revocar refresh token
  * - GET /customer/auth/me - Obtener perfil del cliente autenticado (requiere autenticación)
+ * - PUT /customer/auth/password - Actualizar contraseña del cliente autenticado
  */
 @ApiTags('Auth')
 @Controller('auth')
@@ -41,6 +56,7 @@ export class CustomerAuthController {
     private readonly getUserProfileHandler: GetUserProfileHandler,
     private readonly refreshTokenHandler: RefreshTokenHandler,
     private readonly revokeRefreshTokenHandler: RevokeRefreshTokenHandler,
+    private readonly updatePasswordHandler: UpdatePasswordHandler,
   ) {}
 
   @Post('register')
@@ -166,6 +182,50 @@ export class CustomerAuthController {
 
     // Transformar a respuesta específica para customer (sin campos de partner/tenant/branch)
     return GetCustomerProfileResponse.fromUserProfile(userProfile);
+  }
+
+  @Put('password')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: 'Actualizar contraseña',
+    description:
+      'Permite al cliente autenticado actualizar su contraseña. Requiere contraseña actual y nueva. Mínimo 6 caracteres.',
+  })
+  @ApiBody({ type: UpdatePasswordBodyDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Contraseña actualizada correctamente',
+    type: UpdatePasswordResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Contraseña actual incorrecta',
+    example: { statusCode: 400, message: 'Current password is incorrect', error: 'Bad Request' },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Usuario no autenticado',
+    example: { statusCode: 401, message: 'Unauthorized', error: 'Unauthorized' },
+  })
+  @ApiResponse({
+    status: 422,
+    description: 'Nueva contraseña inválida (ej. longitud mínima)',
+    example: {
+      statusCode: 422,
+      message: ['newPassword must be longer than or equal to 6 characters'],
+      error: 'Unprocessable Entity',
+    },
+  })
+  async updatePassword(
+    @CurrentUser() user: JwtPayload,
+    @Body() body: UpdatePasswordBodyDto,
+  ): Promise<UpdatePasswordResponse> {
+    const request = new UpdatePasswordRequest();
+    request.userId = user.userId;
+    request.currentPassword = body.currentPassword;
+    request.newPassword = body.newPassword;
+    return this.updatePasswordHandler.execute(request);
   }
 
   @Post('refresh')

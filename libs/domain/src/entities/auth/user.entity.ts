@@ -158,7 +158,8 @@ export class User {
   }
 
   /**
-   * Método de dominio para actualizar el perfil del usuario
+   * Método de dominio para actualizar el perfil del usuario.
+   * Parámetros opcionales: solo los enviados reemplazan; undefined mantiene el valor actual.
    */
   updateProfile(
     firstName?: string,
@@ -168,7 +169,10 @@ export class User {
     profile?: Record<string, any> | null,
     name?: string,
     avatar?: string | null,
+    isActive?: boolean,
   ): User {
+    const nextActive = isActive !== undefined ? isActive : this.isActive;
+    const nextStatus = isActive !== undefined ? (isActive ? 'active' : 'inactive') : this.status;
     return new User(
       this.id,
       email ?? this.email,
@@ -179,12 +183,12 @@ export class User {
       profile !== undefined ? profile : this.profile,
       this.passwordHash,
       this.roles,
-      this.isActive,
+      nextActive,
       this.partnerId,
       this.tenantId,
       this.branchId,
       avatar !== undefined ? avatar : this.avatar,
-      this.status,
+      nextStatus,
       this.createdAt,
       new Date(),
     );

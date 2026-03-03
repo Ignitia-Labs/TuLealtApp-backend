@@ -9,6 +9,7 @@ import { CurrenciesController } from './controllers/currencies.controller';
 import { InvitationCodesController } from './controllers/invitation-codes.controller';
 import { CatalogsController } from './controllers/catalogs.controller';
 import { TenantSearchController } from './controllers/tenant-search.controller';
+import { CustomerProfileController } from './controllers/customer-profile.controller';
 import {
   GetPricingPlansHandler,
   GetPricingPlanByIdHandler,
@@ -20,6 +21,7 @@ import {
   GetCurrenciesHandler,
   GetCountriesHandler,
   ValidateInvitationCodeHandler,
+  PatchCustomerProfileHandler,
   // Catalog Handlers
   GetCatalogsHandler,
   // Tenant Handlers
@@ -63,6 +65,7 @@ import {
     InvitationCodesController,
     CatalogsController,
     TenantSearchController,
+    CustomerProfileController,
     HealthController,
   ],
   providers: [
@@ -81,6 +84,8 @@ import {
     GetCountriesHandler,
     // Handlers de aplicación - Invitation Codes
     ValidateInvitationCodeHandler,
+    // Handlers de aplicación - Profile (PATCH)
+    PatchCustomerProfileHandler,
     // Handlers de aplicación - Catalogs
     GetCatalogsHandler,
     // Handlers de aplicación - Tenant Search

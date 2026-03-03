@@ -11,6 +11,7 @@ import {
   CreateCustomerMembershipHandler,
   RefreshTokenHandler,
   RevokeRefreshTokenHandler,
+  UpdatePasswordHandler,
   JwtAuthService,
 } from '@libs/application';
 import { InfrastructureModule } from '@libs/infrastructure';
@@ -51,6 +52,7 @@ import { InfrastructureModule } from '@libs/infrastructure';
     GetUserProfileHandler,
     RefreshTokenHandler,
     RevokeRefreshTokenHandler,
+    UpdatePasswordHandler,
     // Servicio JWT
     JwtAuthService,
     // Estrategia Passport JWT
