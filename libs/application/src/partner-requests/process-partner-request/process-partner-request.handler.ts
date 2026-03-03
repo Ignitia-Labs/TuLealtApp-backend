@@ -364,6 +364,11 @@ export class ProcessPartnerRequestHandler {
         await codeRepo.save(InvitationCodeMapper.toPersistence(defaultInvitationCode));
       }
 
+      const invitationCodeUrl =
+        defaultCode !== null && request.partnerUiUrl
+          ? `${request.partnerUiUrl}${request.partnerUiUrl.includes('?') ? '&' : '?'}code=${defaultCode}`
+          : null;
+
       return new ProcessPartnerRequestResponse(
         createPartnerResponse.id,
         updatedPartnerRequest.id,
@@ -379,6 +384,7 @@ export class ProcessPartnerRequestHandler {
         createdUser.email,
         createdUser.name,
         temporaryPassword,
+        invitationCodeUrl,
       );
     });
   }

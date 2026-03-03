@@ -208,4 +208,7 @@ export class ProcessPartnerRequestRequest {
     required: false,
   })
   domain?: string;
+
+  /** URL base del UI de partner (inyectada por el controller desde PARTNER_UI_URL). No se envía en el body. */
+  partnerUiUrl?: string;
 }

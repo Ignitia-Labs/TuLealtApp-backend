@@ -776,13 +776,14 @@ export class PartnerRequestsController {
   })
   async processPartnerRequest(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body?: Omit<ProcessPartnerRequestRequest, 'requestId'>,
+    @Body() body?: Omit<ProcessPartnerRequestRequest, 'requestId' | 'partnerUiUrl'>,
   ): Promise<ProcessPartnerRequestResponse> {
     const request = new ProcessPartnerRequestRequest();
     request.requestId = id;
     if (body) {
       Object.assign(request, body);
     }
+    request.partnerUiUrl = process.env.PARTNER_UI_URL;
     return this.processPartnerRequestHandler.execute(request);
   }
 

@@ -102,6 +102,16 @@ export class ProcessPartnerRequestResponse {
   })
   userPassword: string;
 
+  @ApiProperty({
+    description:
+      'URL de invitación al partner (PARTNER_UI_URL?code=CODE) para compartir con el partner. Solo presente si se generó código de invitación por defecto.',
+    example: 'https://partner.example.com?code=ABC12XYZ',
+    type: String,
+    nullable: true,
+    required: false,
+  })
+  invitationCodeUrl: string | null;
+
   constructor(
     partnerId: number,
     requestId: number,
@@ -117,6 +127,7 @@ export class ProcessPartnerRequestResponse {
     userEmail: string,
     userName: string,
     userPassword: string,
+    invitationCodeUrl: string | null = null,
   ) {
     this.partnerId = partnerId;
     this.requestId = requestId;
@@ -132,5 +143,6 @@ export class ProcessPartnerRequestResponse {
     this.userEmail = userEmail;
     this.userName = userName;
     this.userPassword = userPassword;
+    this.invitationCodeUrl = invitationCodeUrl;
   }
 }
