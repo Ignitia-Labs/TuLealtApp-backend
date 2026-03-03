@@ -176,7 +176,9 @@ describe('UserMapper', () => {
         1,
         5,
         10,
-        null,
+        null, // avatar
+        null, // avatarId
+        null, // avatarBackground
         'active',
         1,
       );
@@ -206,6 +208,9 @@ describe('UserMapper', () => {
         null,
         null,
         null,
+        null, // avatar
+        null, // avatarId
+        null, // avatarBackground
         'active',
       );
 

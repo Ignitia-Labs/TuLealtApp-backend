@@ -56,6 +56,8 @@ describe('BranchesController', () => {
     null, // tenantId
     null, // branchId
     null, // avatar
+    null, // avatarId
+    null, // avatarBackground
     'active',
     1, // id
   );
@@ -443,6 +445,8 @@ describe('BranchesController', () => {
         null, // tenantId
         null, // branchId
         null, // avatar
+        null, // avatarId
+        null, // avatarBackground
         'active',
         2, // id
       );

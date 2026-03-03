@@ -55,6 +55,8 @@ export class UpdateMyProfileHandler {
       savedUser.isActive,
       savedUser.createdAt,
       savedUser.updatedAt,
+      savedUser.avatarId ?? null,
+      savedUser.avatarBackground ?? null,
     );
   }
 }

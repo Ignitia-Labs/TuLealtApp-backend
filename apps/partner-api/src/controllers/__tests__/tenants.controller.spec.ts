@@ -48,6 +48,8 @@ describe('TenantsController', () => {
     null, // tenantId
     null, // branchId
     null, // avatar
+    null, // avatarId
+    null, // avatarBackground
     'active',
     1, // id
   );
@@ -230,6 +232,8 @@ describe('TenantsController', () => {
         null, // tenantId
         null, // branchId
         null, // avatar
+        null, // avatarId
+        null, // avatarBackground
         'active',
         1, // id
       );

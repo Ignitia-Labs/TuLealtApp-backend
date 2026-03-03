@@ -23,7 +23,9 @@ export class PatchCustomerProfileHandler {
       request.firstName !== undefined ||
       request.lastName !== undefined ||
       request.phone !== undefined ||
-      request.isActive !== undefined;
+      request.isActive !== undefined ||
+      request.avatarId !== undefined ||
+      request.avatarBackground !== undefined;
 
     if (!hasAnyField) {
       throw new BadRequestException('At least one field must be provided to update');
@@ -34,6 +36,13 @@ export class PatchCustomerProfileHandler {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
+    const avatarId =
+      request.avatarId === undefined
+        ? undefined
+        : request.avatarId === null
+          ? null
+          : String(request.avatarId);
+
     const updatedUser = user.updateProfile(
       request.firstName,
       request.lastName,
@@ -43,6 +52,8 @@ export class PatchCustomerProfileHandler {
       request.name,
       undefined,
       request.isActive,
+      avatarId,
+      request.avatarBackground,
     );
 
     const savedUser = await this.userRepository.update(updatedUser);
@@ -59,6 +70,8 @@ export class PatchCustomerProfileHandler {
       savedUser.isActive,
       savedUser.createdAt,
       savedUser.updatedAt,
+      savedUser.avatarId ?? null,
+      savedUser.avatarBackground ?? null,
     );
   }
 }

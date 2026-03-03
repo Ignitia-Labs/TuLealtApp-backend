@@ -56,4 +56,23 @@ export class PatchCustomerProfileRequest {
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
+
+  @ApiProperty({
+    description: 'Identificador del avatar seleccionado (numérico o string)',
+    example: '1',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  avatarId?: string | number | null;
+
+  @ApiProperty({
+    description: 'Gradient o color de fondo del avatar',
+    example: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    required: false,
+    nullable: true,
+  })
+  @IsString()
+  @IsOptional()
+  avatarBackground?: string | null;
 }

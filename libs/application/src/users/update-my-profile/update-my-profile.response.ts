@@ -74,6 +74,22 @@ export class UpdateMyProfileResponse {
   })
   updatedAt: Date;
 
+  @ApiProperty({
+    description: 'Identificador del avatar (numérico o string). Opcional.',
+    example: '1',
+    nullable: true,
+    required: false,
+  })
+  avatarId: string | null;
+
+  @ApiProperty({
+    description: 'Gradient o color de fondo del avatar. Opcional.',
+    example: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    nullable: true,
+    required: false,
+  })
+  avatarBackground: string | null;
+
   constructor(
     id: number,
     email: string,
@@ -86,6 +102,8 @@ export class UpdateMyProfileResponse {
     isActive: boolean,
     createdAt: Date,
     updatedAt: Date,
+    avatarId: string | null = null,
+    avatarBackground: string | null = null,
   ) {
     this.id = id;
     this.email = email;
@@ -98,5 +116,7 @@ export class UpdateMyProfileResponse {
     this.isActive = isActive;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
+    this.avatarId = avatarId ?? null;
+    this.avatarBackground = avatarBackground ?? null;
   }
 }

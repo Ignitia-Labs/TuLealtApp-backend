@@ -42,6 +42,8 @@ export class UserMapper {
       persistenceEntity.tenantId ?? null,
       persistenceEntity.branchId ?? null,
       persistenceEntity.avatar,
+      persistenceEntity.avatarId ?? null,
+      persistenceEntity.avatarBackground ?? null,
       persistenceEntity.status ?? 'active',
       persistenceEntity.createdAt,
       persistenceEntity.updatedAt,
@@ -75,6 +77,8 @@ export class UserMapper {
     entity.tenantId = domainEntity.tenantId;
     entity.branchId = domainEntity.branchId;
     entity.avatar = domainEntity.avatar;
+    entity.avatarId = domainEntity.avatarId;
+    entity.avatarBackground = domainEntity.avatarBackground;
     entity.status = domainEntity.status;
     entity.createdAt = domainEntity.createdAt;
     entity.updatedAt = domainEntity.updatedAt;

@@ -92,6 +92,8 @@ export class GetUserProfileHandler {
       user.partnerId,
       user.tenantId,
       user.branchId,
+      user.avatarId ?? null,
+      user.avatarBackground ?? null,
       user.createdAt,
       user.updatedAt,
       partnerInfo,

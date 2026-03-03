@@ -109,6 +109,22 @@ export class GetUserProfileResponse {
   branch?: BranchInfoDto | null;
 
   @ApiProperty({
+    description: 'Identificador del avatar. Opcional.',
+    example: '1',
+    nullable: true,
+    required: false,
+  })
+  avatarId: string | null;
+
+  @ApiProperty({
+    description: 'Gradient o color de fondo del avatar. Opcional.',
+    example: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    nullable: true,
+    required: false,
+  })
+  avatarBackground: string | null;
+
+  @ApiProperty({
     description: 'Fecha de creación del usuario',
     example: '2024-01-15T10:30:00.000Z',
     type: Date,
@@ -135,6 +151,8 @@ export class GetUserProfileResponse {
     partnerId: number | null,
     tenantId: number | null,
     branchId: number | null,
+    avatarId: string | null,
+    avatarBackground: string | null,
     createdAt: Date,
     updatedAt: Date,
     partner?: PartnerInfoDto | null,
@@ -153,6 +171,8 @@ export class GetUserProfileResponse {
     this.partnerId = partnerId;
     this.tenantId = tenantId;
     this.branchId = branchId;
+    this.avatarId = avatarId ?? null;
+    this.avatarBackground = avatarBackground ?? null;
     this.partner = partner ?? null;
     this.tenant = tenant ?? null;
     this.branch = branch ?? null;

@@ -26,6 +26,8 @@ describe('UserRepository', () => {
     tenantId: 5,
     branchId: 10,
     avatar: null,
+    avatarId: null,
+    avatarBackground: null,
     status: 'active',
     createdAt: baseDate,
     updatedAt: baseDate,

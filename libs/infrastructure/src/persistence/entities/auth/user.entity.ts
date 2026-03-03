@@ -94,6 +94,12 @@ export class UserEntity {
   @Column('text', { nullable: true })
   avatar: string | null;
 
+  @Column('varchar', { length: 255, nullable: true })
+  avatarId: string | null;
+
+  @Column('varchar', { length: 512, nullable: true })
+  avatarBackground: string | null;
+
   @Column('varchar', { length: 20, default: 'active' })
   status: 'active' | 'inactive' | 'suspended';
 
