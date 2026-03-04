@@ -5,9 +5,7 @@ import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
  * Ambas nullable, sin valor por defecto (NULL implícito).
  * No modifica registros existentes.
  */
-export class AddAvatarIdAndAvatarBackgroundToUsers1811000000000
-  implements MigrationInterface
-{
+export class AddAvatarIdAndAvatarBackgroundToUsers1811000000000 implements MigrationInterface {
   name = 'AddAvatarIdAndAvatarBackgroundToUsers1811000000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
